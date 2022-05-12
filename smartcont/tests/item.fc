@@ -102,7 +102,7 @@ _ test_initialized_item_get_nft_data(int exit_code, cell data, tuple stack, cell
 
     cell message_body = begin_cell()
         .store_uint(0x5fcc3d14, 32) ;; op
-        .store_uint(0, 64) ;;  query id
+        .store_uint(42069, 64) ;;  query id
         .store_slice(my_address()) ;; new owner address
         .store_uint(0, 2) ;; response destination
         .store_uint(0, 1)
@@ -150,4 +150,39 @@ _ test_transfer(int exit_code, cell data, tuple stack, cell actions, int gas) me
         .end_cell()
         .begin_parse();
     throw_unless(104, equal_slices(ds~load_ref().begin_parse(), expected_content)); ;; content
+
+    slice actions_list = actions.begin_parse();
+    cell prev_action_list = actions_list~load_ref();
+    slice action = actions_list;
+    ;; action_send_msg#0ec3c86d mode:(## 8)
+    ;;   out_msg:^(MessageRelaxed Any) = OutAction;
+
+    int action_id = action~load_uint(32);  ;; load action id
+    throw_unless(105, action_id == 0x0ec3c86d);
+
+    int mode = action~load_uint(8); ;; send mode
+    ;;  we don't really care about the mode for this
+
+    actions_list = prev_action_list.begin_parse();
+    ;; Only one message: that is action_list is empty
+    throw_unless(107, actions_list.slice_bits() == 0);
+
+    slice message = action~load_ref().begin_parse();
+    
+    message~skip_bits(4); ;; we don't care about the flags
+    message~load_msg_addr(); ;; nor the contracts address
+
+    throw_unless(108, equal_slices(message~load_msg_addr(), my_address())); ;;  Make sure NFT was transferred to myself
+
+    throw_unless(109, message~load_coins() == 50000); ;; Correct amount forwarded
+
+    message~skip_bits(1 + 4 + 4 + 64 + 32 + 1 + 1); ;; skip this hot garbage, not important
+
+    throw_unless(110, message~load_uint(32) == 0x05138d91); ;; OP: ownership changed
+    throw_unless(111, message~load_uint(64) == 42069); ;; Query id
+
+    slice zero_addr = begin_cell().store_uint(0, 2).end_cell().begin_parse();
+    throw_unless(112, equal_slices(message~load_msg_addr(), zero_addr)); ;;  previous owner was zero
+
+    throw_unless(113, message.slice_bits() == 0); ;; Nothing else
 }
