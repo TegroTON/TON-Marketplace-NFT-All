@@ -1,0 +1,6 @@
+int equal_slices (slice a, slice b) asm "SDEQ";
+int builder_null?(builder b) asm "ISNULL";
+builder store_builder(builder to, builder from) asm "STBR";
+
+forall X -> X fifth(tuple t) asm "4 INDEX";
+forall X -> X sixth(tuple t) asm "5 INDEX";

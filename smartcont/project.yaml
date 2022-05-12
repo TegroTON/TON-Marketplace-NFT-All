@@ -1,0 +1,29 @@
+nft-item:
+  func:
+    - func/stdlib_update.fc
+    - token-contract/nft/params.fc
+    - token-contract/nft/op-codes.fc
+    - token-contract/nft/nft-item.fc
+  tests:
+    - func/stdlib_update.fc
+    - tests/item.fc
+
+nft-collection:
+  func:
+    - func/stdlib_update.fc
+    - token-contract/nft/params.fc
+    - token-contract/nft/op-codes.fc
+
+nft-sale:
+  func:
+    - func/stdlib_update.fc
+    - token-contract/nft/params.fc
+    - token-contract/nft/op-codes.fc
+    - token-contract/nft/nft-sale.fc
+
+nft-marketplace:
+  func:
+    - func/stdlib_update.fc
+    - token-contract/nft/params.fc
+    - token-contract/nft/op-codes.fc
+    - token-contract/nft/nft-marketplace.fc
