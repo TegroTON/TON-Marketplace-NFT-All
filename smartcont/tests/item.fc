@@ -186,3 +186,46 @@ _ test_transfer(int exit_code, cell data, tuple stack, cell actions, int gas) me
 
     throw_unless(113, message.slice_bits() == 0); ;; Nothing else
 }
+
+;; test initialization of an nft
+[int, tuple, cell, tuple, int] test_initialize_data() method_id(6) {
+    int function_selector = 0; ;; recv_internal
+
+    int item_balance = 0;
+    int amount = 100000000;
+
+    cell content = begin_cell()
+        .store_uint(69420, 64)
+        .end_cell();
+
+    builder message_body = begin_cell()
+        .store_slice(get_example_address(2)) ;; new owner address
+        .store_ref(content);
+
+    cell message = build_message(0, get_example_address(1), addr_none(), amount, message_body);
+    
+    tuple stack = unsafe_tuple([item_balance, amount, message, message_body.end_cell().begin_parse()]);
+
+    cell data = begin_cell() ;; initial nft data
+        .store_uint(69, 64) ;; index
+        .store_slice(get_example_address(1)) ;; collection address
+        .end_cell();
+
+    return [function_selector, stack, data, get_c7(), null()];
+}
+
+_ test_initialize(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(7) {
+    throw_unless(100, exit_code == 0); ;; test need to be passed
+
+    var ds = data.begin_parse();
+
+    throw_unless(101, ds~load_uint(64) == 69); ;; index
+    throw_unless(102, equal_slices(ds~load_msg_addr(), get_example_address(1))); ;; collection address
+    throw_unless(103, equal_slices(ds~load_msg_addr(), get_example_address(2))); ;; owner address
+    
+    slice expected_content = begin_cell()
+        .store_uint(69420, 64)
+        .end_cell()
+        .begin_parse();
+    throw_unless(104, equal_slices(ds~load_ref().begin_parse(), expected_content)); ;; content
+}
