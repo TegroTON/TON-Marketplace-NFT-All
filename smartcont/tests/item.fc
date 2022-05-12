@@ -92,3 +92,62 @@ _ test_initialized_item_get_nft_data(int exit_code, cell data, tuple stack, cell
         .begin_parse();
     throw_unless(105, equal_slices(content, expected_content)); ;; content
 }
+
+;; test transfer of an nft
+[int, tuple, cell, tuple, int] test_transfer_data() method_id(4) {
+    int function_selector = 0; ;; recv_internal
+
+    int nft_balance = 100000000;
+    int amount = 100000000;
+
+    cell message_body = begin_cell()
+        .store_uint(0x5fcc3d14, 32) ;; op
+        .store_uint(0, 64) ;;  query id
+        .store_slice(my_address()) ;; new owner address
+        .store_uint(0, 2) ;; response destination
+        .store_uint(0, 1)
+        .store_coins(50000) ;; forward amount
+        .end_cell();
+
+    cell message = begin_cell()
+        .store_uint(0x6, 4)
+        .store_uint(0, 2) ;; source address, must be the same as owner stored in data
+        .store_uint(0, 2) ;; destination address
+        .store_coins(amount)
+        .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+        .store_slice(message_body.begin_parse())
+        .end_cell();
+    
+    slice msg = message.begin_parse();
+
+    tuple stack = unsafe_tuple([nft_balance, amount, message, message_body.begin_parse()]);
+
+    cell content = begin_cell()
+        .store_uint(420, 64)
+        .end_cell();
+
+    cell data = begin_cell() ;; initial nft data
+        .store_uint(69, 64) ;; index
+        .store_slice(my_address()) ;; collection address
+        .store_uint(0, 2) ;; owner address
+        .store_ref(content)  ;; content 
+        .end_cell();
+
+    return [function_selector, stack, data, get_c7(), null()];
+}
+
+_ test_transfer(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(5) {
+    throw_if(100, exit_code != 0); ;; test need to be passed
+
+    var ds = data.begin_parse();
+
+    throw_unless(101, ds~load_uint(64) == 69); ;; index
+    throw_unless(102, equal_slices(ds~load_msg_addr(), my_address())); ;; collection address
+    throw_unless(103, equal_slices(ds~load_msg_addr(), my_address())); ;; owner address - transferred to myself
+    
+    slice expected_content = begin_cell()
+        .store_uint(420, 64)
+        .end_cell()
+        .begin_parse();
+    throw_unless(104, equal_slices(ds~load_ref().begin_parse(), expected_content)); ;; content
+}
