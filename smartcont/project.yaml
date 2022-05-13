@@ -14,6 +14,11 @@ nft-collection:
     - func/stdlib_update.fc
     - token-contract/nft/params.fc
     - token-contract/nft/op-codes.fc
+    - token-contract/nft/nft-collection.fc
+  tests:
+    - func/stdlib_update.fc
+    - func/utility.fc
+    - tests/collection.fc
 
 nft-sale:
   func:

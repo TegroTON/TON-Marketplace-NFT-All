@@ -1,0 +1,139 @@
+
+;; test a property of an empty collection
+[int, tuple, cell, tuple, int] test_empty_collection_data() method_id(0) {
+    int function_selector = 102491; ;; get_collection_data
+
+    tuple stack = unsafe_tuple([null()]);
+
+    cell content_body = begin_cell()
+        .store_uint(0, 2)
+        .end_cell();
+
+    cell content = begin_cell()
+        .store_ref(content_body)
+        .end_cell();
+
+    ;; todo: need to get the code somehow
+    cell nft_item_code = begin_cell()
+        .end_cell();
+
+    cell royalty_params = begin_cell()
+        .end_cell();
+
+    cell data = begin_cell() ;; initial nft data
+        .store_slice(my_address()) ;; owner
+        .store_uint(69, 64) ;; next item index
+        .store_ref(content)
+        .store_ref(nft_item_code)
+        .store_ref(royalty_params)
+        .end_cell();
+
+    return [function_selector, stack, data, get_c7(), null()];
+}
+
+_ test_empty_collection(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(1) {
+    throw_unless(100, exit_code == 0); ;; test need to be passed
+
+    int next_item_index = stack.second();
+    throw_unless(101, next_item_index == 69);
+
+    cell content = stack.third();
+    cell expected_content = begin_cell()
+        .store_uint(0, 2)
+        .end_cell();
+    throw_unless(102, equal_slices(content.begin_parse(), expected_content.begin_parse()));
+
+    slice owner = stack.fourth();
+    throw_unless(103, equal_slices(owner, my_address()));
+}
+
+;; test deploy new item
+[int, tuple, cell, tuple, int] test_deploy_item_collection_data() method_id(2) {
+    int function_selector = 0; ;; recv_internal
+
+    int collection_balance = 1000000000;
+    int amount = 100000000;
+
+    cell nft_content = begin_cell()
+        .store_uint(69420, 64)
+        .end_cell();
+
+    builder message_body = begin_cell()
+        .store_uint(1, 32) ;; op - deploy new item
+        .store_uint(42069, 64) ;;  query id
+        .store_uint(69, 64) ;; new item ID, must be received with get_collection_data
+        .store_coins(50000) ;; deploy amount
+        .store_ref(nft_content); ;; new owner address
+
+    cell message = build_message(0, my_address(), addr_none(), amount, message_body);
+    
+    tuple stack = unsafe_tuple([message, message_body.end_cell().begin_parse()]);
+
+    cell content_body = begin_cell()
+        .store_uint(0, 2)
+        .end_cell();
+
+    cell content = begin_cell()
+        .store_ref(content_body)
+        .end_cell();
+
+    ;; todo: need to get the code somehow
+    cell nft_item_code = begin_cell()
+        .end_cell();
+
+    cell royalty_params = begin_cell()
+        .end_cell();
+
+    cell data = begin_cell() ;; initial nft data
+        .store_slice(my_address()) ;; owner
+        .store_uint(69, 64) ;; next item index
+        .store_ref(content)
+        .store_ref(nft_item_code)
+        .store_ref(royalty_params)
+        .end_cell();
+
+    return [function_selector, stack, data, get_c7(), null()];
+}
+
+_ test_deploy_item_collection(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(3) {
+    throw_unless(100, exit_code == 0); ;; test need to be passed
+    
+    var ds = data.begin_parse();
+    throw_unless(101, equal_slices(ds~load_msg_addr(), my_address())); ;; owner address
+    throw_unless(102, ds~load_uint(64) == 70); ;; next item index
+    ;;  after this content, nft code and royalty params follow - not interesting
+
+    slice actions_list = actions.begin_parse();
+    cell prev_action_list = actions_list~load_ref();
+    slice action = actions_list;
+    ;; action_send_msg#0ec3c86d mode:(## 8)
+    ;;   out_msg:^(MessageRelaxed Any) = OutAction;
+
+    int action_id = action~load_uint(32);  ;; load action id
+    throw_unless(103, action_id == 0x0ec3c86d);
+
+    int mode = action~load_uint(8); ;; send mode
+    ;;  we don't really care about the mode for this
+
+    actions_list = prev_action_list.begin_parse();
+    ;; Only one message: that is action_list is empty
+    throw_unless(104, actions_list.slice_bits() == 0);
+
+    slice message = action~load_ref().begin_parse();
+    
+    message~skip_bits(4); ;; we don't care about the flags
+    message~load_msg_addr(); ;; nor the contracts address
+    cell dst = begin_cell().store_slice(message~load_msg_addr()).end_cell();
+    dst~dump(); ;; just display the resulting item address
+
+    throw_unless(105, message~load_coins() == 50000); ;;  deploy nft amount
+    
+    message~skip_bits(1 + 4 + 4 + 64 + 32 + 1 + 1); ;; skip this hot garbage, not important
+    message~load_ref(); ;; skip state init
+
+    slice nft_content = begin_cell()
+        .store_uint(69420, 64)
+        .end_cell()
+        .begin_parse();
+    throw_unless(106, equal_slices(message~load_ref().begin_parse(), nft_content)); ;; check nft content
+}
