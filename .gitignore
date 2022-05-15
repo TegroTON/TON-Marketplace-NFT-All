@@ -2,5 +2,3 @@ build/
 .gradle/
 # does this need to be committed?
 .idea/
-# does this need to be committed? Stupid if so
-gradle/
