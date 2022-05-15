@@ -8,6 +8,9 @@ allprojects {
 
     apply(plugin = "kotlin-multiplatform")
 
+    // Build everything in the same directory
+    project.buildDir = rootProject.buildDir
+
     repositories {
         mavenCentral()
         maven("https://jitpack.io")
