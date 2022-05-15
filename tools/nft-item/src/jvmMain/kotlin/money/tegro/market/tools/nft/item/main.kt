@@ -1,19 +1,15 @@
 package money.tegro.market.tools.nft.item
 
-import io.ktor.utils.io.core.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import org.ton.adnl.AdnlPublicKey
 import org.ton.adnl.AdnlTcpClient
 import org.ton.adnl.AdnlTcpClientImpl
 import org.ton.cell.BagOfCells
-import org.ton.cell.writeBagOfCells
+import org.ton.cell.CellBuilder
 import org.ton.crypto.hex
 import org.ton.lite.api.LiteApi
 import org.ton.lite.api.liteserver.LiteServerAccountId
-import org.ton.lite.api.liteserver.LiteServerMasterchainInfo
 import java.time.Instant
 
 suspend fun main() = coroutineScope {
@@ -25,34 +21,18 @@ suspend fun main() = coroutineScope {
     val time = liteClient.getTime()
     println("[server time: $time] (${Instant.ofEpochSecond(time.now.toLong())})")
 
-    val tr = liteClient.getAccountTransactions(0, "0AB558F4DB84FD31F61A273535C670C091FFC619B1CDBBE5769A0BF28D3B8FEA")
-    println(tr)
-}
+    val lastBlock = liteClient.getMasterchainInfo().last
+    println("last block: $lastBlock")
+    val accountId = LiteServerAccountId(0, hex("83dfd552e63729b472fcbcc8c45ebcc6691702558b68ec7527e1ba403a0f31a8"))
 
-
-suspend fun LiteClient.getAccountTransactions(workchain: Int, address: String): String {
-    val lastBlock = getMasterchainInfo().last
-    val state = getAccountState(lastBlock, LiteServerAccountId(workchain, hex(address)))
-    val cell = BagOfCells(state.state).roots.first()
-
-
-    println(hex(state.state))
-    println(hex(buildPacket { writeBagOfCells(BagOfCells(cell)) }.readBytes()))
-
-//    val json = cell.slice().Account().toJsonString()
-    return "json"
-}
-
-suspend fun LiteClient.lastBlockTask() = coroutineScope {
-    var lastBlock: LiteServerMasterchainInfo? = null
-    while (isActive) {
-        val currentBlock = getMasterchainInfo()
-        if (currentBlock != lastBlock) {
-            lastBlock = currentBlock
-            println("[${Instant.now()}] $currentBlock")
-        }
-        delay(1000)
-    }
+    val result = liteClient.runSmcMethod(
+        0,
+        lastBlock,
+        accountId,
+        85143L, //  seqno
+        byteArrayOf() // takes no parameters
+    )
+    println(result)
 }
 
 class LiteClient(
