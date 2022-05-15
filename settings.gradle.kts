@@ -12,18 +12,6 @@ pluginManagement {
     }
 }
 
-sourceControl {
-    // TODO: proper maven repository instead of git
-    gitRepository(java.net.URI("https://github.com/andreypfau/ton-kotlin.git")) {
-        producesModule("org.ton:ton-adnl")
-        producesModule("org.ton:ton-bitstring")
-        producesModule("org.ton:ton-crypto")
-        producesModule("org.ton:ton-cell")
-        producesModule("org.ton:ton-tlb")
-        producesModule("org.ton:ton-lite-api")
-    }
-}
-
 dependencyResolutionManagement {
     versionCatalogs {
         //  TODO: version catalog for org.ton
