@@ -9,9 +9,8 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                // TODO: proper versions and all
-                implementation("com.github.andreypfau.ton-kotlin:ton-kotlin:ca53e595fb")
-                implementation(core.coroutines)
+                implementation(libs.ton)
+                implementation(libs.coroutines)
             }
         }
     }

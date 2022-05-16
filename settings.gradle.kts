@@ -14,9 +14,12 @@ pluginManagement {
 
 dependencyResolutionManagement {
     versionCatalogs {
-        //  TODO: version catalog for org.ton
-        create("core") {
-            library("coroutines", "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.0")
+        create("libs") {
+            version("coroutines", "1.6.0")
+            version("ton", "781dd09140")
+
+            library("coroutines", "org.jetbrains.kotlinx", "kotlinx-coroutines-jdk8").versionRef("coroutines")
+            library("ton", "com.github.andreypfau.ton-kotlin", "ton-kotlin").versionRef("ton")
         }
     }
 }
