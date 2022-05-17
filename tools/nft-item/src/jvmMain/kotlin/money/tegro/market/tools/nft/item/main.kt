@@ -1,53 +1,57 @@
 package money.tegro.market.tools.nft.item
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
-import org.ton.adnl.AdnlPublicKey
-import org.ton.adnl.AdnlTcpClient
-import org.ton.adnl.AdnlTcpClientImpl
+import kotlinx.cli.ArgParser
+import kotlinx.cli.ArgType
+import kotlinx.cli.Subcommand
+import kotlinx.cli.default
+import kotlinx.coroutines.runBlocking
 import org.ton.cell.BagOfCells
 import org.ton.cell.CellBuilder
 import org.ton.crypto.hex
-import org.ton.lite.api.LiteApi
 import org.ton.lite.api.liteserver.LiteServerAccountId
+import org.ton.lite.client.LiteClient
 import java.time.Instant
 
-suspend fun main() = coroutineScope {
-    val liteClient = LiteClient(
-        host = "67.207.74.182",
-        port = 4924,
-        publicKey = hex("a5e253c3f6ab9517ecb204ee7fd04cca9273a8e8bb49712a48f496884c365353")
-    ).connect()
-    val time = liteClient.getTime()
-    println("[server time: $time] (${Instant.ofEpochSecond(time.now.toLong())})")
+suspend fun main(args: Array<String>) {
+    var parser = ArgParser("nft-item")
 
-    val lastBlock = liteClient.getMasterchainInfo().last
-    println("last block: $lastBlock")
-    val accountId = LiteServerAccountId(0, hex("83dfd552e63729b472fcbcc8c45ebcc6691702558b68ec7527e1ba403a0f31a8"))
+    val liteServerHost by parser.option(ArgType.String, "host", "o ", "Lite server host IP address")
+        .default("67.207.74.182")
+    val liteServerPort by parser.option(ArgType.Int, "port", "p", "Lite server port number").default(4924)
+    val liteServerPubKey by parser.option(ArgType.String, "pubkey", "k", "Lite server public key")
+        .default("a5e253c3f6ab9517ecb204ee7fd04cca9273a8e8bb49712a48f496884c365353")
 
-    val result = liteClient.runSmcMethod(
-        0,
-        lastBlock,
-        accountId,
-        85143L, //  seqno
-        byteArrayOf() // takes no parameters
-    )
-    println(result)
-}
+    class Query : Subcommand("query", "Query NFT item info") {
+        val address by option(ArgType.String, "address", "a", "NFT item contract address")
+            .default("0:83dfd552e63729b472fcbcc8c45ebcc6691702558b68ec7527e1ba403a0f31a8")
 
-class LiteClient(
-    val adnlTcpClient: AdnlTcpClient
-) : LiteApi {
-    constructor(
-        host: String,
-        port: Int,
-        publicKey: ByteArray
-    ) : this(AdnlTcpClientImpl(host, port, AdnlPublicKey(publicKey), Dispatchers.Default))
+        override fun execute() = runBlocking {
+            val liteClient = LiteClient(liteServerHost, liteServerPort, hex(liteServerPubKey)).connect()
 
-    suspend fun connect() = apply {
-        adnlTcpClient.connect()
+            val time = liteClient.getTime()
+            println("[server time: $time] (${Instant.ofEpochSecond(time.now.toLong())})")
+
+            val lastBlock = liteClient.getMasterchainInfo().last
+            println("last block: $lastBlock")
+
+            val wc = address.split(":").first().toInt()
+            val addr = address.split(":").last()
+            val accountId = LiteServerAccountId(wc, hex(addr))
+
+            val result = liteClient.runSmcMethod(
+                0,
+                lastBlock,
+                accountId,
+                "seqno",
+                BagOfCells(CellBuilder.beginCell().storeUInt(0, 16).storeUInt(0, 8).endCell())
+            )
+            println(result)
+        }
     }
 
-    override suspend fun sendRawQuery(byteArray: ByteArray): ByteArray =
-        adnlTcpClient.sendQuery(byteArray)
+    val query = Query()
+
+    parser.subcommands(query)
+
+    parser.parse(args)
 }

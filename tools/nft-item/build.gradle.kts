@@ -11,6 +11,7 @@ kotlin {
             dependencies {
                 implementation(libs.ton)
                 implementation(libs.coroutines)
+                implementation(libs.cli)
             }
         }
     }
