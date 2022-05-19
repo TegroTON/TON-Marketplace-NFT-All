@@ -17,7 +17,7 @@ dependencyResolutionManagement {
         create("libs") {
             version("coroutines", "1.6.0")
             version("cli", "0.3.4")
-            version("ton", "0448f85b55")
+            version("ton", "4c69fafb20")
 
             library("coroutines", "org.jetbrains.kotlinx", "kotlinx-coroutines-jdk8").versionRef("coroutines")
             library("cli", "org.jetbrains.kotlinx", "kotlinx-cli").versionRef("cli")

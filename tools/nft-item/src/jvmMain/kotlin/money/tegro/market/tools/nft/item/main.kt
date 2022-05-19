@@ -38,14 +38,18 @@ suspend fun main(args: Array<String>) {
             val addr = address.split(":").last()
             val accountId = LiteServerAccountId(wc, hex(addr))
 
-            val result = liteClient.runSmcMethod(
+            val response = liteClient.runSmcMethod(
                 0,
                 lastBlock,
                 accountId,
                 "seqno",
-                BagOfCells(CellBuilder.beginCell().storeUInt(0, 16).storeUInt(0, 8).endCell())
+                BagOfCells(
+                    CellBuilder.beginCell().storeUInt(0, 16).storeUInt(0, 8).endCell()
+                )
             )
-            println(result)
+            require(response.exitCode == 0) { "Failed to run the method, exit code is ${response.exitCode}" }
+
+            println(response)
         }
     }
 
