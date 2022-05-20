@@ -2,7 +2,7 @@ plugins {
     application
 }
 application {
-    mainClass.set("money.tegro.market.tools.nft.item.MainKt")
+    mainClass.set("money.tegro.market.nft_tool.MainKt")
 }
 
 kotlin {

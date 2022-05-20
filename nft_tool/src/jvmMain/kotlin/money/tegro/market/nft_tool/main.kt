@@ -1,4 +1,4 @@
-package money.tegro.market.tools.nft.item
+package money.tegro.market.nft_tool
 
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
@@ -16,7 +16,7 @@ import org.ton.lite.client.LiteClient
 import java.time.Instant
 
 suspend fun main(args: Array<String>) {
-    var parser = ArgParser("nft-item")
+    var parser = ArgParser("nft_tool")
 
     val liteServerHost by parser.option(ArgType.String, "host", "o ", "Lite server host IP address")
         .default("67.207.74.182")
@@ -52,6 +52,7 @@ suspend fun main(args: Array<String>) {
                         .endCell() // no parameters
                 ).toByteArray()
             )
+            println(response)
             require(response.exitCode == 0) { "Failed to run the method, exit code is ${response.exitCode}" }
             var loader = BagOfCells(response.result!!).roots.first().beginParse()
             loader.loadUInt(16) // skip whatever this is

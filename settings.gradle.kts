@@ -26,4 +26,4 @@ dependencyResolutionManagement {
     }
 }
 
-include(":tools:nft-item")
+include(":nft_tool")
