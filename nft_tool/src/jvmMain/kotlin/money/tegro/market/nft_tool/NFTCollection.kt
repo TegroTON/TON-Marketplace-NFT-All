@@ -105,6 +105,49 @@ data class NFTCollection(
         return Pair(numerator.toFloat() / denominator, destination)
     }
 
+    suspend fun getNFTContent(
+        liteClient: LiteApi, index: Int, individualContent: Cell
+    ): Cell {
+        val lastBlock = liteClient.getMasterchainInfo().last
+
+        val accountId = LiteServerAccountId(address.workchain_id, address.address)
+
+        val response = liteClient.runSmcMethod(
+            0b00100, // we only care about the result
+            lastBlock,
+            accountId,
+            68445L, // get_nft_content
+            BagOfCells(
+                CellBuilder.beginCell()
+                    .storeUInt(0, 16)
+                    .storeUInt(2, 8) // 2 parameters
+                    .storeUInt(3, 8)
+                    .storeRef(
+                        CellBuilder.beginCell()
+                            .storeUInt(1, 8)
+                            .storeUInt(index, 64)
+                            .storeRef(
+                                CellBuilder.beginCell()
+                                    .endCell()
+                            )
+                            .endCell()
+                    )
+                    .storeRef(individualContent)
+                    .endCell()
+            ).toByteArray()
+        )
+        require(response.exitCode == 0) { "Failed to run the method, exit code is ${response.exitCode}" }
+        var loader = BagOfCells(response.result!!).roots.first().beginParse()
+        loader.loadUInt(16) // skip whatever this is
+        loader.loadUInt(8) // number of entries
+
+
+        loader.loadUInt(8) // type
+        loader.loadRef()
+        return loader.loadRef() // our content
+    }
+
+
     companion object {
         @JvmStatic
         suspend fun fetch(

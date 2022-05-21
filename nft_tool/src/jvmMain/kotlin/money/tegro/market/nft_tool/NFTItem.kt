@@ -47,7 +47,7 @@ data class NFTItem(
 
             loader.loadUInt(8) // type of the last entry, going backwards here
             var next = loader.loadRef()
-            val content = loader.loadRef()
+            var content = loader.loadRef()
             loader = next.beginParse()
 
             loader.loadUInt(8)
@@ -61,7 +61,8 @@ data class NFTItem(
             next = loader.loadRef()
             begin = loader.loadUInt(10).toInt()
             end = loader.loadUInt(10).toInt()
-            val collection = toAddress(Cell(loader.loadRef().bits.slice(begin..end)).beginParse())
+            val collectionAddress = toAddress(Cell(loader.loadRef().bits.slice(begin..end)).beginParse())
+            val collection = if (collectionAddress != null) NFTCollection.fetch(liteClient, collectionAddress) else null
             loader = next.beginParse()
 
             loader.loadUInt(8)
@@ -73,11 +74,15 @@ data class NFTItem(
             next = loader.loadRef()
             val initialized = loader.loadInt(64).toInt()
 
+            if (initialized == -1 && collection != null) {
+                content = collection?.getNFTContent(liteClient, index, content)
+            }
+
             return NFTItem(
                 address,
                 initialized == -1,
                 index,
-                if (collection != null) NFTCollection.fetch(liteClient, collection) else null,
+                collection,
                 owner,
                 content
             )

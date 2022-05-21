@@ -32,6 +32,7 @@ suspend fun main(args: Array<String>) {
             println("\tIndex: ${item.index}")
             println("\tCollection Address: ${item.collection?.address?.toString(userFriendly = true)}")
             println("\tOwner Address: ${item.owner.toString(userFriendly = true)}")
+            println("\tContent: ${item.content}")
 
             if (item.collection != null) {
                 println("NFT Collection ${item.collection.address.toString(userFriendly = true)}")
