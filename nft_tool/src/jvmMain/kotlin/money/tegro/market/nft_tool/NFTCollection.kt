@@ -16,6 +16,46 @@ data class NFTCollection(
     override fun toString(): String =
         "NFTCollection(address=$address, next_item_index=$nextItemIndex owner=$owner, content=$content)"
 
+    suspend fun getNFTAddress(
+        liteClient: LiteApi, index: Int
+    ): MsgAddressInt.AddrStd {
+        val lastBlock = liteClient.getMasterchainInfo().last
+
+        val accountId = LiteServerAccountId(address.workchain_id, address.address)
+
+        val response = liteClient.runSmcMethod(
+            0b00100, // we only care about the result
+            lastBlock,
+            accountId,
+            92067L, // get_nft_address_by_index
+            BagOfCells(
+                CellBuilder.beginCell()
+                    .storeUInt(0, 16)
+                    .storeUInt(1, 8) // 1 parameter
+                    .storeUInt(1, 8)
+                    .storeUInt(index, 64)
+                    .storeRef(
+                        CellBuilder.beginCell()
+                            .endCell()
+                    )
+                    .endCell()
+            ).toByteArray()
+        )
+        require(response.exitCode == 0) { "Failed to run the method, exit code is ${response.exitCode}" }
+        var loader = BagOfCells(response.result!!).roots.first().beginParse()
+        loader.loadUInt(16) // skip whatever this is
+        loader.loadUInt(8) // number of entries
+
+        loader.loadUInt(8)
+        loader.loadRef()
+        var begin = loader.loadUInt(10).toInt()
+        var end = loader.loadUInt(10).toInt()
+        return toAddress(Cell(loader.loadRef().bits.slice(begin..end)).beginParse())!!
+    }
+
+    suspend fun getNFT(liteClient: LiteApi, index: Int): NFTItem =
+        NFTItem.fetch(liteClient, getNFTAddress(liteClient, index))
+
     companion object {
         @JvmStatic
         suspend fun fetch(
