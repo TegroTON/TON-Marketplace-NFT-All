@@ -51,6 +51,12 @@ suspend fun main(args: Array<String>) {
             println("NFT Collection ${collection.address.toString(userFriendly = true)}")
             println("\tNext item index: ${collection.nextItemIndex}")
             println("\tOwner address: ${collection.owner.toString(userFriendly = true)}")
+
+            val royalties = collection.getRoyaltyParams(liteClient)
+            if (royalties != null) {
+                println("\tRoyalty percentage: ${royalties.first * 100f}%")
+                println("\tRoyalty destination: ${royalties.second.toString(userFriendly = true)}")
+            }
         }
     }
 
