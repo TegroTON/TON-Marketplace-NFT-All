@@ -32,7 +32,12 @@ suspend fun main(args: Array<String>) {
             println("\tIndex: ${item.index}")
             println("\tCollection Address: ${item.collection?.address?.toString(userFriendly = true)}")
             println("\tOwner Address: ${item.owner.toString(userFriendly = true)}")
-            println("\tContent: ${item.content}")
+            when (item.content) {
+                is NFTContentOffChain -> {
+                    println("\tContent: off-chain")
+                    println("\tData: ${item.content}")
+                }
+            }
 
             if (item.collection != null) {
                 println("NFT Collection ${item.collection.address.toString(userFriendly = true)}")
@@ -57,6 +62,12 @@ suspend fun main(args: Array<String>) {
             println("NFT Collection ${collection.address.toString(userFriendly = true)}")
             println("\tNext item index: ${collection.nextItemIndex}")
             println("\tOwner address: ${collection.owner.toString(userFriendly = true)}")
+            when (collection.content) {
+                is NFTContentOffChain -> {
+                    println("\tContent: off-chain")
+                    println("\tData: ${collection.content}")
+                }
+            }
 
             val royalties = collection.getRoyaltyParams(liteClient)
             if (royalties != null) {

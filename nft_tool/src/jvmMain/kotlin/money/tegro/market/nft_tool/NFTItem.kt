@@ -13,7 +13,7 @@ data class NFTItem(
     val index: Int,
     val collection: NFTCollection?,
     val owner: MsgAddressInt.AddrStd,
-    val content: Cell
+    val content: NFTContent
 ) {
     override fun toString(): String =
         "NFTItem(address=$address, initialized=$initialized, index=$index, collection=$collection, owner=$owner, content=$content)"
@@ -47,7 +47,7 @@ data class NFTItem(
 
             loader.loadUInt(8) // type of the last entry, going backwards here
             var next = loader.loadRef()
-            var content = loader.loadRef()
+            var contentCell = loader.loadRef()
             loader = next.beginParse()
 
             loader.loadUInt(8)
@@ -75,7 +75,7 @@ data class NFTItem(
             val initialized = loader.loadInt(64).toInt()
 
             if (initialized == -1 && collection != null) {
-                content = collection?.getNFTContent(liteClient, index, content)
+                contentCell = collection?.getNFTContent(liteClient, index, contentCell)
             }
 
             return NFTItem(
@@ -84,7 +84,7 @@ data class NFTItem(
                 index,
                 collection,
                 owner,
-                content
+                NFTContent.parse(contentCell)
             )
         }
     }

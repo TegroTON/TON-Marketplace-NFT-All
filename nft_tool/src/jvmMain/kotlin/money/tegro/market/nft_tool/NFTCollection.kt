@@ -10,7 +10,7 @@ import org.ton.lite.api.liteserver.LiteServerAccountId
 data class NFTCollection(
     val address: MsgAddressInt.AddrStd,
     val nextItemIndex: Int,
-    val content: Cell,
+    val content: NFTContent,
     val owner: MsgAddressInt.AddrStd,
 ) {
     override fun toString(): String =
@@ -184,7 +184,7 @@ data class NFTCollection(
 
             loader.loadUInt(8)
             next = loader.loadRef()
-            val content = loader.loadRef()
+            val contentCell = loader.loadRef()
             loader = next.beginParse()
 
             loader.loadUInt(8)
@@ -194,7 +194,7 @@ data class NFTCollection(
             return NFTCollection(
                 address,
                 nextItemIndex,
-                content,
+                NFTContent.parse(contentCell),
                 owner
             )
         }
