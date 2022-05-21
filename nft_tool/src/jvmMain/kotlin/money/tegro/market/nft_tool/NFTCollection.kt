@@ -7,23 +7,21 @@ import org.ton.cell.CellBuilder
 import org.ton.lite.api.LiteApi
 import org.ton.lite.api.liteserver.LiteServerAccountId
 
-data class NFTItem(
+data class NFTCollection(
     val address: MsgAddressInt.AddrStd,
-    val initialized: Boolean,
-    val index: Int,
-    val collection: NFTCollection?,
+    val nextItemIndex: Int,
+    val content: Cell,
     val owner: MsgAddressInt.AddrStd,
-    val content: Cell
 ) {
     override fun toString(): String =
-        "NFTItem(address=$address, initialized=$initialized, index=$index, collection=$collection, owner=$owner, content=$content)"
+        "NFTCollection(address=$address, next_item_index=$nextItemIndex owner=$owner, content=$content)"
 
     companion object {
         @JvmStatic
         suspend fun fetch(
             liteClient: LiteApi,
             address: MsgAddressInt.AddrStd
-        ): NFTItem {
+        ): NFTCollection {
             val lastBlock = liteClient.getMasterchainInfo().last
 
             val accountId = LiteServerAccountId(address.workchain_id, address.address)
@@ -32,7 +30,7 @@ data class NFTItem(
                 0b100, // we only care about the result
                 lastBlock,
                 accountId,
-                102351L, // get_nft_data
+                102491L, // get_collection_data
                 BagOfCells(
                     CellBuilder.beginCell()
                         .storeUInt(0, 16)
@@ -45,13 +43,8 @@ data class NFTItem(
             loader.loadUInt(16) // skip whatever this is
             loader.loadUInt(8) // number of entries
 
-            loader.loadUInt(8) // type of the last entry, going backwards here
-            var next = loader.loadRef()
-            val content = loader.loadRef()
-            loader = next.beginParse()
-
             loader.loadUInt(8)
-            next = loader.loadRef()
+            var next = loader.loadRef()
             var begin = loader.loadUInt(10).toInt()
             var end = loader.loadUInt(10).toInt()
             val owner = toAddress(Cell(loader.loadRef().bits.slice(begin..end)).beginParse())!!
@@ -59,27 +52,18 @@ data class NFTItem(
 
             loader.loadUInt(8)
             next = loader.loadRef()
-            begin = loader.loadUInt(10).toInt()
-            end = loader.loadUInt(10).toInt()
-            val collection = toAddress(Cell(loader.loadRef().bits.slice(begin..end)).beginParse())
+            val content = loader.loadRef()
             loader = next.beginParse()
 
             loader.loadUInt(8)
             next = loader.loadRef()
-            val index = loader.loadUInt(64).toInt()
-            loader = next.beginParse()
+            val nextItemIndex = loader.loadUInt(64).toInt()
 
-            loader.loadUInt(8)
-            next = loader.loadRef()
-            val initialized = loader.loadInt(64).toInt()
-
-            return NFTItem(
+            return NFTCollection(
                 address,
-                initialized == -1,
-                index,
-                if (collection != null) NFTCollection.fetch(liteClient, collection) else null,
-                owner,
-                content
+                nextItemIndex,
+                content,
+                owner
             )
         }
     }

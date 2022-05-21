@@ -18,9 +18,8 @@ suspend fun main(args: Array<String>) {
     val liteServerPubKey by parser.option(ArgType.String, "pubkey", "k", "Lite server public key")
         .default("a5e253c3f6ab9517ecb204ee7fd04cca9273a8e8bb49712a48f496884c365353")
 
-    class Query : Subcommand("query", "Query NFT item info") {
-        val address by option(ArgType.String, "address", "a", "NFT item contract address")
-            .default("EQBVSrH770Egt4ykTNLons-5MupKVGYTBGwRvuMG0BxIxXpY")
+    class QueryItem : Subcommand("query-item", "Query NFT item info") {
+        val address by argument(ArgType.String, "address", "NFT item contract address")
 
         override fun execute() = runBlocking {
             val liteClient = LiteClient(liteServerHost, liteServerPort, hex(liteServerPubKey)).connect()
@@ -29,14 +28,20 @@ suspend fun main(args: Array<String>) {
             println("NFT Item ${item.address.toString(userFriendly = true)}:")
             println("\tInitialized: ${item.initialized}")
             println("\tIndex: ${item.index}")
-            println("\tCollection Address: ${item.collection?.toString(userFriendly = true)}")
+            println("\tCollection Address: ${item.collection?.address?.toString(userFriendly = true)}")
             println("\tOwner Address: ${item.owner.toString(userFriendly = true)}")
+
+            if (item.collection != null) {
+                println("NFT Collection ${item.collection.address.toString(userFriendly = true)}")
+                println("\tNext item index: ${item.collection.nextItemIndex}")
+                println("\tOwner Address: ${item.collection.owner.toString(userFriendly = true)}")
+            }
         }
     }
 
-    val query = Query()
+    val queryItem = QueryItem()
 
-    parser.subcommands(query)
+    parser.subcommands(queryItem)
 
     parser.parse(args)
 }
