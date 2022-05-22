@@ -90,21 +90,18 @@ class QueryItem : CliktCommand(name = "query-item", help = "Query NFT item info"
             println("\tOwner Address: ${item.owner.toString(userFriendly = true)}")
             when (item.content) {
                 is NFTContentOffChain -> {
-                    println("\tContent: off-chain")
-                    println("\tData: ${item.content}")
+                    println("\tContent URL: ${item.content.url}")
+                    when (item.content) {
+                        is NFTContentOffChainIPFS -> {
+                            println("\tContent: off-chain (IPFS)")
+                            println("\tIPFS Id: ${item.content.id}")
+                        }
+                    }
                 }
             }
-
-            if (item.collection != null) {
-                println("NFT Collection ${item.collection.address.toString(userFriendly = true)}")
-                println("\tNext item index: ${item.collection.nextItemIndex}")
-                println("\tOwner Address: ${item.collection.owner.toString(userFriendly = true)}")
-                val royalties = item.collection.getRoyaltyParameters()
-                if (royalties != null) {
-                    println("\tRoyalty percentage: ${royalties.first * 100f}%")
-                    println("\tRoyalty destination: ${royalties.second.toString(userFriendly = true)}")
-                }
-            }
+            println("\tName: ${item.content.name}")
+            println("\tDescription: ${item.content.description}")
+            println("\tImage: ${item.content.image}")
         }
     }
 }
@@ -120,10 +117,18 @@ class QueryCollection : CliktCommand(name = "query-collection", help = "Query NF
             println("\tOwner address: ${collection.owner.toString(userFriendly = true)}")
             when (collection.content) {
                 is NFTContentOffChain -> {
-                    println("\tContent: off-chain")
-                    println("\tData: ${collection.content}")
+                    println("\tContent URL: ${collection.content.url}")
+                    when (collection.content) {
+                        is NFTContentOffChainIPFS -> {
+                            println("\tContent: off-chain (IPFS)")
+                            println("\tIPFS Id: ${collection.content.id}")
+                        }
+                    }
                 }
             }
+            println("\tName: ${collection.content.name}")
+            println("\tDescription: ${collection.content.description}")
+            println("\tImage: ${collection.content.image}")
 
             val royalties = collection.getRoyaltyParameters()
             if (royalties != null) {

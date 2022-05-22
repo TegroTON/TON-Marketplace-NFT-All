@@ -82,14 +82,14 @@ data class NFTContentOffChainIPFS(
             var hash = DummyMultihash(id)
 
             val content =
-                if (path.length > 0) ipfs.cat(hash, path) else ipfs.cat(
+                if (path != "/") ipfs.cat(hash, path) else ipfs.cat(
                     hash
                 )
 
             return Json {
                 ignoreUnknownKeys = true
             }.decodeFromString<NFTContentOffChainIPFS>(String(content)).apply {
-                this.id = id
+                this.id = id + path
                 this.url = url
             }
         }
