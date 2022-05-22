@@ -6,8 +6,8 @@ import org.ton.block.MsgAddressInt
 import org.ton.cell.BagOfCells
 import org.ton.cell.Cell
 import org.ton.cell.CellBuilder
+import org.ton.lite.api.LiteApi
 import org.ton.lite.api.liteserver.LiteServerAccountId
-import org.ton.lite.client.LiteClient
 
 data class NFTCollection(
     val address: MsgAddressInt.AddrStd,
@@ -31,7 +31,7 @@ data class NFTCollection(
         suspend fun fetch(
             address: MsgAddressInt.AddrStd
         ): NFTCollection {
-            val liteClient: LiteClient by inject()
+            val liteClient: LiteApi by inject()
             val lastBlock = liteClient.getMasterchainInfo().last
 
             val accountId = LiteServerAccountId(address.workchain_id, address.address)
@@ -82,7 +82,7 @@ data class NFTCollection(
             collection: MsgAddressInt.AddrStd,
             index: Int
         ): MsgAddressInt.AddrStd {
-            val liteClient: LiteClient by inject()
+            val liteClient: LiteApi by inject()
             val lastBlock = liteClient.getMasterchainInfo().last
 
             val accountId = LiteServerAccountId(collection.workchain_id, collection.address)
@@ -119,7 +119,7 @@ data class NFTCollection(
 
         @JvmStatic
         suspend fun getRoyaltyParameters(collection: MsgAddressInt.AddrStd): Pair<Float, MsgAddressInt.AddrStd>? {
-            val liteClient: LiteClient by inject()
+            val liteClient: LiteApi by inject()
             val lastBlock = liteClient.getMasterchainInfo().last
 
             val accountId = LiteServerAccountId(collection.workchain_id, collection.address)
@@ -172,7 +172,7 @@ data class NFTCollection(
         suspend fun getNFTContent(
             collection: MsgAddressInt.AddrStd, index: Int, individualContent: Cell
         ): Cell {
-            val liteClient: LiteClient by inject()
+            val liteClient: LiteApi by inject()
             val lastBlock = liteClient.getMasterchainInfo().last
 
             val accountId = LiteServerAccountId(collection.workchain_id, collection.address)

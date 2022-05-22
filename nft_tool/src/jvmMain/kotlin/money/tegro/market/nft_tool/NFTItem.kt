@@ -7,8 +7,8 @@ import org.ton.block.MsgAddressInt
 import org.ton.cell.BagOfCells
 import org.ton.cell.Cell
 import org.ton.cell.CellBuilder
+import org.ton.lite.api.LiteApi
 import org.ton.lite.api.liteserver.LiteServerAccountId
-import org.ton.lite.client.LiteClient
 
 data class NFTItem(
     val address: MsgAddressInt.AddrStd,
@@ -26,7 +26,7 @@ data class NFTItem(
         suspend fun fetch(
             address: MsgAddressInt.AddrStd
         ): NFTItem {
-            val liteClient: LiteClient by inject()
+            val liteClient: LiteApi by inject()
 
 
             val lastBlock = liteClient.getMasterchainInfo().last

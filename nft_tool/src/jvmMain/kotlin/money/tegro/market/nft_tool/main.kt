@@ -22,7 +22,7 @@ import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
 import org.ton.block.MsgAddressInt
 import org.ton.crypto.hex
-import org.ton.lite.client.LiteClient
+import org.ton.lite.api.LiteApi
 
 class LiteClientOptions : OptionGroup("lite-client options") {
     val host by option("-o", "--host", help = "Lite server host IP address")
@@ -37,6 +37,12 @@ class Tool : CliktCommand(name = "nft_tool", help = ""), KoinComponent {
     private val ipfsAddress by option("-i", "--ipfs", help = "Address of the IPFS API server")
         .default("/ip4/127.0.0.1/tcp/5001")
     private val verbose by option("-v", "--verbose", help = "Verbose output").int().default(0)
+    private val retries by option(
+        "-r",
+        "--retry",
+        help = "Retry N times before giving up. 0 for infinite retries"
+    ).int()
+        .default(1)
 
     override fun run() {
         runBlocking {
@@ -60,12 +66,12 @@ class Tool : CliktCommand(name = "nft_tool", help = ""), KoinComponent {
                     logger.warn("Verbose level $verbose is not valid, ignoring")
             }
 
-            val liteClient: LiteClient by inject {
-                parametersOf(liteClientOptions.host, liteClientOptions.port, hex(liteClientOptions.publicKey))
+            val liteClient: LiteApi by inject {
+                parametersOf(liteClientOptions.host, liteClientOptions.port, hex(liteClientOptions.publicKey), retries)
             }
 
             logger.debug("connecting to the lite client at ${liteClientOptions.host}:${liteClientOptions.port}")
-            liteClient.connect()
+            (liteClient as ResilientLiteClient).connect()
 
             val ipfs: IPFS by inject {
                 parametersOf(ipfsAddress)
@@ -182,7 +188,7 @@ suspend fun main(args: Array<String>) {
 
         modules(module {
             single { params ->
-                LiteClient(params.get(), params.get(), params.get())
+                ResilientLiteClient(params.get(), params.get(), params.get(), params.get()) as LiteApi
             }
             single { (addr: String) ->
                 IPFS(addr)
