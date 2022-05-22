@@ -8,6 +8,7 @@ import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.int
+import io.ipfs.api.IPFS
 import kotlinx.coroutines.runBlocking
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -28,14 +29,22 @@ class LiteClientOptions : OptionGroup("lite-client options") {
 
 class Tool : CliktCommand(name = "nft_tool", help = ""), KoinComponent {
     private val liteClientOptions by LiteClientOptions()
-
-    val liteClient: LiteClient by inject {
-        parametersOf(liteClientOptions.host, liteClientOptions.port, hex(liteClientOptions.publicKey))
-    }
+    private val ipfsAddress by option("-i", "--ipfs", help = "Address of the IPFS API server")
+        .default("/ip4/127.0.0.1/tcp/5001")
 
     override fun run() {
         runBlocking {
+            val liteClient: LiteClient by inject {
+                parametersOf(liteClientOptions.host, liteClientOptions.port, hex(liteClientOptions.publicKey))
+            }
+
             liteClient.connect()
+
+            val ipfs: IPFS by inject {
+                parametersOf(ipfsAddress)
+            }
+
+            ipfs.stats
         }
     }
 }
@@ -126,6 +135,9 @@ suspend fun main(args: Array<String>) {
         modules(module {
             single { params ->
                 LiteClient(params.get(), params.get(), params.get())
+            }
+            single { (addr: String) ->
+                IPFS(addr)
             }
         })
     }

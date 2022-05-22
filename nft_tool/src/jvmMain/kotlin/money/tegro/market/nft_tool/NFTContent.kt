@@ -6,6 +6,8 @@ import io.ktor.http.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import org.ton.cell.Cell
 
 sealed interface NFTContent {
@@ -46,10 +48,10 @@ data class NFTContentOffChainIPFS(
     val image: String,
     val imageData: String? = null,
 ) : NFTContentOffChain {
-    companion object {
+    companion object : KoinComponent {
         @JvmStatic
         fun fetch(id: String): NFTContentOffChainIPFS {
-            val ipfs = IPFS("/ip4/127.0.0.1/tcp/5001")
+            val ipfs: IPFS by inject()
             return Json {
                 ignoreUnknownKeys = true
             }.decodeFromString<NFTContentOffChainIPFS>(String(ipfs.cat(Multihash.fromBase58(id))))
