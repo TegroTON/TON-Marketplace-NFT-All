@@ -10,9 +10,13 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.int
 import io.ipfs.api.IPFS
 import kotlinx.coroutines.runBlocking
+import mu.KLogging
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.context.startKoin
+import org.koin.core.logger.Level
+import org.koin.core.logger.Logger
+import org.koin.core.logger.MESSAGE
 import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
 import org.ton.block.MsgAddressInt
@@ -31,22 +35,44 @@ class Tool : CliktCommand(name = "nft_tool", help = ""), KoinComponent {
     private val liteClientOptions by LiteClientOptions()
     private val ipfsAddress by option("-i", "--ipfs", help = "Address of the IPFS API server")
         .default("/ip4/127.0.0.1/tcp/5001")
+    private val verbose by option("-v", "--verbose", help = "Verbose output").int().default(0)
 
     override fun run() {
         runBlocking {
+            when (verbose) {
+                0 -> {
+                    getKoin().logger.level = Level.ERROR
+                    (logger.underlyingLogger as ch.qos.logback.classic.Logger).level = ch.qos.logback.classic.Level.WARN
+                }
+                1 -> {
+                    getKoin().logger.level = Level.INFO
+                    (logger.underlyingLogger as ch.qos.logback.classic.Logger).level = ch.qos.logback.classic.Level.INFO
+                }
+                2 -> {
+                    getKoin().logger.level = Level.DEBUG
+                    (logger.underlyingLogger as ch.qos.logback.classic.Logger).level =
+                        ch.qos.logback.classic.Level.DEBUG
+                }
+                else ->
+                    logger.warn("Verbose level $verbose is not valid, ignoring")
+            }
+
             val liteClient: LiteClient by inject {
                 parametersOf(liteClientOptions.host, liteClientOptions.port, hex(liteClientOptions.publicKey))
             }
 
+            logger.debug("connecting to the lite client at ${liteClientOptions.host}:${liteClientOptions.port}")
             liteClient.connect()
 
             val ipfs: IPFS by inject {
                 parametersOf(ipfsAddress)
             }
 
-            ipfs.stats
+            logger.debug("ipfs api ${ipfs.version()} is initialized")
         }
     }
+
+    companion object : KLogging()
 }
 
 class QueryItem : CliktCommand(name = "query-item", help = "Query NFT item info"), KoinComponent {
@@ -129,9 +155,23 @@ class ListCollection : CliktCommand(name = "list-collection", help = "List all i
     }
 }
 
+class KoinLogger : Logger(Level.NONE) {
+    override fun log(level: Level, msg: MESSAGE) {
+        when (level) {
+            Level.DEBUG -> logger.debug(msg)
+            Level.INFO -> logger.info(msg)
+            Level.ERROR -> logger.error(msg)
+            Level.NONE -> {}
+        }
+    }
+
+    companion object : KLogging()
+}
 
 suspend fun main(args: Array<String>) {
     startKoin {
+        logger(KoinLogger())
+
         modules(module {
             single { params ->
                 LiteClient(params.get(), params.get(), params.get())
