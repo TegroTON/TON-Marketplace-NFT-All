@@ -155,7 +155,7 @@ class ListCollection : CliktCommand(name = "list-collection", help = "List all i
 
             println("index | address | initialized | owner")
 
-            for (i in 1..collection.nextItemIndex) {
+            for (i in 1..collection.nextItemIndex - 1) {
                 val item = collection.getNFT(i)
                 println(
                     "${item.index} | ${item.address.toString(userFriendly = true)} | ${item.initialized} | ${
