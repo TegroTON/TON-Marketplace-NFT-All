@@ -1,5 +1,6 @@
 package money.tegro.market.nft_tool
 
+import mu.KLogging
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.ton.block.MsgAddressInt
@@ -20,17 +21,19 @@ data class NFTItem(
     override fun toString(): String =
         "NFTItem(address=$address, initialized=$initialized, index=$index, collection=$collection, owner=$owner, content=$content)"
 
-    companion object Factory : KoinComponent {
+    companion object Factory : KoinComponent, KLogging() {
         @JvmStatic
         suspend fun fetch(
             address: MsgAddressInt.AddrStd
         ): NFTItem {
             val liteClient: LiteClient by inject()
 
+
             val lastBlock = liteClient.getMasterchainInfo().last
 
             val accountId = LiteServerAccountId(address.workchain_id, address.address)
 
+            logger.debug("running method get_nft_data() on ${address.toString(userFriendly = true)}")
             val response = liteClient.runSmcMethod(
                 0b100, // we only care about the result
                 lastBlock,
@@ -43,6 +46,7 @@ data class NFTItem(
                         .endCell() // no parameters
                 ).toByteArray()
             )
+            logger.debug("response: $response")
             require(response.exitCode == 0) { "Failed to run the method, exit code is ${response.exitCode}" }
             var loader = BagOfCells(response.result!!).roots.first().beginParse()
             loader.loadUInt(16) // skip whatever this is

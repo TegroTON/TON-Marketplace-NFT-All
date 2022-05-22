@@ -20,7 +20,9 @@ abstract class NFTContent {
         @JvmStatic
         fun parse(raw: Cell): NFTContent {
             logger.debug("parsing ${raw.bits.length} bits of NFT content")
-            val data = raw.bits.toByteArray()
+            // concatinate all data from all cells
+            val data = raw.bits.toByteArray() + ((raw.treeWalk().map { it.bits.toByteArray() }
+                .reduceOrNull { acc, bytes -> acc + bytes }) ?: byteArrayOf())
             if (data.first() == 0x01.toByte()) {
                 logger.debug("off-chain content")
                 return NFTContentOffChain.fetch(String(data.drop(1).toByteArray()))
@@ -47,6 +49,11 @@ abstract class NFTContentOffChain : NFTContent() {
     }
 }
 
+class DummyMultihash(val content: String) :
+    Multihash(Multihash.Type.id, byteArrayOf()) {
+    override fun toString() = content
+}
+
 @Serializable
 data class NFTContentOffChainIPFS(
     override val name: String,
@@ -66,13 +73,22 @@ data class NFTContentOffChainIPFS(
 
             val id =
                 Url(url).pathSegments.filter { it.all { it.isLetterOrDigit() } }
-                    .sortedBy { it.length }.last()
-            logger.debug("guess: $id")
+                    .sortedBy { it.length }.last() // get longest alpha-numeric part
+            val path = "/" + Url(url).pathSegments.takeLastWhile { it != id }.joinToString("/")
+            logger.debug("guess: $id, path = $path")
 
             val ipfs: IPFS by inject()
+
+            var hash = DummyMultihash(id)
+
+            val content =
+                if (path.length > 0) ipfs.cat(hash, path) else ipfs.cat(
+                    hash
+                )
+
             return Json {
                 ignoreUnknownKeys = true
-            }.decodeFromString<NFTContentOffChainIPFS>(String(ipfs.cat(Multihash.fromBase58(id)))).apply {
+            }.decodeFromString<NFTContentOffChainIPFS>(String(content)).apply {
                 this.id = id
                 this.url = url
             }
