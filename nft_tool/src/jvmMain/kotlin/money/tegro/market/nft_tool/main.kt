@@ -1,30 +1,50 @@
 package money.tegro.market.nft_tool
 
-import kotlinx.cli.ArgParser
-import kotlinx.cli.ArgType
-import kotlinx.cli.Subcommand
-import kotlinx.cli.default
+import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.subcommands
+import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.groups.OptionGroup
+import com.github.ajalt.clikt.parameters.groups.provideDelegate
+import com.github.ajalt.clikt.parameters.options.default
+import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.types.int
 import kotlinx.coroutines.runBlocking
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import org.koin.core.context.startKoin
+import org.koin.core.parameter.parametersOf
+import org.koin.dsl.module
 import org.ton.block.MsgAddressInt
 import org.ton.crypto.hex
 import org.ton.lite.client.LiteClient
 
-suspend fun main(args: Array<String>) {
-    var parser = ArgParser("nft_tool")
+class LiteClientOptions : OptionGroup("lite-client options") {
+    val host by option("-o", "--host", help = "Lite server host IP address")
+        .default("5.9.10.47")
+    val port by option("-p", "--port", help = "Lite server port number").int().default(19949)
+    val publicKey by option("-k", "--pubkey", help = "Lite server public key")
+        .default("9f85439d2094b92a639c2c9493d7b740e39dea8d08b525986d39d6dd69e7f309")
+}
 
-    val liteServerHost by parser.option(ArgType.String, "host", "o ", "Lite server host IP address")
-        .default("67.207.74.182")
-    val liteServerPort by parser.option(ArgType.Int, "port", "p", "Lite server port number").default(4924)
-    val liteServerPubKey by parser.option(ArgType.String, "pubkey", "k", "Lite server public key")
-        .default("a5e253c3f6ab9517ecb204ee7fd04cca9273a8e8bb49712a48f496884c365353")
-    val verbose by parser.option(ArgType.Boolean, "verbose", "v", "Verbose output")
-        .default(false)
+class Tool : CliktCommand(name = "nft_tool", help = ""), KoinComponent {
+    private val liteClientOptions by LiteClientOptions()
 
-    class QueryItem : Subcommand("query-item", "Query NFT item info") {
-        val address by argument(ArgType.String, "address", "NFT item contract address")
+    val liteClient: LiteClient by inject {
+        parametersOf(liteClientOptions.host, liteClientOptions.port, hex(liteClientOptions.publicKey))
+    }
 
-        override fun execute() = runBlocking {
-            val liteClient = LiteClient(liteServerHost, liteServerPort, hex(liteServerPubKey)).connect()
+    override fun run() {
+        runBlocking {
+            liteClient.connect()
+        }
+    }
+}
+
+class QueryItem : CliktCommand(name = "query-item", help = "Query NFT item info"), KoinComponent {
+    val address by argument(name = "address", help = "NFT item contract address")
+    override fun run() {
+        runBlocking {
+            val liteClient: LiteClient by inject()
 
             val item = NFTItem.fetch(liteClient, MsgAddressInt.AddrStd.parse(address))
             println("NFT Item ${item.address.toString(userFriendly = true)}:")
@@ -51,12 +71,14 @@ suspend fun main(args: Array<String>) {
             }
         }
     }
+}
 
-    class QueryCollection : Subcommand("query-collection", "Query NFT collection info") {
-        val address by argument(ArgType.String, "address", "NFT collection contract address")
+class QueryCollection : CliktCommand(name = "query-collection", help = "Query NFT collection info"), KoinComponent {
+    val address by argument(name = "address", help = "NFT collection contract address")
 
-        override fun execute() = runBlocking {
-            val liteClient = LiteClient(liteServerHost, liteServerPort, hex(liteServerPubKey)).connect()
+    override fun run() {
+        runBlocking {
+            val liteClient: LiteClient by inject()
 
             val collection = NFTCollection.fetch(liteClient, MsgAddressInt.AddrStd.parse(address))
             println("NFT Collection ${collection.address.toString(userFriendly = true)}")
@@ -76,12 +98,15 @@ suspend fun main(args: Array<String>) {
             }
         }
     }
+}
 
-    class ListCollection : Subcommand("list-collection", "List all NFTs of the given collection") {
-        val address by argument(ArgType.String, "address", "NFT collection contract address")
-        override fun execute() = runBlocking {
-            val liteClient = LiteClient(liteServerHost, liteServerPort, hex(liteServerPubKey)).connect()
+class ListCollection : CliktCommand(name = "list-collection", help = "List all items of the given NFT collection"),
+    KoinComponent {
+    val address by argument(name = "address", help = "NFT collection contract address")
 
+    override fun run() {
+        runBlocking {
+            val liteClient: LiteClient by inject()
             val collection = NFTCollection.fetch(liteClient, MsgAddressInt.AddrStd.parse(address))
 
             println("index | address | initialized | owner")
@@ -98,8 +123,29 @@ suspend fun main(args: Array<String>) {
             }
         }
     }
+}
 
-    parser.subcommands(QueryItem(), QueryCollection(), ListCollection())
 
-    parser.parse(args)
+suspend fun main(args: Array<String>) {
+    startKoin {
+        modules(module {
+            single { params ->
+                LiteClient(params.get(), params.get(), params.get())
+            }
+            single {
+                Tool()
+            }
+            single {
+                QueryItem()
+            }
+            single {
+                QueryCollection()
+            }
+            single {
+                ListCollection()
+            }
+        })
+    }
+
+    Tool().subcommands(QueryItem(), QueryCollection(), ListCollection()).main(args)
 }
