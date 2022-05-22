@@ -44,9 +44,7 @@ class QueryItem : CliktCommand(name = "query-item", help = "Query NFT item info"
     val address by argument(name = "address", help = "NFT item contract address")
     override fun run() {
         runBlocking {
-            val liteClient: LiteClient by inject()
-
-            val item = NFTItem.fetch(liteClient, MsgAddressInt.AddrStd.parse(address))
+            val item = NFTItem.fetch(MsgAddressInt.AddrStd.parse(address))
             println("NFT Item ${item.address.toString(userFriendly = true)}:")
             println("\tInitialized: ${item.initialized}")
             println("\tIndex: ${item.index}")
@@ -63,7 +61,7 @@ class QueryItem : CliktCommand(name = "query-item", help = "Query NFT item info"
                 println("NFT Collection ${item.collection.address.toString(userFriendly = true)}")
                 println("\tNext item index: ${item.collection.nextItemIndex}")
                 println("\tOwner Address: ${item.collection.owner.toString(userFriendly = true)}")
-                val royalties = item.collection.getRoyaltyParams(liteClient)
+                val royalties = item.collection.getRoyaltyParameters()
                 if (royalties != null) {
                     println("\tRoyalty percentage: ${royalties.first * 100f}%")
                     println("\tRoyalty destination: ${royalties.second.toString(userFriendly = true)}")
@@ -78,9 +76,7 @@ class QueryCollection : CliktCommand(name = "query-collection", help = "Query NF
 
     override fun run() {
         runBlocking {
-            val liteClient: LiteClient by inject()
-
-            val collection = NFTCollection.fetch(liteClient, MsgAddressInt.AddrStd.parse(address))
+            val collection = NFTCollection.fetch(MsgAddressInt.AddrStd.parse(address))
             println("NFT Collection ${collection.address.toString(userFriendly = true)}")
             println("\tNext item index: ${collection.nextItemIndex}")
             println("\tOwner address: ${collection.owner.toString(userFriendly = true)}")
@@ -91,7 +87,7 @@ class QueryCollection : CliktCommand(name = "query-collection", help = "Query NF
                 }
             }
 
-            val royalties = collection.getRoyaltyParams(liteClient)
+            val royalties = collection.getRoyaltyParameters()
             if (royalties != null) {
                 println("\tRoyalty percentage: ${royalties.first * 100f}%")
                 println("\tRoyalty destination: ${royalties.second.toString(userFriendly = true)}")
@@ -106,13 +102,12 @@ class ListCollection : CliktCommand(name = "list-collection", help = "List all i
 
     override fun run() {
         runBlocking {
-            val liteClient: LiteClient by inject()
-            val collection = NFTCollection.fetch(liteClient, MsgAddressInt.AddrStd.parse(address))
+            val collection = NFTCollection.fetch(MsgAddressInt.AddrStd.parse(address))
 
             println("index | address | initialized | owner")
 
             for (i in 1..collection.nextItemIndex) {
-                val item = collection.getNFT(liteClient, i)
+                val item = collection.getNFT(i)
                 println(
                     "${item.index} | ${item.address.toString(userFriendly = true)} | ${item.initialized} | ${
                         item.owner.toString(
@@ -131,18 +126,6 @@ suspend fun main(args: Array<String>) {
         modules(module {
             single { params ->
                 LiteClient(params.get(), params.get(), params.get())
-            }
-            single {
-                Tool()
-            }
-            single {
-                QueryItem()
-            }
-            single {
-                QueryCollection()
-            }
-            single {
-                ListCollection()
             }
         })
     }

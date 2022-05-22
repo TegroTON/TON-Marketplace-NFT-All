@@ -1,11 +1,13 @@
 package money.tegro.market.nft_tool
 
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import org.ton.block.MsgAddressInt
 import org.ton.cell.BagOfCells
 import org.ton.cell.Cell
 import org.ton.cell.CellBuilder
-import org.ton.lite.api.LiteApi
 import org.ton.lite.api.liteserver.LiteServerAccountId
+import org.ton.lite.client.LiteClient
 
 data class NFTItem(
     val address: MsgAddressInt.AddrStd,
@@ -18,12 +20,13 @@ data class NFTItem(
     override fun toString(): String =
         "NFTItem(address=$address, initialized=$initialized, index=$index, collection=$collection, owner=$owner, content=$content)"
 
-    companion object {
+    companion object Factory : KoinComponent {
         @JvmStatic
         suspend fun fetch(
-            liteClient: LiteApi,
             address: MsgAddressInt.AddrStd
         ): NFTItem {
+            val liteClient: LiteClient by inject()
+
             val lastBlock = liteClient.getMasterchainInfo().last
 
             val accountId = LiteServerAccountId(address.workchain_id, address.address)
@@ -62,7 +65,7 @@ data class NFTItem(
             begin = loader.loadUInt(10).toInt()
             end = loader.loadUInt(10).toInt()
             val collectionAddress = toAddress(Cell(loader.loadRef().bits.slice(begin..end)).beginParse())
-            val collection = if (collectionAddress != null) NFTCollection.fetch(liteClient, collectionAddress) else null
+            val collection = if (collectionAddress != null) NFTCollection.fetch(collectionAddress) else null
             loader = next.beginParse()
 
             loader.loadUInt(8)
@@ -75,7 +78,7 @@ data class NFTItem(
             val initialized = loader.loadInt(64).toInt()
 
             if (initialized == -1 && collection != null) {
-                contentCell = collection?.getNFTContent(liteClient, index, contentCell)
+                contentCell = NFTCollection.getNFTContent(collectionAddress!!, index, contentCell)
             }
 
             return NFTItem(
