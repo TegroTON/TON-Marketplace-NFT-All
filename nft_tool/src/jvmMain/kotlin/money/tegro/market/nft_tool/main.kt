@@ -96,11 +96,11 @@ class QueryItem : CliktCommand(name = "query-item", help = "Query NFT item info"
             println("\tOwner Address: ${item.owner.toString(userFriendly = true)}")
             when (item.content) {
                 is NFTContentOffChain -> {
-                    println("\tContent URL: ${item.content.url}")
+                    println("\tContent URL: ${(item.content as NFTContentOffChain).url}")
                     when (item.content) {
                         is NFTContentOffChainIPFS -> {
                             println("\tContent: off-chain (IPFS)")
-                            println("\tIPFS Id: ${item.content.id}")
+                            println("\tIPFS Id: ${(item.content as NFTContentOffChainIPFS).id}")
                         }
                     }
                 }
@@ -123,11 +123,11 @@ class QueryCollection : CliktCommand(name = "query-collection", help = "Query NF
             println("\tOwner address: ${collection.owner.toString(userFriendly = true)}")
             when (collection.content) {
                 is NFTContentOffChain -> {
-                    println("\tContent URL: ${collection.content.url}")
+                    println("\tContent URL: ${(collection.content as NFTContentOffChain).url}")
                     when (collection.content) {
                         is NFTContentOffChainIPFS -> {
                             println("\tContent: off-chain (IPFS)")
-                            println("\tIPFS Id: ${collection.content.id}")
+                            println("\tIPFS Id: ${(collection.content as NFTContentOffChainIPFS).id}")
                         }
                     }
                 }

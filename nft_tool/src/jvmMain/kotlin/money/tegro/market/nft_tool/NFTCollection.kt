@@ -1,5 +1,6 @@
 package money.tegro.market.nft_tool
 
+import kotlinx.coroutines.runBlocking
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.ton.block.MsgAddressInt
@@ -12,9 +13,15 @@ import org.ton.lite.api.liteserver.LiteServerAccountId
 data class NFTCollection(
     val address: MsgAddressInt.AddrStd,
     val nextItemIndex: Int,
-    val content: NFTContent,
+    val contentCell: Cell,
     val owner: MsgAddressInt.AddrStd,
 ) {
+    val content: NFTContent by lazy {
+        runBlocking {
+            NFTContent.parse(contentCell)
+        }
+    }
+
     override fun toString(): String =
         "NFTCollection(address=$address, next_item_index=$nextItemIndex owner=$owner, content=$content)"
 
@@ -72,7 +79,7 @@ data class NFTCollection(
             return NFTCollection(
                 address,
                 nextItemIndex,
-                NFTContent.parse(contentCell),
+                contentCell,
                 owner
             )
         }

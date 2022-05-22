@@ -1,5 +1,6 @@
 package money.tegro.market.nft_tool
 
+import kotlinx.coroutines.runBlocking
 import mu.KLogging
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -14,10 +15,25 @@ data class NFTItem(
     val address: MsgAddressInt.AddrStd,
     val initialized: Boolean,
     val index: Int,
-    val collection: NFTCollection?,
+    val collectionAddress: MsgAddressInt.AddrStd?,
     val owner: MsgAddressInt.AddrStd,
-    val content: NFTContent
+    val contentCell: Cell
 ) {
+    val collection: NFTCollection? by lazy {
+        runBlocking {
+            if (collectionAddress != null) NFTCollection.fetch(collectionAddress) else null
+        }
+    }
+    val content: NFTContent by lazy {
+        runBlocking {
+            if (collectionAddress != null) {
+                NFTContent.parse(NFTCollection.getNFTContent(collectionAddress!!, index, contentCell))
+            } else {
+                NFTContent.parse(contentCell)
+            }
+        }
+    }
+
     override fun toString(): String =
         "NFTItem(address=$address, initialized=$initialized, index=$index, collection=$collection, owner=$owner, content=$content)"
 
@@ -69,7 +85,6 @@ data class NFTItem(
             begin = loader.loadUInt(10).toInt()
             end = loader.loadUInt(10).toInt()
             val collectionAddress = toAddress(Cell(loader.loadRef().bits.slice(begin..end)).beginParse())
-            val collection = if (collectionAddress != null) NFTCollection.fetch(collectionAddress) else null
             loader = next.beginParse()
 
             loader.loadUInt(8)
@@ -81,17 +96,11 @@ data class NFTItem(
             next = loader.loadRef()
             val initialized = loader.loadInt(64).toInt()
 
-            if (initialized == -1 && collection != null) {
-                contentCell = NFTCollection.getNFTContent(collectionAddress!!, index, contentCell)
-            }
-
             return NFTItem(
                 address,
                 initialized == -1,
                 index,
-                collection,
-                owner,
-                NFTContent.parse(contentCell)
+                collectionAddress, owner, contentCell
             )
         }
     }
