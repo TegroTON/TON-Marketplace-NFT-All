@@ -11,6 +11,7 @@ import com.github.ajalt.clikt.parameters.types.int
 import io.ipfs.api.IPFS
 import kotlinx.coroutines.runBlocking
 import mu.KLogging
+import mu.KotlinLogging
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.context.startKoin
@@ -42,15 +43,17 @@ class Tool : CliktCommand(name = "nft_tool", help = ""), KoinComponent {
             when (verbose) {
                 0 -> {
                     getKoin().logger.level = Level.ERROR
-                    (logger.underlyingLogger as ch.qos.logback.classic.Logger).level = ch.qos.logback.classic.Level.WARN
+                    (KotlinLogging.logger(org.slf4j.Logger.ROOT_LOGGER_NAME).underlyingLogger as ch.qos.logback.classic.Logger).level =
+                        ch.qos.logback.classic.Level.WARN
                 }
                 1 -> {
                     getKoin().logger.level = Level.INFO
-                    (logger.underlyingLogger as ch.qos.logback.classic.Logger).level = ch.qos.logback.classic.Level.INFO
+                    (KotlinLogging.logger(org.slf4j.Logger.ROOT_LOGGER_NAME).underlyingLogger as ch.qos.logback.classic.Logger).level =
+                        ch.qos.logback.classic.Level.INFO
                 }
                 2 -> {
                     getKoin().logger.level = Level.DEBUG
-                    (logger.underlyingLogger as ch.qos.logback.classic.Logger).level =
+                    (KotlinLogging.logger(org.slf4j.Logger.ROOT_LOGGER_NAME).underlyingLogger as ch.qos.logback.classic.Logger).level =
                         ch.qos.logback.classic.Level.DEBUG
                 }
                 else ->
