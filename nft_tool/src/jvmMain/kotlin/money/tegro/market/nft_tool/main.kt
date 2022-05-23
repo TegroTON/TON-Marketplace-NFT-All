@@ -10,6 +10,9 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.int
 import io.ipfs.api.IPFS
 import kotlinx.coroutines.runBlocking
+import money.tegro.market.nft.NFTCollection
+import money.tegro.market.nft.NFTContentOffChain
+import money.tegro.market.nft.NFTItem
 import mu.KLogging
 import mu.KotlinLogging
 import org.koin.core.component.KoinComponent
@@ -89,20 +92,14 @@ class QueryItem : CliktCommand(name = "query-item", help = "Query NFT item info"
     override fun run() {
         runBlocking {
             val item = NFTItem.fetch(MsgAddressInt.AddrStd.parse(address))
-            println("NFT Item ${item.address.toString(userFriendly = true)}:")
+            println("NFT Item ${(item.address as MsgAddressInt.AddrStd).toString(userFriendly = true)}:")
             println("\tInitialized: ${item.initialized}")
             println("\tIndex: ${item.index}")
-            println("\tCollection Address: ${item.collection?.address?.toString(userFriendly = true)}")
-            println("\tOwner Address: ${item.owner.toString(userFriendly = true)}")
+            println("\tCollection Address: ${(item.collection?.address!! as MsgAddressInt.AddrStd).toString(userFriendly = true)}")
+            println("\tOwner Address: ${(item.owner as MsgAddressInt.AddrStd).toString(userFriendly = true)}")
             when (item.content) {
                 is NFTContentOffChain -> {
                     println("\tContent URL: ${(item.content as NFTContentOffChain).url}")
-                    when (item.content) {
-                        is NFTContentOffChainIPFS -> {
-                            println("\tContent: off-chain (IPFS)")
-                            println("\tIPFS Id: ${(item.content as NFTContentOffChainIPFS).id}")
-                        }
-                    }
                 }
             }
             println("\tName: ${item.content.name}")
@@ -118,18 +115,12 @@ class QueryCollection : CliktCommand(name = "query-collection", help = "Query NF
     override fun run() {
         runBlocking {
             val collection = NFTCollection.fetch(MsgAddressInt.AddrStd.parse(address))
-            println("NFT Collection ${collection.address.toString(userFriendly = true)}")
-            println("\tNext item index: ${collection.nextItemIndex}")
-            println("\tOwner address: ${collection.owner.toString(userFriendly = true)}")
+            println("NFT Collection ${(collection.address as MsgAddressInt.AddrStd).toString(userFriendly = true)}")
+            println("\tNumber of items: ${collection.size}")
+            println("\tOwner address: ${(collection.owner as MsgAddressInt.AddrStd).toString(userFriendly = true)}")
             when (collection.content) {
                 is NFTContentOffChain -> {
                     println("\tContent URL: ${(collection.content as NFTContentOffChain).url}")
-                    when (collection.content) {
-                        is NFTContentOffChainIPFS -> {
-                            println("\tContent: off-chain (IPFS)")
-                            println("\tIPFS Id: ${(collection.content as NFTContentOffChainIPFS).id}")
-                        }
-                    }
                 }
             }
             println("\tName: ${collection.content.name}")
@@ -139,7 +130,7 @@ class QueryCollection : CliktCommand(name = "query-collection", help = "Query NF
             val royalties = collection.getRoyaltyParameters()
             if (royalties != null) {
                 println("\tRoyalty percentage: ${royalties.first * 100f}%")
-                println("\tRoyalty destination: ${royalties.second.toString(userFriendly = true)}")
+                println("\tRoyalty destination: ${(royalties.second as MsgAddressInt.AddrStd).toString(userFriendly = true)}")
             }
         }
     }
@@ -155,11 +146,11 @@ class ListCollection : CliktCommand(name = "list-collection", help = "List all i
 
             println("index | address | initialized | owner")
 
-            for (i in 1..collection.nextItemIndex - 1) {
-                val item = collection.getNFT(i)
+            for (i in 0..collection.size - 1) {
+                val item = collection.getItem(i)
                 println(
-                    "${item.index} | ${item.address.toString(userFriendly = true)} | ${item.initialized} | ${
-                        item.owner.toString(
+                    "${item.index} | ${(item.address as MsgAddressInt.AddrStd).toString(userFriendly = true)} | ${item.initialized} | ${
+                        (item.owner as MsgAddressInt.AddrStd).toString(
                             userFriendly = true
                         )
                     }"

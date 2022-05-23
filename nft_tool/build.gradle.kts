@@ -17,6 +17,7 @@ kotlin {
                 implementation(libs.logging)
                 implementation(libs.slf4j)
                 implementation(libs.ton)
+                implementation(projects.nft)
             }
         }
     }
