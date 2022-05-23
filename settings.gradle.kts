@@ -23,6 +23,7 @@ dependencyResolutionManagement {
             version("koin", "3.2.0")
             version("logback", "1.2.11")
             version("logging", "2.1.23")
+//            version("serialization", "1.6.10")
             version("slf4j", "1.7.36")
             version("ton", "ce058f49fe")
 
@@ -35,8 +36,19 @@ dependencyResolutionManagement {
             library("logging", "io.github.microutils", "kotlin-logging").versionRef("logging")
             library("slf4j", "org.slf4j", "slf4j-api").versionRef("slf4j")
             library("ton", "com.github.andreypfau.ton-kotlin", "ton-kotlin").versionRef("ton")
+//            library(
+//                "serialization-core",
+//                "org.jetbrains.kotlinx",
+//                "kotlinx-serialization-core"
+//            ).versionRef("serialization")
+//            library(
+//                "serialization-json",
+//                "org.jetbrains.kotlinx",
+//                "kotlinx-serialization-json"
+//            ).versionRef("serialization")
         }
     }
 }
 
+include(":nft")
 include(":nft_tool")
