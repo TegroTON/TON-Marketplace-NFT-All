@@ -11,13 +11,14 @@ import com.github.ajalt.clikt.parameters.types.int
 import io.ipfs.api.IPFS
 import kotlinx.coroutines.runBlocking
 import money.tegro.market.nft.NFTCollection
+import money.tegro.market.nft.NFTContent
 import money.tegro.market.nft.NFTContentOffChain
 import money.tegro.market.nft.NFTItem
 import mu.KLogging
 import mu.KotlinLogging
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import org.koin.core.context.startKoin
+import org.koin.core.context.GlobalContext.startKoin
 import org.koin.core.logger.Level
 import org.koin.core.logger.Logger
 import org.koin.core.logger.MESSAGE
@@ -92,19 +93,30 @@ class QueryItem : CliktCommand(name = "query-item", help = "Query NFT item info"
     override fun run() {
         runBlocking {
             val item = NFTItem.fetch(MsgAddressInt.AddrStd.parse(address))
-            println("NFT Item ${(item.address as MsgAddressInt.AddrStd).toString(userFriendly = true)}:")
+            println("NFT Item ${item.address.toString(userFriendly = true)}:")
             println("\tInitialized: ${item.initialized}")
             println("\tIndex: ${item.index}")
-            println("\tCollection Address: ${(item.collection?.address!! as MsgAddressInt.AddrStd).toString(userFriendly = true)}")
-            println("\tOwner Address: ${(item.owner as MsgAddressInt.AddrStd).toString(userFriendly = true)}")
-            when (item.content) {
+            println("\tCollection Address: ${item.collection?.toString(userFriendly = true)}")
+            println("\tOwner Address: ${item.owner.toString(userFriendly = true)}")
+
+            val fullContent = item.collection?.let {
+                NFTCollection.getItemContent(
+                    it,
+                    item.index,
+                    item.content
+                )
+            }
+
+            val content = NFTContent.parse(fullContent ?: item.content)
+
+            when (content) {
                 is NFTContentOffChain -> {
-                    println("\tContent URL: ${(item.content as NFTContentOffChain).url}")
+                    println("\tContent URL: ${content.url}")
                 }
             }
-            println("\tName: ${item.content.name}")
-            println("\tDescription: ${item.content.description}")
-            println("\tImage: ${item.content.image}")
+            println("\tName: ${content.name}")
+            println("\tDescription: ${content.description}")
+            println("\tImage: ${content.image}")
         }
     }
 }
@@ -115,17 +127,19 @@ class QueryCollection : CliktCommand(name = "query-collection", help = "Query NF
     override fun run() {
         runBlocking {
             val collection = NFTCollection.fetch(MsgAddressInt.AddrStd.parse(address))
-            println("NFT Collection ${(collection.address as MsgAddressInt.AddrStd).toString(userFriendly = true)}")
+            println("NFT Collection ${collection.address.toString(userFriendly = true)}")
             println("\tNumber of items: ${collection.size}")
-            println("\tOwner address: ${(collection.owner as MsgAddressInt.AddrStd).toString(userFriendly = true)}")
-            when (collection.content) {
+            println("\tOwner address: ${collection.owner.toString(userFriendly = true)}")
+
+            val content = NFTContent.parse(collection.content)
+            when (content) {
                 is NFTContentOffChain -> {
-                    println("\tContent URL: ${(collection.content as NFTContentOffChain).url}")
+                    println("\tContent URL: ${content.url}")
                 }
             }
-            println("\tName: ${collection.content.name}")
-            println("\tDescription: ${collection.content.description}")
-            println("\tImage: ${collection.content.image}")
+            println("\tName: ${content.name}")
+            println("\tDescription: ${content.description}")
+            println("\tImage: ${content.image}")
 
             val royalties = collection.getRoyaltyParameters()
             if (royalties != null) {
@@ -149,8 +163,8 @@ class ListCollection : CliktCommand(name = "list-collection", help = "List all i
             for (i in 0..collection.size - 1) {
                 val item = collection.getItem(i)
                 println(
-                    "${item.index} | ${(item.address as MsgAddressInt.AddrStd).toString(userFriendly = true)} | ${item.initialized} | ${
-                        (item.owner as MsgAddressInt.AddrStd).toString(
+                    "${item.index} | ${item.address.toString(userFriendly = true)} | ${item.initialized} | ${
+                        item.owner.toString(
                             userFriendly = true
                         )
                     }"
