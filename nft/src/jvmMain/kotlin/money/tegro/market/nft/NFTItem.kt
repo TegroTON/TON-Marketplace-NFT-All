@@ -1,8 +1,6 @@
 package money.tegro.market.nft
 
 import mu.KLogging
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import org.ton.block.MsgAddressInt
 import org.ton.block.VmStackValue
 import org.ton.block.tlb.tlbCodec
@@ -14,18 +12,17 @@ import org.ton.tlb.loadTlb
 data class NFTItem(
     val address: MsgAddressInt.AddrStd,
     val initialized: Boolean,
-    val index: Long,
+    val index: Long?,
     val collection: MsgAddressInt.AddrStd?,
-    val owner: MsgAddressInt.AddrStd,
-    val content: Cell
+    val owner: MsgAddressInt.AddrStd?,
+    val content: Cell?
 ) {
-    companion object : KoinComponent, KLogging() {
+    companion object : KLogging() {
         @JvmStatic
         suspend fun fetch(
+            liteClient: LiteApi,
             address: MsgAddressInt.AddrStd
         ): NFTItem {
-            val liteClient: LiteApi by inject()
-
             val lastBlock = liteClient.getMasterchainInfo().last
             logger.debug("last block: $lastBlock")
 
@@ -54,3 +51,7 @@ data class NFTItem(
         }
     }
 }
+
+suspend fun LiteApi.getNFTItem(address: MsgAddressInt.AddrStd) = NFTItem.fetch(this, address)
+
+suspend fun LiteApi.getNFTItemRoyalties(address: MsgAddressInt.AddrStd) = NFT.getRoyaltyParameters(this, address)

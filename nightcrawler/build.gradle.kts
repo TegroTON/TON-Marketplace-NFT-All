@@ -1,12 +1,14 @@
 plugins {
     application
 }
+
 application {
     mainClass.set("money.tegro.market.nightcrawler.MainKt")
 }
+
 kotlin {
     sourceSets {
-        commonMain {
+        val commonMain by getting {
             dependencies {
                 implementation(libs.clikt)
                 implementation(libs.coroutines)
@@ -14,7 +16,7 @@ kotlin {
                 implementation(libs.exposed.dao)
                 implementation(libs.exposed.jdbc)
                 implementation(libs.ipfs)
-                implementation(libs.koin)
+                implementation(libs.kodein)
                 implementation(libs.logback)
                 implementation(libs.logging)
                 implementation(libs.serialization.core)

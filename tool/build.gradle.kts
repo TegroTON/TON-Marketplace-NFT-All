@@ -1,9 +1,11 @@
 plugins {
     application
 }
+
 application {
-    mainClass.set("money.tegro.market.nft_tool.MainKt")
+    mainClass.set("money.tegro.market.tool.MainKt")
 }
+
 kotlin {
     sourceSets {
         commonMain {
@@ -11,7 +13,8 @@ kotlin {
                 implementation(libs.clikt)
                 implementation(libs.coroutines)
                 implementation(libs.ipfs)
-                implementation(libs.koin)
+                implementation(libs.kodein)
+                implementation(libs.kodein.conf)
                 implementation(libs.logback)
                 implementation(libs.logging)
                 implementation(libs.serialization.core)

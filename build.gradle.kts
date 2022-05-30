@@ -5,7 +5,7 @@ plugins {
 
 allprojects {
     group = "money.tegro"
-    version = "1.0-SNAPSHOT"
+    version = "0.0.1"
 
     apply(plugin = "kotlin-multiplatform")
     apply(plugin = "kotlinx-serialization")
@@ -35,7 +35,7 @@ allprojects {
             }
             val commonTest by getting {
                 dependencies {
-//                    implementation(kotlin("test"))
+                    implementation(kotlin("test"))
                 }
             }
         }

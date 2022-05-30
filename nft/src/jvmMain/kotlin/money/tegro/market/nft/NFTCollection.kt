@@ -1,8 +1,6 @@
 package money.tegro.market.nft
 
 import mu.KLogging
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import org.ton.block.MsgAddressInt
 import org.ton.block.VmStackValue
 import org.ton.block.tlb.tlbCodec
@@ -17,18 +15,9 @@ data class NFTCollection(
     val content: Cell,
     val owner: MsgAddressInt.AddrStd
 ) {
-    suspend fun getItemAddress(index: Long) = NFTCollection.getItemAddress(this.address, index)
-
-    suspend fun getItem(index: Long): NFTItem = NFTItem.fetch(getItemAddress(index))
-
-    // Returns pair of percentage and destination for royalties
-    suspend fun getRoyaltyParameters(): Pair<Float, MsgAddressInt>? =
-        NFTCollection.getRoyaltyParameters(address)
-
-    companion object : KoinComponent, KLogging() {
+    companion object : KLogging() {
         @JvmStatic
-        suspend fun fetch(address: MsgAddressInt.AddrStd): NFTCollection {
-            val liteClient: LiteApi by inject()
+        suspend fun fetch(liteClient: LiteApi, address: MsgAddressInt.AddrStd): NFTCollection {
             val lastBlock = liteClient.getMasterchainInfo().last
             logger.debug("last block: $lastBlock")
 
@@ -53,9 +42,11 @@ data class NFTCollection(
         }
 
         @JvmStatic
-        suspend fun getItemAddress(collection: MsgAddressInt.AddrStd, index: Long): MsgAddressInt.AddrStd {
-            val liteClient: LiteApi by inject()
-
+        suspend fun getItemAddress(
+            liteClient: LiteApi,
+            collection: MsgAddressInt.AddrStd,
+            index: Long
+        ): MsgAddressInt.AddrStd {
             val lastBlock = liteClient.getMasterchainInfo().last
             logger.debug("last block: $lastBlock")
 
@@ -76,9 +67,12 @@ data class NFTCollection(
         }
 
         @JvmStatic
-        suspend fun getItemContent(collection: MsgAddressInt.AddrStd, index: Long, individualContent: Cell): Cell {
-            val liteClient: LiteApi by inject()
-
+        suspend fun getItemContent(
+            liteClient: LiteApi,
+            collection: MsgAddressInt.AddrStd,
+            index: Long,
+            individualContent: Cell
+        ): Cell {
             val lastBlock = liteClient.getMasterchainInfo().last
             logger.debug("last block: $lastBlock")
 
@@ -97,38 +91,23 @@ data class NFTCollection(
 
             return (result.first() as VmStackValue.Cell).cell
         }
-
-        @JvmStatic
-        suspend fun getRoyaltyParameters(collection: MsgAddressInt.AddrStd): Pair<Float, MsgAddressInt>? {
-            val liteClient: LiteApi by inject()
-            val lastBlock = liteClient.getMasterchainInfo().last
-            logger.debug("last block: $lastBlock")
-
-            logger.debug("running method `get_nft_address_by_index` on ${collection.toString(userFriendly = true)}")
-            val result = liteClient.runSmcMethod(
-                0b100, // we only care about the result
-                lastBlock,
-                LiteServerAccountId(collection),
-                "royalty_params"
-            )
-
-            logger.debug("response: $result")
-            if (result.exitCode == 11) { // unknown error, its thrown when no such method exists
-                // NFT Collection doesn't implement NFTRoyalty extension - its ok
-                logger.debug("collection doesn't implement the NFTRoyalty extension")
-                return null
-            }
-
-            require(result.exitCode == 0) {
-                "Failed to run the method, exit code is ${result.exitCode}"
-            }
-
-
-            val numerator = (result[0] as VmStackValue.TinyInt).value
-            val denominator = (result[1] as VmStackValue.TinyInt).value
-            val destination = (result[2] as VmStackValue.Slice).toCellSlice().loadTlb(MsgAddressInt.tlbCodec())
-
-            return Pair(numerator.toFloat() / denominator, destination as MsgAddressInt.AddrStd)
-        }
     }
 }
+
+suspend fun LiteApi.getNFTCollection(address: MsgAddressInt.AddrStd) = NFTCollection.fetch(this, address)
+
+suspend fun LiteApi.getNFTCollectionItem(collection: MsgAddressInt.AddrStd, index: Long) =
+    NFTCollection.getItemAddress(this, collection, index)
+
+suspend fun LiteApi.getNFTCollectionItem(collection: NFTCollection, index: Long) =
+    this.getNFTItem(NFTCollection.getItemAddress(this, collection.address, index))
+
+suspend fun LiteApi.getNFTCollectionItemContent(
+    collection: MsgAddressInt.AddrStd,
+    index: Long,
+    individualContent: Cell
+) =
+    NFTCollection.getItemContent(this, collection, index, individualContent)
+
+suspend fun LiteApi.getNFTCollectionRoyalties(address: MsgAddressInt.AddrStd) =
+    NFT.getRoyaltyParameters(this, address)
