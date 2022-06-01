@@ -7,6 +7,7 @@ import com.github.ajalt.clikt.parameters.groups.OptionGroup
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.int
 import io.ipfs.kotlin.IPFS
 import io.ipfs.kotlin.IPFSConfiguration
@@ -18,24 +19,36 @@ import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
 import org.kodein.di.conf.ConfigurableDI
 import org.kodein.di.instance
-import org.ton.block.MsgAddressInt
+import org.ton.api.pk.PrivateKeyEd25519
+import org.ton.bitstring.BitString
+import org.ton.block.*
+import org.ton.block.tlb.tlbCodec
+import org.ton.boc.BagOfCells
+import org.ton.cell.Cell
+import org.ton.cell.CellBuilder
 import org.ton.crypto.base64
+import org.ton.crypto.hex
+import org.ton.hashmap.EmptyHashMapE
 import org.ton.lite.api.LiteApi
+import org.ton.lite.api.liteserver.LiteServerAccountId
 import org.ton.lite.client.LiteClient
+import org.ton.smartcontract.wallet.SimpleWalletR3
+import org.ton.tlb.constructor.AnyTlbConstructor
+import org.ton.tlb.storeTlb
 
 class LiteServerOptions : OptionGroup("lite server options") {
     val host by option("--lite-server-host", help = "Lite server host IP address", envvar = "LITE_SERVER_HOST")
         .int()
-        .default(908566172)
+        .default(1426768764)
     val port by option("--lite-server-port", help = "Lite server port number", envvar = "LITE_SERVER_PORT")
         .int()
-        .default(51565)
+        .default(13724)
     val publicKey by option(
         "--lite-server-public-key",
         help = "Lite server public key (base64)",
         envvar = "LITE_SERVER_PUBLIC_KEY"
     )
-        .default("TDg+ILLlRugRB4Kpg3wXjPcoc+d+Eeb7kuVe16CS9z8=")
+        .default("R1KsqYlNks2Zows+I9s4ywhilbSevs9dH1x2KF9MeSU=")
 }
 
 class IPFSOptions : OptionGroup("IPFS options") {
@@ -58,7 +71,7 @@ class Tool(override val di: ConfigurableDI) :
                         liteServerOptions.port,
                         liteServerOptions.publicKey.let { base64(it) })
                 }
-                bindSingleton<IPFS> { IPFS(IPFSConfiguration(ipfsOptions.url)) }
+                bindSingleton { IPFS(IPFSConfiguration(ipfsOptions.url)) }
             }
 
             val liteClient: LiteApi by instance()
@@ -68,7 +81,7 @@ class Tool(override val di: ConfigurableDI) :
 
             val ipfs: IPFS by instance()
 
-            logger.debug("IPFS API ${ipfs.info.version()?.toString()} is initialized")
+            logger.debug("IPFS API is initialized")
         }
     }
 
@@ -83,39 +96,37 @@ class QueryItem(override val di: DI) : CliktCommand(name = "query-item", help = 
 
             val item = liteClient.getNFTItem(MsgAddressInt.AddrStd.parse(address))
             println("NFT Item ${item.address.toString(userFriendly = true)}:")
-            println("\tInitialized: ${item.initialized}")
-            println("\tIndex: ${item.index}")
-            println("\tCollection Address: ${item.collection?.toString(userFriendly = true)}")
-            println("\tOwner Address: ${item.owner?.toString(userFriendly = true)}")
+            println("\tInitialized: ${item is NFTItemInitialized}")
+            if (item is NFTItemInitialized) {
+                println("\tIndex: ${item.index}")
+                println("\tCollection Address: ${item.collection?.toString(userFriendly = true)}")
+                println("\tOwner Address: ${item.owner.toString(userFriendly = true)}")
 
-            val fullContent = item.collection?.let { collection ->
-                item.index?.let { index ->
-                    item.content?.let { content ->
-                        liteClient.getNFTCollectionItemContent(
-                            collection, index, content
-                        )
+                val fullContent = item.collection?.let {
+                    liteClient.getNFTCollectionItemContent(
+                        it, item.index, item.content
+                    )
+                } ?: item.content
+
+                val content = fullContent.let {
+                    if (isOnChainContent(it)) {
+                        TODO()
+                    } else {
+                        val ipfs: IPFS by instance()
+                        NFTContentOffChain.parse(ipfs, it)
                     }
                 }
-            } ?: item.content
+                println("\tName: ${content.name}")
+                println("\tDescription: ${content.description}")
+                println("\tImage: ${content.image}")
 
-            val content = fullContent?.let {
-                if (isOnChainContent(it)) {
-                    TODO()
-                } else {
-                    val ipfs: IPFS by instance()
-                    NFTContentOffChain.parse(ipfs, it)
-                }
+                (item.collection?.let { liteClient.getNFTCollectionRoyalties(it) }
+                    ?: liteClient.getNFTItemRoyalties(item.address))
+                    ?.let { royalties ->
+                        println("\tRoyalty percentage: ${royalties.first.toFloat() * 100.0 / royalties.second}%")
+                        println("\tRoyalty destination: ${royalties.third.toString(userFriendly = true)}")
+                    }
             }
-            println("\tName: ${content?.name}")
-            println("\tDescription: ${content?.description}")
-            println("\tImage: ${content?.image}")
-
-            (item.collection?.let { liteClient.getNFTCollectionRoyalties(it) }
-                ?: liteClient.getNFTItemRoyalties(item.address))
-                ?.let { royalties ->
-                    println("\tRoyalty percentage: ${royalties.first.toFloat() * 100.0 / royalties.second}%")
-                    println("\tRoyalty destination: ${royalties.third.toString(userFriendly = true)}")
-                }
         }
 
     }
@@ -163,23 +174,125 @@ class ListCollection(override val di: DI) :
 
             val collection = liteClient.getNFTCollection(MsgAddressInt.AddrStd.parse(address))
 
-            println("index | address | initialized | owner")
+            println("index | address | owner")
 
-            for (i in 0..collection.size - 1) {
+            for (i in 0 until collection.size) {
                 val item = liteClient.getNFTCollectionItem(collection, i)
-                println(
-                    "${item.index} | ${item.address.toString(userFriendly = true)} | ${item.initialized} | ${
-                        item.owner?.toString(
-                            userFriendly = true
-                        )
-                    }"
-                )
+                if (item is NFTItemInitialized)
+                    println(
+                        "${item.index} | ${item.address.toString(userFriendly = true)} | ${
+                            item.owner.toString(
+                                userFriendly = true
+                            )
+                        }"
+                    )
             }
         }
     }
 }
 
+class MintItem(override val di: DI) : CliktCommand(name = "mint-item", help = "Mint a standalone item"), DIAware {
+    private val messageCodec by lazy { Message.tlbCodec(AnyTlbConstructor) }
+    private val privateKeyBase64 by option(
+        "--private-key",
+        help = "Your wallet's private key encoded as base64"
+    ).required()
+
+    override fun run() {
+        runBlocking {
+            val liteClient: LiteApi by instance()
+
+            val privateKey = PrivateKeyEd25519(base64(privateKeyBase64))
+            val wallet = SimpleWalletR3(privateKey)
+            logger.debug("wallet public key: ${hex(wallet.publicKey.key)}")
+            val address = wallet.address()
+
+            logger.debug("wallet address ${address.toString(bounceable = true)}")
+
+            val lastBlock = liteClient.getMasterchainInfo().last
+            logger.debug("trying to get wallet's seqno")
+            val seqnoResult = liteClient.runSmcMethod(0b100, lastBlock, LiteServerAccountId(address), "seqno")
+
+            logger.debug("seqno: ${(seqnoResult.first() as VmStackValue.TinyInt).value}")
+
+//            val stub = NFTItemStub(
+//                CellBuilder.createCell {
+//                    storeBytes(byteArrayOf(0x01.toByte()) + "https://youtu.be/dQw4w9WgXcQ".toByteArray())
+//                },
+//                address
+//            )
+//            logger.debug("stub NFT address: ${stub.address.toString(userFriendly = true)}")
+//
+//            val messagePayload = stub.initMessage()
+
+            val message =
+                wallet.createMessage((seqnoResult.first() as VmStackValue.TinyInt).value.toInt(),
+                    CellBuilder.createCell {
+                        storeTlb(
+                            messageCodec, Message(
+                                CommonMsgInfo.IntMsgInfo(
+                                    true,
+                                    false,
+                                    false,
+                                    address,
+                                    address,
+                                    CurrencyCollection(
+                                        Coins(690_000_000),
+                                        ExtraCurrencyCollection(
+                                            EmptyHashMapE()
+                                        )
+                                    ),
+                                    Coins(0),
+                                    Coins(0),
+                                    0L,
+                                    0
+                                ),
+                                null,
+                                CellBuilder.createCell {
+
+                                }.bits to null
+                            )
+                        )
+                    })
+
+            val boc = CellBuilder.createCell {
+                messageCodec.storeTlb(this, message)
+            }.let { BagOfCells.of(it) }
+            logger.debug(hex(boc.toByteArray()))
+            logger.debug("sending the message")
+            val result = liteClient.sendMessage(
+                boc
+            )
+            logger.info { result.toString() }
+        }
+    }
+
+    companion object : KLogging()
+}
+
+fun SimpleWalletR3.createMessage(seqno: Int, payload: Cell): Message<BitString> {
+    val stateInit = createStateInit()
+    val dest = address(stateInit)
+    val signingMessage = CellBuilder.createCell {
+        storeUInt(seqno, 32)
+//        storeUInt(Int.MAX_VALUE, 32) // valid_until
+        storeUInt(3, 8) // mode
+        storeRef(payload)
+    }
+    val signature = privateKey.sign(signingMessage.hash())
+    val body = CellBuilder.createCell {
+        storeBytes(signature)
+        storeBits(signingMessage.bits)
+    }.bits
+    val info = CommonMsgInfo.ExtInMsgInfo(dest)
+    return Message(
+        info,
+        null,
+        body to null
+    )
+}
+
 suspend fun main(args: Array<String>) {
     val di = ConfigurableDI()
-    Tool(di).subcommands(QueryItem(di), QueryCollection(di), ListCollection(di)).main(args)
+    Tool(di).subcommands(QueryItem(di), QueryCollection(di), ListCollection(di), MintItem(di)).main(args)
 }
