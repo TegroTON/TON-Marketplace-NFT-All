@@ -20,21 +20,19 @@ import org.kodein.di.bindSingleton
 import org.kodein.di.conf.ConfigurableDI
 import org.kodein.di.instance
 import org.ton.api.pk.PrivateKeyEd25519
-import org.ton.bitstring.BitString
-import org.ton.block.*
+import org.ton.block.CommonMsgInfo
+import org.ton.block.Message
+import org.ton.block.MsgAddressInt
+import org.ton.block.VmStackValue
 import org.ton.block.tlb.tlbCodec
-import org.ton.boc.BagOfCells
-import org.ton.cell.Cell
 import org.ton.cell.CellBuilder
 import org.ton.crypto.base64
 import org.ton.crypto.hex
-import org.ton.hashmap.EmptyHashMapE
 import org.ton.lite.api.LiteApi
 import org.ton.lite.api.liteserver.LiteServerAccountId
 import org.ton.lite.client.LiteClient
 import org.ton.smartcontract.wallet.SimpleWalletR3
 import org.ton.tlb.constructor.AnyTlbConstructor
-import org.ton.tlb.storeTlb
 
 class LiteServerOptions : OptionGroup("lite server options") {
     val host by option("--lite-server-host", help = "Lite server host IP address", envvar = "LITE_SERVER_HOST")
@@ -210,58 +208,39 @@ class MintItem(override val di: DI) : CliktCommand(name = "mint-item", help = "M
             logger.debug("wallet address ${address.toString(bounceable = true)}")
 
             val lastBlock = liteClient.getMasterchainInfo().last
+
+            val stub = NFTItemStub(
+                CellBuilder.createCell {
+                    storeBytes(byteArrayOf(0x01.toByte()) + "https://youtu.be/dQw4w9WgXcQ".toByteArray())
+                },
+                address
+            )
+            logger.debug("stub NFT address: ${stub.address.toString(userFriendly = true)}")
+
             logger.debug("trying to get wallet's seqno")
             val seqnoResult = liteClient.runSmcMethod(0b100, lastBlock, LiteServerAccountId(address), "seqno")
 
             logger.debug("seqno: ${(seqnoResult.first() as VmStackValue.TinyInt).value}")
-
-//            val stub = NFTItemStub(
-//                CellBuilder.createCell {
-//                    storeBytes(byteArrayOf(0x01.toByte()) + "https://youtu.be/dQw4w9WgXcQ".toByteArray())
-//                },
-//                address
-//            )
-//            logger.debug("stub NFT address: ${stub.address.toString(userFriendly = true)}")
-//
-//            val messagePayload = stub.initMessage()
-
             val message =
-                wallet.createMessage((seqnoResult.first() as VmStackValue.TinyInt).value.toInt(),
-                    CellBuilder.createCell {
-                        storeTlb(
-                            messageCodec, Message(
-                                CommonMsgInfo.IntMsgInfo(
-                                    true,
-                                    false,
-                                    false,
-                                    address,
-                                    address,
-                                    CurrencyCollection(
-                                        Coins(690_000_000),
-                                        ExtraCurrencyCollection(
-                                            EmptyHashMapE()
-                                        )
-                                    ),
-                                    Coins(0),
-                                    Coins(0),
-                                    0L,
-                                    0
-                                ),
-                                null,
-                                CellBuilder.createCell {
+                wallet.createSigningMessage((seqnoResult.first() as VmStackValue.TinyInt).value.toInt(), {
+                    storeUInt(3, 8)
+                    storeRef(stub.initMessage())
+                })
 
-                                }.bits to null
-                            )
-                        )
-                    })
+            val signature = wallet.privateKey.sign(message.hash())
+            val body = CellBuilder.createCell {
+                storeBytes(signature)
+                storeBits(message.bits)
+                storeRefs(message.refs)
+            }
 
-            val boc = CellBuilder.createCell {
-                messageCodec.storeTlb(this, message)
-            }.let { BagOfCells.of(it) }
-            logger.debug(hex(boc.toByteArray()))
             logger.debug("sending the message")
             val result = liteClient.sendMessage(
-                boc
+                Message(
+                    CommonMsgInfo.ExtInMsgInfo(wallet.address()),
+                    null,
+                    null to body
+                )
             )
             logger.info { result.toString() }
         }
@@ -270,29 +249,7 @@ class MintItem(override val di: DI) : CliktCommand(name = "mint-item", help = "M
     companion object : KLogging()
 }
 
-fun SimpleWalletR3.createMessage(seqno: Int, payload: Cell): Message<BitString> {
-    val stateInit = createStateInit()
-    val dest = address(stateInit)
-    val signingMessage = CellBuilder.createCell {
-        storeUInt(seqno, 32)
-//        storeUInt(Int.MAX_VALUE, 32) // valid_until
-        storeUInt(3, 8) // mode
-        storeRef(payload)
-    }
-    val signature = privateKey.sign(signingMessage.hash())
-    val body = CellBuilder.createCell {
-        storeBytes(signature)
-        storeBits(signingMessage.bits)
-    }.bits
-    val info = CommonMsgInfo.ExtInMsgInfo(dest)
-    return Message(
-        info,
-        null,
-        body to null
-    )
-}
-
-suspend fun main(args: Array<String>) {
+fun main(args: Array<String>) {
     val di = ConfigurableDI()
     Tool(di).subcommands(QueryItem(di), QueryCollection(di), ListCollection(di), MintItem(di)).main(args)
 }
