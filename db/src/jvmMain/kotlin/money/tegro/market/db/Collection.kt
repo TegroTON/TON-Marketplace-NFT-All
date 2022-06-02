@@ -3,10 +3,15 @@ package money.tegro.market.db
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
+import org.jetbrains.exposed.sql.and
 import org.ton.block.MsgAddressInt
 
 class Collection(id: EntityID<Long>) : LongEntity(id) {
-    companion object : LongEntityClass<Collection>(Collections)
+    companion object : LongEntityClass<Collection>(Collections) {
+        @JvmStatic
+        fun find(collection: MsgAddressInt.AddrStd) =
+            this.find { (Collections.workchain eq collection.workchainId) and (Collections.address eq collection.address) }
+    }
 
     private var rawWorkchain by Collections.workchain
     private var rawAddress by Collections.address
@@ -29,8 +34,6 @@ class Collection(id: EntityID<Long>) : LongEntity(id) {
         }
 
     var size: Long by Collections.size
-
-//    var itemCode: BagOfCells by Collections.itemCode.transform({ it.toByteArray() }, { BagOfCells(it) })
 
     var royaltyNumerator: Int? by Collections.royaltyNumerator
     var royaltyDenominator: Int? by Collections.royaltyDenominator

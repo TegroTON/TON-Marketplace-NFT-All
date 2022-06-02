@@ -3,7 +3,7 @@ package money.tegro.market.db
 import org.jetbrains.exposed.dao.id.LongIdTable
 
 object Collections : LongIdTable("nft_collections") {
-    val workchain = integer("workchain").uniqueIndex()
+    val workchain = integer("workchain")
     val address = binary("address", 32).uniqueIndex()
     val ownerWorkchain = integer("owner_workchain")
     val ownerAddress = binary("owner_address", 32)

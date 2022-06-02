@@ -15,14 +15,11 @@ import kotlinx.coroutines.runBlocking
 import money.tegro.market.db.Collections
 import money.tegro.market.db.Item
 import money.tegro.market.db.Items
-import money.tegro.market.nft.NFTItemInitialized
-import money.tegro.market.nft.getNFTCollection
-import money.tegro.market.nft.getNFTCollectionRoyalties
-import money.tegro.market.nft.getNFTItem
+import money.tegro.market.nft.*
 import mu.KLogging
 import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.DatabaseConfig
 import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.kodein.di.DI
@@ -80,7 +77,11 @@ class Tool(override val di: ConfigurableDI) :
                         liteServerOptions.publicKey.let { base64(it) })
                 }
                 bindSingleton { IPFS(IPFSConfiguration(ipfsOptions.url)) }
-                bindSingleton { Database.connect(databaseOptions.url, databaseOptions.driver) }
+                bindSingleton {
+                    Database.connect(databaseOptions.url, databaseOptions.driver, databaseConfig = DatabaseConfig {
+                        useNestedTransactions = true
+                    })
+                }
             }
 
             val liteClient: LiteApi by instance()
@@ -123,11 +124,10 @@ class AddCollection(override val di: DI) :
 
                 newSuspendedTransaction {
                     val dbCollection =
-                        money.tegro.market.db.Collection.find {
-                            (Collections.workchain eq collection.address.workchainId) and (Collections.address eq collection.address.address)
-                        }.firstOrNull() ?: money.tegro.market.db.Collection.new {
-                            this.address = collection.address
-                        }
+                        money.tegro.market.db.Collection.find(collection.address).firstOrNull()
+                            ?: money.tegro.market.db.Collection.new {
+                                this.address = collection.address
+                            }
 
                     dbCollection.owner = collection.owner
                     dbCollection.size = collection.size
@@ -161,9 +161,7 @@ class AddItem(override val di: DI) :
 
                 newSuspendedTransaction {
                     val dbItem =
-                        Item.find {
-                            (Items.workchain eq item.address.workchainId) and (Items.address eq item.address.address)
-                        }.firstOrNull() ?: Item.new {
+                        Item.find(item.address).firstOrNull() ?: Item.new {
                             this.address = item.address
                             initialized = item is NFTItemInitialized
                         }
@@ -173,9 +171,7 @@ class AddItem(override val di: DI) :
                         dbItem.index = item.index
 
                         item.collection?.let { collection ->
-                            val dbCollection = money.tegro.market.db.Collection.find {
-                                (Collections.workchain eq collection.workchainId) and (Collections.address eq collection.address)
-                            }.firstOrNull()
+                            val dbCollection = money.tegro.market.db.Collection.find(collection).firstOrNull()
 
                             require(dbCollection != null) { "Collection ${collection.toString(userFriendly = true)} not in db" }
 
@@ -190,7 +186,76 @@ class AddItem(override val di: DI) :
     }
 }
 
+class IndexAll(override val di: DI) :
+    CliktCommand(
+        name = "index-all",
+        help = "Updates information about all entries, collections and items, in the database"
+    ),
+    DIAware {
+    override fun run() {
+        runBlocking {
+            val liteClient: LiteApi by instance()
+            val database: Database by instance()
+
+            newSuspendedTransaction {
+                logger.debug("processing collections...")
+                money.tegro.market.db.Collection.all().map { dbCollection ->
+                    logger.debug("collection: ${dbCollection.address.toString(userFriendly = true)}")
+
+                    val collection = liteClient.getNFTCollection(dbCollection.address)
+
+                    dbCollection.owner = collection.owner
+                    dbCollection.size = collection.size
+
+                    liteClient.getNFTCollectionRoyalties(collection.address)?.let {
+                        dbCollection.royaltyNumerator = it.first
+                        dbCollection.royaltyDenominator = it.second
+                        dbCollection.royaltyDestination = it.third
+                    }
+                }
+            }
+
+            logger.debug("processing collection items...")
+            val collectionItems = transaction {
+                money.tegro.market.db.Collection.all().toList()
+            }
+
+            collectionItems.forEach { dbCollection ->
+                logger.debug("collection: ${dbCollection.address.toString(userFriendly = true)}")
+
+                for (i in 0 until dbCollection.size) {
+                    val itemAddress = liteClient.getNFTCollectionItem(dbCollection.address, i)
+                    logger.debug("item no. $i: ${itemAddress.toString(userFriendly = true)}")
+
+                    val item = liteClient.getNFTItem(itemAddress)
+
+                    transaction {
+                        val dbItem =
+                            Item.find(item.address).firstOrNull() ?: Item.new {
+                                this.address = item.address
+                                initialized = item is NFTItemInitialized
+                            }
+
+                        // Even for uninitialized items, we can easily deduce collection and their index for the future
+                        dbItem.collection = dbCollection
+                        dbItem.index = i
+
+                        if (item is NFTItemInitialized) {
+                            dbItem.owner = item.owner
+                        }
+                    }
+                }
+            }
+
+            // TODO: process items not belonging to collections
+        }
+    }
+
+    companion object : KLogging()
+}
+
 fun main(args: Array<String>) {
     val di = ConfigurableDI()
-    Tool(di).subcommands(AddCollection(di), AddItem(di)).main(args)
+    Tool(di).subcommands(AddCollection(di), AddItem(di), IndexAll(di)).main(args)
 }
+
