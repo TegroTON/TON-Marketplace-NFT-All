@@ -33,8 +33,9 @@ interface NFT {
                 return null
             }
 
-            require(result.exitCode == 0) {
-                "Failed to run the method, exit code is ${result.exitCode}"
+            if (result.exitCode != 0) {
+                logger.warn { "Failed to run the method, exit code is ${result.exitCode}. Contract might be uninitialized" }
+                return null
             }
 
             return Triple(

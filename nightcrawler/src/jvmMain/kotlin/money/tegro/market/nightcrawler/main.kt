@@ -23,6 +23,7 @@ import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.DatabaseConfig
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.statements.api.ExposedBlob
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -186,57 +187,57 @@ class IndexAll(override val di: DI) :
     override fun run() {
         runBlocking {
             val liteClient: LiteApi by instance()
+            val ipfs: IPFS by instance()
             val database: Database by instance()
 
-//            newSuspendedTransaction {
-//                logger.debug("processing collections...")
-//                money.tegro.market.db.CollectionEntity.all().map { dbCollection ->
-//                    logger.debug("collection: ${dbCollection.address.toString(userFriendly = true)}")
-//
-//                    val collection = liteClient.getNFTCollection(dbCollection.address)
-//
-//                    dbCollection.owner = collection.owner
-//                    dbCollection.size = collection.size
-//
-//                    liteClient.getNFTCollectionRoyalties(collection.address)?.let {
-//                        dbCollection.royaltyNumerator = it.first
-//                        dbCollection.royaltyDenominator = it.second
-//                        dbCollection.royaltyDestination = it.third
-//                    }
-//                }
-//            }
-//
-//            logger.debug("processing collection items...")
-//            val collectionEntityItems = transaction {
-//                money.tegro.market.db.CollectionEntity.all().toList()
-//            }
-//
-//            collectionEntityItems.forEach { dbCollection ->
-//                logger.debug("collection: ${dbCollection.address.toString(userFriendly = true)}")
-//
-//                for (i in 0 until dbCollection.size) {
-//                    val itemAddress = liteClient.getNFTCollectionItem(dbCollection.address, i)
-//                    logger.debug("item no. $i: ${itemAddress.toString(userFriendly = true)}")
-//
-//                    val item = liteClient.getNFTItem(itemAddress)
-//
-//                    transaction {
-//                        val dbItemEntity =
-//                            ItemEntity.find(item.address).firstOrNull() ?: ItemEntity.new {
-//                                this.address = item.address
-//                                initialized = item is NFTItemInitialized
-//                            }
-//
-//                        // Even for uninitialized items, we can easily deduce collection and their index for the future
-//                        dbItemEntity.collectionEntity = dbCollection
-//                        dbItemEntity.index = i
-//
-//                        if (item is NFTItemInitialized) {
-//                            dbItemEntity.owner = item.owner
-//                        }
-//                    }
-//                }
-//            }
+            newSuspendedTransaction {
+                logger.debug { "processing collections..." }
+                CollectionEntity.all().map { dbCollection ->
+                    logger.debug { "updating collection ${dbCollection.address.toString(userFriendly = true)}" }
+
+                    val collection = liteClient.getNFTCollection(dbCollection.address)
+                    val royalties = liteClient.getNFTCollectionRoyalties(dbCollection.address)
+                    val metadata = NFTCollectionMetadata.of(collection.content, ipfs)
+
+                    transaction {
+                        dbCollection.update(collection, royalties, metadata)
+                    }
+                }
+            }
+
+            logger.debug { "processing collection items..." }
+            val allCollections = transaction {
+                CollectionEntity.all().toList()
+            }
+
+            allCollections.forEach { dbCollection ->
+                logger.debug {
+                    "processing all ${dbCollection.nextItemIndex} items of collection ${
+                        dbCollection.address.toString(
+                            userFriendly = true
+                        )
+                    }"
+                }
+
+                for (i in 0 until dbCollection.nextItemIndex) {
+                    val itemAddress = liteClient.getNFTCollectionItem(dbCollection.address, i)
+                    logger.debug { "item no. $i: ${itemAddress.toString(userFriendly = true)}" }
+
+                    val item = liteClient.getNFTItem(itemAddress)
+                    val royalties = liteClient.getNFTItemRoyalties(item.address)
+                    val metadata =
+                        if (item is NFTItemInitialized) NFTItemMetadata.of(item.fullContent(liteClient), ipfs) else null
+
+                    transaction {
+                        ItemEntity.find(item.address).firstOrNull()?.run {
+                            logger.debug { "updating already existing item ${this.address.toString(userFriendly = true)}" }
+                            update(item, royalties, metadata)
+                        } ?: ItemEntity.new(item, royalties, metadata).run {
+                            logger.debug { "new item ${this.address.toString(userFriendly = true)}" }
+                        }
+                    }
+                }
+            }
 
             // TODO: process items not belonging to collections
         }
