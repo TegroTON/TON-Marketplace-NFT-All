@@ -21,8 +21,8 @@ object CollectionsTable : LongIdTable("collections") {
     val metadataUrl = text("metadata_url").nullable()
     val metadataIpfs = text("metadata_ipfs").nullable()
 
-    val name = text("metadata_name")
-    val description = text("metadata_description")
+    val name = text("metadata_name").nullable()
+    val description = text("metadata_description").nullable()
 
     val imageUrl = text("metadata_image_url").nullable()
     val imageIpfs = text("metadata_image_ipfs").nullable()

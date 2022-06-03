@@ -18,6 +18,7 @@ import money.tegro.market.db.CollectionsTable
 import money.tegro.market.db.ItemEntity
 import money.tegro.market.db.ItemsTable
 import money.tegro.market.nft.*
+import money.tegro.market.ton.ResilientLiteClient
 import mu.KLogging
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.DatabaseConfig
@@ -74,7 +75,7 @@ class Tool(override val di: ConfigurableDI) :
         runBlocking {
             di.addConfig {
                 bindSingleton<LiteApi> {
-                    LiteClient(
+                    ResilientLiteClient(
                         liteServerOptions.host,
                         liteServerOptions.port,
                         liteServerOptions.publicKey.let { base64(it) })

@@ -12,14 +12,15 @@ import kotlinx.serialization.json.decodeFromStream
 import mu.KLogging
 import org.ton.cell.Cell
 
-sealed interface NFTItemMetadata {
-    abstract val name: String
-    abstract val description: String
-    abstract val image: NFTContent
+sealed interface NFTCollectionMetadata {
+    abstract val name: String?
+    abstract val description: String?
+    abstract val image: NFTContent?
+    abstract val coverImage: NFTContent?
 
     companion object : KLogging() {
         @JvmStatic
-        suspend fun of(content: Cell, ipfs: IPFS): NFTItemMetadata {
+        suspend fun of(content: Cell, ipfs: IPFS): NFTCollectionMetadata {
             val contentLayout = content.beginParse().loadUInt(8).toInt()
             if (contentLayout == 0x00) {
                 logger.debug { "on-chain content layout detected" }
@@ -40,13 +41,13 @@ sealed interface NFTItemMetadata {
                     logger.debug { "IPFS content detected, its extracted id is: $id" }
                     return Json {
                         ignoreUnknownKeys = true
-                    }.decodeFromString<NFTItemMetadataOffChainIpfs>(ipfs.get.cat(id)).apply {
+                    }.decodeFromString<NFTCollectionMetadataOffChainIpfs>(ipfs.get.cat(id)).apply {
                         this.id = id
                     }
                 } else {
                     return Json {
                         ignoreUnknownKeys = true
-                    }.decodeFromStream<NFTItemMetadataOffChainHttp>(HttpClient { }.get(url).body()).apply {
+                    }.decodeFromStream<NFTCollectionMetadataOffChainHttp>(HttpClient { }.get(url).body()).apply {
                         this.url = url
                     }
                 }
@@ -57,38 +58,49 @@ sealed interface NFTItemMetadata {
     }
 }
 
-sealed interface NFTItemMetadataOffChain : NFTItemMetadata
+sealed interface NFTCollectionMetadataOffChain : NFTCollectionMetadata
 
 @kotlinx.serialization.Serializable
-data class NFTItemMetadataOffChainHttp(
-    override val name: String,
-    override val description: String,
+data class NFTCollectionMetadataOffChainHttp(
+    override val name: String? = null,
+    override val description: String? = null,
     @SerialName("image")
-    val imageUrl: String,
-) : NFTItemMetadataOffChain {
+    val imageUrl: String? = null,
+    @SerialName("cover_image")
+    val coverImageUrl: String? = null,
+) : NFTCollectionMetadataOffChain {
     @kotlinx.serialization.Transient
     lateinit var url: String
 
     @kotlinx.serialization.Transient
-    override val image: NFTContentOffChain by lazy { NFTContentOffChain.of(imageUrl) }
+    override val image: NFTContentOffChain? by lazy { imageUrl?.let { NFTContentOffChain.of(it) } }
+
+    @kotlinx.serialization.Transient
+    override val coverImage: NFTContentOffChain? by lazy { coverImageUrl?.let { NFTContentOffChain.of(it) } }
 }
 
 @kotlinx.serialization.Serializable
-data class NFTItemMetadataOffChainIpfs(
-    override val name: String,
-    override val description: String,
+data class NFTCollectionMetadataOffChainIpfs(
+    override val name: String? = null,
+    override val description: String? = null,
     @SerialName("image")
-    val imageUrl: String,
-) : NFTItemMetadataOffChain {
+    val imageUrl: String? = null,
+    @SerialName("cover_image")
+    val coverImageUrl: String? = null,
+) : NFTCollectionMetadataOffChain {
     @kotlinx.serialization.Transient
     lateinit var id: String
 
     @kotlinx.serialization.Transient
-    override val image: NFTContentOffChain by lazy { NFTContentOffChain.of(imageUrl) }
+    override val image: NFTContentOffChain? by lazy { imageUrl?.let { NFTContentOffChain.of(it) } }
+
+    @kotlinx.serialization.Transient
+    override val coverImage: NFTContentOffChain? by lazy { coverImageUrl?.let { NFTContentOffChain.of(it) } }
 }
 
-data class NFTItemMetadataOnChain(
-    override val name: String,
-    override val description: String,
-    override val image: NFTContent,
-) : NFTItemMetadataOffChain
+data class NFTCollectionMetadataOnChain(
+    override val name: String?,
+    override val description: String?,
+    override val image: NFTContent?,
+    override val coverImage: NFTContent?,
+) : NFTCollectionMetadata

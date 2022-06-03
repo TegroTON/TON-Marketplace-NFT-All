@@ -28,7 +28,7 @@ kotlin {
                 implementation(libs.sqlite)
                 implementation(libs.ton)
                 implementation(projects.db)
-                implementation(projects.nft)
+                implementation(projects.common)
             }
         }
     }

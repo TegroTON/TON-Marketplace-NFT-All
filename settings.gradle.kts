@@ -60,7 +60,7 @@ dependencyResolutionManagement {
     }
 }
 
+include(":common")
 include(":db")
-include(":nft")
 include(":nightcrawler")
 include(":tool")

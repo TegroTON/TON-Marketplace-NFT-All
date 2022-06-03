@@ -21,7 +21,7 @@ kotlin {
                 implementation(libs.serialization.json)
                 implementation(libs.slf4j)
                 implementation(libs.ton)
-                implementation(projects.nft)
+                implementation(projects.common)
             }
         }
     }
