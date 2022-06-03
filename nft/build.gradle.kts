@@ -3,6 +3,7 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(libs.coroutines)
+                implementation(libs.datetime)
                 implementation(libs.ipfs)
                 implementation(libs.logback)
                 implementation(libs.logging)

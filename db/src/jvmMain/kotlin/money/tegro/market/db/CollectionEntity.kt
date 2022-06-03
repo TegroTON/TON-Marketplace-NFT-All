@@ -74,7 +74,7 @@ class CollectionEntity(id: EntityID<Long>) : LongEntity(id) {
     var coverImageData by CollectionsTable.coverImageData
 
     val approved by CollectionsTable.approved
-    val discovered by CollectionsTable.discovered
+    var discovered by CollectionsTable.discovered
     var lastIndexed by CollectionsTable.lastIndexed
 
     val items by ItemEntity optionalReferrersOn ItemsTable.collection

@@ -12,9 +12,9 @@ import com.github.ajalt.clikt.parameters.types.int
 import io.ipfs.kotlin.IPFS
 import io.ipfs.kotlin.IPFSConfiguration
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.Clock
 import money.tegro.market.db.CollectionEntity
 import money.tegro.market.db.CollectionsTable
-import money.tegro.market.db.ItemEntity
 import money.tegro.market.db.ItemsTable
 import money.tegro.market.nft.*
 import mu.KLogging
@@ -22,7 +22,6 @@ import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.DatabaseConfig
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.statements.api.ExposedBlob
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -119,21 +118,27 @@ class AddCollection(override val di: DI) :
     override fun run() {
         runBlocking {
             val liteClient: LiteApi by instance()
+            val ipfs: IPFS by instance()
             val database: Database by instance()
 
             addresses.forEach { address ->
                 val collection = liteClient.getNFTCollection(MsgAddressInt.AddrStd.parse(address))
                 val royalties = liteClient.getNFTCollectionRoyalties(collection.address)
-                val metadata =
+                val metadata = NFTCollectionMetadata.of(collection.content, ipfs)
 
-                    transaction {
-                        CollectionEntity.find(collection.address).firstOrNull()?.let {
-                            this.update(collection, royalties, metadata)
-                        } ?: this.new(collection, royalties, metadata)
+                transaction {
+                    CollectionEntity.find(collection.address).firstOrNull()?.run {
+                        logger.debug { "updating already existing collection ${this.address.toString(userFriendly = true)}" }
+                        update(collection, royalties, metadata)
+                    } ?: CollectionEntity.new(collection, royalties, metadata).run {
+                        logger.debug { "new collection ${this.address.toString(userFriendly = true)}" }
                     }
+                }
             }
         }
     }
+
+    companion object : KLogging()
 }
 
 class AddItem(override val di: DI) :
@@ -149,33 +154,33 @@ class AddItem(override val di: DI) :
             val liteClient: LiteApi by instance()
             val database: Database by instance()
 
-            addresses.forEach { address ->
-                val item = liteClient.getNFTItem(MsgAddressInt.AddrStd.parse(address))
-
-                newSuspendedTransaction {
-                    val dbItemEntity =
-                        ItemEntity.find(item.address).firstOrNull() ?: ItemEntity.new {
-                            this.address = item.address
-                            initialized = item is NFTItemInitialized
-                        }
-
-                    if (item is NFTItemInitialized) {
-                        dbItemEntity.initialized = true
-                        dbItemEntity.index = item.index
-
-                        item.collection?.let { collection ->
-                            val dbCollectionEntity =
-                                money.tegro.market.db.CollectionEntity.find(collection).firstOrNull()
-
-                            require(dbCollectionEntity != null) { "Collection ${collection.toString(userFriendly = true)} not in db" }
-
-                            dbItemEntity.collectionEntity = dbCollectionEntity
-                        }
-
-                        dbItemEntity.owner = item.owner
-                    }
-                }
-            }
+//            addresses.forEach { address ->
+//                val item = liteClient.getNFTItem(MsgAddressInt.AddrStd.parse(address))
+//
+//                newSuspendedTransaction {
+//                    val dbItemEntity =
+//                        ItemEntity.find(item.address).firstOrNull() ?: ItemEntity.new {
+//                            this.address = item.address
+//                            initialized = item is NFTItemInitialized
+//                        }
+//
+//                    if (item is NFTItemInitialized) {
+//                        dbItemEntity.initialized = true
+//                        dbItemEntity.index = item.index
+//
+//                        item.collection?.let { collection ->
+//                            val dbCollectionEntity =
+//                                money.tegro.market.db.CollectionEntity.find(collection).firstOrNull()
+//
+//                            require(dbCollectionEntity != null) { "Collection ${collection.toString(userFriendly = true)} not in db" }
+//
+//                            dbItemEntity.collectionEntity = dbCollectionEntity
+//                        }
+//
+//                        dbItemEntity.owner = item.owner
+//                    }
+//                }
+//            }
         }
     }
 }
@@ -191,55 +196,55 @@ class IndexAll(override val di: DI) :
             val liteClient: LiteApi by instance()
             val database: Database by instance()
 
-            newSuspendedTransaction {
-                logger.debug("processing collections...")
-                money.tegro.market.db.CollectionEntity.all().map { dbCollection ->
-                    logger.debug("collection: ${dbCollection.address.toString(userFriendly = true)}")
-
-                    val collection = liteClient.getNFTCollection(dbCollection.address)
-
-                    dbCollection.owner = collection.owner
-                    dbCollection.size = collection.size
-
-                    liteClient.getNFTCollectionRoyalties(collection.address)?.let {
-                        dbCollection.royaltyNumerator = it.first
-                        dbCollection.royaltyDenominator = it.second
-                        dbCollection.royaltyDestination = it.third
-                    }
-                }
-            }
-
-            logger.debug("processing collection items...")
-            val collectionEntityItems = transaction {
-                money.tegro.market.db.CollectionEntity.all().toList()
-            }
-
-            collectionEntityItems.forEach { dbCollection ->
-                logger.debug("collection: ${dbCollection.address.toString(userFriendly = true)}")
-
-                for (i in 0 until dbCollection.size) {
-                    val itemAddress = liteClient.getNFTCollectionItem(dbCollection.address, i)
-                    logger.debug("item no. $i: ${itemAddress.toString(userFriendly = true)}")
-
-                    val item = liteClient.getNFTItem(itemAddress)
-
-                    transaction {
-                        val dbItemEntity =
-                            ItemEntity.find(item.address).firstOrNull() ?: ItemEntity.new {
-                                this.address = item.address
-                                initialized = item is NFTItemInitialized
-                            }
-
-                        // Even for uninitialized items, we can easily deduce collection and their index for the future
-                        dbItemEntity.collectionEntity = dbCollection
-                        dbItemEntity.index = i
-
-                        if (item is NFTItemInitialized) {
-                            dbItemEntity.owner = item.owner
-                        }
-                    }
-                }
-            }
+//            newSuspendedTransaction {
+//                logger.debug("processing collections...")
+//                money.tegro.market.db.CollectionEntity.all().map { dbCollection ->
+//                    logger.debug("collection: ${dbCollection.address.toString(userFriendly = true)}")
+//
+//                    val collection = liteClient.getNFTCollection(dbCollection.address)
+//
+//                    dbCollection.owner = collection.owner
+//                    dbCollection.size = collection.size
+//
+//                    liteClient.getNFTCollectionRoyalties(collection.address)?.let {
+//                        dbCollection.royaltyNumerator = it.first
+//                        dbCollection.royaltyDenominator = it.second
+//                        dbCollection.royaltyDestination = it.third
+//                    }
+//                }
+//            }
+//
+//            logger.debug("processing collection items...")
+//            val collectionEntityItems = transaction {
+//                money.tegro.market.db.CollectionEntity.all().toList()
+//            }
+//
+//            collectionEntityItems.forEach { dbCollection ->
+//                logger.debug("collection: ${dbCollection.address.toString(userFriendly = true)}")
+//
+//                for (i in 0 until dbCollection.size) {
+//                    val itemAddress = liteClient.getNFTCollectionItem(dbCollection.address, i)
+//                    logger.debug("item no. $i: ${itemAddress.toString(userFriendly = true)}")
+//
+//                    val item = liteClient.getNFTItem(itemAddress)
+//
+//                    transaction {
+//                        val dbItemEntity =
+//                            ItemEntity.find(item.address).firstOrNull() ?: ItemEntity.new {
+//                                this.address = item.address
+//                                initialized = item is NFTItemInitialized
+//                            }
+//
+//                        // Even for uninitialized items, we can easily deduce collection and their index for the future
+//                        dbItemEntity.collectionEntity = dbCollection
+//                        dbItemEntity.index = i
+//
+//                        if (item is NFTItemInitialized) {
+//                            dbItemEntity.owner = item.owner
+//                        }
+//                    }
+//                }
+//            }
 
             // TODO: process items not belonging to collections
         }
@@ -259,7 +264,8 @@ fun CollectionEntity.Companion.new(
     metadata: NFTCollectionMetadata
 ): CollectionEntity =
     this.new {
-        this.update(collection, royalties, metadata)
+        discovered = Clock.System.now()
+        update(collection, royalties, metadata)
     }
 
 fun CollectionEntity.update(
@@ -267,6 +273,7 @@ fun CollectionEntity.update(
     royalties: Triple<Int, Int, MsgAddressInt.AddrStd>?,
     metadata: NFTCollectionMetadata
 ) {
+    lastIndexed = Clock.System.now()
     address = collection.address
     owner = collection.owner
     nextItemIndex = collection.size
