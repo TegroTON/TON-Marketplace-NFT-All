@@ -20,10 +20,7 @@ import org.kodein.di.bindSingleton
 import org.kodein.di.conf.ConfigurableDI
 import org.kodein.di.instance
 import org.ton.api.pk.PrivateKeyEd25519
-import org.ton.block.CommonMsgInfo
-import org.ton.block.Message
-import org.ton.block.MsgAddressInt
-import org.ton.block.VmStackValue
+import org.ton.block.*
 import org.ton.block.tlb.tlbCodec
 import org.ton.cell.CellBuilder
 import org.ton.crypto.base64
@@ -201,7 +198,7 @@ class MintItem(override val di: DI) : CliktCommand(name = "mint-item", help = "M
             val liteClient: LiteApi by instance()
 
             val privateKey = PrivateKeyEd25519(base64(privateKeyBase64))
-            val wallet = SimpleWalletR3(privateKey)
+            val wallet = SimpleWalletR3(liteClient, privateKey, 0)
             logger.debug("wallet public key: ${hex(wallet.publicKey.key)}")
             val address = wallet.address()
 
@@ -222,10 +219,11 @@ class MintItem(override val di: DI) : CliktCommand(name = "mint-item", help = "M
 
             logger.debug("seqno: ${(seqnoResult.first() as VmStackValue.TinyInt).value}")
             val message =
-                wallet.createSigningMessage((seqnoResult.first() as VmStackValue.TinyInt).value.toInt(), {
+                CellBuilder.createCell {
+                    storeUInt((seqnoResult.first() as VmStackValue.TinyInt).value, 32)
                     storeUInt(3, 8)
                     storeRef(stub.initMessage())
-                })
+                }
 
             val signature = wallet.privateKey.sign(message.hash())
             val body = CellBuilder.createCell {
@@ -235,14 +233,21 @@ class MintItem(override val di: DI) : CliktCommand(name = "mint-item", help = "M
             }
 
             logger.debug("sending the message")
-            val result = liteClient.sendMessage(
-                Message(
-                    CommonMsgInfo.ExtInMsgInfo(wallet.address()),
-                    null,
-                    null to body
-                )
+//            val result = liteClient.sendMessage(
+//                Message(
+//                    CommonMsgInfo.ExtInMsgInfo(wallet.address()),
+//                    init = null,
+//                    body = body
+//                )
+//            )
+            wallet.transfer(
+                stub.address,
+                (seqnoResult.first() as VmStackValue.TinyInt).value.toInt(),
+                Coins(VarUInteger(100_000_000L)),
+                null,
+                bounce = false
             )
-            logger.info { result.toString() }
+//            logger.info { result.toString() }
         }
     }
 

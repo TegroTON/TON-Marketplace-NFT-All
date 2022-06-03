@@ -3,9 +3,10 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(libs.coroutines)
-                implementation(libs.ipfs)
+                implementation(libs.datetime)
                 implementation(libs.exposed.core)
                 implementation(libs.exposed.dao)
+                implementation(libs.exposed.kotlin.datetime)
                 implementation(libs.logback)
                 implementation(libs.logging)
                 implementation(libs.serialization.core)

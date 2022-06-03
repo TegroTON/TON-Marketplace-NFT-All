@@ -12,9 +12,11 @@ kotlin {
             dependencies {
                 implementation(libs.clikt)
                 implementation(libs.coroutines)
+                implementation(libs.datetime)
                 implementation(libs.exposed.core)
                 implementation(libs.exposed.dao)
                 implementation(libs.exposed.jdbc)
+                implementation(libs.exposed.kotlin.datetime)
                 implementation(libs.ipfs)
                 implementation(libs.kodein)
                 implementation(libs.kodein.conf)

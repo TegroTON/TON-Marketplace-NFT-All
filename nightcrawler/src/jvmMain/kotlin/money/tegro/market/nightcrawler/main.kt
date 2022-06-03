@@ -12,14 +12,16 @@ import com.github.ajalt.clikt.parameters.types.int
 import io.ipfs.kotlin.IPFS
 import io.ipfs.kotlin.IPFSConfiguration
 import kotlinx.coroutines.runBlocking
-import money.tegro.market.db.Collections
-import money.tegro.market.db.Item
-import money.tegro.market.db.Items
+import money.tegro.market.db.CollectionEntity
+import money.tegro.market.db.CollectionsTable
+import money.tegro.market.db.ItemEntity
+import money.tegro.market.db.ItemsTable
 import money.tegro.market.nft.*
 import mu.KLogging
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.DatabaseConfig
 import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.statements.api.ExposedBlob
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.kodein.di.DI
@@ -98,7 +100,7 @@ class Tool(override val di: ConfigurableDI) :
             logger.debug("connecting to the database ${db.vendor} v${db.version}")
 
             transaction {
-                SchemaUtils.create(Collections, Items)
+                SchemaUtils.create(CollectionsTable, ItemsTable)
             }
         }
     }
@@ -121,23 +123,14 @@ class AddCollection(override val di: DI) :
 
             addresses.forEach { address ->
                 val collection = liteClient.getNFTCollection(MsgAddressInt.AddrStd.parse(address))
+                val royalties = liteClient.getNFTCollectionRoyalties(collection.address)
+                val metadata =
 
-                newSuspendedTransaction {
-                    val dbCollection =
-                        money.tegro.market.db.Collection.find(collection.address).firstOrNull()
-                            ?: money.tegro.market.db.Collection.new {
-                                this.address = collection.address
-                            }
-
-                    dbCollection.owner = collection.owner
-                    dbCollection.size = collection.size
-
-                    liteClient.getNFTCollectionRoyalties(collection.address)?.let {
-                        dbCollection.royaltyNumerator = it.first
-                        dbCollection.royaltyDenominator = it.second
-                        dbCollection.royaltyDestination = it.third
+                    transaction {
+                        CollectionEntity.find(collection.address).firstOrNull()?.let {
+                            this.update(collection, royalties, metadata)
+                        } ?: this.new(collection, royalties, metadata)
                     }
-                }
             }
         }
     }
@@ -160,25 +153,26 @@ class AddItem(override val di: DI) :
                 val item = liteClient.getNFTItem(MsgAddressInt.AddrStd.parse(address))
 
                 newSuspendedTransaction {
-                    val dbItem =
-                        Item.find(item.address).firstOrNull() ?: Item.new {
+                    val dbItemEntity =
+                        ItemEntity.find(item.address).firstOrNull() ?: ItemEntity.new {
                             this.address = item.address
                             initialized = item is NFTItemInitialized
                         }
 
                     if (item is NFTItemInitialized) {
-                        dbItem.initialized = true
-                        dbItem.index = item.index
+                        dbItemEntity.initialized = true
+                        dbItemEntity.index = item.index
 
                         item.collection?.let { collection ->
-                            val dbCollection = money.tegro.market.db.Collection.find(collection).firstOrNull()
+                            val dbCollectionEntity =
+                                money.tegro.market.db.CollectionEntity.find(collection).firstOrNull()
 
-                            require(dbCollection != null) { "Collection ${collection.toString(userFriendly = true)} not in db" }
+                            require(dbCollectionEntity != null) { "Collection ${collection.toString(userFriendly = true)} not in db" }
 
-                            dbItem.collection = dbCollection
+                            dbItemEntity.collectionEntity = dbCollectionEntity
                         }
 
-                        dbItem.owner = item.owner
+                        dbItemEntity.owner = item.owner
                     }
                 }
             }
@@ -199,7 +193,7 @@ class IndexAll(override val di: DI) :
 
             newSuspendedTransaction {
                 logger.debug("processing collections...")
-                money.tegro.market.db.Collection.all().map { dbCollection ->
+                money.tegro.market.db.CollectionEntity.all().map { dbCollection ->
                     logger.debug("collection: ${dbCollection.address.toString(userFriendly = true)}")
 
                     val collection = liteClient.getNFTCollection(dbCollection.address)
@@ -216,11 +210,11 @@ class IndexAll(override val di: DI) :
             }
 
             logger.debug("processing collection items...")
-            val collectionItems = transaction {
-                money.tegro.market.db.Collection.all().toList()
+            val collectionEntityItems = transaction {
+                money.tegro.market.db.CollectionEntity.all().toList()
             }
 
-            collectionItems.forEach { dbCollection ->
+            collectionEntityItems.forEach { dbCollection ->
                 logger.debug("collection: ${dbCollection.address.toString(userFriendly = true)}")
 
                 for (i in 0 until dbCollection.size) {
@@ -230,18 +224,18 @@ class IndexAll(override val di: DI) :
                     val item = liteClient.getNFTItem(itemAddress)
 
                     transaction {
-                        val dbItem =
-                            Item.find(item.address).firstOrNull() ?: Item.new {
+                        val dbItemEntity =
+                            ItemEntity.find(item.address).firstOrNull() ?: ItemEntity.new {
                                 this.address = item.address
                                 initialized = item is NFTItemInitialized
                             }
 
                         // Even for uninitialized items, we can easily deduce collection and their index for the future
-                        dbItem.collection = dbCollection
-                        dbItem.index = i
+                        dbItemEntity.collectionEntity = dbCollection
+                        dbItemEntity.index = i
 
                         if (item is NFTItemInitialized) {
-                            dbItem.owner = item.owner
+                            dbItemEntity.owner = item.owner
                         }
                     }
                 }
@@ -259,3 +253,66 @@ fun main(args: Array<String>) {
     Tool(di).subcommands(AddCollection(di), AddItem(di), IndexAll(di)).main(args)
 }
 
+fun CollectionEntity.Companion.new(
+    collection: NFTCollection,
+    royalties: Triple<Int, Int, MsgAddressInt.AddrStd>?,
+    metadata: NFTCollectionMetadata
+): CollectionEntity =
+    this.new {
+        this.update(collection, royalties, metadata)
+    }
+
+fun CollectionEntity.update(
+    collection: NFTCollection,
+    royalties: Triple<Int, Int, MsgAddressInt.AddrStd>?,
+    metadata: NFTCollectionMetadata
+) {
+    address = collection.address
+    owner = collection.owner
+    nextItemIndex = collection.size
+
+    royalties?.let {
+        royaltyNumerator = it.first
+        royaltyDenominator = it.second
+        royaltyDestination = it.third
+    }
+
+    if (metadata is NFTCollectionMetadataOffChainHttp) {
+        metadataUrl = metadata.url
+        metadataIpfs = null
+    } else if (metadata is NFTCollectionMetadataOffChainIpfs) {
+        metadataUrl = null
+        metadataIpfs = metadata.id
+    }
+
+    name = metadata.name
+    description = metadata.description
+
+    if (metadata.image is NFTContentOffChainHttp) {
+        imageUrl = (metadata.image as NFTContentOffChainHttp).url
+        imageIpfs = null
+        imageData = null
+    } else if (metadata.image is NFTContentOffChainIpfs) {
+        imageUrl = null
+        imageIpfs = (metadata.image as NFTContentOffChainIpfs).id
+        imageData = null
+    } else if (metadata.image is NFTContentOnChain) {
+        imageUrl = null
+        imageIpfs = null
+        imageData = ExposedBlob((metadata.image as NFTContentOnChain).data)
+    }
+
+    if (metadata.coverImage is NFTContentOffChainHttp) {
+        coverImageUrl = (metadata.coverImage as NFTContentOffChainHttp).url
+        coverImageIpfs = null
+        coverImageData = null
+    } else if (metadata.coverImage is NFTContentOffChainIpfs) {
+        coverImageUrl = null
+        coverImageIpfs = (metadata.coverImage as NFTContentOffChainIpfs).id
+        coverImageData = null
+    } else if (metadata.coverImage is NFTContentOnChain) {
+        coverImageUrl = null
+        coverImageIpfs = null
+        coverImageData = ExposedBlob((metadata.coverImage as NFTContentOnChain).data)
+    }
+}
