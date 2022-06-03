@@ -2,22 +2,22 @@ package money.tegro.market.nft
 
 import mu.KLogging
 import org.ton.block.MsgAddressInt
+import org.ton.block.MsgAddressIntStd
 import org.ton.block.VmStackValue
-import org.ton.block.tlb.tlbCodec
 import org.ton.cell.Cell
 import org.ton.lite.api.LiteApi
 import org.ton.lite.api.liteserver.LiteServerAccountId
 import org.ton.tlb.loadTlb
 
 data class NFTCollection(
-    val address: MsgAddressInt.AddrStd,
+    val address: MsgAddressIntStd,
     val size: Long,
     val content: Cell,
-    val owner: MsgAddressInt.AddrStd
+    val owner: MsgAddressIntStd
 ) {
     companion object : KLogging() {
         @JvmStatic
-        suspend fun fetch(liteClient: LiteApi, address: MsgAddressInt.AddrStd): NFTCollection {
+        suspend fun fetch(liteClient: LiteApi, address: MsgAddressIntStd): NFTCollection {
             val lastBlock = liteClient.getMasterchainInfo().last
             logger.debug("last block: $lastBlock")
 
@@ -37,16 +37,16 @@ data class NFTCollection(
                 (result[0] as VmStackValue.TinyInt).value,
                 (result[1] as VmStackValue.Cell).cell,
                 (result[2] as VmStackValue.Slice).toCellSlice()
-                    .loadTlb(MsgAddressInt.tlbCodec()) as MsgAddressInt.AddrStd
+                    .loadTlb(MsgAddressInt.tlbCodec()) as MsgAddressIntStd
             )
         }
 
         @JvmStatic
         suspend fun getItemAddress(
             liteClient: LiteApi,
-            collection: MsgAddressInt.AddrStd,
+            collection: MsgAddressIntStd,
             index: Long
-        ): MsgAddressInt.AddrStd {
+        ): MsgAddressIntStd {
             val lastBlock = liteClient.getMasterchainInfo().last
             logger.debug("last block: $lastBlock")
 
@@ -63,13 +63,13 @@ data class NFTCollection(
             require(result.exitCode == 0) { "Failed to run the method, exit code is ${result.exitCode}" }
 
             return (result.first() as VmStackValue.Slice).toCellSlice()
-                .loadTlb(MsgAddressInt.tlbCodec()) as MsgAddressInt.AddrStd
+                .loadTlb(MsgAddressInt.tlbCodec()) as MsgAddressIntStd
         }
 
         @JvmStatic
         suspend fun getItemContent(
             liteClient: LiteApi,
-            collection: MsgAddressInt.AddrStd,
+            collection: MsgAddressIntStd,
             index: Long,
             individualContent: Cell
         ): Cell {
@@ -94,20 +94,20 @@ data class NFTCollection(
     }
 }
 
-suspend fun LiteApi.getNFTCollection(address: MsgAddressInt.AddrStd) = NFTCollection.fetch(this, address)
+suspend fun LiteApi.getNFTCollection(address: MsgAddressIntStd) = NFTCollection.fetch(this, address)
 
-suspend fun LiteApi.getNFTCollectionItem(collection: MsgAddressInt.AddrStd, index: Long) =
+suspend fun LiteApi.getNFTCollectionItem(collection: MsgAddressIntStd, index: Long) =
     NFTCollection.getItemAddress(this, collection, index)
 
 suspend fun LiteApi.getNFTCollectionItem(collection: NFTCollection, index: Long) =
     this.getNFTItem(NFTCollection.getItemAddress(this, collection.address, index))
 
 suspend fun LiteApi.getNFTCollectionItemContent(
-    collection: MsgAddressInt.AddrStd,
+    collection: MsgAddressIntStd,
     index: Long,
     individualContent: Cell
 ) =
     NFTCollection.getItemContent(this, collection, index, individualContent)
 
-suspend fun LiteApi.getNFTCollectionRoyalties(address: MsgAddressInt.AddrStd) =
+suspend fun LiteApi.getNFTCollectionRoyalties(address: MsgAddressIntStd) =
     NFT.getRoyaltyParameters(this, address)

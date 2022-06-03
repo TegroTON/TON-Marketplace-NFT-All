@@ -4,23 +4,23 @@ import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.and
-import org.ton.block.MsgAddressInt
+import org.ton.block.MsgAddressIntStd
 
 class ItemEntity(id: EntityID<Long>) : LongEntity(id) {
     companion object : LongEntityClass<ItemEntity>(ItemsTable) {
         @JvmStatic
-        fun find(item: MsgAddressInt.AddrStd) =
-            this.find { (ItemsTable.workchain eq item.workchainId) and (ItemsTable.address eq item.address) }
+        fun find(item: MsgAddressIntStd) =
+            this.find { (ItemsTable.workchain eq item.workchainId) and (ItemsTable.address eq item.address.toByteArray()) }
     }
 
     private var rawWorkchain by ItemsTable.workchain
     private var rawAddress by ItemsTable.address
 
-    var address: MsgAddressInt.AddrStd
-        get() = MsgAddressInt.AddrStd(rawWorkchain, rawAddress)
+    var address: MsgAddressIntStd
+        get() = MsgAddressIntStd(rawWorkchain, rawAddress)
         set(value) {
             rawWorkchain = value.workchainId
-            rawAddress = value.address
+            rawAddress = value.address.toByteArray()
         }
 
     var initialized: Boolean by ItemsTable.initialized
@@ -31,10 +31,10 @@ class ItemEntity(id: EntityID<Long>) : LongEntity(id) {
     private var rawOwnerWorkchain by ItemsTable.ownerWorkchain
     private var rawOwnerAddress by ItemsTable.ownerAddress
 
-    var owner: MsgAddressInt.AddrStd?
+    var owner: MsgAddressIntStd?
         get() = rawOwnerWorkchain?.let { workchain ->
             rawOwnerAddress?.let { address ->
-                MsgAddressInt.AddrStd(
+                MsgAddressIntStd(
                     workchain,
                     address
                 )
@@ -42,7 +42,7 @@ class ItemEntity(id: EntityID<Long>) : LongEntity(id) {
         }
         set(value) {
             rawOwnerWorkchain = value?.workchainId
-            rawOwnerAddress = value?.address
+            rawOwnerAddress = value?.address?.toByteArray()
         }
 
     var royaltyNumerator: Int? by ItemsTable.royaltyNumerator
@@ -54,11 +54,11 @@ class ItemEntity(id: EntityID<Long>) : LongEntity(id) {
     private var rawRoyaltyDestinationWorkchain by ItemsTable.royaltyDestinationWorkchain
     private var rawRoyaltyDestinationAddress by ItemsTable.royaltyDestinationAddress
 
-    var royaltyDestination: MsgAddressInt.AddrStd?
+    var royaltyDestination: MsgAddressIntStd?
         get() =
             rawRoyaltyDestinationWorkchain?.let { workchain ->
                 rawRoyaltyDestinationAddress?.let { address ->
-                    MsgAddressInt.AddrStd(
+                    MsgAddressIntStd(
                         workchain,
                         address
                     )
@@ -66,7 +66,7 @@ class ItemEntity(id: EntityID<Long>) : LongEntity(id) {
             }
         set(value) {
             rawRoyaltyDestinationWorkchain = value?.workchainId
-            rawRoyaltyDestinationAddress = value?.address
+            rawRoyaltyDestinationAddress = value?.address?.toByteArray()
         }
 
     var metadataUrl by ItemsTable.metadataUrl
@@ -80,6 +80,6 @@ class ItemEntity(id: EntityID<Long>) : LongEntity(id) {
     var imageData by ItemsTable.imageData
 
     val approved by ItemsTable.approved
-    val discovered by ItemsTable.discovered
+    var discovered by ItemsTable.discovered
     var lastIndexed by ItemsTable.lastIndexed
 }

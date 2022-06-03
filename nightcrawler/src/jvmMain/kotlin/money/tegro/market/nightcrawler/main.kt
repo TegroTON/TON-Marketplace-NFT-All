@@ -15,6 +15,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import money.tegro.market.db.CollectionEntity
 import money.tegro.market.db.CollectionsTable
+import money.tegro.market.db.ItemEntity
 import money.tegro.market.db.ItemsTable
 import money.tegro.market.nft.*
 import mu.KLogging
@@ -28,7 +29,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
 import org.kodein.di.conf.ConfigurableDI
 import org.kodein.di.instance
-import org.ton.block.MsgAddressInt
+import org.ton.block.MsgAddressIntStd
 import org.ton.crypto.base64
 import org.ton.lite.api.LiteApi
 import org.ton.lite.client.LiteClient
@@ -122,7 +123,7 @@ class AddCollection(override val di: DI) :
             val database: Database by instance()
 
             addresses.forEach { address ->
-                val collection = liteClient.getNFTCollection(MsgAddressInt.AddrStd.parse(address))
+                val collection = liteClient.getNFTCollection(MsgAddressIntStd.parse(address))
                 val royalties = liteClient.getNFTCollectionRoyalties(collection.address)
                 val metadata = NFTCollectionMetadata.of(collection.content, ipfs)
 
@@ -152,37 +153,28 @@ class AddItem(override val di: DI) :
     override fun run() {
         runBlocking {
             val liteClient: LiteApi by instance()
+            val ipfs: IPFS by instance()
             val database: Database by instance()
 
-//            addresses.forEach { address ->
-//                val item = liteClient.getNFTItem(MsgAddressInt.AddrStd.parse(address))
-//
-//                newSuspendedTransaction {
-//                    val dbItemEntity =
-//                        ItemEntity.find(item.address).firstOrNull() ?: ItemEntity.new {
-//                            this.address = item.address
-//                            initialized = item is NFTItemInitialized
-//                        }
-//
-//                    if (item is NFTItemInitialized) {
-//                        dbItemEntity.initialized = true
-//                        dbItemEntity.index = item.index
-//
-//                        item.collection?.let { collection ->
-//                            val dbCollectionEntity =
-//                                money.tegro.market.db.CollectionEntity.find(collection).firstOrNull()
-//
-//                            require(dbCollectionEntity != null) { "Collection ${collection.toString(userFriendly = true)} not in db" }
-//
-//                            dbItemEntity.collectionEntity = dbCollectionEntity
-//                        }
-//
-//                        dbItemEntity.owner = item.owner
-//                    }
-//                }
-//            }
+            addresses.forEach { address ->
+                val item = liteClient.getNFTItem(MsgAddressIntStd.parse(address))
+                val royalties = liteClient.getNFTItemRoyalties(item.address)
+                val metadata =
+                    if (item is NFTItemInitialized) NFTItemMetadata.of(item.fullContent(liteClient), ipfs) else null
+
+                transaction {
+                    ItemEntity.find(item.address).firstOrNull()?.run {
+                        logger.debug { "updating already existing item ${this.address.toString(userFriendly = true)}" }
+                        update(item, royalties, metadata)
+                    } ?: ItemEntity.new(item, royalties, metadata).run {
+                        logger.debug { "new item ${this.address.toString(userFriendly = true)}" }
+                    }
+                }
+            }
         }
     }
+
+    companion object : KLogging()
 }
 
 class IndexAll(override val di: DI) :
@@ -260,7 +252,7 @@ fun main(args: Array<String>) {
 
 fun CollectionEntity.Companion.new(
     collection: NFTCollection,
-    royalties: Triple<Int, Int, MsgAddressInt.AddrStd>?,
+    royalties: Triple<Int, Int, MsgAddressIntStd>?,
     metadata: NFTCollectionMetadata
 ): CollectionEntity =
     this.new {
@@ -270,7 +262,7 @@ fun CollectionEntity.Companion.new(
 
 fun CollectionEntity.update(
     collection: NFTCollection,
-    royalties: Triple<Int, Int, MsgAddressInt.AddrStd>?,
+    royalties: Triple<Int, Int, MsgAddressIntStd>?,
     metadata: NFTCollectionMetadata
 ) {
     lastIndexed = Clock.System.now()
@@ -321,5 +313,64 @@ fun CollectionEntity.update(
         coverImageUrl = null
         coverImageIpfs = null
         coverImageData = ExposedBlob((metadata.coverImage as NFTContentOnChain).data)
+    }
+}
+
+
+fun ItemEntity.Companion.new(
+    item: NFTItem,
+    royalties: Triple<Int, Int, MsgAddressIntStd>?,
+    metadata: NFTItemMetadata?
+): ItemEntity =
+    this.new {
+        discovered = Clock.System.now()
+        update(item, royalties, metadata)
+    }
+
+fun ItemEntity.update(
+    item: NFTItem,
+    royalties: Triple<Int, Int, MsgAddressIntStd>?,
+    metadata: NFTItemMetadata?
+) {
+    lastIndexed = Clock.System.now()
+    address = item.address
+    initialized = item is NFTItemInitialized
+
+    if (item is NFTItemInitialized) {
+        this.collection = item.collection?.let { CollectionEntity.find(it).firstOrNull() }
+        owner = item.owner
+    }
+
+    royalties?.let {
+        royaltyNumerator = it.first
+        royaltyDenominator = it.second
+        royaltyDestination = it.third
+    }
+
+    metadata?.let { metadata ->
+        if (metadata is NFTItemMetadataOffChainHttp) {
+            metadataUrl = metadata.url
+            metadataIpfs = null
+        } else if (metadata is NFTItemMetadataOffChainIpfs) {
+            metadataUrl = null
+            metadataIpfs = metadata.id
+        }
+
+        name = metadata.name
+        description = metadata.description
+
+        if (metadata.image is NFTContentOffChainHttp) {
+            imageUrl = (metadata.image as NFTContentOffChainHttp).url
+            imageIpfs = null
+            imageData = null
+        } else if (metadata.image is NFTContentOffChainIpfs) {
+            imageUrl = null
+            imageIpfs = (metadata.image as NFTContentOffChainIpfs).id
+            imageData = null
+        } else if (metadata.image is NFTContentOnChain) {
+            imageUrl = null
+            imageIpfs = null
+            imageData = ExposedBlob((metadata.image as NFTContentOnChain).data)
+        }
     }
 }

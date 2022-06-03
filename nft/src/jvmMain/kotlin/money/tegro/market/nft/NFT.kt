@@ -2,8 +2,8 @@ package money.tegro.market.nft
 
 import mu.KLogging
 import org.ton.block.MsgAddressInt
+import org.ton.block.MsgAddressIntStd
 import org.ton.block.VmStackValue
-import org.ton.block.tlb.tlbCodec
 import org.ton.lite.api.LiteApi
 import org.ton.lite.api.liteserver.LiteServerAccountId
 import org.ton.tlb.loadTlb
@@ -13,12 +13,12 @@ interface NFT {
         @JvmStatic
         suspend fun getRoyaltyParameters(
             liteClient: LiteApi,
-            address: MsgAddressInt.AddrStd
-        ): Triple<Int, Int, MsgAddressInt.AddrStd>? {
+            address: MsgAddressIntStd
+        ): Triple<Int, Int, MsgAddressIntStd>? {
             val lastBlock = liteClient.getMasterchainInfo().last
             logger.debug("last block: $lastBlock")
 
-            logger.debug("running method `get_nft_address_by_index` on ${address.toString(userFriendly = true)}")
+            logger.debug("running method `royalty_params` on ${address.toString(userFriendly = true)}")
             val result = liteClient.runSmcMethod(
                 0b100, // we only care about the result
                 lastBlock,
@@ -41,7 +41,7 @@ interface NFT {
                 (result[0] as VmStackValue.TinyInt).value.toInt(),
                 (result[1] as VmStackValue.TinyInt).value.toInt(),
                 (result[2] as VmStackValue.Slice).toCellSlice()
-                    .loadTlb(MsgAddressInt.tlbCodec()) as MsgAddressInt.AddrStd
+                    .loadTlb(MsgAddressInt.tlbCodec()) as MsgAddressIntStd
             )
         }
     }

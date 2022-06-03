@@ -4,33 +4,33 @@ import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.and
-import org.ton.block.MsgAddressInt
+import org.ton.block.MsgAddressIntStd
 
 class CollectionEntity(id: EntityID<Long>) : LongEntity(id) {
     companion object : LongEntityClass<CollectionEntity>(CollectionsTable) {
         @JvmStatic
-        fun find(collection: MsgAddressInt.AddrStd) =
-            this.find { (CollectionsTable.workchain eq collection.workchainId) and (CollectionsTable.address eq collection.address) }
+        fun find(collection: MsgAddressIntStd) =
+            this.find { (CollectionsTable.workchain eq collection.workchainId) and (CollectionsTable.address eq collection.address.toByteArray()) }
     }
 
     private var rawWorkchain by CollectionsTable.workchain
     private var rawAddress by CollectionsTable.address
 
-    var address: MsgAddressInt.AddrStd
-        get() = MsgAddressInt.AddrStd(rawWorkchain, rawAddress)
+    var address: MsgAddressIntStd
+        get() = MsgAddressIntStd(rawWorkchain, rawAddress)
         set(value) {
             rawWorkchain = value.workchainId
-            rawAddress = value.address
+            rawAddress = value.address.toByteArray()
         }
 
     private var rawOwnerWorkchain by CollectionsTable.ownerWorkchain
     private var rawOwnerAddress by CollectionsTable.ownerAddress
 
-    var owner: MsgAddressInt.AddrStd
-        get() = MsgAddressInt.AddrStd(rawOwnerWorkchain, rawOwnerAddress)
+    var owner: MsgAddressIntStd
+        get() = MsgAddressIntStd(rawOwnerWorkchain, rawOwnerAddress)
         set(value) {
             rawOwnerWorkchain = value.workchainId
-            rawOwnerAddress = value.address
+            rawOwnerAddress = value.address.toByteArray()
         }
 
     var nextItemIndex: Long by CollectionsTable.nextItemIndex
@@ -44,11 +44,11 @@ class CollectionEntity(id: EntityID<Long>) : LongEntity(id) {
     private var rawRoyaltyDestinationWorkchain by CollectionsTable.royaltyDestinationWorkchain
     private var rawRoyaltyDestinationAddress by CollectionsTable.royaltyDestinationAddress
 
-    var royaltyDestination: MsgAddressInt.AddrStd?
+    var royaltyDestination: MsgAddressIntStd?
         get() =
             rawRoyaltyDestinationWorkchain?.let { workchain ->
                 rawRoyaltyDestinationAddress?.let { address ->
-                    MsgAddressInt.AddrStd(
+                    MsgAddressIntStd(
                         workchain,
                         address
                     )
@@ -56,7 +56,7 @@ class CollectionEntity(id: EntityID<Long>) : LongEntity(id) {
             }
         set(value) {
             rawRoyaltyDestinationWorkchain = value?.workchainId
-            rawRoyaltyDestinationAddress = value?.address
+            rawRoyaltyDestinationAddress = value?.address?.toByteArray()
         }
 
     var metadataUrl by CollectionsTable.metadataUrl

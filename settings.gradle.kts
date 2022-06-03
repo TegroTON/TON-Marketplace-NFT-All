@@ -29,7 +29,7 @@ dependencyResolutionManagement {
             version("serialization", "1.3.2")
             version("slf4j", "1.7.36")
             version("sqlite", "3.36.0")
-            version("ton", "297c7f0a63")
+            version("ton", "4f7603be4b")
 
             library("clikt", "com.github.ajalt.clikt", "clikt").versionRef("clikt")
             library("coroutines", "org.jetbrains.kotlinx", "kotlinx-coroutines-jdk8").versionRef("coroutines")
