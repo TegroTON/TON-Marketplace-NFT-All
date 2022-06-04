@@ -10,7 +10,7 @@ class CollectionEntity(id: EntityID<Long>) : LongEntity(id) {
     companion object : LongEntityClass<CollectionEntity>(CollectionsTable) {
         @JvmStatic
         fun find(collection: MsgAddressIntStd) =
-            this.find { (db.CollectionsTable.workchain eq collection.workchainId) and (db.CollectionsTable.address eq collection.address.toByteArray()) }
+            this.find { (CollectionsTable.workchain eq collection.workchainId) and (CollectionsTable.address eq collection.address.toByteArray()) }
     }
 
     private var rawWorkchain by CollectionsTable.workchain
