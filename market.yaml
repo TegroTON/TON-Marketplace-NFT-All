@@ -1,0 +1,153 @@
+openapi: "3.0.2"
+info:
+  title: Market API
+  version: "1.0"
+servers:
+  - url: https://example.com/v1
+
+components:
+  schemas:
+    royalty:
+      type: object
+      required:
+        - value
+        - destination
+      properties:
+        value:
+          type: number
+          format: float
+        destination:
+          type: string
+
+    collection:
+      type: object
+      required:
+        - address
+        - owner
+        - size
+      properties:
+        address:
+          type: string
+        owner:
+          type: string
+        size:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+        image:
+          type: string
+        cover_image:
+          type: string
+        royalty:
+          $ref: '#/components/schemas/royalty/'
+
+    item:
+      type: object
+      required:
+        - address
+        - owner
+      properties:
+        address:
+          type: string
+        index:
+          type: integer
+          format: int64
+        collection:
+          type: string
+        owner:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        image:
+          type: string
+        royalty:
+          $ref: '#/components/schemas/royalty/'
+
+paths:
+  /collection/{address}:
+    get:
+      summary: Get a collection by its address
+      parameters:
+        - name: address
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully fetched a collection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/collection'
+        '404':
+          description: Collection not found, either not public or not in the database
+
+  /collection/{address}/items:
+    get:
+      summary: Get a list of items belonging to certain collection
+      parameters:
+        - name: address
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully fetched list of items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/item'
+  
+  /item/{address}:
+    get:
+      summary: Get an item by its address
+      parameters:
+        - name: address
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully fetched an item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/item'
+        '404':
+          description: Item not found, either not public or not in the database
+
+  /collections:
+    get:
+      summary: Get all available collections
+      responses:
+        '200':
+          description: Successfully fetched list of collections
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/collection'
+
+  /items:
+    get:
+      summary: Get all available items
+      responses:
+        '200':
+          description: Successfully fetched list of items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/item'
