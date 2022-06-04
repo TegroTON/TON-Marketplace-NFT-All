@@ -38,16 +38,16 @@ import org.ton.tlb.constructor.AnyTlbConstructor
 class LiteServerOptions : OptionGroup("lite server options") {
     val host by option("--lite-server-host", help = "Lite server host IP address", envvar = "LITE_SERVER_HOST")
         .int()
-        .default(1426768764)
+        .default(84478479)
     val port by option("--lite-server-port", help = "Lite server port number", envvar = "LITE_SERVER_PORT")
         .int()
-        .default(13724)
+        .default(48014)
     val publicKey by option(
         "--lite-server-public-key",
         help = "Lite server public key (base64)",
         envvar = "LITE_SERVER_PUBLIC_KEY"
     )
-        .default("R1KsqYlNks2Zows+I9s4ywhilbSevs9dH1x2KF9MeSU=")
+        .default("3XO67K/qi+gu3T9v8G2hx1yNmWZhccL3O7SoosFo8G0=")
 }
 
 class IPFSOptions : OptionGroup("IPFS options") {
@@ -107,6 +107,16 @@ class QueryItem(override val di: DI) : CliktCommand(name = "query-item", help = 
                         println("\tRoyalty percentage: ${royalties.first.toFloat() * 100.0 / royalties.second}%")
                         println("\tRoyalty destination: ${royalties.third.toString(userFriendly = true)}")
                     }
+
+                liteClient.getNFTSale(item.owner)?.run {
+                    println("\tOn sale: yes")
+                    println("\tMarketplace: ${marketplace.toString(userFriendly = true)}")
+                    println("\tSeller: ${owner.toString(userFriendly = true)}")
+                    println("\tPrice: ${price} nTON")
+                    println("\tMarketplace fee: ${marketplaceFee} nTON")
+                    println("\tRoyalties: ${royalty} nTON")
+                    println("\tRoyalty destination: ${royaltyDestination?.toString(userFriendly = true)}")
+                }
             }
         }
 
