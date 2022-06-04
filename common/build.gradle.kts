@@ -11,6 +11,9 @@ kotlin {
                 implementation(libs.serialization.json)
                 implementation(libs.slf4j)
                 implementation(libs.ton)
+                implementation(libs.exposed.core)
+                implementation(libs.exposed.dao)
+                implementation(libs.exposed.kotlin.datetime)
             }
         }
     }

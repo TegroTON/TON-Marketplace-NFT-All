@@ -13,7 +13,6 @@ import io.ipfs.kotlin.IPFS
 import io.ipfs.kotlin.IPFSConfiguration
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import money.tegro.market.db.CollectionEntity
@@ -62,7 +61,7 @@ class IPFSOptions : OptionGroup("IPFS options") {
 
 class DatabaseOptions : OptionGroup("Database options") {
     val url by option("--db-url", help = "Database url", envvar = "DB_URL")
-        .default("jdbc:sqlite:../build/nighcrawler.db")
+        .default("jdbc:sqlite:../build/nightcrawler.db")
     val driver by option("--db-driver", help = "Database driver", envvar = "DB_DRIVER")
         .default("org.sqlite.JDBC")
 }
@@ -81,7 +80,8 @@ class Tool(override val di: ConfigurableDI) :
                     ResilientLiteClient(
                         liteServerOptions.host,
                         liteServerOptions.port,
-                        liteServerOptions.publicKey.let { base64(it) })
+                        base64(liteServerOptions.publicKey)
+                    )
                 }
                 bindSingleton { IPFS(IPFSConfiguration(ipfsOptions.url)) }
                 bindSingleton {
@@ -95,10 +95,6 @@ class Tool(override val di: ConfigurableDI) :
 
             logger.debug("connecting to the lite client at ${liteServerOptions.host}:${liteServerOptions.port}")
             (liteClient as LiteClient).connect()
-
-            val ipfs: IPFS by instance()
-
-            logger.debug("initializing IPFS API")
 
             val db: Database by instance()
 
@@ -116,7 +112,7 @@ class Tool(override val di: ConfigurableDI) :
 class AddCollection(override val di: DI) :
     CliktCommand(name = "add-collection", help = "Adds a collection to the database. Updates existing entries"),
     DIAware {
-    val addresses by argument(
+    private val addresses by argument(
         name = "addresses",
         help = "NFT collection contract address(es)"
     ).multiple(required = true)
@@ -125,7 +121,6 @@ class AddCollection(override val di: DI) :
         runBlocking {
             val liteClient: LiteApi by instance()
             val ipfs: IPFS by instance()
-            val database: Database by instance()
 
             addresses.forEach { address ->
                 val collection = liteClient.getNFTCollection(MsgAddressIntStd.parse(address))
@@ -150,7 +145,7 @@ class AddCollection(override val di: DI) :
 class AddItem(override val di: DI) :
     CliktCommand(name = "add-item", help = "Adds a singular collection to the database. Updates existing entries"),
     DIAware {
-    val addresses by argument(
+    private val addresses by argument(
         name = "addresses",
         help = "NFT item contract address(es)"
     ).multiple(required = true)
@@ -159,7 +154,6 @@ class AddItem(override val di: DI) :
         runBlocking {
             val liteClient: LiteApi by instance()
             val ipfs: IPFS by instance()
-            val database: Database by instance()
 
             addresses.forEach { address ->
                 val item = liteClient.getNFTItem(MsgAddressIntStd.parse(address))
@@ -192,9 +186,6 @@ class IndexAll(override val di: DI) :
         runBlocking {
             val liteClient: LiteApi by instance()
             val ipfs: IPFS by instance()
-            val database: Database by instance()
-
-
             logger.debug { "processing collections..." }
 
             newSuspendedTransaction {
@@ -244,7 +235,7 @@ class IndexAll(override val di: DI) :
                     val item = liteClient.getNFTItem(itemAddress)
                     val royalties = liteClient.getNFTItemRoyalties(itemAddress)
                     val metadata = if (item is NFTItemInitialized) NFTItemMetadata.of(
-                        (item as NFTItemInitialized).fullContent(
+                        item.fullContent(
                             liteClient
                         ), ipfs
                     ) else null
@@ -315,18 +306,22 @@ fun CollectionEntity.update(
     name = metadata.name
     description = metadata.description
 
-    if (metadata.image is NFTContentOffChainHttp) {
-        imageUrl = (metadata.image as NFTContentOffChainHttp).url
-        imageIpfs = null
-        imageData = null
-    } else if (metadata.image is NFTContentOffChainIpfs) {
-        imageUrl = null
-        imageIpfs = (metadata.image as NFTContentOffChainIpfs).id
-        imageData = null
-    } else if (metadata.image is NFTContentOnChain) {
-        imageUrl = null
-        imageIpfs = null
-        imageData = ExposedBlob((metadata.image as NFTContentOnChain).data)
+    when (metadata.image) {
+        is NFTContentOffChainHttp -> {
+            imageUrl = (metadata.image as NFTContentOffChainHttp).url
+            imageIpfs = null
+            imageData = null
+        }
+        is NFTContentOffChainIpfs -> {
+            imageUrl = null
+            imageIpfs = (metadata.image as NFTContentOffChainIpfs).id
+            imageData = null
+        }
+        is NFTContentOnChain -> {
+            imageUrl = null
+            imageIpfs = null
+            imageData = ExposedBlob((metadata.image as NFTContentOnChain).data)
+        }
     }
 
     if (metadata.coverImage is NFTContentOffChainHttp) {
@@ -365,7 +360,7 @@ fun ItemEntity.update(
     initialized = item is NFTItemInitialized
 
     if (item is NFTItemInitialized) {
-        this.collection = item.collection?.let { CollectionEntity.find(it).firstOrNull() }
+        this.collection = item.collection?.let { money.tegro.market.db.CollectionEntity.find(it).firstOrNull() }
         owner = item.owner
     }
 
@@ -387,18 +382,22 @@ fun ItemEntity.update(
         name = metadata.name
         description = metadata.description
 
-        if (metadata.image is NFTContentOffChainHttp) {
-            imageUrl = (metadata.image as NFTContentOffChainHttp).url
-            imageIpfs = null
-            imageData = null
-        } else if (metadata.image is NFTContentOffChainIpfs) {
-            imageUrl = null
-            imageIpfs = (metadata.image as NFTContentOffChainIpfs).id
-            imageData = null
-        } else if (metadata.image is NFTContentOnChain) {
-            imageUrl = null
-            imageIpfs = null
-            imageData = ExposedBlob((metadata.image as NFTContentOnChain).data)
+        when (metadata.image) {
+            is NFTContentOffChainHttp -> {
+                imageUrl = (metadata.image as NFTContentOffChainHttp).url
+                imageIpfs = null
+                imageData = null
+            }
+            is NFTContentOffChainIpfs -> {
+                imageUrl = null
+                imageIpfs = (metadata.image as NFTContentOffChainIpfs).id
+                imageData = null
+            }
+            is NFTContentOnChain -> {
+                imageUrl = null
+                imageIpfs = null
+                imageData = ExposedBlob((metadata.image as NFTContentOnChain).data)
+            }
         }
     }
 }

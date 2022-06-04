@@ -28,7 +28,6 @@ kotlin {
                 implementation(libs.slf4j)
                 implementation(libs.sqlite)
                 implementation(libs.ton)
-                implementation(projects.db)
                 implementation(projects.common)
             }
         }

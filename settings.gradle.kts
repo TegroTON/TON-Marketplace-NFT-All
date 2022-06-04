@@ -64,6 +64,5 @@ dependencyResolutionManagement {
 }
 
 include(":common")
-include(":db")
 include(":nightcrawler")
 include(":tool")
