@@ -11,6 +11,9 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.int
 import io.ipfs.kotlin.IPFS
 import io.ipfs.kotlin.IPFSConfiguration
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import money.tegro.market.db.CollectionEntity
@@ -191,54 +194,77 @@ class IndexAll(override val di: DI) :
             val ipfs: IPFS by instance()
             val database: Database by instance()
 
+
+            logger.debug { "processing collections..." }
+
             newSuspendedTransaction {
-                logger.debug { "processing collections..." }
-                CollectionEntity.all().map { dbCollection ->
-                    logger.debug { "updating collection ${dbCollection.address.toString(userFriendly = true)}" }
+                CollectionEntity.all().asFlow()
+                    .map { dbCollection ->
+                        logger.debug { "updating collection ${dbCollection.address.toString(userFriendly = true)}" }
 
-                    val collection = liteClient.getNFTCollection(dbCollection.address)
-                    val royalties = liteClient.getNFTCollectionRoyalties(dbCollection.address)
-                    val metadata = NFTCollectionMetadata.of(collection.content, ipfs)
+                        val collection = liteClient.getNFTCollection(dbCollection.address)
+                        val royalties = liteClient.getNFTCollectionRoyalties(dbCollection.address)
+                        val metadata = NFTCollectionMetadata.of(collection.content, ipfs)
 
-                    transaction {
-                        dbCollection.update(collection, royalties, metadata)
+                        Triple(Pair(dbCollection, collection), royalties, metadata)
                     }
-                }
+                    .flowOn(Dispatchers.Default)
+                    .buffer()
+                    .collect {
+                        val (collections, royalties, metadata) = it
+                        val (dbCollection, collection) = collections
+                        transaction {
+                            dbCollection.update(collection, royalties, metadata)
+                        }
+                    }
             }
 
             logger.debug { "processing collection items..." }
-            val allCollections = transaction {
+            transaction {
                 CollectionEntity.all().toList()
-            }
+            }.asFlow()
+                .transform { dbCollection ->
+                    logger.debug {
+                        "processing all ${dbCollection.nextItemIndex} items of collection ${
+                            dbCollection.address.toString(
+                                userFriendly = true
+                            )
+                        }"
+                    }
 
-            allCollections.forEach { dbCollection ->
-                logger.debug {
-                    "processing all ${dbCollection.nextItemIndex} items of collection ${
-                        dbCollection.address.toString(
-                            userFriendly = true
-                        )
-                    }"
+                    (0 until dbCollection.nextItemIndex).asFlow()
+                        .map { index ->
+                            liteClient.getNFTCollectionItem(dbCollection.address, index)
+                        }
+                        .flowOn(Dispatchers.Default)
+                        .buffer()
+                        .collect { emit(it) }
                 }
-
-                for (i in 0 until dbCollection.nextItemIndex) {
-                    val itemAddress = liteClient.getNFTCollectionItem(dbCollection.address, i)
-                    logger.debug { "item no. $i: ${itemAddress.toString(userFriendly = true)}" }
-
+                .map { itemAddress ->
                     val item = liteClient.getNFTItem(itemAddress)
-                    val royalties = liteClient.getNFTItemRoyalties(item.address)
-                    val metadata =
-                        if (item is NFTItemInitialized) NFTItemMetadata.of(item.fullContent(liteClient), ipfs) else null
+                    val royalties = liteClient.getNFTItemRoyalties(itemAddress)
+                    val metadata = if (item is NFTItemInitialized) NFTItemMetadata.of(
+                        (item as NFTItemInitialized).fullContent(
+                            liteClient
+                        ), ipfs
+                    ) else null
 
+                    Triple(item, royalties, metadata)
+                }
+                .flowOn(Dispatchers.IO)
+                .buffer()
+                .collect {
+                    val (item, royalties, metadata) = it
                     transaction {
                         ItemEntity.find(item.address).firstOrNull()?.run {
                             logger.debug { "updating already existing item ${this.address.toString(userFriendly = true)}" }
                             update(item, royalties, metadata)
-                        } ?: ItemEntity.new(item, royalties, metadata).run {
-                            logger.debug { "new item ${this.address.toString(userFriendly = true)}" }
-                        }
+                        } ?: ItemEntity.new(item, royalties, metadata)
+                            .run {
+                                logger.debug { "new item ${this.address.toString(userFriendly = true)}" }
+                            }
                     }
                 }
-            }
 
             // TODO: process items not belonging to collections
         }

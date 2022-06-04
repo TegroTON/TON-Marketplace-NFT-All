@@ -22,7 +22,7 @@ open class ResilientLiteClient(
             try {
                 return super.sendRawQuery(byteArray)
             } catch (e: Exception) {
-                if (attempt >= 100) {
+                if (attempt >= 1000) {
                     logger.info { "too many attempts, giving up" }
                     throw e
                 }
@@ -44,7 +44,7 @@ open class ResilientLiteClient(
             try {
                 return super.sendQuery(query, queryCodec, answerCodec)
             } catch (e: Exception) {
-                if (attempt >= 10) {
+                if (attempt >= 100) {
                     logger.info { "too many attempts, giving up" }
                     throw e
                 }

@@ -10,6 +10,7 @@ pluginManagement {
     plugins {
         kotlin("multiplatform") version "1.6.21"
         kotlin("plugin.serialization") version "1.6.10"
+        id("com.github.johnrengelman.shadow") version "7.1.2"
     }
 }
 
@@ -19,20 +20,22 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
             version("clikt", "3.4.2")
-            version("coroutines", "1.6.0")
             version("datetime", "0.3.3")
             version("exposed", "0.38.2")
             version("ipfs", "0.15")
             version("kodein", "7.11.0")
             version("logback", "1.2.11")
             version("logging", "2.1.23")
+            version("reaktive", "1.2.1")
             version("serialization", "1.3.2")
             version("slf4j", "1.7.36")
             version("sqlite", "3.36.0")
             version("ton", "4f7603be4b")
 
             library("clikt", "com.github.ajalt.clikt", "clikt").versionRef("clikt")
-            library("coroutines", "org.jetbrains.kotlinx", "kotlinx-coroutines-jdk8").versionRef("coroutines")
+            library("coroutines", "org.jetbrains.kotlinx", "kotlinx-coroutines-core").version {
+                strictly("1.6.1-native-mt")
+            }
             library("datetime", "org.jetbrains.kotlinx", "kotlinx-datetime").versionRef("datetime")
             library("exposed.core", "org.jetbrains.exposed", "exposed-core").versionRef("exposed")
             library("exposed.dao", "org.jetbrains.exposed", "exposed-dao").versionRef("exposed")
