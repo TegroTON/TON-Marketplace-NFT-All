@@ -15,10 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
-import money.tegro.market.db.CollectionEntity
-import money.tegro.market.db.CollectionsTable
-import money.tegro.market.db.ItemEntity
-import money.tegro.market.db.ItemsTable
+import money.tegro.market.db.*
 import money.tegro.market.nft.*
 import money.tegro.market.ton.ResilientLiteClient
 import mu.KLogging
@@ -101,7 +98,7 @@ class Tool(override val di: ConfigurableDI) :
             logger.debug("connecting to the database ${db.vendor} v${db.version}")
 
             transaction {
-                SchemaUtils.create(CollectionsTable, ItemsTable)
+                SchemaUtils.create(CollectionsTable, ItemsTable, ItemAttributesTable)
             }
         }
     }
@@ -167,6 +164,20 @@ class AddItem(override val di: DI) :
                         update(item, royalties, metadata)
                     } ?: ItemEntity.new(item, royalties, metadata).run {
                         logger.debug { "new item ${this.address.toString(userFriendly = true)}" }
+                    }
+                }
+
+                metadata?.attributes?.forEach { attribute ->
+                    transaction {
+                        val dbItem = ItemEntity.find(item.address).firstOrNull()
+                        requireNotNull(dbItem)
+                        ItemAttributeEntity.find(dbItem, attribute.trait).firstOrNull()?.run {
+                            value = attribute.value
+                        } ?: ItemAttributeEntity.new {
+                            this.item = dbItem
+                            trait = attribute.trait
+                            value = attribute.value
+                        }
                     }
                 }
             }
@@ -254,6 +265,20 @@ class IndexAll(override val di: DI) :
                             .run {
                                 logger.debug { "new item ${this.address.toString(userFriendly = true)}" }
                             }
+                    }
+
+                    metadata?.attributes?.forEach { attribute ->
+                        transaction {
+                            val dbItem = ItemEntity.find(item.address).firstOrNull()
+                            requireNotNull(dbItem)
+                            ItemAttributeEntity.find(dbItem, attribute.trait).firstOrNull()?.run {
+                                value = attribute.value
+                            } ?: ItemAttributeEntity.new {
+                                this.item = dbItem
+                                trait = attribute.trait
+                                value = attribute.value
+                            }
+                        }
                     }
                 }
 

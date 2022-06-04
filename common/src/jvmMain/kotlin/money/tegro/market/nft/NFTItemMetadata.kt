@@ -12,10 +12,18 @@ import kotlinx.serialization.json.decodeFromStream
 import mu.KLogging
 import org.ton.cell.Cell
 
+@kotlinx.serialization.Serializable
+data class NFTItemAttribute(
+    @SerialName("trait_type")
+    val trait: String,
+    val value: String
+)
+
 sealed interface NFTItemMetadata {
-    abstract val name: String?
-    abstract val description: String?
-    abstract val image: NFTContent?
+    val name: String?
+    val description: String?
+    val image: NFTContent?
+    val attributes: List<NFTItemAttribute>?
 
     companion object : KLogging() {
         @JvmStatic
@@ -63,6 +71,7 @@ sealed interface NFTItemMetadataOffChain : NFTItemMetadata
 data class NFTItemMetadataOffChainHttp(
     override val name: String? = null,
     override val description: String? = null,
+    override val attributes: List<NFTItemAttribute>? = null,
     @SerialName("image")
     val imageUrl: String? = null,
 ) : NFTItemMetadataOffChain {
@@ -77,6 +86,7 @@ data class NFTItemMetadataOffChainHttp(
 data class NFTItemMetadataOffChainIpfs(
     override val name: String? = null,
     override val description: String? = null,
+    override val attributes: List<NFTItemAttribute>? = null,
     @SerialName("image")
     val imageUrl: String? = null,
 ) : NFTItemMetadataOffChain {
@@ -91,4 +101,5 @@ data class NFTItemMetadataOnChain(
     override val name: String?,
     override val description: String?,
     override val image: NFTContent?,
+    override val attributes: List<NFTItemAttribute>? = null,
 ) : NFTItemMetadataOffChain
