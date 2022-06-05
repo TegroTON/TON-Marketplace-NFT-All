@@ -13,8 +13,8 @@ class ItemEntity(id: EntityID<Long>) : LongEntity(id) {
             this.find { (ItemsTable.workchain eq item.workchainId) and (ItemsTable.address eq item.address.toByteArray()) }
     }
 
-    private var rawWorkchain by ItemsTable.workchain
-    private var rawAddress by ItemsTable.address
+    var rawWorkchain by ItemsTable.workchain
+    var rawAddress by ItemsTable.address
 
     var address: MsgAddressIntStd
         get() = MsgAddressIntStd(rawWorkchain, rawAddress)
@@ -28,8 +28,8 @@ class ItemEntity(id: EntityID<Long>) : LongEntity(id) {
     var index: Long? by ItemsTable.index
     var collection: CollectionEntity? by CollectionEntity optionalReferencedOn ItemsTable.collection
 
-    private var rawOwnerWorkchain by ItemsTable.ownerWorkchain
-    private var rawOwnerAddress by ItemsTable.ownerAddress
+    var rawOwnerWorkchain by ItemsTable.ownerWorkchain
+    var rawOwnerAddress by ItemsTable.ownerAddress
 
     var owner: MsgAddressIntStd?
         get() = rawOwnerWorkchain?.let { workchain ->
@@ -53,7 +53,6 @@ class ItemEntity(id: EntityID<Long>) : LongEntity(id) {
 
     private var rawRoyaltyDestinationWorkchain by ItemsTable.royaltyDestinationWorkchain
     private var rawRoyaltyDestinationAddress by ItemsTable.royaltyDestinationAddress
-
     var royaltyDestination: MsgAddressIntStd?
         get() =
             rawRoyaltyDestinationWorkchain?.let { workchain ->
@@ -68,6 +67,62 @@ class ItemEntity(id: EntityID<Long>) : LongEntity(id) {
             rawRoyaltyDestinationWorkchain = value?.workchainId
             rawRoyaltyDestinationAddress = value?.address?.toByteArray()
         }
+
+    private var rawMarketplaceWorkchain by ItemsTable.marketplaceWorkchain
+    private var rawMarketplaceAddress by ItemsTable.marketplaceAddress
+    var marketplace: MsgAddressIntStd?
+        get() =
+            rawMarketplaceWorkchain?.let { workchain ->
+                rawMarketplaceAddress?.let { address ->
+                    MsgAddressIntStd(
+                        workchain,
+                        address
+                    )
+                }
+            }
+        set(value) {
+            rawMarketplaceWorkchain = value?.workchainId
+            rawMarketplaceAddress = value?.address?.toByteArray()
+        }
+
+    private var rawSellerWorkchain by ItemsTable.sellerWorkchain
+    private var rawSellerAddress by ItemsTable.sellerAddress
+    var seller: MsgAddressIntStd?
+        get() =
+            rawSellerWorkchain?.let { workchain ->
+                rawSellerAddress?.let { address ->
+                    MsgAddressIntStd(
+                        workchain,
+                        address
+                    )
+                }
+            }
+        set(value) {
+            rawSellerWorkchain = value?.workchainId
+            rawSellerAddress = value?.address?.toByteArray()
+        }
+
+    var price by ItemsTable.price
+    var marketplaceFee by ItemsTable.marketplaceFee
+
+    private var rawSaleRoyaltyDestinationWorkchain by ItemsTable.saleRoyaltyDestinationWorkchain
+    private var rawSaleRoyaltyDestinationAddress by ItemsTable.saleRoyaltyDestinationAddress
+    var saleRoyaltyDestination: MsgAddressIntStd?
+        get() =
+            rawSaleRoyaltyDestinationWorkchain?.let { workchain ->
+                rawSaleRoyaltyDestinationAddress?.let { address ->
+                    MsgAddressIntStd(
+                        workchain,
+                        address
+                    )
+                }
+            }
+        set(value) {
+            rawSaleRoyaltyDestinationWorkchain = value?.workchainId
+            rawSaleRoyaltyDestinationAddress = value?.address?.toByteArray()
+        }
+
+    var saleRoyalty by ItemsTable.saleRoyalty
 
     var metadataUrl by ItemsTable.metadataUrl
     var metadataIpfs by ItemsTable.metadataIpfs

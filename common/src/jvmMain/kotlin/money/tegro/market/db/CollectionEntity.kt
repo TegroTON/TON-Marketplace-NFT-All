@@ -1,5 +1,6 @@
 package money.tegro.market.db
 
+import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
@@ -13,8 +14,8 @@ class CollectionEntity(id: EntityID<Long>) : LongEntity(id) {
             this.find { (CollectionsTable.workchain eq collection.workchainId) and (CollectionsTable.address eq collection.address.toByteArray()) }
     }
 
-    private var rawWorkchain by CollectionsTable.workchain
-    private var rawAddress by CollectionsTable.address
+    var rawWorkchain by CollectionsTable.workchain
+    var rawAddress by CollectionsTable.address
 
     var address: MsgAddressIntStd
         get() = MsgAddressIntStd(rawWorkchain, rawAddress)

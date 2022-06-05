@@ -21,6 +21,21 @@ object ItemsTable : LongIdTable("items") {
     val royaltyDestinationWorkchain = integer("royalty_destination_workchain").nullable()
     val royaltyDestinationAddress = binary("royalty_destination_address").nullable()
 
+    // items that are owned by the NFTSale contracts have the following fields
+    val marketplaceWorkchain = integer("sale_marketplace_workchain").nullable()
+    val marketplaceAddress = binary("sale_marketplace_address", 32).nullable()
+    val sellerWorkchain = integer("sale_seller_workchain").nullable()
+    val sellerAddress = binary("sale_seller_address", 32).nullable()
+    val price = long("sale_price").nullable()
+    val marketplaceFee = long("sale_marketplace_fee").nullable()
+
+    // NOT THE SAME AS `royaltyDestination*` - a rogue seller contract might send royalties to a different address
+    // This shows the actual address where `saleRoyalty` will be sent
+    val saleRoyaltyDestinationWorkchain = integer("sale_royalty_destination_workchain").nullable()
+    val saleRoyaltyDestinationAddress = binary("sale_royalty_destination_address").nullable()
+    val saleRoyalty = long("sale_royalty").nullable()
+
+
     // metadata-related properties
     val metadataUrl = text("metadata_url").nullable()
     val metadataIpfs = text("metadata_ipfs").nullable()

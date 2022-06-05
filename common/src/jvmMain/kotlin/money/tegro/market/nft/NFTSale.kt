@@ -38,23 +38,26 @@ data class NFTSale(
             )
 
             logger.debug("response: $result")
-            if (result.exitCode == 11) {
-                logger.debug { "contract doesn't have such method, not an NFTSale contract" }
+            if (result.exitCode != 0) {
+                logger.debug { "contract doesn't have such method/method execution failed, assume not an NFTSale contract" }
                 return null
             }
 
-            require(result.exitCode == 0) { "runSmcMethod() failed, exit code: ${result.exitCode}" }
-
-            return NFTSale(
-                address,
-                (result[0] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec) as MsgAddressIntStd,
-                (result[1] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec) as MsgAddressIntStd,
-                (result[2] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec) as MsgAddressIntStd,
-                (result[3] as VmStackValue.TinyInt).value,
-                (result[4] as VmStackValue.TinyInt).value,
-                (result[5] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec) as? MsgAddressIntStd,
-                (result[6] as VmStackValue.TinyInt).value,
-            )
+            try {
+                return NFTSale(
+                    address,
+                    (result[0] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec) as MsgAddressIntStd,
+                    (result[1] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec) as MsgAddressIntStd,
+                    (result[2] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec) as MsgAddressIntStd,
+                    (result[3] as VmStackValue.TinyInt).value,
+                    (result[4] as VmStackValue.TinyInt).value,
+                    (result[5] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec) as? MsgAddressIntStd,
+                    (result[6] as VmStackValue.TinyInt).value,
+                )
+            } catch (e: Exception) {
+                logger.warn { "couldn't parse response: $e" }
+                return null
+            }
         }
     }
 }
