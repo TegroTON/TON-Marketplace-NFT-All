@@ -22,7 +22,6 @@ dependencyResolutionManagement {
             version("clikt", "3.4.2")
             version("datetime", "0.3.3")
             version("exposed", "0.38.2")
-            version("flink", "1.15.0")
             version("ipfs", "0.15")
             version("kodein", "7.11.0")
             version("logback", "1.2.11")
@@ -42,15 +41,14 @@ dependencyResolutionManagement {
             library("exposed.dao", "org.jetbrains.exposed", "exposed-dao").versionRef("exposed")
             library("exposed.jdbc", "org.jetbrains.exposed", "exposed-jdbc").versionRef("exposed")
             library("exposed.kotlin.datetime", "org.jetbrains.exposed", "exposed-kotlin-datetime").versionRef("exposed")
-            library("flink.core", "org.apache.flink", "flink-core").versionRef("flink")
-            library("flink.clients", "org.apache.flink", "flink-clients").versionRef("flink")
-            library("flink.streaming", "org.apache.flink", "flink-streaming-java").versionRef("flink")
-            library("flink.web", "org.apache.flink", "flink-runtime-web").versionRef("flink")
             library("ipfs", "com.github.ligi", "ipfs-api-kotlin").versionRef("ipfs")
             library("kodein", "org.kodein.di", "kodein-di").versionRef("kodein")
             library("kodein.conf", "org.kodein.di", "kodein-di-conf").versionRef("kodein")
             library("logback", "ch.qos.logback", "logback-classic").versionRef("logback")
             library("logging", "io.github.microutils", "kotlin-logging").versionRef("logging")
+            library("reaktive", "com.badoo.reaktive", "reaktive").versionRef("reaktive")
+            library("reaktive.annotations", "com.badoo.reaktive", "reaktive-annotations").versionRef("reaktive")
+            library("reaktive.coroutines", "com.badoo.reaktive", "coroutines-interop").versionRef("reaktive")
             library(
                 "serialization.core",
                 "org.jetbrains.kotlinx",

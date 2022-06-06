@@ -1,5 +1,10 @@
 package money.tegro.market.nightcrawler
 
+import com.badoo.reaktive.observable.*
+import com.badoo.reaktive.scheduler.computationScheduler
+import com.badoo.reaktive.scheduler.ioScheduler
+import com.badoo.reaktive.scheduler.mainScheduler
+import com.badoo.reaktive.scheduler.singleScheduler
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.clikt.parameters.arguments.argument
@@ -11,44 +16,27 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.int
 import io.ipfs.kotlin.IPFS
 import io.ipfs.kotlin.IPFSConfiguration
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import money.tegro.market.db.*
 import money.tegro.market.nft.*
 import money.tegro.market.ton.ResilientLiteClient
 import mu.KLogging
-import org.apache.flink.configuration.Configuration
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
-import org.apache.flink.streaming.api.functions.ProcessFunction
-import org.apache.flink.streaming.api.functions.sink.RichSinkFunction
-import org.apache.flink.streaming.api.functions.sink.SinkFunction
-import org.apache.flink.streaming.api.functions.source.RichSourceFunction
-import org.apache.flink.streaming.api.functions.source.SourceFunction
-import org.apache.flink.util.Collector
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.DatabaseConfig
 import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.statements.api.ExposedBlob
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
 import org.kodein.di.conf.ConfigurableDI
-import org.kodein.di.conf.DIGlobalAware
-import org.kodein.di.conf.global
 import org.kodein.di.instance
-import org.ton.block.MsgAddress
 import org.ton.block.MsgAddressIntStd
-import org.ton.block.VmStackValue
-import org.ton.boc.BagOfCells
 import org.ton.crypto.base64
-import org.ton.crypto.hex
 import org.ton.lite.api.LiteApi
-import org.ton.lite.api.liteserver.LiteServerAccountId
 import org.ton.lite.client.LiteClient
-import org.ton.tlb.loadTlb
 
 
 class LiteServerOptions : OptionGroup("lite server options") {
@@ -209,28 +197,136 @@ class IndexAll(override val di: DI) :
     ),
     DIAware {
     override fun run() {
-        val liteClient: LiteApi by instance()
+        runBlocking {
+            val liteClient: LiteApi by instance()
+            val ipfs: IPFS by instance()
 
-        val env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(Configuration())
+            val dbCollectionAddresses = observable<MsgAddressIntStd> { emitter ->
+                transaction {
+                    CollectionEntity.all().forEach {
+                        emitter.onNext(it.address)
+                    }
+                }
+            }.subscribeOn(mainScheduler)
 
-        val dbCollectionAddresses = env.addSource(CollectionsTableAddrSource())
+            val collectionData = dbCollectionAddresses
+                .observeOn(computationScheduler)
+                .map {
+                    runBlocking {
+                        liteClient.getNFTCollection(it)
+                    }
+                }
 
-        val dbCollectionData = dbCollectionAddresses.process(Addr2Coll())
+            val collectionRoyalties = dbCollectionAddresses
+                .observeOn(computationScheduler)
+                .map {
+                    runBlocking {
+                        it to liteClient.getNFTCollectionRoyalties(it)
+                    }
+                }
 
-        val collectionItems = dbCollectionData.process(Coll2ItemAddr()).process(Addr2Item())
+            val itemData = collectionData
+                .observeOn(ioScheduler)
+                .flatMap {
+                    observable<Pair<MsgAddressIntStd, Long>> { emitter ->
+                        (0 until it.size).forEach { i ->
+                            emitter.onNext(it.address to i)
+                        }
+                    }
+                }
+                .flatMap(4) {
+                    observableOf(it)
+                        .subscribeOn(computationScheduler)
+                        .map {
+                            runBlocking {
+                                liteClient.getNFTCollectionItem(it.first, it.second)
+                            }
+                        }
+                }
+                .flatMap(4) {
+                    observableOf(it)
+                        .subscribeOn(computationScheduler)
+                        .map {
+                            runBlocking {
+                                liteClient.getNFTItem(it)
+                            }
+                        }
+                }
 
-        collectionItems.print()
+            collectionData
+                .observeOn(mainScheduler)
+                .subscribe {
+                    transaction {
+                        CollectionEntity.find(it.address).firstOrNull()?.run {
+                            logger.debug { "updating collection ${it.address.toString(userFriendly = true)} in the database" }
+                            lastIndexed = Clock.System.now()
+                            owner = it.owner
+                            nextItemIndex = it.size
+                        } ?: CollectionEntity.new {
+                            logger.debug { "adding new collection ${it.address.toString(userFriendly = true)} to the database" }
+                            discovered = Clock.System.now()
+                            lastIndexed = Clock.System.now()
+                            address = it.address
+                            owner = it.owner
+                            nextItemIndex = it.size
+                        }
+                    }
+                }
 
-        collectionItems.addSink(ItemsTableSink())
+            itemData
+                .observeOn(mainScheduler)
+                .subscribe {
+                    transaction {
+                        ItemEntity.find(it.address).firstOrNull()?.run {
+                            logger.debug { "updating item ${it.address.toString(userFriendly = true)} in the database" }
+                            lastIndexed = Clock.System.now()
+                            address = it.address
+                            initialized = it is NFTItemInitialized
 
-        env.execute()
+                            if (it is NFTItemInitialized) {
+                                index = it.index
+                                this.collection = it.collection?.let { CollectionEntity.find(it).firstOrNull() }
+                                owner = it.owner
+                            }
+                        } ?: ItemEntity.new {
+                            logger.debug { "adding new item ${it.address.toString(userFriendly = true)} to the database" }
+                            discovered = Clock.System.now()
+                            lastIndexed = Clock.System.now()
+                            address = it.address
+                            initialized = it is NFTItemInitialized
+
+                            if (it is NFTItemInitialized) {
+                                index = it.index
+                                this.collection = it.collection?.let { CollectionEntity.find(it).firstOrNull() }
+                                owner = it.owner
+                            }
+                        }
+                    }
+                }
+
+            collectionRoyalties
+                .observeOn(mainScheduler)
+                .subscribe {
+                    transaction {
+                        CollectionEntity.find(it.first).firstOrNull()?.run {
+                            logger.debug { "updating collection ${it.first.toString(userFriendly = true)} royalties in the database" }
+                            lastIndexed = Clock.System.now()
+                            royaltyNumerator = it.second?.first
+                            royaltyDenominator = it.second?.second
+                            royaltyDestination = it.second?.third
+                        }
+                    }
+                }
+
+            delay(100000000000L)
+        }
     }
 
     companion object : KLogging()
 }
 
 fun main(args: Array<String>) {
-    val di = DI.global
+    val di = ConfigurableDI()
     Tool(di).subcommands(AddCollection(di), AddItem(di), IndexAll(di)).main(args)
 }
 
@@ -366,236 +462,3 @@ fun ItemEntity.update(
         }
     }
 }
-
-data class Addr(
-    var workchain: Int,
-    var address: ByteArray,
-)
-
-data class Coll(
-    var address: Addr,
-    var nextItemIndex: Long,
-    var content: ByteArray,
-    var owner: Addr,
-)
-
-data class Item(
-    var address: Addr,
-    var initialized: Boolean,
-    var index: Long?,
-    var collection: Addr?,
-    var owner: Addr?,
-    var content: ByteArray?,
-)
-
-data class Royal(
-    var numerator: Int,
-    var denominator: Int,
-    var destination: Addr,
-)
-
-data class Attrib(
-    var trait: String,
-    var value: String
-)
-
-abstract class Cont
-
-data class ContOff(
-    var url: String
-) : Cont()
-
-data class ContOn(
-    var data: ByteArray
-) : Cont()
-
-data class Meta(
-    var name: String?,
-    var description: String?,
-    var image: Cont?,
-    var coverImage: Cont?,
-    val attributes: List<NFTItemAttribute>?
-)
-
-class Addr2Coll : ProcessFunction<Addr, Coll>(), DIGlobalAware {
-    companion object : KLogging()
-
-    override fun processElement(value: Addr?, ctx: Context?, out: Collector<Coll>?) {
-        val msgAddressCodec by lazy { MsgAddress.tlbCodec() }
-
-        value?.let {
-            runBlocking {
-                val liteClient: LiteApi by instance()
-                val lastBlock = liteClient.getMasterchainInfo().last
-
-                logger.debug { "running method `get_collection_data` on ${it.workchain}:${hex(it.address)}" }
-                val result = liteClient.runSmcMethod(
-                    0b100,
-                    lastBlock,
-                    LiteServerAccountId(it.workchain, it.address),
-                    "get_collection_data"
-                )
-                logger.debug { "result: $result" }
-                require(result.exitCode == 0) { "failed to run the method, exit code is ${result.exitCode}" }
-
-                val nextItemIndex = (result[0] as VmStackValue.TinyInt).value
-                val content = BagOfCells((result[1] as VmStackValue.Cell).cell).toByteArray()
-                val owner = (result[2] as VmStackValue.Slice).toCellSlice()
-                    .loadTlb(msgAddressCodec) as MsgAddressIntStd
-                out?.collect(Coll(it, nextItemIndex, content, Addr(owner.workchainId, owner.address.toByteArray())))
-            }
-        }
-    }
-}
-
-class Addr2Item : ProcessFunction<Addr, Item>(), DIGlobalAware {
-    companion object : KLogging()
-
-    override fun processElement(value: Addr?, ctx: Context?, out: Collector<Item>?) {
-        val msgAddressCodec by lazy { MsgAddress.tlbCodec() }
-        value?.let {
-            runBlocking {
-                val liteClient: LiteApi by instance()
-                val lastBlock = liteClient.getMasterchainInfo().last
-
-                logger.debug { "running method `get_nft_data` on ${it.workchain}:${hex(it.address)}" }
-                val result = liteClient.runSmcMethod(
-                    0b100,
-                    lastBlock,
-                    LiteServerAccountId(it.workchain, it.address),
-                    "get_nft_data"
-                )
-                logger.debug { "result: $result" }
-                if (result.exitCode != 0) {
-                    logger.warn { "Method exit code was ${result.exitCode}. NFT is most likely not initialized" }
-                    out?.collect(Item(it, false, null, null, null, null))
-                    return@runBlocking
-                }
-
-                if ((result[0] as VmStackValue.TinyInt).value == -1L) {
-                    val index = (result[1] as VmStackValue.TinyInt).value
-                    val collection =
-                        (result[2] as? VmStackValue.Slice)?.toCellSlice()
-                            ?.loadTlb(msgAddressCodec) as? MsgAddressIntStd
-                    val owner =
-                        (result[3] as VmStackValue.Slice).toCellSlice()
-                            .loadTlb(msgAddressCodec) as MsgAddressIntStd
-                    val content = BagOfCells((result[4] as VmStackValue.Cell).cell).toByteArray()
-                    out?.collect(
-                        Item(
-                            it,
-                            true,
-                            index,
-                            collection?.let { Addr(it.workchainId, it.address.toByteArray()) },
-                            Addr(owner.workchainId, owner.address.toByteArray()),
-                            content
-                        )
-                    )
-                } else {
-                    out?.collect(Item(it, false, null, null, null, null))
-                }
-            }
-        }
-    }
-}
-
-class Coll2ItemAddr : ProcessFunction<Coll, Addr>(), DIGlobalAware {
-    companion object : KLogging()
-
-    override fun processElement(value: Coll?, ctx: Context?, out: Collector<Addr>?) {
-        val msgAddressCodec by lazy { MsgAddress.tlbCodec() }
-
-        value?.let {
-            runBlocking {
-                val liteClient: LiteApi by instance()
-                val lastBlock = liteClient.getMasterchainInfo().last
-
-                logger.debug { "indexing all ${it.nextItemIndex} items of the ${it.address.workchain}:${hex(it.address.address)} collection" }
-                for (i in 0 until it.nextItemIndex) {
-                    logger.debug { "running method `get_nft_address_by_index` on ${it.address.workchain}:${hex(it.address.address)} with index $i" }
-                    val result = liteClient.runSmcMethod(
-                        0b100,
-                        lastBlock,
-                        LiteServerAccountId(it.address.workchain, it.address.address),
-                        "get_nft_address_by_index",
-                        VmStackValue.TinyInt(i)
-                    )
-
-                    require(result.exitCode == 0) { "Failed to run the method, exit code is ${result.exitCode}" }
-
-                    val item = (result.first() as VmStackValue.Slice).toCellSlice()
-                        .loadTlb(msgAddressCodec) as MsgAddressIntStd
-
-                    out?.collect(Addr(item.workchainId, item.address.toByteArray()))
-                }
-                logger.debug { "finished processing items of ${it.address.workchain}:${hex(it.address.address)} collection" }
-            }
-        }
-    }
-}
-
-class CollectionsTableAddrSource : RichSourceFunction<Addr>() {
-    private var isCancelled = false
-    override fun run(ctx: SourceFunction.SourceContext<Addr>?) {
-        transaction {
-            CollectionEntity.all()
-                .takeUnless { isCancelled }
-                ?.map { Addr(it.rawWorkchain, it.rawAddress) }
-                ?.forEach {
-                    ctx?.collect(it)
-                }
-        }
-    }
-
-    override fun cancel() {
-        isCancelled = true
-    }
-}
-
-class ItemsTableSink : RichSinkFunction<Item>() {
-    companion object : KLogging()
-
-    private fun ItemEntity.update(it: Item) {
-        lastIndexed = Clock.System.now()
-        initialized = it.initialized
-        index = it.index
-        it.collection?.let {
-            CollectionEntity.find((CollectionsTable.workchain eq it.workchain) and (CollectionsTable.address eq it.address))
-                .firstOrNull()?.let {
-                    collection = it
-                }
-        }
-        it.owner?.let {
-            rawOwnerWorkchain = it.workchain
-            rawOwnerAddress = it.address
-        }
-        // TODO: content
-    }
-
-    override fun invoke(value: Item?, context: SinkFunction.Context?) {
-        value?.let {
-            transaction {
-                ItemEntity.find((ItemsTable.workchain eq it.address.workchain) and (ItemsTable.address eq it.address.address))
-                    .firstOrNull()?.run {
-                        logger.debug { "updating item ${it.address.workchain}:${hex(it.address.address)}" }
-                        this.update(it)
-                    } ?: ItemEntity.new {
-                    logger.debug { "new item  ${it.address.workchain}:${hex(it.address.address)}" }
-                    discovered = Clock.System.now()
-                    rawWorkchain = it.address.workchain
-                    rawAddress = it.address.address
-                    this.update(it)
-                }
-            }
-        }
-    }
-}
-
-
-//
-//class Addr2Royal : ProcessFunction<Addr, Royal>
-//
-//class Item2Meta : ProcessFunction<Item, Meta>
-//
-//class Coll2Meta : ProcessFunction<Item, Meta>
-
