@@ -37,16 +37,16 @@ import org.ton.tlb.constructor.AnyTlbConstructor
 class LiteServerOptions : OptionGroup("lite server options") {
     val host by option("--lite-server-host", help = "Lite server host IP address", envvar = "LITE_SERVER_HOST")
         .int()
-        .default(1426768764)
+        .default(908566172)
     val port by option("--lite-server-port", help = "Lite server port number", envvar = "LITE_SERVER_PORT")
         .int()
-        .default(13724)
+        .default(51565)
     val publicKey by option(
         "--lite-server-public-key",
         help = "Lite server public key (base64)",
         envvar = "LITE_SERVER_PUBLIC_KEY"
     )
-        .default("R1KsqYlNks2Zows+I9s4ywhilbSevs9dH1x2KF9MeSU=")
+        .default("TDg+ILLlRugRB4Kpg3wXjPcoc+d+Eeb7kuVe16CS9z8=")
 }
 
 class IPFSOptions : OptionGroup("IPFS options") {
@@ -100,11 +100,10 @@ class QueryItem(override val di: DI) : CliktCommand(name = "query-item", help = 
                 println("\tCollection Address: ${item.collection?.toString(userFriendly = true)}")
                 println("\tOwner Address: ${item.owner.toString(userFriendly = true)}")
 
-                (item.collection?.let { liteClient.getNFTCollectionRoyalties(it) }
-                    ?: liteClient.getNFTItemRoyalties(item.address))
+                liteClient.getNFTRoyalty(item.collection ?: item.address)
                     ?.let { royalties ->
-                        println("\tRoyalty percentage: ${royalties.first.toFloat() * 100.0 / royalties.second}%")
-                        println("\tRoyalty destination: ${royalties.third.toString(userFriendly = true)}")
+                        println("\tRoyalty percentage: ${royalties.value() * 100.0}%")
+                        println("\tRoyalty destination: ${royalties.destination.toString(userFriendly = true)}")
                     }
 
                 liteClient.getNFTSale(item.owner)?.run {
@@ -135,10 +134,7 @@ class QueryCollection(override val di: DI) :
             println("\tNumber of items: ${collection.size}")
             println("\tOwner address: ${collection.owner.toString(userFriendly = true)}")
 
-            liteClient.getNFTCollectionRoyalties(collection.address)?.let {
-                println("\tRoyalty percentage: ${it.first.toFloat() * 100.0 / it.second}%")
-                println("\tRoyalty destination: ${it.third.toString(userFriendly = true)}")
-            }
+//
         }
     }
 }

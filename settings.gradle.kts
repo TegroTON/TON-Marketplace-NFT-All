@@ -27,6 +27,7 @@ dependencyResolutionManagement {
             version("logback", "1.2.11")
             version("logging", "2.1.23")
             version("reaktive", "1.2.1")
+            version("reaktive.coroutines", "1.2.1-nmtc")
             version("serialization", "1.3.2")
             version("slf4j", "1.7.36")
             version("sqlite", "3.36.0")
@@ -48,7 +49,7 @@ dependencyResolutionManagement {
             library("logging", "io.github.microutils", "kotlin-logging").versionRef("logging")
             library("reaktive", "com.badoo.reaktive", "reaktive").versionRef("reaktive")
             library("reaktive.annotations", "com.badoo.reaktive", "reaktive-annotations").versionRef("reaktive")
-            library("reaktive.coroutines", "com.badoo.reaktive", "coroutines-interop").versionRef("reaktive")
+            library("reaktive.coroutines", "com.badoo.reaktive", "coroutines-interop").versionRef("reaktive.coroutines")
             library(
                 "serialization.core",
                 "org.jetbrains.kotlinx",

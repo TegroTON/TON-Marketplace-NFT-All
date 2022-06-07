@@ -22,12 +22,12 @@ object ItemsTable : LongIdTable("items") {
     val royaltyDestinationAddress = binary("royalty_destination_address").nullable()
 
     // items that are owned by the NFTSale contracts have the following fields
-    val marketplaceWorkchain = integer("sale_marketplace_workchain").nullable()
-    val marketplaceAddress = binary("sale_marketplace_address", 32).nullable()
-    val sellerWorkchain = integer("sale_seller_workchain").nullable()
-    val sellerAddress = binary("sale_seller_address", 32).nullable()
-    val price = long("sale_price").nullable()
-    val marketplaceFee = long("sale_marketplace_fee").nullable()
+    val marketplaceWorkchain = integer("marketplace_workchain").nullable()
+    val marketplaceAddress = binary("marketplace_address", 32).nullable()
+    val sellerWorkchain = integer("seller_workchain").nullable()
+    val sellerAddress = binary("seller_address", 32).nullable()
+    val price = long("price").nullable()
+    val marketplaceFee = long("marketplace_fee").nullable()
 
     // NOT THE SAME AS `royaltyDestination*` - a rogue seller contract might send royalties to a different address
     // This shows the actual address where `saleRoyalty` will be sent
@@ -35,24 +35,21 @@ object ItemsTable : LongIdTable("items") {
     val saleRoyaltyDestinationAddress = binary("sale_royalty_destination_address").nullable()
     val saleRoyalty = long("sale_royalty").nullable()
 
-
     // metadata-related properties
-    val metadataUrl = text("metadata_url").nullable()
-    val metadataIpfs = text("metadata_ipfs").nullable()
-
-    val name = text("metadata_name").nullable()
-    val description = text("metadata_description").nullable()
-
-    val imageUrl = text("metadata_image_url").nullable()
-    val imageIpfs = text("metadata_image_ipfs").nullable()
-    val imageData = blob("metadata_image_data").nullable()
+    val name = text("name").nullable()
+    val description = text("description").nullable()
+    val image = text("image").nullable()
+    val imageData = blob("image_data").nullable()
 
     // various internal properties
     val approved = bool("approved").nullable()
 
-    /** First time this particular collection was added to the database */
+    /** First time this particular item was added to the database */
     val discovered = timestamp("discovered")
 
-    /** Last time collection was indexed by the nightcrawler tool */
-    val lastIndexed = timestamp("last_indexed")
+    /** Last time item was indexed by the nightcrawler tool */
+    val dataLastIndexed = timestamp("data_last_indexed").nullable()
+    val royaltyLastIndexed = timestamp("royalty_last_indexed").nullable()
+    val ownerLastIndexed = timestamp("owner_last_indexed").nullable()
+    val metadataLastIndexed = timestamp("metadata_last_indexed").nullable()
 }

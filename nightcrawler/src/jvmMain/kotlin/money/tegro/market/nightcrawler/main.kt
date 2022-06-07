@@ -1,12 +1,7 @@
 package money.tegro.market.nightcrawler
 
-import com.badoo.reaktive.base.Observer
-import com.badoo.reaktive.disposable.Disposable
+import com.badoo.reaktive.coroutinesinterop.singleFromCoroutine
 import com.badoo.reaktive.observable.*
-import com.badoo.reaktive.scheduler.computationScheduler
-import com.badoo.reaktive.scheduler.ioScheduler
-import com.badoo.reaktive.scheduler.mainScheduler
-import com.badoo.reaktive.scheduler.singleScheduler
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.clikt.parameters.arguments.argument
@@ -35,6 +30,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.bindSingleton
 import org.kodein.di.conf.ConfigurableDI
 import org.kodein.di.instance
+import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.block.MsgAddressIntStd
 import org.ton.crypto.base64
 import org.ton.lite.api.LiteApi
@@ -124,20 +120,15 @@ class AddCollection(override val di: DI) :
             val liteClient: LiteApi by instance()
             val ipfs: IPFS by instance()
 
-            addresses.forEach { address ->
-                val collection = liteClient.getNFTCollection(MsgAddressIntStd.parse(address))
-                val royalties = liteClient.getNFTCollectionRoyalties(collection.address)
-                val metadata = NFTCollectionMetadata.of(collection.content, ipfs)
+            val collectionAddresses = addresses.asObservable().map { MsgAddressIntStd.parse(it) }
+            val collectionData = collectionAddresses.collections(liteClient)
+            val collectionRoyalties = collectionAddresses.royalties(liteClient)
+            val collectionMetadata = collectionData.metadata(ipfs)
+            collectionData.upsert()
+            collectionRoyalties.upsert()
+            collectionMetadata.upsert()
 
-                transaction {
-                    CollectionEntity.find(collection.address).firstOrNull()?.run {
-                        logger.debug { "updating already existing collection ${this.address.toString(userFriendly = true)}" }
-                        update(collection, royalties, metadata)
-                    } ?: CollectionEntity.new(collection, royalties, metadata).run {
-                        logger.debug { "new collection ${this.address.toString(userFriendly = true)}" }
-                    }
-                }
-            }
+            delay(4_000L);
         }
     }
 
@@ -157,35 +148,13 @@ class AddItem(override val di: DI) :
             val liteClient: LiteApi by instance()
             val ipfs: IPFS by instance()
 
-            addresses.forEach { address ->
-                val item = liteClient.getNFTItem(MsgAddressIntStd.parse(address))
-                val royalties = liteClient.getNFTItemRoyalties(item.address)
-                val metadata =
-                    if (item is NFTItemInitialized) NFTItemMetadata.of(item.fullContent(liteClient), ipfs) else null
+            val itemAddresses = addresses.asObservable().map { MsgAddressIntStd.parse(it) }
+            val itemData = itemAddresses.items(liteClient)
+            itemData.upsert()
+            itemAddresses.royalties(liteClient).upsert()
+            itemData.metadata(ipfs, liteClient).upsert()
 
-                transaction {
-                    ItemEntity.find(item.address).firstOrNull()?.run {
-                        logger.debug { "updating already existing item ${this.address.toString(userFriendly = true)}" }
-                        update(item, royalties, metadata)
-                    } ?: ItemEntity.new(item, royalties, metadata).run {
-                        logger.debug { "new item ${this.address.toString(userFriendly = true)}" }
-                    }
-                }
-
-                metadata?.attributes?.forEach { attribute ->
-                    transaction {
-                        val dbItem = ItemEntity.find(item.address).firstOrNull()
-                        requireNotNull(dbItem)
-                        ItemAttributeEntity.find(dbItem, attribute.trait).firstOrNull()?.run {
-                            value = attribute.value
-                        } ?: ItemAttributeEntity.new {
-                            this.item = dbItem
-                            trait = attribute.trait
-                            value = attribute.value
-                        }
-                    }
-                }
-            }
+            delay(4_000L)
         }
     }
 
@@ -209,412 +178,193 @@ class IndexAll(override val di: DI) :
             val liteClient: LiteApi by instance()
             val ipfs: IPFS by instance()
 
-            val dbCollectionAddresses = observable<MsgAddressIntStd> { emitter ->
-                transaction {
-                    CollectionEntity.all().forEach {
-                        emitter.onNext(it.address)
-                    }
-                }
-            }.subscribeOn(mainScheduler)
-
-            val collectionData = dbCollectionAddresses
-                .observeOn(computationScheduler)
-                .map {
-                    runBlocking {
-                        liteClient.getNFTCollection(it)
-                    }
-                }
-
-            val collectionRoyalties = dbCollectionAddresses
-                .observeOn(computationScheduler)
-                .map {
-                    runBlocking {
-                        it to liteClient.getNFTCollectionRoyalties(it)
-                    }
-                }
-
-            val collectionMetadata = collectionData
-                .observeOn(computationScheduler)
-                .map {
-                    runBlocking {
-                        it.address to NFTCollectionMetadata.of(it.content, ipfs)
-                    }
-                }
-
-            val itemAddresses = collectionData
-                .observeOn(ioScheduler)
-                .flatMap {
-                    observable<Pair<MsgAddressIntStd, Long>> { emitter ->
-                        (0 until it.size).forEach { i ->
-                            emitter.onNext(it.address to i)
-                        }
-                    }
-                }
-                .flatMap(Runtime.getRuntime().availableProcessors()) {
-                    observableOf(it)
-                        .subscribeOn(computationScheduler)
-                        .map {
-                            runBlocking {
-                                liteClient.getNFTCollectionItem(it.first, it.second)
-                            }
-                        }
-                }
-
-            val itemRoyalties = itemAddresses
-                .observeOn(computationScheduler)
-                .map {
-                    runBlocking {
-                        it to liteClient.getNFTItemRoyalties(it)
-                    }
-                }
-
-            val itemData = itemAddresses
-                .observeOn(ioScheduler)
-                .flatMap(Runtime.getRuntime().availableProcessors()) {
-                    observableOf(it)
-                        .subscribeOn(computationScheduler)
-                        .map {
-                            runBlocking {
-                                liteClient.getNFTItem(it)
-                            }
-                        }
-                }
-
-            val itemMetadata = itemData
-                .observeOn(computationScheduler)
-                .filter { it is NFTItemInitialized }
-                .map {
-                    runBlocking {
-                        it.address to NFTItemMetadata.of((it as NFTItemInitialized).fullContent(liteClient), ipfs)
-                    }
-                }
-
-            collectionData
-                .observeOn(mainScheduler)
-                .subscribe {
-                    transaction {
-                        CollectionEntity.find(it.address).firstOrNull()?.run {
-                            logger.debug { "updating collection ${it.address.toString(userFriendly = true)} in the database" }
-                            lastIndexed = Clock.System.now()
-                            owner = it.owner
-                            nextItemIndex = it.size
-                        } ?: CollectionEntity.new {
-                            logger.debug { "adding new collection ${it.address.toString(userFriendly = true)} to the database" }
-                            discovered = Clock.System.now()
-                            lastIndexed = Clock.System.now()
-                            address = it.address
-                            owner = it.owner
-                            nextItemIndex = it.size
-                        }
-                    }
-                }
-
-            itemData
-                .observeOn(mainScheduler)
-                .subscribe {
-                    transaction {
-                        ItemEntity.find(it.address).firstOrNull()?.run {
-                            logger.debug { "updating item ${it.address.toString(userFriendly = true)} in the database" }
-                            lastIndexed = Clock.System.now()
-                            address = it.address
-                            initialized = it is NFTItemInitialized
-
-                            if (it is NFTItemInitialized) {
-                                index = it.index
-                                this.collection = it.collection?.let { CollectionEntity.find(it).firstOrNull() }
-                                owner = it.owner
-                            }
-                        } ?: ItemEntity.new {
-                            logger.debug { "adding new item ${it.address.toString(userFriendly = true)} to the database" }
-                            discovered = Clock.System.now()
-                            lastIndexed = Clock.System.now()
-                            address = it.address
-                            initialized = it is NFTItemInitialized
-
-                            if (it is NFTItemInitialized) {
-                                index = it.index
-                                this.collection = it.collection?.let { CollectionEntity.find(it).firstOrNull() }
-                                owner = it.owner
-                            }
-                        }
-                    }
-                }
-
-            collectionRoyalties
-                .observeOn(mainScheduler)
-                .subscribe {
-                    transaction {
-                        CollectionEntity.find(it.first).firstOrNull()?.run {
-                            logger.debug { "updating collection ${it.first.toString(userFriendly = true)} royalties in the database" }
-                            lastIndexed = Clock.System.now()
-                            royaltyNumerator = it.second?.first
-                            royaltyDenominator = it.second?.second
-                            royaltyDestination = it.second?.third
-                        }
-                    }
-                }
-
-            itemRoyalties
-                .observeOn(mainScheduler)
-                .subscribe {
-                    transaction {
-                        ItemEntity.find(it.first).firstOrNull()?.run {
-                            logger.debug { "updating item ${it.first.toString(userFriendly = true)} royalties in the database" }
-                            lastIndexed = Clock.System.now()
-                            royaltyNumerator = it.second?.first
-                            royaltyDenominator = it.second?.second
-                            royaltyDestination = it.second?.third
-                        }
-                    }
-                }
-
-            collectionMetadata
-                .observeOn(mainScheduler)
-                .subscribe {
-                    val (address, metadata) = it
-                    transaction {
-                        CollectionEntity.find(address).firstOrNull()?.run {
-                            logger.debug { "updating collection ${address.toString(userFriendly = true)} metadata in the database" }
-                            lastIndexed = Clock.System.now()
-                            if (metadata is NFTCollectionMetadataOffChainHttp) {
-                                metadataUrl = metadata.url
-                                metadataIpfs = null
-                            } else if (metadata is NFTCollectionMetadataOffChainIpfs) {
-                                metadataUrl = null
-                                metadataIpfs = metadata.id
-                            }
-
-                            name = metadata.name
-                            description = metadata.description
-
-                            when (metadata.image) {
-                                is NFTContentOffChainHttp -> {
-                                    imageUrl = (metadata.image as NFTContentOffChainHttp).url
-                                    imageIpfs = null
-                                    imageData = null
-                                }
-                                is NFTContentOffChainIpfs -> {
-                                    imageUrl = null
-                                    imageIpfs = (metadata.image as NFTContentOffChainIpfs).id
-                                    imageData = null
-                                }
-                                is NFTContentOnChain -> {
-                                    imageUrl = null
-                                    imageIpfs = null
-                                    imageData = ExposedBlob((metadata.image as NFTContentOnChain).data)
-                                }
-                            }
-
-                            if (metadata.coverImage is NFTContentOffChainHttp) {
-                                coverImageUrl = (metadata.coverImage as NFTContentOffChainHttp).url
-                                coverImageIpfs = null
-                                coverImageData = null
-                            } else if (metadata.coverImage is NFTContentOffChainIpfs) {
-                                coverImageUrl = null
-                                coverImageIpfs = (metadata.coverImage as NFTContentOffChainIpfs).id
-                                coverImageData = null
-                            } else if (metadata.coverImage is NFTContentOnChain) {
-                                coverImageUrl = null
-                                coverImageIpfs = null
-                                coverImageData = ExposedBlob((metadata.coverImage as NFTContentOnChain).data)
-                            }
-                        }
-                    }
-                }
-
-            itemMetadata
-                .observeOn(mainScheduler)
-                .subscribe {
-                    val (address, metadata) = it
-                    transaction {
-                        ItemEntity.find(address).firstOrNull()?.run {
-                            logger.debug { "updating item ${address.toString(userFriendly = true)} metadata in the database" }
-                            if (metadata is NFTItemMetadataOffChainHttp) {
-                                metadataUrl = metadata.url
-                                metadataIpfs = null
-                            } else if (metadata is NFTItemMetadataOffChainIpfs) {
-                                metadataUrl = null
-                                metadataIpfs = metadata.id
-                            }
-
-                            name = metadata.name
-                            description = metadata.description
-
-                            when (metadata.image) {
-                                is NFTContentOffChainHttp -> {
-                                    imageUrl = (metadata.image as NFTContentOffChainHttp).url
-                                    imageIpfs = null
-                                    imageData = null
-                                }
-                                is NFTContentOffChainIpfs -> {
-                                    imageUrl = null
-                                    imageIpfs = (metadata.image as NFTContentOffChainIpfs).id
-                                    imageData = null
-                                }
-                                is NFTContentOnChain -> {
-                                    imageUrl = null
-                                    imageIpfs = null
-                                    imageData = ExposedBlob((metadata.image as NFTContentOnChain).data)
-                                }
-                            }
-                        }
-                    }
-                    metadata.attributes.orEmpty().forEach { attribute ->
-                        transaction {
-                            val dbItem = ItemEntity.find(address).firstOrNull()
-                            requireNotNull(dbItem)
-                            ItemAttributeEntity.find(dbItem, attribute.trait).firstOrNull()?.run {
-                                value = attribute.value
-                            } ?: ItemAttributeEntity.new {
-                                this.item = dbItem
-                                trait = attribute.trait
-                                value = attribute.value
-                            }
-                        }
-                    }
-                }
-
-            delay(20_000L)
+            // TODO
         }
     }
 
     companion object : KLogging()
 }
 
+fun Observable<MsgAddressIntStd>.collections(
+    liteClient: LiteApi,
+    referenceBlock: TonNodeBlockIdExt = runBlocking { liteClient.getMasterchainInfo().last },
+) =
+    this.flatMapSingle { singleFromCoroutine { NFTCollection.of(it, liteClient, referenceBlock) } }
+
+@JvmName("itemsNFTCollection")
+fun Observable<NFTCollection>.items(
+    liteClient: LiteApi,
+    referenceBlock: TonNodeBlockIdExt = runBlocking { liteClient.getMasterchainInfo().last },
+) =
+    this.flatMap {
+        observable<Pair<MsgAddressIntStd, Long>> { emitter ->
+            (0 until it.nextItemIndex).forEach { index ->
+                emitter.onNext(it.address to index)
+            }
+        }
+    }
+        .flatMapSingle {
+            singleFromCoroutine { NFTItem.of(it.first, it.second, liteClient, referenceBlock) }
+        }
+
+@JvmName("itemsMsgAddressIntStd")
+fun Observable<MsgAddressIntStd>.items(
+    liteClient: LiteApi,
+    referenceBlock: TonNodeBlockIdExt = runBlocking { liteClient.getMasterchainInfo().last },
+) =
+    this.flatMapSingle { singleFromCoroutine { NFTItem.of(it, liteClient, referenceBlock) } }
+
+fun Observable<MsgAddressIntStd>.royalties(
+    liteClient: LiteApi,
+    referenceBlock: TonNodeBlockIdExt = runBlocking { liteClient.getMasterchainInfo().last },
+) =
+    observable<Pair<MsgAddressIntStd, NFTRoyalty>> { emitter ->
+        this.flatMapSingle { singleFromCoroutine { it to NFTRoyalty.of(it, liteClient, referenceBlock) } }
+            .subscribe {
+                val (address, royalty) = it
+                if (royalty != null) emitter.onNext(address to royalty)
+            }
+    }
+
+fun Observable<NFTCollection>.metadata(ipfs: IPFS) = this.flatMapSingle {
+    singleFromCoroutine { it.address to NFTMetadata.of<NFTCollectionMetadata>(it.content, ipfs) }
+}
+
+fun Observable<NFTItem>.metadata(
+    ipfs: IPFS, liteClient: LiteApi,
+    referenceBlock: TonNodeBlockIdExt = runBlocking { liteClient.getMasterchainInfo().last },
+) =
+    observable<Pair<MsgAddressIntStd, NFTItemMetadata>> { emitter ->
+        this.flatMapSingle {
+            singleFromCoroutine {
+                (it as? NFTItemInitialized)?.let {
+                    it.address to NFTMetadata.of<NFTItemMetadata>(it.fullContent(liteClient, referenceBlock), ipfs)
+                }
+            }
+        }.subscribe {
+            if (it != null) emitter.onNext(it)
+        }
+    }
+
+@JvmName("upsertNFTCollection")
+fun Observable<NFTCollection>.upsert() =
+    this.subscribe {
+        transaction {
+            val collection = CollectionEntity.find(it.address).firstOrNull() ?: CollectionEntity.new {
+                discovered = Clock.System.now()
+                workchain = it.address.workchainId
+                address = it.address.address.toByteArray()
+            }
+
+            collection.run {
+                ownerWorkchain = it.owner.workchainId
+                ownerAddress = it.owner.address.toByteArray()
+                nextItemIndex = it.nextItemIndex
+
+                dataLastIndexed = Clock.System.now()
+            }
+        }
+    }
+
+@JvmName("upsertNFTItem")
+fun Observable<NFTItem>.upsert() =
+    this.subscribe {
+        transaction {
+            val item = ItemEntity.find(it.address).firstOrNull() ?: ItemEntity.new {
+                discovered = Clock.System.now()
+                workchain = it.address.workchainId
+                address = it.address.address.toByteArray()
+            }
+
+            item.run {
+                initialized = it is NFTItemInitialized
+
+                if (it is NFTItemInitialized) {
+                    index = it.index
+                    this.collection = it.collection?.let { CollectionEntity.find(it).firstOrNull() }
+
+                    ownerWorkchain = it.owner.workchainId
+                    ownerAddress = it.owner.address.toByteArray()
+                }
+
+                dataLastIndexed = Clock.System.now()
+            }
+        }
+    }
+
+fun Observable<Pair<MsgAddressIntStd, NFTRoyalty>>.upsert() =
+    this.subscribe {
+        val (address, royalty) = it
+        transaction {
+            // If not in database, do nothing - since we don't know whether to add new item or collection in this case
+            (ItemEntity.find(address).firstOrNull() ?: CollectionEntity.find(address).firstOrNull())?.run {
+                royaltyNumerator = royalty.numerator
+                royaltyDenominator = royalty.denominator
+                royaltyDestinationWorkchain = address.workchainId
+                royaltyDestinationAddress = address.address.toByteArray()
+
+                royaltyLastIndexed = Clock.System.now()
+            }
+        }
+    }
+
+@JvmName("upsertMsgAddressIntStdNFTMetadata")
+fun Observable<Pair<MsgAddressIntStd, NFTMetadata>>.upsert() =
+    this.subscribe {
+        val (address, metadata) = it
+        transaction {
+            // common metadata
+            val entity = if (metadata is NFTItemMetadata) {
+                ItemEntity.find(address).firstOrNull() ?: ItemEntity.new {
+                    discovered = Clock.System.now()
+                    workchain = address.workchainId
+                    this.address = address.address.toByteArray()
+                }
+            } else {
+                CollectionEntity.find(address).firstOrNull() ?: CollectionEntity.new {
+                    discovered = Clock.System.now()
+                    workchain = address.workchainId
+                    this.address = address.address.toByteArray()
+                }
+            }
+
+            entity.run {
+                name = metadata.name
+                description = metadata.description
+                image = metadata.image
+                imageData = metadata.imageData?.let { ExposedBlob(it) }
+
+                metadataLastIndexed = Clock.System.now()
+            }
+        }
+
+        if (metadata is NFTItemMetadata) {
+            metadata.attributes.orEmpty().forEach { attribute ->
+                transaction {
+                    val item = ItemEntity.find(address).firstOrNull()
+                    requireNotNull(item)
+                    ItemAttributeEntity.find(item, attribute.trait).firstOrNull()?.run {
+                        value = attribute.value
+                    } ?: ItemAttributeEntity.new {
+                        this.item = item
+                        trait = attribute.trait
+                        value = attribute.value
+                    }
+                }
+            }
+        } else if (metadata is NFTCollectionMetadata) {
+            transaction {
+                val collection = CollectionEntity.find(address).firstOrNull()
+                requireNotNull(collection)
+                collection.run {
+                    coverImage = metadata.coverImage
+                    coverImageData = metadata.coverImageData?.let { ExposedBlob(it) }
+                }
+            }
+        }
+    }
+
 fun main(args: Array<String>) {
     val di = ConfigurableDI()
     Tool(di).subcommands(AddCollection(di), AddItem(di), IndexAll(di)).main(args)
-}
-
-fun CollectionEntity.Companion.new(
-    collection: NFTCollection,
-    royalties: Triple<Int, Int, MsgAddressIntStd>?,
-    metadata: NFTCollectionMetadata
-): CollectionEntity =
-    this.new {
-        discovered = Clock.System.now()
-        update(collection, royalties, metadata)
-    }
-
-fun CollectionEntity.update(
-    collection: NFTCollection,
-    royalties: Triple<Int, Int, MsgAddressIntStd>?,
-    metadata: NFTCollectionMetadata
-) {
-    lastIndexed = Clock.System.now()
-    address = collection.address
-    owner = collection.owner
-    nextItemIndex = collection.size
-
-    royalties?.let {
-        royaltyNumerator = it.first
-        royaltyDenominator = it.second
-        royaltyDestination = it.third
-    }
-
-    if (metadata is NFTCollectionMetadataOffChainHttp) {
-        metadataUrl = metadata.url
-        metadataIpfs = null
-    } else if (metadata is NFTCollectionMetadataOffChainIpfs) {
-        metadataUrl = null
-        metadataIpfs = metadata.id
-    }
-
-    name = metadata.name
-    description = metadata.description
-
-    when (metadata.image) {
-        is NFTContentOffChainHttp -> {
-            imageUrl = (metadata.image as NFTContentOffChainHttp).url
-            imageIpfs = null
-            imageData = null
-        }
-        is NFTContentOffChainIpfs -> {
-            imageUrl = null
-            imageIpfs = (metadata.image as NFTContentOffChainIpfs).id
-            imageData = null
-        }
-        is NFTContentOnChain -> {
-            imageUrl = null
-            imageIpfs = null
-            imageData = ExposedBlob((metadata.image as NFTContentOnChain).data)
-        }
-    }
-
-    if (metadata.coverImage is NFTContentOffChainHttp) {
-        coverImageUrl = (metadata.coverImage as NFTContentOffChainHttp).url
-        coverImageIpfs = null
-        coverImageData = null
-    } else if (metadata.coverImage is NFTContentOffChainIpfs) {
-        coverImageUrl = null
-        coverImageIpfs = (metadata.coverImage as NFTContentOffChainIpfs).id
-        coverImageData = null
-    } else if (metadata.coverImage is NFTContentOnChain) {
-        coverImageUrl = null
-        coverImageIpfs = null
-        coverImageData = ExposedBlob((metadata.coverImage as NFTContentOnChain).data)
-    }
-}
-
-
-fun ItemEntity.Companion.new(
-    item: NFTItem,
-    royalties: Triple<Int, Int, MsgAddressIntStd>?,
-    metadata: NFTItemMetadata?
-): ItemEntity =
-    this.new {
-        discovered = Clock.System.now()
-        update(item, royalties, metadata)
-    }
-
-fun ItemEntity.update(
-    item: NFTItem,
-    royalties: Triple<Int, Int, MsgAddressIntStd>?,
-    metadata: NFTItemMetadata?
-) {
-    lastIndexed = Clock.System.now()
-    address = item.address
-    initialized = item is NFTItemInitialized
-
-    if (item is NFTItemInitialized) {
-        this.collection = item.collection?.let { money.tegro.market.db.CollectionEntity.find(it).firstOrNull() }
-        owner = item.owner
-    }
-
-    royalties?.let {
-        royaltyNumerator = it.first
-        royaltyDenominator = it.second
-        royaltyDestination = it.third
-    }
-
-    metadata?.let { metadata ->
-        if (metadata is NFTItemMetadataOffChainHttp) {
-            metadataUrl = metadata.url
-            metadataIpfs = null
-        } else if (metadata is NFTItemMetadataOffChainIpfs) {
-            metadataUrl = null
-            metadataIpfs = metadata.id
-        }
-
-        name = metadata.name
-        description = metadata.description
-
-        when (metadata.image) {
-            is NFTContentOffChainHttp -> {
-                imageUrl = (metadata.image as NFTContentOffChainHttp).url
-                imageIpfs = null
-                imageData = null
-            }
-            is NFTContentOffChainIpfs -> {
-                imageUrl = null
-                imageIpfs = (metadata.image as NFTContentOffChainIpfs).id
-                imageData = null
-            }
-            is NFTContentOnChain -> {
-                imageUrl = null
-                imageIpfs = null
-                imageData = ExposedBlob((metadata.image as NFTContentOnChain).data)
-            }
-        }
-    }
 }

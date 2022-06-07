@@ -7,9 +7,9 @@ object CollectionsTable : LongIdTable("collections") {
     // basic collection properties, present in all kinds of collections
     val workchain = integer("workchain")
     val address = binary("address", 32).uniqueIndex()
-    val ownerWorkchain = integer("owner_workchain")
-    val ownerAddress = binary("owner_address", 32)
-    val nextItemIndex = long("next_item_index")
+    val ownerWorkchain = integer("owner_workchain").nullable()
+    val ownerAddress = binary("owner_address", 32).nullable()
+    val nextItemIndex = long("next_item_index").nullable()
 
     // royalty-related properties
     val royaltyNumerator = integer("royalty_numerator").nullable()
@@ -18,19 +18,12 @@ object CollectionsTable : LongIdTable("collections") {
     val royaltyDestinationAddress = binary("royalty_destination_address").nullable()
 
     // metadata-related properties
-    val metadataUrl = text("metadata_url").nullable()
-    val metadataIpfs = text("metadata_ipfs").nullable()
-
-    val name = text("metadata_name").nullable()
-    val description = text("metadata_description").nullable()
-
-    val imageUrl = text("metadata_image_url").nullable()
-    val imageIpfs = text("metadata_image_ipfs").nullable()
-    val imageData = blob("metadata_image_data").nullable()
-
-    val coverImageUrl = text("metadata_cover_image_url").nullable()
-    val coverImageIpfs = text("metadata_cover_image_ipfs").nullable()
-    val coverImageData = blob("metadata_cover_image_data").nullable()
+    val name = text("name").nullable()
+    val description = text("description").nullable()
+    val image = text("image").nullable()
+    val imageData = blob("image_data").nullable()
+    val coverImage = text("cover_image").nullable()
+    val coverImageData = blob("cover_image_data").nullable()
 
     // various internal properties
     /** If true, collection was manually approved and is public */
@@ -40,5 +33,7 @@ object CollectionsTable : LongIdTable("collections") {
     val discovered = timestamp("discovered")
 
     /** Last time collection was indexed by the nightcrawler tool */
-    val lastIndexed = timestamp("last_indexed")
+    val dataLastIndexed = timestamp("data_last_indexed").nullable()
+    val royaltyLastIndexed = timestamp("royalty_last_indexed").nullable()
+    val metadataLastIndexed = timestamp("metadata_last_indexed").nullable()
 }

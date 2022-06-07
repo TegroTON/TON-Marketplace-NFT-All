@@ -1,6 +1,8 @@
 package money.tegro.market.nft
 
+import kotlinx.coroutines.runBlocking
 import mu.KLogging
+import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.block.*
 import org.ton.boc.BagOfCells
 import org.ton.cell.Cell
@@ -12,27 +14,18 @@ import org.ton.tlb.constructor.AnyTlbConstructor
 import org.ton.tlb.loadTlb
 import org.ton.tlb.storeTlb
 
-interface NFTItem {
-    abstract val address: MsgAddressIntStd
-
+interface NFTItem : NFT {
     companion object : KLogging() {
         private val msgAddressCodec by lazy { MsgAddress.tlbCodec() }
 
         @JvmStatic
-        suspend fun fetch(
+        suspend fun of(
+            address: MsgAddressIntStd,
             liteClient: LiteApi,
-            address: MsgAddressIntStd
+            referenceBlock: TonNodeBlockIdExt = runBlocking { liteClient.getMasterchainInfo().last },
         ): NFTItem {
-            val lastBlock = liteClient.getMasterchainInfo().last
-            logger.debug("last block: $lastBlock")
-
             logger.debug("running method `get_nft_data` on ${address.toString(userFriendly = true)}")
-            val result = liteClient.runSmcMethod(
-                0b100, // we only care about the result
-                lastBlock,
-                LiteServerAccountId(address),
-                "get_nft_data"
-            )
+            val result = liteClient.runSmcMethod(0b100, referenceBlock, LiteServerAccountId(address), "get_nft_data")
 
             logger.debug("response: $result")
             if (result.exitCode != 0) {
@@ -60,6 +53,29 @@ interface NFTItem {
                 )
             }
         }
+
+        @JvmStatic
+        suspend fun of(
+            collection: MsgAddressIntStd,
+            index: Long,
+            liteClient: LiteApi,
+            referenceBlock: TonNodeBlockIdExt = runBlocking { liteClient.getMasterchainInfo().last },
+        ): MsgAddressIntStd {
+            logger.debug("running method `get_nft_address_by_index` on ${collection.toString(userFriendly = true)}")
+            val result = liteClient.runSmcMethod(
+                0b100,
+                referenceBlock,
+                LiteServerAccountId(collection),
+                "get_nft_address_by_index",
+                VmStackValue.TinyInt(index)
+            )
+
+            logger.debug("response: $result")
+            require(result.exitCode == 0) { "Failed to run the method, exit code is ${result.exitCode}" }
+
+            return (result.first() as VmStackValue.Slice).toCellSlice()
+                .loadTlb(msgAddressCodec) as MsgAddressIntStd
+        }
     }
 }
 
@@ -70,8 +86,37 @@ data class NFTItemInitialized(
     val owner: MsgAddressIntStd,
     val content: Cell,
 ) : NFTItem {
-    suspend fun fullContent(liteClient: LiteApi) =
-        collection?.let { liteClient.getNFTCollectionItemContent(it, index, content) } ?: content
+    suspend fun fullContent(
+        liteClient: LiteApi,
+        referenceBlock: TonNodeBlockIdExt = runBlocking { liteClient.getMasterchainInfo().last },
+    ) =
+        collection?.let { NFTItemInitialized.content(it, index, content, liteClient, referenceBlock) } ?: content
+
+    companion object : KLogging() {
+        @JvmStatic
+        suspend fun content(
+            collection: MsgAddressIntStd,
+            index: Long,
+            individualContent: Cell,
+            liteClient: LiteApi,
+            referenceBlock: TonNodeBlockIdExt = runBlocking { liteClient.getMasterchainInfo().last },
+        ): Cell {
+            logger.debug("running method `get_nft_content` on ${collection.toString(userFriendly = true)}")
+            val result = liteClient.runSmcMethod(
+                0b100,
+                referenceBlock,
+                LiteServerAccountId(collection),
+                "get_nft_content",
+                VmStackValue.TinyInt(index),
+                VmStackValue.Cell(individualContent)
+            )
+
+            logger.debug("response: $result")
+            require(result.exitCode == 0) { "Failed to run the method, exit code is ${result.exitCode}" }
+
+            return (result.first() as VmStackValue.Cell).cell
+        }
+    }
 }
 
 data class NFTItemUninitialized(
@@ -127,8 +172,3 @@ data class NFTItemStub(
         storeTlb(MessageRelaxed.tlbCodec(AnyTlbConstructor), message)
     }
 }
-
-
-suspend fun LiteApi.getNFTItem(address: MsgAddressIntStd) = NFTItem.fetch(this, address)
-
-suspend fun LiteApi.getNFTItemRoyalties(address: MsgAddressIntStd) = NFT.getRoyaltyParameters(this, address)
