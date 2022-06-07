@@ -1,5 +1,7 @@
 package money.tegro.market.nightcrawler
 
+import com.badoo.reaktive.base.Observer
+import com.badoo.reaktive.disposable.Disposable
 import com.badoo.reaktive.observable.*
 import com.badoo.reaktive.scheduler.computationScheduler
 import com.badoo.reaktive.scheduler.ioScheduler
@@ -190,6 +192,12 @@ class AddItem(override val di: DI) :
     companion object : KLogging()
 }
 
+class DBCollectionAddresses : Observable<MsgAddressIntStd> {
+    override fun subscribe(observer: ObservableObserver<MsgAddressIntStd>) {
+
+    }
+}
+
 class IndexAll(override val di: DI) :
     CliktCommand(
         name = "index-all",
@@ -225,7 +233,15 @@ class IndexAll(override val di: DI) :
                     }
                 }
 
-            val itemData = collectionData
+            val collectionMetadata = collectionData
+                .observeOn(computationScheduler)
+                .map {
+                    runBlocking {
+                        it.address to NFTCollectionMetadata.of(it.content, ipfs)
+                    }
+                }
+
+            val itemAddresses = collectionData
                 .observeOn(ioScheduler)
                 .flatMap {
                     observable<Pair<MsgAddressIntStd, Long>> { emitter ->
@@ -234,7 +250,7 @@ class IndexAll(override val di: DI) :
                         }
                     }
                 }
-                .flatMap(4) {
+                .flatMap(Runtime.getRuntime().availableProcessors()) {
                     observableOf(it)
                         .subscribeOn(computationScheduler)
                         .map {
@@ -243,7 +259,18 @@ class IndexAll(override val di: DI) :
                             }
                         }
                 }
-                .flatMap(4) {
+
+            val itemRoyalties = itemAddresses
+                .observeOn(computationScheduler)
+                .map {
+                    runBlocking {
+                        it to liteClient.getNFTItemRoyalties(it)
+                    }
+                }
+
+            val itemData = itemAddresses
+                .observeOn(ioScheduler)
+                .flatMap(Runtime.getRuntime().availableProcessors()) {
                     observableOf(it)
                         .subscribeOn(computationScheduler)
                         .map {
@@ -251,6 +278,15 @@ class IndexAll(override val di: DI) :
                                 liteClient.getNFTItem(it)
                             }
                         }
+                }
+
+            val itemMetadata = itemData
+                .observeOn(computationScheduler)
+                .filter { it is NFTItemInitialized }
+                .map {
+                    runBlocking {
+                        it.address to NFTItemMetadata.of((it as NFTItemInitialized).fullContent(liteClient), ipfs)
+                    }
                 }
 
             collectionData
@@ -318,7 +354,127 @@ class IndexAll(override val di: DI) :
                     }
                 }
 
-            delay(100000000000L)
+            itemRoyalties
+                .observeOn(mainScheduler)
+                .subscribe {
+                    transaction {
+                        ItemEntity.find(it.first).firstOrNull()?.run {
+                            logger.debug { "updating item ${it.first.toString(userFriendly = true)} royalties in the database" }
+                            lastIndexed = Clock.System.now()
+                            royaltyNumerator = it.second?.first
+                            royaltyDenominator = it.second?.second
+                            royaltyDestination = it.second?.third
+                        }
+                    }
+                }
+
+            collectionMetadata
+                .observeOn(mainScheduler)
+                .subscribe {
+                    val (address, metadata) = it
+                    transaction {
+                        CollectionEntity.find(address).firstOrNull()?.run {
+                            logger.debug { "updating collection ${address.toString(userFriendly = true)} metadata in the database" }
+                            lastIndexed = Clock.System.now()
+                            if (metadata is NFTCollectionMetadataOffChainHttp) {
+                                metadataUrl = metadata.url
+                                metadataIpfs = null
+                            } else if (metadata is NFTCollectionMetadataOffChainIpfs) {
+                                metadataUrl = null
+                                metadataIpfs = metadata.id
+                            }
+
+                            name = metadata.name
+                            description = metadata.description
+
+                            when (metadata.image) {
+                                is NFTContentOffChainHttp -> {
+                                    imageUrl = (metadata.image as NFTContentOffChainHttp).url
+                                    imageIpfs = null
+                                    imageData = null
+                                }
+                                is NFTContentOffChainIpfs -> {
+                                    imageUrl = null
+                                    imageIpfs = (metadata.image as NFTContentOffChainIpfs).id
+                                    imageData = null
+                                }
+                                is NFTContentOnChain -> {
+                                    imageUrl = null
+                                    imageIpfs = null
+                                    imageData = ExposedBlob((metadata.image as NFTContentOnChain).data)
+                                }
+                            }
+
+                            if (metadata.coverImage is NFTContentOffChainHttp) {
+                                coverImageUrl = (metadata.coverImage as NFTContentOffChainHttp).url
+                                coverImageIpfs = null
+                                coverImageData = null
+                            } else if (metadata.coverImage is NFTContentOffChainIpfs) {
+                                coverImageUrl = null
+                                coverImageIpfs = (metadata.coverImage as NFTContentOffChainIpfs).id
+                                coverImageData = null
+                            } else if (metadata.coverImage is NFTContentOnChain) {
+                                coverImageUrl = null
+                                coverImageIpfs = null
+                                coverImageData = ExposedBlob((metadata.coverImage as NFTContentOnChain).data)
+                            }
+                        }
+                    }
+                }
+
+            itemMetadata
+                .observeOn(mainScheduler)
+                .subscribe {
+                    val (address, metadata) = it
+                    transaction {
+                        ItemEntity.find(address).firstOrNull()?.run {
+                            logger.debug { "updating item ${address.toString(userFriendly = true)} metadata in the database" }
+                            if (metadata is NFTItemMetadataOffChainHttp) {
+                                metadataUrl = metadata.url
+                                metadataIpfs = null
+                            } else if (metadata is NFTItemMetadataOffChainIpfs) {
+                                metadataUrl = null
+                                metadataIpfs = metadata.id
+                            }
+
+                            name = metadata.name
+                            description = metadata.description
+
+                            when (metadata.image) {
+                                is NFTContentOffChainHttp -> {
+                                    imageUrl = (metadata.image as NFTContentOffChainHttp).url
+                                    imageIpfs = null
+                                    imageData = null
+                                }
+                                is NFTContentOffChainIpfs -> {
+                                    imageUrl = null
+                                    imageIpfs = (metadata.image as NFTContentOffChainIpfs).id
+                                    imageData = null
+                                }
+                                is NFTContentOnChain -> {
+                                    imageUrl = null
+                                    imageIpfs = null
+                                    imageData = ExposedBlob((metadata.image as NFTContentOnChain).data)
+                                }
+                            }
+                        }
+                    }
+                    metadata.attributes.orEmpty().forEach { attribute ->
+                        transaction {
+                            val dbItem = ItemEntity.find(address).firstOrNull()
+                            requireNotNull(dbItem)
+                            ItemAttributeEntity.find(dbItem, attribute.trait).firstOrNull()?.run {
+                                value = attribute.value
+                            } ?: ItemAttributeEntity.new {
+                                this.item = dbItem
+                                trait = attribute.trait
+                                value = attribute.value
+                            }
+                        }
+                    }
+                }
+
+            delay(20_000L)
         }
     }
 
