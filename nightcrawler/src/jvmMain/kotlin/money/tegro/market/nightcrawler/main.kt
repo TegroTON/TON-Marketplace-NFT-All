@@ -2,6 +2,8 @@ package money.tegro.market.nightcrawler
 
 import com.badoo.reaktive.coroutinesinterop.singleFromCoroutine
 import com.badoo.reaktive.observable.*
+import com.badoo.reaktive.scheduler.ioScheduler
+import com.badoo.reaktive.scheduler.singleScheduler
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.clikt.parameters.arguments.argument
@@ -35,6 +37,7 @@ import org.ton.block.MsgAddressIntStd
 import org.ton.crypto.base64
 import org.ton.lite.api.LiteApi
 import org.ton.lite.client.LiteClient
+import kotlin.system.exitProcess
 
 
 class LiteServerOptions : OptionGroup("lite server options") {
@@ -124,11 +127,24 @@ class AddCollection(override val di: DI) :
             val collectionData = collectionAddresses.collections(liteClient)
             val collectionRoyalties = collectionAddresses.royalties(liteClient)
             val collectionMetadata = collectionData.metadata(ipfs)
+
             collectionData.upsert()
             collectionRoyalties.upsert()
             collectionMetadata.upsert()
 
-            delay(4_000L);
+            concat(
+                collectionAddresses,
+                collectionData,
+                collectionRoyalties,
+                collectionMetadata
+            ).subscribe(
+                onComplete = {
+                    runBlocking { delay(5_000L) }
+                    logger.debug { "completed" }
+                    exitProcess(0)
+                }
+            )
+            delay(Long.MAX_VALUE)
         }
     }
 
@@ -150,21 +166,34 @@ class AddItem(override val di: DI) :
 
             val itemAddresses = addresses.asObservable().map { MsgAddressIntStd.parse(it) }
             val itemData = itemAddresses.items(liteClient)
-            itemData.upsert()
-            itemAddresses.royalties(liteClient).upsert()
-            itemData.metadata(ipfs, liteClient).upsert()
+            val itemRoyalties = itemAddresses.royalties(liteClient)
+            val itemSellers = itemData.filter { it is NFTItemInitialized }.map { (it as NFTItemInitialized).owner }
+                .sellers(liteClient)
+            val itemMetadata = itemData.metadata(ipfs, liteClient)
 
-            delay(4_000L)
+            itemData.upsert()
+            itemRoyalties.upsert()
+            itemSellers.upsert()
+            itemMetadata.upsert()
+
+            concat(
+                itemAddresses,
+                itemData,
+                itemRoyalties,
+                itemSellers,
+                itemMetadata
+            ).subscribe(
+                onComplete = {
+                    runBlocking { delay(5_000L) }
+                    logger.debug { "completed" }
+                    exitProcess(0)
+                }
+            )
+            delay(Long.MAX_VALUE)
         }
     }
 
     companion object : KLogging()
-}
-
-class DBCollectionAddresses : Observable<MsgAddressIntStd> {
-    override fun subscribe(observer: ObservableObserver<MsgAddressIntStd>) {
-
-    }
 }
 
 class IndexAll(override val di: DI) :
@@ -178,12 +207,71 @@ class IndexAll(override val di: DI) :
             val liteClient: LiteApi by instance()
             val ipfs: IPFS by instance()
 
-            // TODO
+            val collectionAddresses = observable<MsgAddressIntStd> { emitter ->
+                transaction {
+                    CollectionEntity.all().forEach {
+                        emitter.onNext(MsgAddressIntStd(it.workchain, it.address))
+                    }
+                }
+                emitter.onComplete()
+            }.subscribeOn(singleScheduler)
+
+            val collectionData = collectionAddresses.observeOn(ioScheduler).collections(liteClient)
+            val collectionRoyalties = collectionAddresses.observeOn(ioScheduler).royalties(liteClient)
+            val collectionMetadata = collectionData.observeOn(ioScheduler).metadata(ipfs)
+
+            val itemAddresses = collectionData.observeOn(ioScheduler).items(liteClient)
+            val itemData = itemAddresses.observeOn(ioScheduler).items(liteClient)
+            val itemRoyalties = itemAddresses.observeOn(ioScheduler).royalties(liteClient)
+            val itemSellers = itemData.observeOn(ioScheduler).filter { it is NFTItemInitialized }
+                .map { (it as NFTItemInitialized).owner }
+                .sellers(liteClient)
+            val itemMetadata = itemData.observeOn(ioScheduler).metadata(ipfs, liteClient)
+
+            collectionData.observeOn(singleScheduler).upsert()
+            collectionRoyalties.observeOn(singleScheduler).upsert()
+            collectionMetadata.observeOn(singleScheduler).upsert()
+
+            itemData.observeOn(singleScheduler).upsert()
+            itemRoyalties.observeOn(singleScheduler).upsert()
+            itemSellers.observeOn(singleScheduler).upsert()
+            itemMetadata.observeOn(singleScheduler).upsert()
+
+            concat(
+                collectionAddresses,
+                collectionData,
+                collectionRoyalties,
+                collectionMetadata,
+                itemAddresses,
+                itemData,
+                itemRoyalties,
+                itemSellers,
+                itemMetadata
+            ).subscribe(
+                onComplete = {
+                    runBlocking { delay(5_000L) }
+                    logger.debug { "completed" }
+                    exitProcess(0)
+                }
+            )
+            delay(Long.MAX_VALUE)
         }
     }
 
     companion object : KLogging()
 }
+
+fun Observable<MsgAddressIntStd>.sellers(
+    liteClient: LiteApi,
+    referenceBlock: TonNodeBlockIdExt = runBlocking { liteClient.getMasterchainInfo().last },
+) =
+    observable<NFTSale> { emitter ->
+        this.flatMapSingle { singleFromCoroutine { NFTSale.of(it, liteClient, referenceBlock) } }
+            .doOnAfterComplete { emitter.onComplete() }
+            .subscribe {
+                if (it != null) emitter.onNext(it)
+            }
+    }
 
 fun Observable<MsgAddressIntStd>.collections(
     liteClient: LiteApi,
@@ -201,9 +289,10 @@ fun Observable<NFTCollection>.items(
             (0 until it.nextItemIndex).forEach { index ->
                 emitter.onNext(it.address to index)
             }
+            emitter.onComplete()
         }
     }
-        .flatMapSingle {
+        .flatMapSingle(1) {
             singleFromCoroutine { NFTItem.of(it.first, it.second, liteClient, referenceBlock) }
         }
 
@@ -220,6 +309,7 @@ fun Observable<MsgAddressIntStd>.royalties(
 ) =
     observable<Pair<MsgAddressIntStd, NFTRoyalty>> { emitter ->
         this.flatMapSingle { singleFromCoroutine { it to NFTRoyalty.of(it, liteClient, referenceBlock) } }
+            .doOnAfterComplete { emitter.onComplete() }
             .subscribe {
                 val (address, royalty) = it
                 if (royalty != null) emitter.onNext(address to royalty)
@@ -241,9 +331,11 @@ fun Observable<NFTItem>.metadata(
                     it.address to NFTMetadata.of<NFTItemMetadata>(it.fullContent(liteClient, referenceBlock), ipfs)
                 }
             }
-        }.subscribe {
-            if (it != null) emitter.onNext(it)
         }
+            .doOnAfterComplete { emitter.onComplete() }
+            .subscribe {
+                if (it != null) emitter.onNext(it)
+            }
     }
 
 @JvmName("upsertNFTCollection")
@@ -304,6 +396,31 @@ fun Observable<Pair<MsgAddressIntStd, NFTRoyalty>>.upsert() =
                 royaltyDestinationAddress = address.address.toByteArray()
 
                 royaltyLastIndexed = Clock.System.now()
+            }
+        }
+    }
+
+@JvmName("upsertNFTSale")
+fun Observable<NFTSale>.upsert() =
+    this.subscribe {
+        transaction {
+            val item = ItemEntity.find(it.address).firstOrNull() ?: ItemEntity.new {
+                discovered = Clock.System.now()
+                workchain = it.address.workchainId
+                address = it.address.address.toByteArray()
+            }
+
+            item.run {
+                marketplaceWorkchain = it.marketplace.workchainId
+                marketplaceAddress = it.marketplace.address.toByteArray()
+                sellerWorkchain = it.owner.workchainId
+                sellerAddress = it.owner.address.toByteArray()
+                price = it.price
+                marketplaceFee = it.marketplaceFee
+
+                saleRoyaltyDestinationWorkchain = it.royaltyDestination?.workchainId
+                saleRoyaltyDestinationAddress = it.royaltyDestination?.address?.toByteArray()
+                saleRoyalty = it.royalty
             }
         }
     }

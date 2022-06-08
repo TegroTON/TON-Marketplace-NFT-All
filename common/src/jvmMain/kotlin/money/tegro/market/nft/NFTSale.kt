@@ -1,6 +1,8 @@
 package money.tegro.market.nft
 
+import kotlinx.coroutines.runBlocking
 import mu.KLogging
+import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.block.MsgAddress
 import org.ton.block.MsgAddressIntStd
 import org.ton.block.VmStackValue
@@ -22,17 +24,14 @@ data class NFTSale(
         private val msgAddressCodec by lazy { MsgAddress.tlbCodec() }
 
         @JvmStatic
-        suspend fun fetch(
+        suspend fun of(
+            address: MsgAddressIntStd,
             liteClient: LiteApi,
-            address: MsgAddressIntStd
+            referenceBlock: TonNodeBlockIdExt = runBlocking { liteClient.getMasterchainInfo().last },
         ): NFTSale? {
-            val lastBlock = liteClient.getMasterchainInfo().last
-            logger.debug("last block: $lastBlock")
-
             logger.debug("running method `get_sale_data` on ${address.toString(userFriendly = true)}")
             val result = liteClient.runSmcMethod(
-                0b100, // we only care about the result
-                lastBlock,
+                0b100, referenceBlock,
                 LiteServerAccountId(address),
                 "get_sale_data"
             )
@@ -61,5 +60,3 @@ data class NFTSale(
         }
     }
 }
-
-suspend fun LiteApi.getNFTSale(address: MsgAddressIntStd) = NFTSale.fetch(this, address)

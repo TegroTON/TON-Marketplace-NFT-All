@@ -43,7 +43,7 @@ class ItemEntity(id: EntityID<Long>) : LongEntity(id), Royalty, Metadata {
     override var image by ItemsTable.image
     override var imageData by ItemsTable.imageData
 
-    val attributes by ItemAttributeEntity referencedOn ItemAttributesTable.item
+    val attributes by ItemAttributeEntity referrersOn ItemAttributesTable.item
 
     val approved by ItemsTable.approved
     var discovered by ItemsTable.discovered
