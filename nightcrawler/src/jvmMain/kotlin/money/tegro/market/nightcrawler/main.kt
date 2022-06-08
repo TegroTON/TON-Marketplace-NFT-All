@@ -421,6 +421,8 @@ fun Observable<NFTSale>.upsert() =
                 saleRoyaltyDestinationWorkchain = it.royaltyDestination?.workchainId
                 saleRoyaltyDestinationAddress = it.royaltyDestination?.address?.toByteArray()
                 saleRoyalty = it.royalty
+
+                ownerLastIndexed = Clock.System.now()
             }
         }
     }
