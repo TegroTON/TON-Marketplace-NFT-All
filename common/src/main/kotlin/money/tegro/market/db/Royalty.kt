@@ -1,6 +1,6 @@
 package money.tegro.market.db
 
-import kotlinx.datetime.Instant
+import java.time.Instant
 
 sealed interface Royalty {
     var royaltyNumerator: Int?

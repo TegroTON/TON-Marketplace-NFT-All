@@ -1,7 +1,7 @@
 package money.tegro.market.db
 
 import org.jetbrains.exposed.dao.id.LongIdTable
-import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
+import org.jetbrains.exposed.sql.javatime.timestamp
 
 object ItemsTable : LongIdTable("items") {
     // basic properties, present in all items

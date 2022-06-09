@@ -1,35 +1,13 @@
 package money.tegro.market.nft
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.json.Json
 import mu.KLogging
 import org.ton.cell.Cell
-import org.ton.crypto.base64
-
-object ByteArrayAsBase64StringSerializer : KSerializer<ByteArray> {
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor(
-        "kotlinx.serialization.ByteArrayAsBase64StringSerializer",
-        PrimitiveKind.STRING
-    )
-
-    override fun deserialize(decoder: Decoder): ByteArray {
-        return base64(decoder.decodeString())
-    }
-
-    override fun serialize(encoder: kotlinx.serialization.encoding.Encoder, value: ByteArray) {
-        encoder.encodeString(base64(value))
-    }
-}
 
 interface NFTMetadata {
     val name: String?
@@ -38,6 +16,8 @@ interface NFTMetadata {
     val imageData: ByteArray?
 
     companion object : KLogging() {
+        val mapper by lazy { jacksonObjectMapper() }
+
         @JvmStatic
         suspend inline fun <reified T : NFTMetadata> of(
             content: Cell,
@@ -58,10 +38,7 @@ interface NFTMetadata {
                     val url = String(rawData)
                     logger.debug { "off-chain content layout, url is: $url" }
 
-                    return HttpClient { }.get(url).bodyAsText()
-                        .let {
-                            Json { ignoreUnknownKeys = true }.decodeFromString(it)
-                        }
+                    return mapper.readValue(HttpClient {}.get(url).bodyAsText(), T::class.java)
                 }
                 else -> {
                     throw Error("unknown content layout $contentLayout, can't proceed")
@@ -71,15 +48,13 @@ interface NFTMetadata {
     }
 }
 
-@Serializable
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class NFTCollectionMetadata(
     override val name: String? = null,
     override val description: String? = null,
     override val image: String? = null,
-    @Serializable(with = ByteArrayAsBase64StringSerializer::class)
     override val imageData: ByteArray? = null,
     val coverImage: String? = null,
-    @Serializable(with = ByteArrayAsBase64StringSerializer::class)
     val coverImageData: ByteArray? = null,
 ) : NFTMetadata {
     override fun equals(other: Any?): Boolean {
@@ -115,20 +90,18 @@ data class NFTCollectionMetadata(
     }
 }
 
-
-@Serializable
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class NFTItemAttribute(
-    @SerialName("trait_type")
+    @JsonProperty("trait_type")
     val trait: String,
     val value: String
 )
 
-@Serializable
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class NFTItemMetadata(
     override val name: String? = null,
     override val description: String? = null,
     override val image: String? = null,
-    @Serializable(with = ByteArrayAsBase64StringSerializer::class)
     override val imageData: ByteArray? = null,
     val attributes: List<NFTItemAttribute>? = null,
 ) : NFTMetadata {

@@ -2,7 +2,6 @@ package money.tegro.market.nightcrawler
 
 import com.badoo.reaktive.observable.Observable
 import com.badoo.reaktive.observable.subscribe
-import kotlinx.datetime.Clock
 import money.tegro.market.db.CollectionEntity
 import money.tegro.market.db.ItemAttributeEntity
 import money.tegro.market.db.ItemEntity
@@ -10,12 +9,13 @@ import money.tegro.market.nft.*
 import org.jetbrains.exposed.sql.statements.api.ExposedBlob
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.ton.block.MsgAddressIntStd
+import java.time.Instant
 
 fun Observable<NFTCollection>.upsertCollectionData() =
     this.subscribe {
         transaction {
             val collection = CollectionEntity.find(it.address).firstOrNull() ?: CollectionEntity.new {
-                discovered = Clock.System.now()
+                discovered = Instant.now()
                 workchain = it.address.workchainId
                 address = it.address.address.toByteArray()
             }
@@ -25,7 +25,7 @@ fun Observable<NFTCollection>.upsertCollectionData() =
                 ownerAddress = it.owner.address.toByteArray()
                 nextItemIndex = it.nextItemIndex
 
-                dataLastIndexed = Clock.System.now()
+                dataLastIndexed = Instant.now()
             }
         }
     }
@@ -34,7 +34,7 @@ fun Observable<NFTItem>.upsertItemData() =
     this.subscribe {
         transaction {
             val item = ItemEntity.find(it.address).firstOrNull() ?: ItemEntity.new {
-                discovered = Clock.System.now()
+                discovered = Instant.now()
                 workchain = it.address.workchainId
                 address = it.address.address.toByteArray()
             }
@@ -50,7 +50,7 @@ fun Observable<NFTItem>.upsertItemData() =
                     ownerAddress = it.owner.address.toByteArray()
                 }
 
-                dataLastIndexed = Clock.System.now()
+                dataLastIndexed = Instant.now()
             }
         }
     }
@@ -66,7 +66,7 @@ fun Observable<Pair<MsgAddressIntStd, NFTRoyalty?>>.updateRoyalty() =
                 royaltyDestinationWorkchain = royalty?.destination?.workchainId
                 royaltyDestinationAddress = royalty?.destination?.address?.toByteArray()
 
-                royaltyLastIndexed = Clock.System.now()
+                royaltyLastIndexed = Instant.now()
             }
         }
     }
@@ -76,7 +76,7 @@ fun Observable<Pair<MsgAddressIntStd, NFTSale?>>.upsertItemSale() =
         val (address, sale) = it
         transaction {
             val item = ItemEntity.find(address).firstOrNull() ?: ItemEntity.new {
-                discovered = Clock.System.now()
+                discovered = Instant.now()
                 workchain = address.workchainId
                 this.address = address.address.toByteArray()
             }
@@ -93,7 +93,7 @@ fun Observable<Pair<MsgAddressIntStd, NFTSale?>>.upsertItemSale() =
                 saleRoyaltyDestinationAddress = sale?.royaltyDestination?.address?.toByteArray()
                 saleRoyalty = sale?.royalty
 
-                ownerLastIndexed = Clock.System.now()
+                ownerLastIndexed = Instant.now()
             }
         }
     }
@@ -103,7 +103,7 @@ fun Observable<Pair<MsgAddressIntStd, NFTCollectionMetadata?>>.upsertCollectionM
         val (address, metadata) = it
         transaction {
             val collection = CollectionEntity.find(address).firstOrNull() ?: CollectionEntity.new {
-                discovered = Clock.System.now()
+                discovered = Instant.now()
                 workchain = address.workchainId
                 this.address = address.address.toByteArray()
             }
@@ -116,7 +116,7 @@ fun Observable<Pair<MsgAddressIntStd, NFTCollectionMetadata?>>.upsertCollectionM
                 coverImage = metadata?.coverImage
                 coverImageData = metadata?.coverImageData?.let { ExposedBlob(it) }
 
-                metadataLastIndexed = Clock.System.now()
+                metadataLastIndexed = Instant.now()
             }
         }
     }
@@ -127,7 +127,7 @@ fun Observable<Pair<MsgAddressIntStd, NFTItemMetadata?>>.upsertItemMetadata() =
         val (address, metadata) = it
         transaction {
             val item = ItemEntity.find(address).firstOrNull() ?: ItemEntity.new {
-                discovered = Clock.System.now()
+                discovered = Instant.now()
                 workchain = address.workchainId
                 this.address = address.address.toByteArray()
             }
@@ -138,7 +138,7 @@ fun Observable<Pair<MsgAddressIntStd, NFTItemMetadata?>>.upsertItemMetadata() =
                 image = metadata?.image
                 imageData = metadata?.imageData?.let { ExposedBlob(it) }
 
-                metadataLastIndexed = Clock.System.now()
+                metadataLastIndexed = Instant.now()
             }
 
             metadata?.attributes.orEmpty().forEach { attribute ->

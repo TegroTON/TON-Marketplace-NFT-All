@@ -1,14 +1,14 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
-    kotlin("multiplatform")
-    kotlin("plugin.serialization")
+    kotlin("jvm")
 }
 
 allprojects {
     group = "money.tegro"
     version = "0.0.1"
 
-    apply(plugin = "kotlin-multiplatform")
-    apply(plugin = "kotlinx-serialization")
+    apply(plugin = "org.jetbrains.kotlin.jvm")
 
     if (project != rootProject)
         project.buildDir = File(rootProject.buildDir, project.name)
@@ -18,26 +18,9 @@ allprojects {
         maven("https://jitpack.io")
     }
 
-    kotlin {
-        jvm {
-            withJava()
-            compilations.all {
-                kotlinOptions.jvmTarget = "11"
-            }
-        }
-        sourceSets {
-            val commonMain by getting {
-                dependencies {
-                    subprojects {
-                        api(this)
-                    }
-                }
-            }
-            val commonTest by getting {
-                dependencies {
-                    implementation(kotlin("test"))
-                }
-            }
+    tasks.withType<KotlinCompile>().configureEach {
+        kotlinOptions {
+            jvmTarget = "11"
         }
     }
 }

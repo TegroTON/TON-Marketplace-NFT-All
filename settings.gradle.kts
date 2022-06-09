@@ -8,8 +8,10 @@ pluginManagement {
     }
 
     plugins {
-        kotlin("multiplatform") version "1.6.21"
-        kotlin("plugin.serialization") version "1.6.10"
+        kotlin("jvm") version "1.7.0"
+        kotlin("plugin.spring") version "1.6.21"
+        id("org.springframework.boot") version "2.6.8"
+        id("io.spring.dependency-management") version "1.0.11.RELEASE"
         id("com.github.johnrengelman.shadow") version "7.1.2"
     }
 }
@@ -18,63 +20,63 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 dependencyResolutionManagement {
     versionCatalogs {
-        create("libs") {
+        create("coreLibs") {
             version("clikt", "3.4.2")
-            version("datetime", "0.3.3")
-            version("exposed", "0.38.2")
+            version("jackson", "2.13.2")
             version("kodein", "7.11.0")
-            version("ktor", "2.0.1")
-            version("logback", "1.2.11")
-            version("logging", "2.1.23")
             version("reaktive", "1.2.1")
             version("reaktive.coroutines", "1.2.1-nmtc")
-            version("serialization", "1.3.2")
-            version("slf4j", "1.7.36")
-            version("sqlite", "3.36.0")
+            version("reflect", "1.7.0")
             version("ton", "597de41105")
 
             library("clikt", "com.github.ajalt.clikt", "clikt").versionRef("clikt")
-            library("coroutines", "org.jetbrains.kotlinx", "kotlinx-coroutines-core").version {
-                strictly("1.6.1-native-mt")
-            }
-            library("datetime", "org.jetbrains.kotlinx", "kotlinx-datetime").versionRef("datetime")
-            library("exposed.core", "org.jetbrains.exposed", "exposed-core").versionRef("exposed")
-            library("exposed.dao", "org.jetbrains.exposed", "exposed-dao").versionRef("exposed")
-            library("exposed.jdbc", "org.jetbrains.exposed", "exposed-jdbc").versionRef("exposed")
-            library("exposed.kotlin.datetime", "org.jetbrains.exposed", "exposed-kotlin-datetime").versionRef("exposed")
-            library("kodein.conf", "org.kodein.di", "kodein-di-conf").versionRef("kodein")
+            library(
+                "coroutines",
+                "org.jetbrains.kotlinx",
+                "kotlinx-coroutines-core"
+            ).version { strictly("1.6.1-native-mt") }
+            library("jackson", "com.fasterxml.jackson.module", "jackson-module-kotlin").versionRef("jackson")
             library("kodein", "org.kodein.di", "kodein-di").versionRef("kodein")
-            library("ktor.serialization.kotlinxJson", "io.ktor", "ktor-serialization-kotlinx-json").versionRef("ktor")
-            library("ktor.server.cachingHeaders", "io.ktor", "ktor-server-caching-headers").versionRef("ktor")
-            library("ktor.server.callId", "io.ktor", "ktor-server-call-id").versionRef("ktor")
-            library("ktor.server.callLogging", "io.ktor", "ktor-server-call-logging").versionRef("ktor")
-            library("ktor.server.compression", "io.ktor", "ktor-server-compression").versionRef("ktor")
-            library("ktor.server.conditionalHeaders", "io.ktor", "ktor-server-conditional-headers").versionRef("ktor")
-            library("ktor.server.contentNegotiation", "io.ktor", "ktor-server-content-negotiation").versionRef("ktor")
-            library("ktor.server.core", "io.ktor", "ktor-server-core").versionRef("ktor")
-            library("ktor.server.hostCommon", "io.ktor", "ktor-server-host-common").versionRef("ktor")
-            library("ktor.server.locations", "io.ktor", "ktor-server-locations").versionRef("ktor")
-            library("ktor.server.metrics", "io.ktor", "ktor-server-metrics").versionRef("ktor")
-            library("ktor.server.netty", "io.ktor", "ktor-server-netty").versionRef("ktor")
-            library("ktor.server.statusPages", "io.ktor", "ktor-server-status-pages").versionRef("ktor")
-            library("logback", "ch.qos.logback", "logback-classic").versionRef("logback")
-            library("logging", "io.github.microutils", "kotlin-logging").versionRef("logging")
+            library("kodein.conf", "org.kodein.di", "kodein-di-conf").versionRef("kodein")
             library("reaktive", "com.badoo.reaktive", "reaktive").versionRef("reaktive")
             library("reaktive.annotations", "com.badoo.reaktive", "reaktive-annotations").versionRef("reaktive")
             library("reaktive.coroutines", "com.badoo.reaktive", "coroutines-interop").versionRef("reaktive.coroutines")
-            library(
-                "serialization.core",
-                "org.jetbrains.kotlinx",
-                "kotlinx-serialization-core"
-            ).versionRef("serialization")
-            library(
-                "serialization.json",
-                "org.jetbrains.kotlinx",
-                "kotlinx-serialization-json"
-            ).versionRef("serialization")
-            library("slf4j", "org.slf4j", "slf4j-api").versionRef("slf4j")
-            library("sqlite", "org.xerial", "sqlite-jdbc").versionRef("sqlite")
+            library("reflect", "org.jetbrains.kotlin", "kotlin-reflect").versionRef("reflect")
             library("ton", "com.github.andreypfau.ton-kotlin", "ton-kotlin").versionRef("ton")
+        }
+
+        create("logLibs") {
+            version("logback", "1.2.11")
+            version("logging", "2.1.23")
+            version("slf4j", "1.7.36")
+
+            library("logback", "ch.qos.logback", "logback-classic").versionRef("logback")
+            library("logging", "io.github.microutils", "kotlin-logging").versionRef("logging")
+            library("slf4j", "org.slf4j", "slf4j-api").versionRef("slf4j")
+        }
+
+        create("dbLibs") {
+            version("exposed", "0.38.2")
+            version("sqlite", "3.36.0")
+
+            library("exposed.core", "org.jetbrains.exposed", "exposed-core").versionRef("exposed")
+            library("exposed.dao", "org.jetbrains.exposed", "exposed-dao").versionRef("exposed")
+            library("exposed.jdbc", "org.jetbrains.exposed", "exposed-jdbc").versionRef("exposed")
+            library("exposed.java.time", "org.jetbrains.exposed", "exposed-java-time").versionRef("exposed")
+            library("sqlite", "org.xerial", "sqlite-jdbc").versionRef("sqlite")
+        }
+
+        create("webLibs") {
+            version("springdoc.openapi", "1.6.9")
+            version("spring.boot", "2.6.8")
+
+            library("springdoc.openapi", "org.springdoc", "sprindoc-openapi-ui").versionRef("springdoc.openapi")
+            library(
+                "spring.boot.security",
+                "org.springframework.boot",
+                "spring-boot-starter-security"
+            ).versionRef("spring.boot")
+            library("spring.boot.web", "org.springframework.boot", "spring-boot-starter-web").versionRef("spring.boot")
         }
     }
 }

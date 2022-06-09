@@ -7,22 +7,16 @@ application {
     mainClass.set("money.tegro.market.tool.MainKt")
 }
 
-kotlin {
-    sourceSets {
-        commonMain {
-            dependencies {
-                implementation(libs.clikt)
-                implementation(libs.coroutines)
-                implementation(libs.kodein)
-                implementation(libs.kodein.conf)
-                implementation(libs.logback)
-                implementation(libs.logging)
-                implementation(libs.serialization.core)
-                implementation(libs.serialization.json)
-                implementation(libs.slf4j)
-                implementation(libs.ton)
-                implementation(projects.common)
-            }
-        }
-    }
+dependencies {
+    implementation(coreLibs.clikt)
+    implementation(coreLibs.coroutines)
+    implementation(coreLibs.jackson)
+    implementation(coreLibs.kodein)
+    implementation(coreLibs.kodein.conf)
+    implementation(coreLibs.ton)
+    implementation(logLibs.logback)
+    implementation(logLibs.logging)
+    implementation(logLibs.slf4j)
+
+    implementation(projects.common)
 }
