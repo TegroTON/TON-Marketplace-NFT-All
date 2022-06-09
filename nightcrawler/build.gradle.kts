@@ -18,7 +18,6 @@ kotlin {
                 implementation(libs.exposed.dao)
                 implementation(libs.exposed.jdbc)
                 implementation(libs.exposed.kotlin.datetime)
-                implementation(libs.ipfs)
                 implementation(libs.kodein)
                 implementation(libs.kodein.conf)
                 implementation(libs.logback)

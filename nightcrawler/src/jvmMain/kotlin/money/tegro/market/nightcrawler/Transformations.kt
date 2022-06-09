@@ -5,7 +5,6 @@ import com.badoo.reaktive.observable.Observable
 import com.badoo.reaktive.observable.flatMap
 import com.badoo.reaktive.observable.flatMapSingle
 import com.badoo.reaktive.observable.observable
-import io.ipfs.kotlin.IPFS
 import money.tegro.market.nft.*
 import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.block.MsgAddressIntStd
@@ -52,12 +51,12 @@ fun Observable<MsgAddressIntStd>.nftRoyaltyOf(
 ) =
     this.flatMapSingle { singleFromCoroutine { it to NFTRoyalty.of(it, liteClient, referenceBlock()) } }
 
-fun Observable<NFTCollection>.nftCollectionMetadata(ipfs: IPFS) = this.flatMapSingle {
-    singleFromCoroutine { it.address to NFTMetadata.of<NFTCollectionMetadata>(it.content, ipfs) }
+fun Observable<NFTCollection>.nftCollectionMetadata() = this.flatMapSingle {
+    singleFromCoroutine { it.address to NFTMetadata.of<NFTCollectionMetadata>(it.content) }
 }
 
 fun Observable<NFTItem>.nftItemMetadata(
-    ipfs: IPFS, liteClient: LiteApi,
+    liteClient: LiteApi,
     referenceBlock: suspend () -> TonNodeBlockIdExt = { liteClient.getMasterchainInfo().last },
 ) =
     this.flatMapSingle {
@@ -67,7 +66,7 @@ fun Observable<NFTItem>.nftItemMetadata(
                     it.fullContent(
                         liteClient,
                         referenceBlock()
-                    ), ipfs
+                    )
                 )
             }
         }

@@ -4,7 +4,6 @@ kotlin {
             dependencies {
                 implementation(libs.coroutines)
                 implementation(libs.datetime)
-                implementation(libs.ipfs)
                 implementation(libs.logback)
                 implementation(libs.logging)
                 implementation(libs.serialization.core)

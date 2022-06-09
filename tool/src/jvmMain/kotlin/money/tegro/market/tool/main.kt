@@ -9,8 +9,6 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.int
-import io.ipfs.kotlin.IPFS
-import io.ipfs.kotlin.IPFSConfiguration
 import kotlinx.coroutines.runBlocking
 import money.tegro.market.nft.*
 import mu.KLogging
@@ -49,16 +47,10 @@ class LiteServerOptions : OptionGroup("lite server options") {
         .default("TDg+ILLlRugRB4Kpg3wXjPcoc+d+Eeb7kuVe16CS9z8=")
 }
 
-class IPFSOptions : OptionGroup("IPFS options") {
-    val url by option("--ipfs-url", help = "IPFS API server url", envvar = "IPFS_URL")
-        .default("http://127.0.0.1:5001/api/v0/")
-}
-
 class Tool(override val di: ConfigurableDI) :
     CliktCommand(name = "tool", help = "Your one-stop NFT item/collection shop"),
     DIAware {
     private val liteServerOptions by LiteServerOptions()
-    private val ipfsOptions by IPFSOptions()
 
     override fun run() {
         runBlocking {
@@ -69,17 +61,12 @@ class Tool(override val di: ConfigurableDI) :
                         liteServerOptions.port,
                         liteServerOptions.publicKey.let { base64(it) })
                 }
-                bindSingleton { IPFS(IPFSConfiguration(ipfsOptions.url)) }
             }
 
             val liteClient: LiteApi by instance()
 
             logger.debug("connecting to the lite client at ${liteServerOptions.host}:${liteServerOptions.port}")
             (liteClient as LiteClient).connect()
-
-            val ipfs: IPFS by instance()
-
-            logger.debug("IPFS API is initialized")
         }
     }
 
@@ -92,7 +79,7 @@ class QueryItem(override val di: DI) : CliktCommand(name = "query-item", help = 
         runBlocking {
             val liteClient: LiteApi by instance()
 
-            val item = liteClient.getNFTItem(MsgAddressIntStd.parse(address))
+            val item = NFTItem.of(MsgAddressIntStd.parse(address), liteClient)
             println("NFT Item ${item.address.toString(userFriendly = true)}:")
             println("\tInitialized: ${item is NFTItemInitialized}")
             if (item is NFTItemInitialized) {
@@ -100,13 +87,13 @@ class QueryItem(override val di: DI) : CliktCommand(name = "query-item", help = 
                 println("\tCollection Address: ${item.collection?.toString(userFriendly = true)}")
                 println("\tOwner Address: ${item.owner.toString(userFriendly = true)}")
 
-                liteClient.getNFTRoyalty(item.collection ?: item.address)
+                NFTRoyalty.of(item.collection ?: item.address, liteClient)
                     ?.let { royalties ->
                         println("\tRoyalty percentage: ${royalties.value() * 100.0}%")
                         println("\tRoyalty destination: ${royalties.destination.toString(userFriendly = true)}")
                     }
 
-                liteClient.getNFTSale(item.owner)?.run {
+                NFTSale.of(item.owner, liteClient)?.run {
                     println("\tOn sale: yes")
                     println("\tMarketplace: ${marketplace.toString(userFriendly = true)}")
                     println("\tSeller: ${owner.toString(userFriendly = true)}")
@@ -114,6 +101,17 @@ class QueryItem(override val di: DI) : CliktCommand(name = "query-item", help = 
                     println("\tMarketplace fee: ${marketplaceFee} nTON")
                     println("\tRoyalties: ${royalty} nTON")
                     println("\tRoyalty destination: ${royaltyDestination?.toString(userFriendly = true)}")
+                }
+
+                NFTMetadata.of<NFTItemMetadata>(item.fullContent(liteClient)).run {
+                    println("\tName: ${this.name}")
+                    println("\tDescription: ${this.description}")
+                    println("\tImage: ${this.image}")
+                    println("\tImage data: ${this.imageData?.let { hex(it) }}")
+                    println("\tAttributes:")
+                    attributes.orEmpty().forEach {
+                        println("\t\t${it.trait}: ${it.value}")
+                    }
                 }
             }
         }
@@ -129,12 +127,25 @@ class QueryCollection(override val di: DI) :
         runBlocking {
             val liteClient: LiteApi by instance()
 
-            val collection = liteClient.getNFTCollection(MsgAddressIntStd.parse(address))
+            val collection = NFTCollection.of(MsgAddressIntStd.parse(address), liteClient)
             println("NFT Collection ${collection.address.toString(userFriendly = true)}")
-            println("\tNumber of items: ${collection.size}")
+            println("\tNumber of items: ${collection.nextItemIndex}")
             println("\tOwner address: ${collection.owner.toString(userFriendly = true)}")
 
-//
+            NFTRoyalty.of(collection.address, liteClient)
+                ?.let { royalties ->
+                    println("\tRoyalty percentage: ${royalties.value() * 100.0}%")
+                    println("\tRoyalty destination: ${royalties.destination.toString(userFriendly = true)}")
+                }
+
+            NFTMetadata.of<NFTCollectionMetadata>(collection.content).run {
+                println("\tName: ${this.name}")
+                println("\tDescription: ${this.description}")
+                println("\tImage: ${this.image}")
+                println("\tImage data: ${this.imageData?.let { hex(it) }}")
+                println("\tCover image: ${this.coverImage}")
+                println("\tCover image data: ${this.coverImageData?.let { hex(it) }}")
+            }
         }
     }
 }
@@ -148,12 +159,12 @@ class ListCollection(override val di: DI) :
         runBlocking {
             val liteClient: LiteApi by instance()
 
-            val collection = liteClient.getNFTCollection(MsgAddressIntStd.parse(address))
+            val collection = NFTCollection.of(MsgAddressIntStd.parse(address), liteClient)
 
             println("index | address | owner")
 
-            for (i in 0 until collection.size) {
-                val item = liteClient.getNFTCollectionItem(collection, i)
+            for (i in 0 until collection.nextItemIndex) {
+                val item = NFTItem.of(NFTItem.of(collection.address, i, liteClient), liteClient)
                 if (item is NFTItemInitialized)
                     println(
                         "${item.index} | ${item.address.toString(userFriendly = true)} | ${

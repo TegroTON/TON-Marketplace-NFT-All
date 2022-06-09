@@ -1,10 +1,8 @@
 package money.tegro.market.nft
 
-import io.ipfs.kotlin.IPFS
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
-import io.ktor.http.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -21,7 +19,6 @@ interface NFTMetadata {
         @JvmStatic
         suspend inline fun <reified T : NFTMetadata> of(
             content: Cell,
-            ipfs: IPFS,
         ): T {
             val contentLayout = content.beginParse().loadUInt(8).toInt()
             if (contentLayout == 0x00) {
@@ -37,17 +34,7 @@ interface NFTMetadata {
                 val url = String(rawData)
                 logger.debug { "off-chain content layout, url is: $url" }
 
-                return (if (url.contains("ipfs", ignoreCase = true)) {
-                    val id =
-                        Url(url).pathSegments.filter { it.all { it.isLetterOrDigit() } }
-                            .sortedBy { it.length }.last() // get longest alpha-numeric part
-
-                    logger.debug { "IPFS content detected, its extracted id is: $id" }
-
-                    ipfs.get.cat(id)
-                } else {
-                    HttpClient { }.get(url).bodyAsText()
-                })
+                return HttpClient { }.get(url).bodyAsText()
                     .let {
                         Json { ignoreUnknownKeys = true }.decodeFromString<T>(it)
                     }

@@ -12,8 +12,6 @@ import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.int
-import io.ipfs.kotlin.IPFS
-import io.ipfs.kotlin.IPFSConfiguration
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
@@ -54,11 +52,6 @@ class LiteServerOptions : OptionGroup("lite server options") {
         .default("3XO67K/qi+gu3T9v8G2hx1yNmWZhccL3O7SoosFo8G0=")
 }
 
-class IPFSOptions : OptionGroup("IPFS options") {
-    val url by option("--ipfs-url", help = "IPFS API server url", envvar = "IPFS_URL")
-        .default("http://127.0.0.1:5001/api/v0/")
-}
-
 class DatabaseOptions : OptionGroup("Database options") {
     val url by option("--db-url", help = "Database url", envvar = "DB_URL")
         .default("jdbc:sqlite:../build/nightcrawler.db")
@@ -70,7 +63,6 @@ class Tool(override val di: ConfigurableDI) :
     CliktCommand(name = "nightcrawler", help = "Remember, use your zoom, steady hands."),
     DIAware {
     private val liteServerOptions by LiteServerOptions()
-    private val ipfsOptions by IPFSOptions()
     private val databaseOptions by DatabaseOptions()
 
     override fun run() {
@@ -83,7 +75,6 @@ class Tool(override val di: ConfigurableDI) :
                         base64(liteServerOptions.publicKey)
                     )
                 }
-                bindSingleton { IPFS(IPFSConfiguration(ipfsOptions.url)) }
                 bindSingleton {
                     Database.connect(databaseOptions.url, databaseOptions.driver, databaseConfig = DatabaseConfig {
                         useNestedTransactions = true
@@ -120,12 +111,11 @@ class AddCollection(override val di: DI) :
     override fun run() {
         runBlocking {
             val liteClient: LiteApi by instance()
-            val ipfs: IPFS by instance()
 
             val collectionAddresses = addresses.asObservable().map { MsgAddressIntStd.parse(it) }
             val collectionData = collectionAddresses.nftCollectionOf(liteClient)
             val collectionRoyalties = collectionAddresses.nftRoyaltyOf(liteClient)
-            val collectionMetadata = collectionData.nftCollectionMetadata(ipfs)
+            val collectionMetadata = collectionData.nftCollectionMetadata()
 
             collectionData.upsertCollectionData()
             collectionRoyalties.updateRoyalty()
@@ -161,14 +151,13 @@ class AddItem(override val di: DI) :
     override fun run() {
         runBlocking {
             val liteClient: LiteApi by instance()
-            val ipfs: IPFS by instance()
 
             val itemAddresses = addresses.asObservable().map { MsgAddressIntStd.parse(it) }
             val itemData = itemAddresses.nftItemOf(liteClient)
             val itemRoyalties = itemAddresses.nftRoyaltyOf(liteClient)
             val itemSellers = itemData.filter { it is NFTItemInitialized }.map { (it as NFTItemInitialized).owner }
                 .nftSaleOf(liteClient)
-            val itemMetadata = itemData.nftItemMetadata(ipfs, liteClient)
+            val itemMetadata = itemData.nftItemMetadata(liteClient)
 
             itemData.upsertItemData()
             itemRoyalties.updateRoyalty()
@@ -204,13 +193,12 @@ class IndexAll(override val di: DI) :
     override fun run() {
         runBlocking {
             val liteClient: LiteApi by instance()
-            val ipfs: IPFS by instance()
 
             val collectionAddresses = databaseCollections().subscribeOn(singleScheduler)
 
             val collectionData = collectionAddresses.observeOn(ioScheduler).nftCollectionOf(liteClient)
             val collectionRoyalties = collectionAddresses.observeOn(ioScheduler).nftRoyaltyOf(liteClient)
-            val collectionMetadata = collectionData.observeOn(ioScheduler).nftCollectionMetadata(ipfs)
+            val collectionMetadata = collectionData.observeOn(ioScheduler).nftCollectionMetadata()
 
             val itemAddresses = concat(
                 collectionData.observeOn(ioScheduler).nftCollectionItems(liteClient),
@@ -222,7 +210,7 @@ class IndexAll(override val di: DI) :
             val itemSellers = itemData.observeOn(ioScheduler).filter { it is NFTItemInitialized }
                 .map { (it as NFTItemInitialized).owner }
                 .nftSaleOf(liteClient)
-            val itemMetadata = itemData.observeOn(ioScheduler).nftItemMetadata(ipfs, liteClient)
+            val itemMetadata = itemData.observeOn(ioScheduler).nftItemMetadata(liteClient)
 
             collectionData.observeOn(singleScheduler).upsertCollectionData()
             collectionRoyalties.observeOn(singleScheduler).updateRoyalty()
@@ -318,7 +306,6 @@ class Steady(override val di: DI) :
     override fun run() {
         runBlocking {
             val liteClient: LiteApi by instance()
-            val ipfs: IPFS by instance()
 
             val collectionAddresses =
                 observableInterval(100L, singleScheduler)
@@ -356,7 +343,7 @@ class Steady(override val di: DI) :
                         } ?: true
                     }
                 }.observeOn(ioScheduler)
-                .nftCollectionMetadata(ipfs)
+                .nftCollectionMetadata()
 
             val itemAddresses = merge(
                 collectionData.observeOn(ioScheduler).nftCollectionItems(liteClient),
@@ -406,7 +393,7 @@ class Steady(override val di: DI) :
                         } ?: true
                     }
                 }.observeOn(ioScheduler)
-                .nftItemMetadata(ipfs, liteClient)
+                .nftItemMetadata(liteClient)
 
             collectionData.observeOn(singleScheduler).upsertCollectionData()
             collectionRoyalties.observeOn(singleScheduler).updateRoyalty()

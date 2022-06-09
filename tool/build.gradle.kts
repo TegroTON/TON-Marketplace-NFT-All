@@ -12,7 +12,6 @@ kotlin {
             dependencies {
                 implementation(libs.clikt)
                 implementation(libs.coroutines)
-                implementation(libs.ipfs)
                 implementation(libs.kodein)
                 implementation(libs.kodein.conf)
                 implementation(libs.logback)
