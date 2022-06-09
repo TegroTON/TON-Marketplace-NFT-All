@@ -11,6 +11,7 @@ pluginManagement {
         kotlin("jvm") version "1.7.0"
         kotlin("plugin.spring") version "1.6.21"
         id("org.springframework.boot") version "2.6.8"
+        id("org.springdoc.openapi-gradle-plugin") version "1.3.4"
         id("io.spring.dependency-management") version "1.0.11.RELEASE"
         id("com.github.johnrengelman.shadow") version "7.1.2"
     }
@@ -70,7 +71,12 @@ dependencyResolutionManagement {
             version("springdoc.openapi", "1.6.9")
             version("spring.boot", "2.6.8")
 
-            library("springdoc.openapi", "org.springdoc", "sprindoc-openapi-ui").versionRef("springdoc.openapi")
+            library("springdoc.openapi.ui", "org.springdoc", "springdoc-openapi-ui").versionRef("springdoc.openapi")
+            library(
+                "springdoc.openapi.kotlin",
+                "org.springdoc",
+                "springdoc-openapi-kotlin"
+            ).versionRef("springdoc.openapi")
             library(
                 "spring.boot.security",
                 "org.springframework.boot",
