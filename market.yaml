@@ -9,9 +9,6 @@ components:
   schemas:
     royalty:
       type: object
-      required:
-        - value
-        - destination
       properties:
         value:
           type: number
@@ -19,12 +16,16 @@ components:
         destination:
           type: string
 
+    image:
+      type: object
+      properties:
+        preview:
+          type: string
+        full:
+          type: string
+
     collection:
       type: object
-      required:
-        - address
-        - owner
-        - size
       properties:
         address:
           type: string
@@ -32,46 +33,75 @@ components:
           type: string
         size:
           type: integer
-          format: int64
+          format: uint64
+        royalty:
+          $ref: '#/components/schemas/royalty/'
         name:
           type: string
         description:
           type: string
         image:
-          type: string
+          $ref: '#/components/schemas/image'
         cover_image:
-          type: string
-        royalty:
-          $ref: '#/components/schemas/royalty/'
+          $ref: '#/components/schemas/image'
 
     item:
       type: object
-      required:
-        - address
-        - owner
       properties:
         address:
           type: string
         index:
           type: integer
-          format: int64
+          format: uint64
         collection:
           type: string
         owner:
           type: string
+        royalty:
+          $ref: '#/components/schemas/royalty/'
+        sale:
+          type: object
+          properties:
+            marketplace:
+              type: object
+              properties:
+                address:
+                  type: string
+                fee:
+                  type: number
+                  format: uint64
+            seller:
+              type: string
+            price:
+              type: number
+              format: uint64
+            royalty:
+              type: object
+              properties:
+                destination:
+                  type: string
+                amount:
+                  type: number
+                  format: uint64
         name:
           type: string
         description:
           type: string
         image:
-          type: string
-        royalty:
-          $ref: '#/components/schemas/royalty/'
+          $ref: '#/components/schemas/image'
+        attributes:
+          type: array
+          items:
+            type: object
+            properties:
+              trait:
+                type: string
+              value:
+                type: string
 
 paths:
   /collection/{address}:
     get:
-      summary: Get a collection by its address
       parameters:
         - name: address
           in: path
