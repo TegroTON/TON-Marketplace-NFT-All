@@ -6,7 +6,7 @@ import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.and
 import org.ton.block.MsgAddressIntStd
 
-class CollectionEntity(id: EntityID<Long>) : LongEntity(id), Royalty, Metadata {
+class CollectionEntity(id: EntityID<Long>) : LongEntity(id), Royalty {
     companion object : LongEntityClass<CollectionEntity>(CollectionsTable) {
         @JvmStatic
         fun find(collection: MsgAddressIntStd) =
@@ -18,7 +18,7 @@ class CollectionEntity(id: EntityID<Long>) : LongEntity(id), Royalty, Metadata {
     var ownerWorkchain by CollectionsTable.ownerWorkchain
     var ownerAddress by CollectionsTable.ownerAddress
     var nextItemIndex by CollectionsTable.nextItemIndex
-    
+
     val items by ItemEntity optionalReferrersOn ItemsTable.collection
 
     override var royaltyNumerator: Int? by CollectionsTable.royaltyNumerator
@@ -26,10 +26,10 @@ class CollectionEntity(id: EntityID<Long>) : LongEntity(id), Royalty, Metadata {
     override var royaltyDestinationWorkchain by CollectionsTable.royaltyDestinationWorkchain
     override var royaltyDestinationAddress by CollectionsTable.royaltyDestinationAddress
 
-    override var name by CollectionsTable.name
-    override var description by CollectionsTable.description
-    override var image by CollectionsTable.image
-    override var imageData by CollectionsTable.imageData
+    var name by CollectionsTable.name
+    var description by CollectionsTable.description
+    var image by CollectionsTable.image
+    var imageData by CollectionsTable.imageData
     var coverImage by CollectionsTable.coverImage
     var coverImageData by CollectionsTable.coverImageData
 
@@ -37,5 +37,5 @@ class CollectionEntity(id: EntityID<Long>) : LongEntity(id), Royalty, Metadata {
     var discovered by CollectionsTable.discovered
     var dataLastIndexed by CollectionsTable.dataLastIndexed
     override var royaltyLastIndexed by CollectionsTable.royaltyLastIndexed
-    override var metadataLastIndexed by CollectionsTable.metadataLastIndexed
+    var metadataLastIndexed by CollectionsTable.metadataLastIndexed
 }

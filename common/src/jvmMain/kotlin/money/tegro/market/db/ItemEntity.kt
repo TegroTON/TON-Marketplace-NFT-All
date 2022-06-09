@@ -6,7 +6,7 @@ import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.and
 import org.ton.block.MsgAddressIntStd
 
-class ItemEntity(id: EntityID<Long>) : LongEntity(id), Royalty, Metadata {
+class ItemEntity(id: EntityID<Long>) : LongEntity(id), Royalty {
     companion object : LongEntityClass<ItemEntity>(ItemsTable) {
         @JvmStatic
         fun find(item: MsgAddressIntStd) =
@@ -38,10 +38,10 @@ class ItemEntity(id: EntityID<Long>) : LongEntity(id), Royalty, Metadata {
     var saleRoyaltyDestinationAddress by ItemsTable.saleRoyaltyDestinationAddress
     var saleRoyalty by ItemsTable.saleRoyalty
 
-    override var name by ItemsTable.name
-    override var description by ItemsTable.description
-    override var image by ItemsTable.image
-    override var imageData by ItemsTable.imageData
+    var name by ItemsTable.name
+    var description by ItemsTable.description
+    var image by ItemsTable.image
+    var imageData by ItemsTable.imageData
 
     val attributes by ItemAttributeEntity referrersOn ItemAttributesTable.item
 
@@ -50,5 +50,5 @@ class ItemEntity(id: EntityID<Long>) : LongEntity(id), Royalty, Metadata {
     var dataLastIndexed by ItemsTable.dataLastIndexed
     override var royaltyLastIndexed by ItemsTable.royaltyLastIndexed
     var ownerLastIndexed by ItemsTable.ownerLastIndexed
-    override var metadataLastIndexed by ItemsTable.metadataLastIndexed
+    var metadataLastIndexed by ItemsTable.metadataLastIndexed
 }
