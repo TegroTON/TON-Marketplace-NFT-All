@@ -10,8 +10,8 @@ allprojects {
     apply(plugin = "kotlin-multiplatform")
     apply(plugin = "kotlinx-serialization")
 
-    // Build everything in the same directory
-    project.buildDir = rootProject.buildDir
+    if (project != rootProject)
+        project.buildDir = File(rootProject.buildDir, project.name)
 
     repositories {
         mavenCentral()
