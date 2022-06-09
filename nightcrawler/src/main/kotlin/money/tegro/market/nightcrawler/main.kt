@@ -23,11 +23,6 @@ import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.DatabaseConfig
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.kodein.di.DI
-import org.kodein.di.DIAware
-import org.kodein.di.bindSingleton
-import org.kodein.di.conf.ConfigurableDI
-import org.kodein.di.instance
 import org.ton.block.MsgAddressIntStd
 import org.ton.crypto.base64
 import org.ton.lite.api.LiteApi
@@ -59,35 +54,25 @@ class DatabaseOptions : OptionGroup("Database options") {
         .default("org.sqlite.JDBC")
 }
 
-class Tool(override val di: ConfigurableDI) :
-    CliktCommand(name = "nightcrawler", help = "Remember, use your zoom, steady hands."),
-    DIAware {
+class Tool :
+    CliktCommand(name = "nightcrawler", help = "Remember, use your zoom, steady hands.") {
     private val liteServerOptions by LiteServerOptions()
     private val databaseOptions by DatabaseOptions()
 
     override fun run() {
         runBlocking {
-            di.addConfig {
-                bindSingleton<LiteApi> {
-                    ResilientLiteClient(
-                        liteServerOptions.host,
-                        liteServerOptions.port,
-                        base64(liteServerOptions.publicKey)
-                    )
-                }
-                bindSingleton {
-                    Database.connect(databaseOptions.url, databaseOptions.driver, databaseConfig = DatabaseConfig {
-                        useNestedTransactions = true
-                    })
-                }
-            }
-
-            val liteClient: LiteApi by instance()
+            liteClient = ResilientLiteClient(
+                liteServerOptions.host,
+                liteServerOptions.port,
+                base64(liteServerOptions.publicKey)
+            )
 
             logger.debug("connecting to the lite client at ${liteServerOptions.host}:${liteServerOptions.port}")
             (liteClient as LiteClient).connect()
 
-            val db: Database by instance()
+            val db = Database.connect(databaseOptions.url, databaseOptions.driver, databaseConfig = DatabaseConfig {
+                useNestedTransactions = true
+            })
 
             logger.debug("connecting to the database ${db.vendor} v${db.version}")
 
@@ -97,20 +82,22 @@ class Tool(override val di: ConfigurableDI) :
         }
     }
 
-    companion object : KLogging()
+    companion object : KLogging() {
+        lateinit var liteClient: LiteApi
+    }
 }
 
-class AddCollection(override val di: DI) :
-    CliktCommand(name = "add-collection", help = "Adds a collection to the database. Updates existing entries"),
-    DIAware {
+class AddCollection :
+    CliktCommand(name = "add-collection", help = "Adds a collection to the database. Updates existing entries") {
     private val addresses by argument(
         name = "addresses",
         help = "NFT collection contract address(es)"
     ).multiple(required = true)
 
     override fun run() {
+
         runBlocking {
-            val liteClient: LiteApi by instance()
+            val liteClient = Tool.liteClient
 
             val collectionAddresses = addresses.asObservable().map { MsgAddressIntStd.parse(it) }
             val collectionData = collectionAddresses.nftCollectionOf(liteClient)
@@ -140,9 +127,8 @@ class AddCollection(override val di: DI) :
     companion object : KLogging()
 }
 
-class AddItem(override val di: DI) :
-    CliktCommand(name = "add-item", help = "Adds a singular collection to the database. Updates existing entries"),
-    DIAware {
+class AddItem :
+    CliktCommand(name = "add-item", help = "Adds a singular collection to the database. Updates existing entries") {
     private val addresses by argument(
         name = "addresses",
         help = "NFT item contract address(es)"
@@ -150,7 +136,7 @@ class AddItem(override val di: DI) :
 
     override fun run() {
         runBlocking {
-            val liteClient: LiteApi by instance()
+            val liteClient = Tool.liteClient
 
             val itemAddresses = addresses.asObservable().map { MsgAddressIntStd.parse(it) }
             val itemData = itemAddresses.nftItemOf(liteClient)
@@ -184,16 +170,14 @@ class AddItem(override val di: DI) :
     companion object : KLogging()
 }
 
-class IndexAll(override val di: DI) :
+class IndexAll :
     CliktCommand(
         name = "index-all",
         help = "Updates information about all entries, collections and items, in the database"
-    ),
-    DIAware {
+    ) {
     override fun run() {
         runBlocking {
-            val liteClient: LiteApi by instance()
-
+            val liteClient = Tool.liteClient
             val collectionAddresses = databaseCollections().subscribeOn(singleScheduler)
 
             val collectionData = collectionAddresses.observeOn(ioScheduler).nftCollectionOf(liteClient)
@@ -245,12 +229,11 @@ class IndexAll(override val di: DI) :
     companion object : KLogging()
 }
 
-class Steady(override val di: DI) :
+class Steady :
     CliktCommand(
         name = "steady",
         help = "Main service, keeps entire database updated"
-    ),
-    DIAware {
+    ) {
     private val collectionDataUpdatePeriod by option(
         "--collection-data-period",
         help = "Time delay (in minutes), after which collection data will be queued for an update"
@@ -304,7 +287,7 @@ class Steady(override val di: DI) :
 
     override fun run() {
         runBlocking {
-            val liteClient: LiteApi by instance()
+            val liteClient = Tool.liteClient
 
             val collectionAddresses =
                 observableInterval(100L, singleScheduler)
@@ -418,7 +401,5 @@ class Steady(override val di: DI) :
     companion object : KLogging()
 }
 
-fun main(args: Array<String>) {
-    val di = ConfigurableDI()
-    Tool(di).subcommands(AddCollection(di), AddItem(di), IndexAll(di), Steady(di)).main(args)
-}
+fun main(args: Array<String>) =
+    Tool().subcommands(AddCollection(), AddItem(), IndexAll(), Steady()).main(args)

@@ -11,8 +11,6 @@ dependencies {
     implementation(coreLibs.clikt)
     implementation(coreLibs.coroutines)
     implementation(coreLibs.jackson)
-    implementation(coreLibs.kodein)
-    implementation(coreLibs.kodein.conf)
     implementation(coreLibs.ton)
     implementation(logLibs.logback)
     implementation(logLibs.logging)

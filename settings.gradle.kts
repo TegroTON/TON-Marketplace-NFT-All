@@ -24,7 +24,6 @@ dependencyResolutionManagement {
         create("coreLibs") {
             version("clikt", "3.4.2")
             version("jackson", "2.13.2")
-            version("kodein", "7.11.0")
             version("reaktive", "1.2.1")
             version("reaktive.coroutines", "1.2.1-nmtc")
             version("reflect", "1.7.0")
@@ -37,8 +36,6 @@ dependencyResolutionManagement {
                 "kotlinx-coroutines-core"
             ).version { strictly("1.6.1-native-mt") }
             library("jackson", "com.fasterxml.jackson.module", "jackson-module-kotlin").versionRef("jackson")
-            library("kodein", "org.kodein.di", "kodein-di").versionRef("kodein")
-            library("kodein.conf", "org.kodein.di", "kodein-di-conf").versionRef("kodein")
             library("reaktive", "com.badoo.reaktive", "reaktive").versionRef("reaktive")
             library("reaktive.annotations", "com.badoo.reaktive", "reaktive-annotations").versionRef("reaktive")
             library("reaktive.coroutines", "com.badoo.reaktive", "coroutines-interop").versionRef("reaktive.coroutines")
@@ -62,8 +59,8 @@ dependencyResolutionManagement {
 
             library("exposed.core", "org.jetbrains.exposed", "exposed-core").versionRef("exposed")
             library("exposed.dao", "org.jetbrains.exposed", "exposed-dao").versionRef("exposed")
-            library("exposed.jdbc", "org.jetbrains.exposed", "exposed-jdbc").versionRef("exposed")
             library("exposed.java.time", "org.jetbrains.exposed", "exposed-java-time").versionRef("exposed")
+            library("exposed.jdbc", "org.jetbrains.exposed", "exposed-jdbc").versionRef("exposed")
             library("sqlite", "org.xerial", "sqlite-jdbc").versionRef("sqlite")
         }
 

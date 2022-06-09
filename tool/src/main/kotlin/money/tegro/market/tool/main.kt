@@ -11,12 +11,8 @@ import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.int
 import kotlinx.coroutines.runBlocking
 import money.tegro.market.nft.*
+import money.tegro.market.ton.ResilientLiteClient
 import mu.KLogging
-import org.kodein.di.DI
-import org.kodein.di.DIAware
-import org.kodein.di.bindSingleton
-import org.kodein.di.conf.ConfigurableDI
-import org.kodein.di.instance
 import org.ton.api.pk.PrivateKeyEd25519
 import org.ton.block.CommonMsgInfo
 import org.ton.block.Message
@@ -47,38 +43,33 @@ class LiteServerOptions : OptionGroup("lite server options") {
         .default("TDg+ILLlRugRB4Kpg3wXjPcoc+d+Eeb7kuVe16CS9z8=")
 }
 
-class Tool(override val di: ConfigurableDI) :
-    CliktCommand(name = "tool", help = "Your one-stop NFT item/collection shop"),
-    DIAware {
+class Tool :
+    CliktCommand(name = "tool", help = "Your one-stop NFT item/collection shop") {
     private val liteServerOptions by LiteServerOptions()
 
     override fun run() {
         runBlocking {
-            di.addConfig {
-                bindSingleton<LiteApi> {
-                    LiteClient(
-                        liteServerOptions.host,
-                        liteServerOptions.port,
-                        base64(liteServerOptions.publicKey)
-                    )
-                }
-            }
-
-            val liteClient: LiteApi by instance()
+            liteClient = ResilientLiteClient(
+                liteServerOptions.host,
+                liteServerOptions.port,
+                base64(liteServerOptions.publicKey)
+            )
 
             logger.debug("connecting to the lite client at ${liteServerOptions.host}:${liteServerOptions.port}")
             (liteClient as LiteClient).connect()
         }
     }
 
-    companion object : KLogging()
+    companion object : KLogging() {
+        lateinit var liteClient: LiteApi
+    }
 }
 
-class QueryItem(override val di: DI) : CliktCommand(name = "query-item", help = "Query NFT item info"), DIAware {
+class QueryItem : CliktCommand(name = "query-item", help = "Query NFT item info") {
     private val address by argument(name = "address", help = "NFT item contract address")
     override fun run() {
         runBlocking {
-            val liteClient: LiteApi by instance()
+            val liteClient = Tool.liteClient
 
             val item = NFTItem.of(MsgAddressIntStd.parse(address), liteClient)
             println("NFT Item ${item.address.toString(userFriendly = true)}:")
@@ -116,17 +107,16 @@ class QueryItem(override val di: DI) : CliktCommand(name = "query-item", help = 
                 }
             }
         }
-
     }
 }
 
-class QueryCollection(override val di: DI) :
-    CliktCommand(name = "query-collection", help = "Query NFT collection info"), DIAware {
+class QueryCollection :
+    CliktCommand(name = "query-collection", help = "Query NFT collection info") {
     private val address by argument(name = "address", help = "NFT collection contract address")
 
     override fun run() {
         runBlocking {
-            val liteClient: LiteApi by instance()
+            val liteClient = Tool.liteClient
 
             val collection = NFTCollection.of(MsgAddressIntStd.parse(address), liteClient)
             println("NFT Collection ${collection.address.toString(userFriendly = true)}")
@@ -151,14 +141,13 @@ class QueryCollection(override val di: DI) :
     }
 }
 
-class ListCollection(override val di: DI) :
-    CliktCommand(name = "list-collection", help = "List all items of the given NFT collection"),
-    DIAware {
+class ListCollection :
+    CliktCommand(name = "list-collection", help = "List all items of the given NFT collection") {
     private val address by argument(name = "address", help = "NFT collection contract address")
 
     override fun run() {
         runBlocking {
-            val liteClient: LiteApi by instance()
+            val liteClient = Tool.liteClient
 
             val collection = NFTCollection.of(MsgAddressIntStd.parse(address), liteClient)
 
@@ -179,7 +168,7 @@ class ListCollection(override val di: DI) :
     }
 }
 
-class MintItem(override val di: DI) : CliktCommand(name = "mint-item", help = "Mint a standalone item"), DIAware {
+class MintItem : CliktCommand(name = "mint-item", help = "Mint a standalone item") {
     private val messageCodec by lazy { Message.tlbCodec(AnyTlbConstructor) }
     private val privateKeyBase64 by option(
         "--private-key",
@@ -188,7 +177,7 @@ class MintItem(override val di: DI) : CliktCommand(name = "mint-item", help = "M
 
     override fun run() {
         runBlocking {
-            val liteClient: LiteApi by instance()
+            val liteClient = Tool.liteClient
 
             val privateKey = PrivateKeyEd25519(base64(privateKeyBase64))
             val wallet = WalletV1R3(liteClient, privateKey)
@@ -240,7 +229,5 @@ class MintItem(override val di: DI) : CliktCommand(name = "mint-item", help = "M
     companion object : KLogging()
 }
 
-fun main(args: Array<String>) {
-    val di = ConfigurableDI()
-    Tool(di).subcommands(QueryItem(di), QueryCollection(di), ListCollection(di), MintItem(di)).main(args)
-}
+fun main(args: Array<String>) =
+    Tool().subcommands(QueryItem(), QueryCollection(), ListCollection(), MintItem()).main(args)
