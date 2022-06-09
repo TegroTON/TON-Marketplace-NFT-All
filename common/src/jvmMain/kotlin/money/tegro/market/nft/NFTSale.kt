@@ -42,8 +42,8 @@ data class NFTSale(
                 return null
             }
 
-            try {
-                return NFTSale(
+            return try {
+                NFTSale(
                     address,
                     (result[0] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec) as MsgAddressIntStd,
                     (result[1] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec) as MsgAddressIntStd,
@@ -55,7 +55,7 @@ data class NFTSale(
                 )
             } catch (e: Exception) {
                 logger.warn { "couldn't parse response: $e" }
-                return null
+                null
             }
         }
     }

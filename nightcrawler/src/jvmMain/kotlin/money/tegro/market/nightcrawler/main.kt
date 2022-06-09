@@ -34,7 +34,6 @@ import org.ton.lite.api.LiteApi
 import org.ton.lite.client.LiteClient
 import kotlin.system.exitProcess
 import kotlin.time.Duration.Companion.minutes
-import kotlin.time.ExperimentalTime
 
 
 class LiteServerOptions : OptionGroup("lite server options") {
@@ -203,7 +202,7 @@ class IndexAll(override val di: DI) :
             val itemAddresses = concat(
                 collectionData.observeOn(ioScheduler).nftCollectionItems(liteClient),
                 // Include all of the items without collections
-                databaseItems({ it.collection == null }).subscribeOn(singleScheduler),
+                databaseItems { it.collection == null }.subscribeOn(singleScheduler),
             )
             val itemData = itemAddresses.observeOn(ioScheduler).nftItemOf(liteClient)
             val itemRoyalties = itemAddresses.observeOn(ioScheduler).nftRoyaltyOf(liteClient)
@@ -245,7 +244,6 @@ class IndexAll(override val di: DI) :
     companion object : KLogging()
 }
 
-@OptIn(ExperimentalTime::class)
 class Steady(override val di: DI) :
     CliktCommand(
         name = "steady",
@@ -350,7 +348,7 @@ class Steady(override val di: DI) :
                 // Include all of the items without collections
                 observableInterval(100L, singleScheduler)
                     .flatMap(1) {
-                        databaseItems({ it.collection == null }).subscribeOn(singleScheduler)
+                        databaseItems { it.collection == null }.subscribeOn(singleScheduler)
                     }
             )
             val itemData = itemAddresses.observeOn(singleScheduler)

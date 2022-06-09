@@ -99,7 +99,7 @@ fun Observable<Pair<MsgAddressIntStd, NFTSale?>>.upsertItemSale() =
     }
 
 fun Observable<Pair<MsgAddressIntStd, NFTCollectionMetadata?>>.upsertCollectionMetadata() =
-    this.subscribe {
+    this.subscribe { it ->
         val (address, metadata) = it
         transaction {
             val collection = CollectionEntity.find(address).firstOrNull() ?: CollectionEntity.new {
@@ -123,7 +123,7 @@ fun Observable<Pair<MsgAddressIntStd, NFTCollectionMetadata?>>.upsertCollectionM
 
 
 fun Observable<Pair<MsgAddressIntStd, NFTItemMetadata?>>.upsertItemMetadata() =
-    this.subscribe {
+    this.subscribe { it ->
         val (address, metadata) = it
         transaction {
             val item = ItemEntity.find(address).firstOrNull() ?: ItemEntity.new {

@@ -17,7 +17,7 @@ open class ResilientLiteClient(
     )
 
     override suspend fun sendRawQuery(byteArray: ByteArray): ByteArray {
-        var attempt = 1;
+        var attempt = 1
         while (true) {
             try {
                 return super.sendRawQuery(byteArray)
@@ -29,7 +29,7 @@ open class ResilientLiteClient(
 
                 logger.debug { "attempt no. $attempt failed, trying again in 100ms" }
                 delay(100L)
-                attempt += 1;
+                attempt += 1
             }
         }
     }
@@ -39,7 +39,7 @@ open class ResilientLiteClient(
         queryCodec: TlConstructor<Q>,
         answerCodec: TlConstructor<A>
     ): A {
-        var attempt = 1;
+        var attempt = 1
         while (true) {
             try {
                 return super.sendQuery(query, queryCodec, answerCodec)
@@ -51,7 +51,7 @@ open class ResilientLiteClient(
 
                 logger.debug { "attempt no. $attempt failed, trying again in 100ms" }
                 delay(100L)
-                attempt += 1;
+                attempt += 1
             }
         }
     }

@@ -59,7 +59,8 @@ class Tool(override val di: ConfigurableDI) :
                     LiteClient(
                         liteServerOptions.host,
                         liteServerOptions.port,
-                        liteServerOptions.publicKey.let { base64(it) })
+                        base64(liteServerOptions.publicKey)
+                    )
                 }
             }
 
@@ -74,7 +75,7 @@ class Tool(override val di: ConfigurableDI) :
 }
 
 class QueryItem(override val di: DI) : CliktCommand(name = "query-item", help = "Query NFT item info"), DIAware {
-    val address by argument(name = "address", help = "NFT item contract address")
+    private val address by argument(name = "address", help = "NFT item contract address")
     override fun run() {
         runBlocking {
             val liteClient: LiteApi by instance()
@@ -97,9 +98,9 @@ class QueryItem(override val di: DI) : CliktCommand(name = "query-item", help = 
                     println("\tOn sale: yes")
                     println("\tMarketplace: ${marketplace.toString(userFriendly = true)}")
                     println("\tSeller: ${owner.toString(userFriendly = true)}")
-                    println("\tPrice: ${price} nTON")
-                    println("\tMarketplace fee: ${marketplaceFee} nTON")
-                    println("\tRoyalties: ${royalty} nTON")
+                    println("\tPrice: $price nTON")
+                    println("\tMarketplace fee: $marketplaceFee nTON")
+                    println("\tRoyalties: $royalty nTON")
                     println("\tRoyalty destination: ${royaltyDestination?.toString(userFriendly = true)}")
                 }
 
@@ -121,7 +122,7 @@ class QueryItem(override val di: DI) : CliktCommand(name = "query-item", help = 
 
 class QueryCollection(override val di: DI) :
     CliktCommand(name = "query-collection", help = "Query NFT collection info"), DIAware {
-    val address by argument(name = "address", help = "NFT collection contract address")
+    private val address by argument(name = "address", help = "NFT collection contract address")
 
     override fun run() {
         runBlocking {
@@ -153,7 +154,7 @@ class QueryCollection(override val di: DI) :
 class ListCollection(override val di: DI) :
     CliktCommand(name = "list-collection", help = "List all items of the given NFT collection"),
     DIAware {
-    val address by argument(name = "address", help = "NFT collection contract address")
+    private val address by argument(name = "address", help = "NFT collection contract address")
 
     override fun run() {
         runBlocking {
@@ -212,10 +213,10 @@ class MintItem(override val di: DI) : CliktCommand(name = "mint-item", help = "M
 
             logger.debug("seqno: ${(seqnoResult.first() as VmStackValue.TinyInt).value}")
             val message =
-                wallet.createSigningMessage((seqnoResult.first() as VmStackValue.TinyInt).value.toInt(), {
+                wallet.createSigningMessage((seqnoResult.first() as VmStackValue.TinyInt).value.toInt()) {
                     storeUInt(3, 8) // mode
                     storeRef(stub.initMessage())
-                })
+                }
 
             val signature = wallet.privateKey.sign(message.hash())
             val body = CellBuilder.createCell {

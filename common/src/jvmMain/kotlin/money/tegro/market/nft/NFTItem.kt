@@ -90,7 +90,7 @@ data class NFTItemInitialized(
         liteClient: LiteApi,
         referenceBlock: TonNodeBlockIdExt = runBlocking { liteClient.getMasterchainInfo().last },
     ) =
-        collection?.let { NFTItemInitialized.content(it, index, content, liteClient, referenceBlock) } ?: content
+        collection?.let { content(it, index, content, liteClient, referenceBlock) } ?: content
 
     companion object : KLogging() {
         @JvmStatic
