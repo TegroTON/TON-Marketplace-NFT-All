@@ -211,7 +211,11 @@ class IndexAll(override val di: DI) :
             val collectionRoyalties = collectionAddresses.observeOn(ioScheduler).nftRoyaltyOf(liteClient)
             val collectionMetadata = collectionData.observeOn(ioScheduler).nftCollectionMetadata(ipfs)
 
-            val itemAddresses = collectionData.observeOn(ioScheduler).nftCollectionItems(liteClient)
+            val itemAddresses = concat(
+                collectionData.observeOn(ioScheduler).nftCollectionItems(liteClient),
+                // Include all of the items without collections
+                databaseItems({ it.collection == null }).subscribeOn(singleScheduler),
+            )
             val itemData = itemAddresses.observeOn(ioScheduler).nftItemOf(liteClient)
             val itemRoyalties = itemAddresses.observeOn(ioScheduler).nftRoyaltyOf(liteClient)
             val itemSellers = itemData.observeOn(ioScheduler).filter { it is NFTItemInitialized }
