@@ -16,9 +16,8 @@ import io.ipfs.kotlin.IPFS
 import io.ipfs.kotlin.IPFSConfiguration
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import money.tegro.market.db.CollectionsTable
-import money.tegro.market.db.ItemAttributesTable
-import money.tegro.market.db.ItemsTable
+import kotlinx.datetime.Clock
+import money.tegro.market.db.*
 import money.tegro.market.nft.NFTItemInitialized
 import money.tegro.market.ton.ResilientLiteClient
 import mu.KLogging
@@ -36,6 +35,8 @@ import org.ton.crypto.base64
 import org.ton.lite.api.LiteApi
 import org.ton.lite.client.LiteClient
 import kotlin.system.exitProcess
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.ExperimentalTime
 
 
 class LiteServerOptions : OptionGroup("lite server options") {
@@ -256,7 +257,174 @@ class IndexAll(override val di: DI) :
     companion object : KLogging()
 }
 
+@OptIn(ExperimentalTime::class)
+class Steady(override val di: DI) :
+    CliktCommand(
+        name = "steady",
+        help = "Main service, keeps entire database updated"
+    ),
+    DIAware {
+    private val collectionDataUpdatePeriod by option(
+        "--collection-data-period",
+        help = "Time delay (in minutes), after which collection data will be queued for an update"
+    )
+        .int()
+        .default(69)
+    private val collectionRoyaltyUpdatePeriod by option(
+        "--collection-royalty-period",
+        help = "Time delay (in minutes), after which collection royalty data will be queued for an update"
+    )
+        .int()
+        .default(420)
+    private val collectionMetadataUpdatePeriod by option(
+        "--collection-metadata-period",
+        help = "Time delay (in minutes), after which collection metadata will be queued for an update"
+    )
+        .int()
+        .default(420)
+
+
+    private val itemDataUpdatePeriod by option(
+        "--item-data-period",
+        help = "Time delay (in minutes), after which item data will be queued for an update"
+    )
+        .int()
+        .default(6)
+    private val itemOrphanRoyaltyUpdatePeriod by option(
+        "--item-orphan-royalty-period",
+        help = "Time delay (in minutes), after which item royalty data for orphan NFTs (not belonging to a collection) will be queued for an update"
+    )
+        .int()
+        .default(420)
+    private val itemRoyaltyUpdatePeriod by option(
+        "--item-royalty-period",
+        help = "Time delay (in minutes), after which item royalty data will be queued for an update"
+    )
+        .int()
+        .default(420 * 6)
+    private val itemOwnerUpdatePeriod by option(
+        "--item-owner-period",
+        help = "Time delay (in minutes), after which item's owner data will be queued for an update"
+    )
+        .int()
+        .default(9)
+    private val itemMetadataUpdatePeriod by option(
+        "--item-metadata-period",
+        help = "Time delay (in minutes), after which item metadata will be queued for an update"
+    )
+        .int()
+        .default(420)
+
+    override fun run() {
+        runBlocking {
+            val liteClient: LiteApi by instance()
+            val ipfs: IPFS by instance()
+
+            val collectionAddresses =
+                observableInterval(100L, singleScheduler)
+                    .flatMap(1) {
+                        databaseCollections().subscribeOn(singleScheduler)
+                    }
+
+            val collectionData = collectionAddresses.observeOn(singleScheduler)
+                .filter {
+                    transaction {
+                        CollectionEntity.find(it).firstOrNull()?.dataLastIndexed?.let {
+                            it > Clock.System.now() + collectionDataUpdatePeriod.minutes
+                        } ?: true
+                    }
+                }
+                .observeOn(ioScheduler)
+                .nftCollectionOf(liteClient)
+
+            val collectionRoyalties = collectionAddresses.observeOn(singleScheduler)
+                .filter {
+                    transaction {
+                        CollectionEntity.find(it).firstOrNull()?.royaltyLastIndexed?.let {
+                            it > Clock.System.now() + collectionRoyaltyUpdatePeriod.minutes
+                        } ?: true
+                    }
+                }
+                .observeOn(ioScheduler)
+                .nftRoyaltyOf(liteClient)
+
+            val collectionMetadata = collectionData.observeOn(singleScheduler)
+                .filter {
+                    transaction {
+                        CollectionEntity.find(it.address).firstOrNull()?.metadataLastIndexed?.let {
+                            it > Clock.System.now() + collectionMetadataUpdatePeriod.minutes
+                        } ?: true
+                    }
+                }.observeOn(ioScheduler)
+                .nftCollectionMetadata(ipfs)
+
+            val itemAddresses = merge(
+                collectionData.observeOn(ioScheduler).nftCollectionItems(liteClient),
+                // Include all of the items without collections
+                observableInterval(100L, singleScheduler)
+                    .flatMap(1) {
+                        databaseItems({ it.collection == null }).subscribeOn(singleScheduler)
+                    }
+            )
+            val itemData = itemAddresses.observeOn(singleScheduler)
+                .filter {
+                    transaction {
+                        ItemEntity.find(it).firstOrNull()?.dataLastIndexed?.let {
+                            it > Clock.System.now() + itemDataUpdatePeriod.minutes
+                        } ?: true
+                    }
+                }.observeOn(ioScheduler).nftItemOf(liteClient)
+            val itemRoyalties = itemAddresses.observeOn(singleScheduler)
+                .filter {
+                    transaction {
+                        ItemEntity.find(it).firstOrNull()?.run {
+                            if (collection == null) { // We've got an orphan
+                                royaltyLastIndexed?.let { it > Clock.System.now() + itemOrphanRoyaltyUpdatePeriod.minutes }
+                            } else {
+                                royaltyLastIndexed?.let { it > Clock.System.now() + itemRoyaltyUpdatePeriod.minutes }
+                            }
+                        } ?: true
+                    }
+                }.observeOn(ioScheduler).nftRoyaltyOf(liteClient)
+            val itemSellers = itemData.observeOn(ioScheduler).filter { it is NFTItemInitialized }
+                .map { (it as NFTItemInitialized).owner }
+                .observeOn(singleScheduler)
+                .filter {
+                    transaction {
+                        ItemEntity.find(it).firstOrNull()?.ownerLastIndexed?.let {
+                            it > Clock.System.now() + itemOwnerUpdatePeriod.minutes
+                        } ?: true
+                    }
+                }
+                .observeOn(ioScheduler)
+                .nftSaleOf(liteClient)
+            val itemMetadata = itemData.observeOn(singleScheduler)
+                .filter {
+                    transaction {
+                        ItemEntity.find(it.address).firstOrNull()?.dataLastIndexed?.let {
+                            it > Clock.System.now() + itemMetadataUpdatePeriod.minutes
+                        } ?: true
+                    }
+                }.observeOn(ioScheduler)
+                .nftItemMetadata(ipfs, liteClient)
+
+            collectionData.observeOn(singleScheduler).upsertCollectionData()
+            collectionRoyalties.observeOn(singleScheduler).updateRoyalty()
+            collectionMetadata.observeOn(singleScheduler).upsertCollectionMetadata()
+
+            itemData.observeOn(singleScheduler).upsertItemData()
+            itemRoyalties.observeOn(singleScheduler).updateRoyalty()
+            itemSellers.observeOn(singleScheduler).upsertItemSale()
+            itemMetadata.observeOn(singleScheduler).upsertItemMetadata()
+
+            delay(Long.MAX_VALUE)
+        }
+    }
+
+    companion object : KLogging()
+}
+
 fun main(args: Array<String>) {
     val di = ConfigurableDI()
-    Tool(di).subcommands(AddCollection(di), AddItem(di), IndexAll(di)).main(args)
+    Tool(di).subcommands(AddCollection(di), AddItem(di), IndexAll(di), Steady(di)).main(args)
 }
