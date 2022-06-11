@@ -2,31 +2,34 @@ package money.tegro.market.nightcrawler
 
 import kotlinx.coroutines.runBlocking
 import money.tegro.market.db.CollectionInfo
+import money.tegro.market.db.CollectionRoyalty
 import money.tegro.market.nft.NFTCollection
-import org.hibernate.SessionFactory
+import money.tegro.market.nft.NFTRoyalty
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory
+import org.springframework.batch.core.launch.support.RunIdIncrementer
 import org.springframework.batch.item.ItemProcessor
-import org.springframework.batch.item.database.builder.HibernateCursorItemReaderBuilder
-import org.springframework.batch.item.database.builder.HibernateItemWriterBuilder
+import org.springframework.batch.item.database.builder.JpaCursorItemReaderBuilder
+import org.springframework.batch.item.database.builder.JpaItemWriterBuilder
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder
 import org.springframework.batch.item.support.CompositeItemProcessor
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.ClassPathResource
-import org.springframework.transaction.annotation.Transactional
 import org.ton.block.MsgAddressIntStd
 import java.time.Instant
+import javax.persistence.EntityManagerFactory
 
 @Configuration
 @EnableBatchProcessing
 class CollectionJobs(
     val jobBuilderFactory: JobBuilderFactory,
     val stepBuilderFactory: StepBuilderFactory,
-    val sessionFactory: SessionFactory,
+    val entityManagerFactory: EntityManagerFactory,
     val liteApiFactory: LiteApiFactory,
     val collectionInfoRepository: CollectionInfoRepository,
+    val collectionRoyaltyRepository: CollectionRoyaltyRepository,
 ) {
     @Bean
     fun requiredCollectionAddressReader() = FlatFileItemReaderBuilder<String>()
@@ -40,15 +43,21 @@ class CollectionJobs(
         .build()
 
     @Bean
-    fun collectionInfoReader() = HibernateCursorItemReaderBuilder<CollectionInfo>()
+    fun collectionInfoReader() = JpaCursorItemReaderBuilder<CollectionInfo>()
         .name("collectionInfoReader")
-        .sessionFactory(sessionFactory)
         .queryString("from CollectionInfo")
+        .entityManagerFactory(entityManagerFactory)
+        .saveState(false)
         .build()
 
     @Bean
-    fun collectionInfoWriter() = HibernateItemWriterBuilder<CollectionInfo>()
-        .sessionFactory(sessionFactory)
+    fun collectionInfoWriter() = JpaItemWriterBuilder<CollectionInfo>()
+        .entityManagerFactory(entityManagerFactory)
+        .build()
+
+    @Bean
+    fun collectionRoyaltyWriter() = JpaItemWriterBuilder<CollectionRoyalty>()
+        .entityManagerFactory(entityManagerFactory)
         .build()
 
     @Bean
@@ -59,17 +68,43 @@ class CollectionJobs(
     }
 
     @Bean
-    @Transactional(readOnly = true)
+    fun nftRoyaltyProcessor() = ItemProcessor<MsgAddressIntStd, Pair<MsgAddressIntStd, NFTRoyalty?>> {
+        runBlocking {
+            it to NFTRoyalty.of(it, liteApiFactory.getObject())
+        }
+    }
+
+    @Bean
     fun collectionInfoProcessor() = ItemProcessor<NFTCollection, CollectionInfo> {
-        val collection = collectionInfoRepository.findByAddress(it.address) ?: CollectionInfo(
+        (collectionInfoRepository.findByAddress(it.address) ?: CollectionInfo(
             it.address.workchainId,
             it.address.address.toByteArray(),
-        )
-        collection.apply {
+        )).apply {
+            if (modified == null || nextItemIndex != it.nextItemIndex || owner() != it.owner)
+                modified = Instant.now()
+
             nextItemIndex = it.nextItemIndex
             owner(it.owner)
-            modified = Instant.now()
             updated = Instant.now()
+        }
+    }
+
+    @Bean
+    fun collectionRoyaltyProcessor() = ItemProcessor<Pair<MsgAddressIntStd, NFTRoyalty?>, CollectionRoyalty> {
+        val (address, royalty) = it
+        collectionInfoRepository.findByAddress(address)?.let { collection ->
+            (collectionRoyaltyRepository.findByCollection(collection)
+                ?: CollectionRoyalty(collection)).apply {
+                if (modified == null || numerator != royalty?.numerator || denominator != royalty?.denominator || destinationWorkchain != royalty?.destination?.workchainId || destinationAddress != royalty?.destination?.address?.toByteArray())
+                    modified = Instant.now()
+
+                numerator = royalty?.numerator
+                denominator = royalty?.denominator
+                destinationWorkchain = royalty?.destination?.workchainId
+                destinationAddress = royalty?.destination?.address?.toByteArray()
+                updated = Instant.now()
+            }
+
         }
     }
 
@@ -99,7 +134,7 @@ class CollectionJobs(
                 arrayListOf(
                     ItemProcessor<CollectionInfo, MsgAddressIntStd> { it.address() },
                     nftCollectionProcessor(),
-                    collectionInfoProcessor()
+                    collectionInfoProcessor(),
                 )
             )
         })
@@ -108,12 +143,32 @@ class CollectionJobs(
         .build()
 
     @Bean
+    fun updateCollectionRoyalty() = stepBuilderFactory
+        .get("updateCollectionRoyalty")
+        .chunk<CollectionInfo, CollectionRoyalty>(1)
+        .processor(CompositeItemProcessor<CollectionInfo, CollectionRoyalty>().apply {
+            setDelegates(
+                arrayListOf(
+                    ItemProcessor<CollectionInfo, MsgAddressIntStd> { it.address() },
+                    nftRoyaltyProcessor(),
+                    collectionRoyaltyProcessor(),
+                )
+            )
+        })
+        .reader(collectionInfoReader())
+        .writer(collectionRoyaltyWriter())
+        .build()
+
+    @Bean
     fun initializeCollections() = jobBuilderFactory.get("initializeCollections")
         .start(initializeCollectionInfo())
+        .next(updateCollectionRoyalty())
         .build()
 
     @Bean
     fun updateCollections() = jobBuilderFactory.get("updateCollections")
+        .incrementer(RunIdIncrementer())
         .start(updateCollectionInfo())
+        .next(updateCollectionRoyalty())
         .build()
 }

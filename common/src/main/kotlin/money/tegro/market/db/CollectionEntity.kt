@@ -64,21 +64,21 @@ class CollectionRoyalty(
     @JoinColumn(name = "collection", nullable = false)
     val collection: CollectionInfo,
 
-    @Column(name = "royalty_numerator")
-    override val royaltyNumerator: Int? = null,
-    @Column(name = "royalty_denominator")
-    override val royaltyDenominator: Int? = null,
-    @Column(name = "royalty_destination_workchain")
-    override val royaltyDestinationWorkchain: Int? = null,
-    @Column(name = "royalty_destination_address", length = 32)
-    override val royaltyDestinationAddress: ByteArray? = null,
+    @Column(name = "numerator")
+    override var numerator: Int? = null,
+    @Column(name = "denominator")
+    override var denominator: Int? = null,
+    @Column(name = "destination_workchain")
+    override var destinationWorkchain: Int? = null,
+    @Column(name = "destination_address", length = 32)
+    override var destinationAddress: ByteArray? = null,
 
     @Column(name = "discovered", nullable = false)
     override val discovered: Instant = Instant.now(),
     @Column(name = "updated")
-    override val updated: Instant? = null,
+    override var updated: Instant? = null,
     @Column(name = "modified")
-    override val modified: Instant? = null,
+    override var modified: Instant? = null,
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,

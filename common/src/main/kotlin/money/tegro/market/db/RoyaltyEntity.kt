@@ -1,8 +1,8 @@
 package money.tegro.market.db
 
 interface RoyaltyEntity {
-    val royaltyNumerator: Int?
-    val royaltyDenominator: Int?
-    val royaltyDestinationWorkchain: Int?
-    val royaltyDestinationAddress: ByteArray?
+    val numerator: Int?
+    val denominator: Int?
+    val destinationWorkchain: Int?
+    val destinationAddress: ByteArray?
 }
