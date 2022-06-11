@@ -1,54 +1,65 @@
 package money.tegro.market.db
 
-import org.jetbrains.exposed.dao.LongEntity
-import org.jetbrains.exposed.dao.LongEntityClass
-import org.jetbrains.exposed.dao.id.EntityID
-import org.jetbrains.exposed.sql.and
-import org.ton.block.MsgAddressIntStd
+import java.time.Instant
+import javax.persistence.*
 
-class ItemEntity(id: EntityID<Long>) : LongEntity(id), Royalty {
-    companion object : LongEntityClass<ItemEntity>(ItemsTable) {
-        @JvmStatic
-        fun find(item: MsgAddressIntStd) =
-            this.find { (ItemsTable.workchain eq item.workchainId) and (ItemsTable.address eq item.address.toByteArray()) }
-    }
+//@Entity
+//@Table(name = "items")
+class ItemEntity(
+    // Basic item properties
+    @Column(name = "workchain", nullable = false)
+    val workchain: Int,
+    @Column(name = "address", nullable = false, unique = true, length = 32)
+    val address: ByteArray,
+    @Column(name = "initialized", nullable = false)
+    val initialized: Boolean = false,
 
-    var workchain by ItemsTable.workchain
-    var address by ItemsTable.address
+    @Column(name = "index")
+    val index: Long? = null,
+    @ManyToOne
+    @JoinColumn(name = "collection", referencedColumnName = "id")
+    val collection: CollectionInfo? = null,
+    @Column(name = "owner_workchain")
+    val ownerWorkchain: Int? = null,
+    @Column(name = "owner_address", length = 32)
+    val ownerAddress: ByteArray? = null,
 
-    var initialized: Boolean by ItemsTable.initialized
-    var index: Long? by ItemsTable.index
-    var collection: CollectionEntity? by CollectionEntity optionalReferencedOn ItemsTable.collection
-    var ownerWorkchain by ItemsTable.ownerWorkchain
-    var ownerAddress by ItemsTable.ownerAddress
+    // Royalty-related properties
+    @Column(name = "royalty_numerator")
+    override val royaltyNumerator: Int? = null,
+    @Column(name = "royalty_denominator")
+    override val royaltyDenominator: Int? = null,
+    @Column(name = "royalty_destination_workchain")
+    override val royaltyDestinationWorkchain: Int? = null,
+    @Column(name = "royalty_destination_address", length = 32)
+    override val royaltyDestinationAddress: ByteArray? = null,
 
-    override var royaltyNumerator: Int? by ItemsTable.royaltyNumerator
-    override var royaltyDenominator: Int? by ItemsTable.royaltyDenominator
-    override var royaltyDestinationWorkchain by ItemsTable.royaltyDestinationWorkchain
-    override var royaltyDestinationAddress by ItemsTable.royaltyDestinationAddress
+    // Metadata-related properties
+    @Column(name = "name")
+    val name: String? = null,
+    @Column(name = "description")
+    val description: String? = null,
+    @Column(name = "image")
+    val image: String? = null,
+    @Column(name = "image_data")
+    val imageData: ByteArray? = null,
+    @OneToMany
+    @JoinColumn(name = "attributes", referencedColumnName = "id")
+    val attributes: List<ItemAttributeEntity>? = null,
 
-    var marketplaceWorkchain by ItemsTable.marketplaceWorkchain
-    var marketplaceAddress by ItemsTable.marketplaceAddress
-    var sellerWorkchain by ItemsTable.sellerWorkchain
-    var sellerAddress by ItemsTable.sellerAddress
-    var price by ItemsTable.price
-    var marketplaceFee by ItemsTable.marketplaceFee
+    // Internal properties
+    @Column(name = "approved", nullable = false)
+    val approved: Boolean = false,
+    @Column(name = "discovered", nullable = false)
+    val discovered: Instant = Instant.now(),
+    @Column(name = "data_last_indexed")
+    val dataLastIndexed: Instant? = null,
+    @Column(name = "royalty_last_indexed")
+    override val royaltyLastIndexed: Instant? = null,
+    @Column(name = "metadata_last_indexed")
+    val metadataLastIndexed: Instant? = null,
 
-    var saleRoyaltyDestinationWorkchain by ItemsTable.saleRoyaltyDestinationWorkchain
-    var saleRoyaltyDestinationAddress by ItemsTable.saleRoyaltyDestinationAddress
-    var saleRoyalty by ItemsTable.saleRoyalty
-
-    var name by ItemsTable.name
-    var description by ItemsTable.description
-    var image by ItemsTable.image
-    var imageData by ItemsTable.imageData
-
-    val attributes by ItemAttributeEntity referrersOn ItemAttributesTable.item
-
-    val approved by ItemsTable.approved
-    var discovered by ItemsTable.discovered
-    var dataLastIndexed by ItemsTable.dataLastIndexed
-    override var royaltyLastIndexed by ItemsTable.royaltyLastIndexed
-    var ownerLastIndexed by ItemsTable.ownerLastIndexed
-    var metadataLastIndexed by ItemsTable.metadataLastIndexed
-}
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    var id: Long? = null,
+) : Royalty

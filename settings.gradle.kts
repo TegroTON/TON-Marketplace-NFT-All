@@ -9,7 +9,10 @@ pluginManagement {
 
     plugins {
         kotlin("jvm") version "1.7.0"
-        kotlin("plugin.spring") version "1.6.21"
+        kotlin("plugin.allopen") version "1.7.0"
+        kotlin("plugin.jpa") version "1.7.0"
+        kotlin("plugin.noarg") version "1.7.0"
+        kotlin("plugin.spring") version "1.7.0"
         id("org.springframework.boot") version "2.6.8"
         id("org.springdoc.openapi-gradle-plugin") version "1.3.4"
         id("io.spring.dependency-management") version "1.0.11.RELEASE"
@@ -35,6 +38,11 @@ dependencyResolutionManagement {
                 "org.jetbrains.kotlinx",
                 "kotlinx-coroutines-core"
             ).version { strictly("1.6.1-native-mt") }
+            library(
+                "coroutines.reactor",
+                "org.jetbrains.kotlinx",
+                "kotlinx-coroutines-reactor"
+            ).version { strictly("1.6.1-native-mt") }
             library("jackson", "com.fasterxml.jackson.module", "jackson-module-kotlin").versionRef("jackson")
             library("reaktive", "com.badoo.reaktive", "reaktive").versionRef("reaktive")
             library("reaktive.annotations", "com.badoo.reaktive", "reaktive-annotations").versionRef("reaktive")
@@ -54,32 +62,40 @@ dependencyResolutionManagement {
         }
 
         create("dbLibs") {
-            version("exposed", "0.38.2")
-            version("sqlite", "3.36.0")
+            version("h2", "2.1.212")
+            version("hibernate", "5.6.9.Final")
 
-            library("exposed.core", "org.jetbrains.exposed", "exposed-core").versionRef("exposed")
-            library("exposed.dao", "org.jetbrains.exposed", "exposed-dao").versionRef("exposed")
-            library("exposed.java.time", "org.jetbrains.exposed", "exposed-java-time").versionRef("exposed")
-            library("exposed.jdbc", "org.jetbrains.exposed", "exposed-jdbc").versionRef("exposed")
-            library("sqlite", "org.xerial", "sqlite-jdbc").versionRef("sqlite")
+            library("h2", "com.h2database", "h2").versionRef("h2")
+            library("hibernate.core", "org.hibernate", "hibernate-core").versionRef("hibernate")
         }
 
-        create("webLibs") {
+        create("springLibs") {
             version("springdoc.openapi", "1.6.9")
+            version("spring.batch", "4.3.6")
             version("spring.boot", "2.6.8")
 
-            library("springdoc.openapi.ui", "org.springdoc", "springdoc-openapi-ui").versionRef("springdoc.openapi")
+            library("openapi.ui", "org.springdoc", "springdoc-openapi-ui").versionRef("springdoc.openapi")
             library(
-                "springdoc.openapi.kotlin",
+                "openapi.kotlin",
                 "org.springdoc",
                 "springdoc-openapi-kotlin"
             ).versionRef("springdoc.openapi")
+            library("batch.core", "org.springframework.batch", "spring-batch-core").versionRef("spring.batch")
             library(
-                "spring.boot.security",
+                "batch.integration",
+                "org.springframework.batch",
+                "spring-batch-integration"
+            ).versionRef("spring.batch")
+
+            library("core", "org.springframework.boot", "spring-boot-starter").versionRef("spring.boot")
+            library("jdbc", "org.springframework.boot", "spring-boot-starter-jdbc").versionRef("spring.boot")
+            library("jpa", "org.springframework.boot", "spring-boot-starter-data-jpa").versionRef("spring.boot")
+            library(
+                "security",
                 "org.springframework.boot",
                 "spring-boot-starter-security"
             ).versionRef("spring.boot")
-            library("spring.boot.web", "org.springframework.boot", "spring-boot-starter-web").versionRef("spring.boot")
+            library("web", "org.springframework.boot", "spring-boot-starter-web").versionRef("spring.boot")
         }
     }
 }
