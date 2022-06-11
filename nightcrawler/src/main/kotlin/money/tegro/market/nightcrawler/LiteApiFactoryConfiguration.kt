@@ -1,6 +1,7 @@
 package money.tegro.market.nightcrawler
 
 import kotlinx.coroutines.runBlocking
+import money.tegro.market.ton.LiteApiFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.ton.crypto.base64

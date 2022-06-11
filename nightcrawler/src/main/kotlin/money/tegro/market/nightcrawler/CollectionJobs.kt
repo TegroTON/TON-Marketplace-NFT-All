@@ -1,10 +1,10 @@
 package money.tegro.market.nightcrawler
 
 import kotlinx.coroutines.runBlocking
-import money.tegro.market.db.CollectionInfo
-import money.tegro.market.db.CollectionRoyalty
+import money.tegro.market.db.*
 import money.tegro.market.nft.NFTCollection
 import money.tegro.market.nft.NFTRoyalty
+import money.tegro.market.ton.LiteApiFactory
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory
@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.ClassPathResource
 import org.ton.block.MsgAddressIntStd
+import org.ton.boc.BagOfCells
 import java.time.Instant
 import javax.persistence.EntityManagerFactory
 
@@ -34,7 +35,7 @@ class CollectionJobs(
     @Bean
     fun requiredCollectionAddressReader() = FlatFileItemReaderBuilder<String>()
         .name("requiredCollectionReader")
-        .resource(ClassPathResource("required_collections.csv"))
+        .resource(ClassPathResource("initial_collections.csv"))
         .delimited()
         .names("address")
         .fieldSetMapper {
@@ -80,10 +81,11 @@ class CollectionJobs(
             it.address.workchainId,
             it.address.address.toByteArray(),
         )).apply {
-            if (modified == null || nextItemIndex != it.nextItemIndex || owner() != it.owner)
+            if (modified == null || nextItemIndex != it.nextItemIndex || !content.contentEquals(BagOfCells(it.content).toByteArray()) || owner() != it.owner)
                 modified = Instant.now()
 
             nextItemIndex = it.nextItemIndex
+            content = BagOfCells(it.content).toByteArray()
             owner(it.owner)
             updated = Instant.now()
         }

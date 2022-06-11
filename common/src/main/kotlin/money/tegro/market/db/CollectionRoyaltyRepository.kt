@@ -1,7 +1,5 @@
-package money.tegro.market.nightcrawler
+package money.tegro.market.db
 
-import money.tegro.market.db.CollectionInfo
-import money.tegro.market.db.CollectionRoyalty
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface CollectionRoyaltyRepository : JpaRepository<CollectionRoyalty, Long> {

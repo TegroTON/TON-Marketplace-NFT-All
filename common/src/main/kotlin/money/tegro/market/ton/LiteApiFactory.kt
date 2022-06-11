@@ -1,6 +1,5 @@
-package money.tegro.market.nightcrawler
+package money.tegro.market.ton
 
-import money.tegro.market.ton.ResilientLiteClient
 import org.springframework.beans.factory.config.AbstractFactoryBean
 import org.ton.lite.api.LiteApi
 

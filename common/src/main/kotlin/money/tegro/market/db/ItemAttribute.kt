@@ -2,15 +2,16 @@ package money.tegro.market.db
 
 import javax.persistence.*
 
-//@Entity
-//@Table(name = "item_attributes")
-class ItemAttributeEntity(
+@Entity
+@Table(name = "item_attributes")
+class ItemAttribute(
     @ManyToOne
-    @JoinColumn(name = "item", referencedColumnName = "id", nullable = false)
-    val item: ItemEntity,
+    @JoinColumn(name = "metadata", nullable = false)
+    val metadata: ItemMetadata,
+
     @Column(name = "trait", nullable = false)
     val trait: String,
-    @Column(name = "value", nullable = false)
+    @Column(name = "value_", nullable = false)
     val value: String,
 
     @Id

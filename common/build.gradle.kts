@@ -6,4 +6,5 @@ dependencies {
     implementation(logLibs.logback)
     implementation(logLibs.logging)
     implementation(logLibs.slf4j)
+    implementation(springLibs.jpa)
 }
