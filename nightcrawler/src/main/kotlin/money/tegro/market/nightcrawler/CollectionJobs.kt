@@ -3,6 +3,7 @@ package money.tegro.market.nightcrawler
 import kotlinx.coroutines.runBlocking
 import money.tegro.market.db.*
 import money.tegro.market.nft.NFTCollection
+import money.tegro.market.nft.NFTItem
 import money.tegro.market.nft.NFTRoyalty
 import money.tegro.market.ton.LiteApiFactory
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing
@@ -10,6 +11,7 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory
 import org.springframework.batch.core.launch.support.RunIdIncrementer
 import org.springframework.batch.item.ItemProcessor
+import org.springframework.batch.item.ItemWriter
 import org.springframework.batch.item.database.builder.JpaCursorItemReaderBuilder
 import org.springframework.batch.item.database.builder.JpaItemWriterBuilder
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder
@@ -31,6 +33,7 @@ class CollectionJobs(
     val liteApiFactory: LiteApiFactory,
     val collectionInfoRepository: CollectionInfoRepository,
     val collectionRoyaltyRepository: CollectionRoyaltyRepository,
+    val itemInfoRepository: ItemInfoRepository,
 ) {
     @Bean
     fun requiredCollectionAddressReader() = FlatFileItemReaderBuilder<String>()
@@ -62,6 +65,13 @@ class CollectionJobs(
         .build()
 
     @Bean
+    fun itemInfoWriter() = ItemWriter<List<ItemInfo>> {
+        it.forEach {
+            itemInfoRepository.saveAllAndFlush(it)
+        }
+    }
+
+    @Bean
     fun nftCollectionProcessor() = ItemProcessor<MsgAddressIntStd, NFTCollection> {
         runBlocking {
             NFTCollection.of(it, liteApiFactory.getObject())
@@ -72,6 +82,22 @@ class CollectionJobs(
     fun nftRoyaltyProcessor() = ItemProcessor<MsgAddressIntStd, Pair<MsgAddressIntStd, NFTRoyalty?>> {
         runBlocking {
             it to NFTRoyalty.of(it, liteApiFactory.getObject())
+        }
+    }
+
+    @Bean
+    fun collectionItemsProcessor() = ItemProcessor<CollectionInfo, List<ItemInfo>> { collection ->
+        runBlocking {
+            val addedIndices = collection.items.orEmpty().map { it.index }.filterNotNull()
+            collection.nextItemIndex?.let { (0 until it) }
+                ?.filter { !addedIndices.contains(it) }
+                ?.map {
+                    NFTItem.of(collection.addressStd(), it, liteApiFactory.getObject())
+                }
+                ?.map {
+                    itemInfoRepository.findByAddress(it) ?: ItemInfo(it.workchainId, it.address.toByteArray())
+                }
+                ?.toList()
         }
     }
 
@@ -162,9 +188,20 @@ class CollectionJobs(
         .build()
 
     @Bean
+    fun discoverMissingItems() = stepBuilderFactory
+        .get("discoverMissingItems")
+        .chunk<CollectionInfo, List<ItemInfo>>(1)
+        .processor(collectionItemsProcessor())
+        .reader(collectionInfoReader())
+        .writer(itemInfoWriter())
+        .build()
+
+
+    @Bean
     fun initializeCollections() = jobBuilderFactory.get("initializeCollections")
         .start(initializeCollectionInfo())
         .next(updateCollectionRoyalty())
+        .next(discoverMissingItems())
         .build()
 
     @Bean
@@ -172,5 +209,6 @@ class CollectionJobs(
         .incrementer(RunIdIncrementer())
         .start(updateCollectionInfo())
         .next(updateCollectionRoyalty())
+        .next(discoverMissingItems())
         .build()
 }
