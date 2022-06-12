@@ -6,8 +6,8 @@ import javax.persistence.*
 @Entity
 @Table(name = "item_royalties")
 class ItemRoyalty(
-    @OneToOne
-    @JoinColumn(name = "item", nullable = false)
+    @OneToOne(cascade = [CascadeType.ALL])
+    @MapsId
     val item: ItemInfo,
 
     @Column(name = "numerator")
@@ -26,6 +26,9 @@ class ItemRoyalty(
     @Column(name = "modified")
     override var modified: Instant? = null,
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
-) : RoyaltyEntity, UpdatableEntity
+) : RoyaltyEntity, UpdatableEntity {
+    init {
+        item.royalty = this
+    }
+}

@@ -95,7 +95,12 @@ class CollectionJobs(
                     NFTItem.of(collection.addressStd(), it, liteApiFactory.getObject())
                 }
                 ?.map {
-                    itemInfoRepository.findByAddress(it) ?: ItemInfo(it.workchainId, it.address.toByteArray())
+                    (itemInfoRepository.findByAddress(it) ?: ItemInfo(
+                        it.workchainId,
+                        it.address.toByteArray(),
+                    )).apply {
+                        this.setCollection(collection)
+                    }
                 }
                 ?.toList()
         }

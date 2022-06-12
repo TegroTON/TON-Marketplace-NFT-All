@@ -6,8 +6,8 @@ import javax.persistence.*
 @Entity
 @Table(name = "item_approvals")
 class ItemApproval(
-    @OneToOne
-    @JoinColumn(name = "item", nullable = false)
+    @OneToOne(cascade = [CascadeType.ALL])
+    @MapsId
     val item: ItemInfo,
 
     @Column(name = "approved")
@@ -20,6 +20,9 @@ class ItemApproval(
     @Column(name = "modified")
     override val modified: Instant? = null,
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
-) : UpdatableEntity
+) : UpdatableEntity {
+    init {
+        item.approval = this
+    }
+}

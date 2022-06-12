@@ -20,18 +20,18 @@ class CollectionInfo(
     @Column(name = "owner_address", length = 32)
     var ownerAddress: ByteArray? = null,
 
-    @OneToOne
+    @OneToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name = "approval")
-    val approval: CollectionApproval? = null,
-    @OneToOne
+    var approval: CollectionApproval? = null,
+    @OneToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name = "royalty")
-    val royalty: CollectionRoyalty? = null,
-    @OneToOne
+    var royalty: CollectionRoyalty? = null,
+    @OneToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name = "metadata")
-    val metadata: CollectionMetadata? = null,
-    @OneToMany
-    @JoinColumn(name = "items")
-    val items: List<ItemInfo>? = null,
+    var metadata: CollectionMetadata? = null,
+
+    @OneToMany(cascade = [CascadeType.ALL], mappedBy = "collection")
+    var items: MutableSet<ItemInfo>? = null,
 
     @Column(name = "discovered", nullable = false)
     override val discovered: Instant = Instant.now(),

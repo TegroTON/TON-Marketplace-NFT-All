@@ -14,26 +14,27 @@ class ItemInfo(
     var initialized: Boolean = false,
     @Column(name = "index")
     var index: Long? = null,
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "collection")
-    val collection: CollectionInfo? = null,
+    @JvmField
+    final var collection: CollectionInfo? = null,
     @Column(name = "owner_workchain")
     var ownerWorkchain: Int? = null,
     @Column(name = "owner_address", length = 32)
     var ownerAddress: ByteArray? = null,
 
-    @OneToOne
+    @OneToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name = "approval")
-    val approval: ItemApproval? = null,
-    @OneToOne
+    var approval: ItemApproval? = null,
+    @OneToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name = "royalty")
-    val royalty: ItemRoyalty? = null,
-    @OneToOne
+    var royalty: ItemRoyalty? = null,
+    @OneToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name = "metadata")
-    val metadata: ItemMetadata? = null,
-    @OneToOne
+    var metadata: ItemMetadata? = null,
+    @OneToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name = "sale")
-    val sale: ItemSale? = null,
+    var sale: ItemSale? = null,
 
     @Column(name = "discovered", nullable = false)
     override val discovered: Instant = Instant.now(),
@@ -44,4 +45,14 @@ class ItemInfo(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
-) : UpdatableEntity, AddressableEntity()
+) : UpdatableEntity, AddressableEntity() {
+    fun getCollection() = collection
+    fun setCollection(value: CollectionInfo) {
+        collection = value
+        if (value.items != null) {
+            value.items!!.add(this)
+        } else {
+            value.items = mutableSetOf(this)
+        }
+    }
+}

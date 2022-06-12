@@ -6,8 +6,8 @@ import javax.persistence.*
 @Entity
 @Table(name = "collection_metadata")
 class CollectionMetadata(
-    @OneToOne
-    @JoinColumn(name = "collection", nullable = false)
+    @OneToOne(cascade = [CascadeType.ALL])
+    @MapsId
     val collection: CollectionInfo,
 
     @Column(name = "name")
@@ -30,6 +30,9 @@ class CollectionMetadata(
     @Column(name = "modified")
     override val modified: Instant? = null,
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
-) : UpdatableEntity
+) : UpdatableEntity {
+    init {
+        collection.metadata = this
+    }
+}

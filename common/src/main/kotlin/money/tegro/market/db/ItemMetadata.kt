@@ -6,8 +6,8 @@ import javax.persistence.*
 @Entity
 @Table(name = "item_metadata")
 class ItemMetadata(
-    @OneToOne
-    @JoinColumn(name = "item", nullable = false)
+    @OneToOne(cascade = [CascadeType.ALL])
+    @MapsId
     val item: ItemInfo,
 
     @Column(name = "name")
@@ -21,7 +21,7 @@ class ItemMetadata(
 
     @OneToMany
     @JoinColumn(name = "attributes")
-    val attributes: List<ItemAttribute>? = null,
+    var attributes: MutableSet<ItemAttribute>? = null,
 
     @Column(name = "discovered", nullable = false)
     override val discovered: Instant = Instant.now(),
@@ -30,6 +30,9 @@ class ItemMetadata(
     @Column(name = "modified")
     override val modified: Instant? = null,
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
-) : UpdatableEntity
+) : UpdatableEntity {
+    init {
+        item.metadata = this
+    }
+}

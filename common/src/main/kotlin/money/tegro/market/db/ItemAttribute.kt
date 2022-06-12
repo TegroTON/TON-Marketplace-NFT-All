@@ -5,7 +5,7 @@ import javax.persistence.*
 @Entity
 @Table(name = "item_attributes")
 class ItemAttribute(
-    @ManyToOne
+    @ManyToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name = "metadata", nullable = false)
     val metadata: ItemMetadata,
 
@@ -17,4 +17,12 @@ class ItemAttribute(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
-)
+) {
+    init {
+        if (metadata.attributes != null) {
+            metadata.attributes!!.add(this)
+        } else {
+            metadata.attributes = mutableSetOf(this)
+        }
+    }
+}

@@ -6,8 +6,8 @@ import javax.persistence.*
 @Entity
 @Table(name = "item_sales")
 class ItemSale(
-    @OneToOne
-    @JoinColumn(name = "item", nullable = false)
+    @OneToOne(cascade = [CascadeType.ALL])
+    @MapsId
     val item: ItemInfo,
     @Column(name = "workchain", nullable = false)
     override val workchain: Int,
@@ -39,6 +39,9 @@ class ItemSale(
     @Column(name = "modified")
     override var modified: Instant? = null,
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
-) : UpdatableEntity, AddressableEntity()
+) : UpdatableEntity, AddressableEntity() {
+    init {
+        item.sale = this
+    }
+}
