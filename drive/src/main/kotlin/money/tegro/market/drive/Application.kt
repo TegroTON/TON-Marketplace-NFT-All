@@ -1,21 +1,17 @@
 package money.tegro.market.drive
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.autoconfigure.domain.EntityScan
 import org.springframework.boot.runApplication
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.context.annotation.ComponentScan
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 
 @SpringBootApplication
-class DriveApplication
+@EntityScan("money.tegro.market.*")
+@EnableJpaRepositories("money.tegro.market.*")
+@ComponentScan(basePackages = ["money.tegro.market.*"])
+class Application
 
 fun main(args: Array<String>) {
-    runApplication<DriveApplication>(*args)
-}
-
-@RestController
-@RequestMapping("/api/v1")
-class APIv1Controller {
-    @GetMapping("/collection")
-    suspend fun getAllCollections() = "peepeepoopoo"
+    runApplication<Application>(*args)
 }
