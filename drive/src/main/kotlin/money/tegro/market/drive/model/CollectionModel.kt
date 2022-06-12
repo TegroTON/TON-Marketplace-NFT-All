@@ -21,7 +21,7 @@ data class CollectionModel(
         royalty = it.royalty?.let { royalty -> RoyaltyModel.of(royalty) },
         name = it.metadata?.name,
         description = it.metadata?.description,
-        image = ImageModel("TODO", "TODO", it.metadata?.image),
-        coverImage = ImageModel("TODO", "TODO", it.metadata?.coverImage),
+        image = ImageModel("image", it.addressStd(), it.metadata?.image),
+        coverImage = ImageModel("cover", it.addressStd(), it.metadata?.coverImage),
     )
 }

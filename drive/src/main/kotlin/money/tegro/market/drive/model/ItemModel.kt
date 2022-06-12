@@ -24,6 +24,6 @@ data class ItemModel(
         royalty = (it.royalty ?: it.collection?.royalty)?.let { royalty -> RoyaltyModel.of(royalty) },
         name = it.metadata?.name,
         description = it.metadata?.description,
-        image = ImageModel("TODO", "TODO", it.metadata?.image),
+        image = ImageModel("image", it.addressStd(), it.metadata?.image),
     )
 }
