@@ -11,24 +11,26 @@ class CollectionMetadata(
     val collection: CollectionInfo,
 
     @Column(name = "name")
-    val name: String? = null,
+    var name: String? = null,
     @Column(name = "description")
-    val description: String? = null,
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    var description: String? = null,
     @Column(name = "image")
-    val image: String? = null,
+    var image: String? = null,
     @Column(name = "image_data")
-    val imageData: ByteArray? = null,
+    var imageData: ByteArray? = null,
     @Column(name = "cover_image")
-    val coverImage: String? = null,
+    var coverImage: String? = null,
     @Column(name = "cover_image_data")
-    val coverImageData: ByteArray? = null,
+    var coverImageData: ByteArray? = null,
 
     @Column(name = "discovered", nullable = false)
     override val discovered: Instant = Instant.now(),
     @Column(name = "updated")
-    override val updated: Instant? = null,
+    override var updated: Instant? = null,
     @Column(name = "modified")
-    override val modified: Instant? = null,
+    override var modified: Instant? = null,
     @Id
     var id: Long? = null,
 ) : UpdatableEntity {

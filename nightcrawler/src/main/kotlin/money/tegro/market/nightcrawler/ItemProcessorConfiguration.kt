@@ -2,9 +2,7 @@ package money.tegro.market.nightcrawler
 
 import kotlinx.coroutines.runBlocking
 import money.tegro.market.db.*
-import money.tegro.market.nft.NFTCollection
-import money.tegro.market.nft.NFTItem
-import money.tegro.market.nft.NFTRoyalty
+import money.tegro.market.nft.*
 import money.tegro.market.ton.LiteApiFactory
 import org.springframework.batch.item.ItemProcessor
 import org.springframework.context.annotation.Bean
@@ -18,6 +16,7 @@ class ItemProcessorConfiguration(
     val liteApiFactory: LiteApiFactory,
     val collectionInfoRepository: CollectionInfoRepository,
     val collectionRoyaltyRepository: CollectionRoyaltyRepository,
+    val collectionMetadataRepository: CollectionMetadataRepository,
     val itemInfoRepository: ItemInfoRepository,
 ) {
     @Bean
@@ -39,6 +38,19 @@ class ItemProcessorConfiguration(
             NFTRoyalty.of(it, liteApiFactory.getObject(), liteApiFactory.lastMasterchainBlock)
         }
     }
+
+    @Bean
+    fun nftCollectionMetadataProcessor() =
+        ItemProcessor<CollectionInfo, NFTCollectionMetadata> {
+            runBlocking {
+                it.content?.let { content ->
+                    NFTMetadata.of(
+                        it.addressStd(),
+                        BagOfCells(content).roots.first()
+                    )
+                }
+            }
+        }
 
     @Bean
     fun missingCollectionItemsProcessor() = ItemProcessor<CollectionInfo, List<ItemInfo>> { collection ->
@@ -92,6 +104,33 @@ class ItemProcessorConfiguration(
                 denominator = it.denominator
                 destinationWorkchain = it.destination?.workchainId
                 destinationAddress = it.destination?.address?.toByteArray()
+                updated = Instant.now()
+            }
+        }
+    }
+
+    @Bean
+    fun collectionMetadataProcessor() = ItemProcessor<NFTCollectionMetadata, CollectionMetadata> {
+        collectionInfoRepository.findByAddress(it.address)?.let { collection ->
+            (collectionMetadataRepository.findByCollection(collection)
+                ?: CollectionMetadata(collection)).apply {
+                if (modified == null ||
+                    name != it.name ||
+                    description != it.description ||
+                    image != it.image ||
+                    !imageData.contentEquals(it.imageData) ||
+                    coverImage != it.coverImage ||
+                    !coverImageData.contentEquals(it.coverImageData)
+                )
+                    modified = Instant.now()
+
+                name = it.name
+                description = it.description
+                image = it.image
+                imageData = it.imageData
+                coverImage = it.coverImage
+                coverImageData = it.coverImageData
+
                 updated = Instant.now()
             }
         }

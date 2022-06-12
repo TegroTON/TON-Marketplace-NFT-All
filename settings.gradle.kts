@@ -36,7 +36,12 @@ dependencyResolutionManagement {
             library(
                 "coroutines",
                 "org.jetbrains.kotlinx",
-                "kotlinx-coroutines-core"
+                "kotlinx-coroutines-core-jvm"
+            ).version { strictly("1.6.1-native-mt") }
+            library(
+                "coroutines.reactive",
+                "org.jetbrains.kotlinx",
+                "kotlinx-coroutines-reactive"
             ).version { strictly("1.6.1-native-mt") }
             library(
                 "coroutines.reactor",

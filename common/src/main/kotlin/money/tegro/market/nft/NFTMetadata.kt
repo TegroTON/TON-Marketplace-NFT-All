@@ -1,5 +1,6 @@
 package money.tegro.market.nft
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -7,19 +8,23 @@ import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import mu.KLogging
+import org.ton.block.MsgAddressIntStd
 import org.ton.cell.Cell
 
-interface NFTMetadata {
-    val name: String?
-    val description: String?
-    val image: String?
-    val imageData: ByteArray?
+abstract class NFTMetadata {
+    @JsonIgnore
+    lateinit var address: MsgAddressIntStd
+    abstract val name: String?
+    abstract val description: String?
+    abstract val image: String?
+    abstract val imageData: ByteArray?
 
     companion object : KLogging() {
         val mapper by lazy { jacksonObjectMapper() }
 
         @JvmStatic
         suspend inline fun <reified T : NFTMetadata> of(
+            addressStd: MsgAddressIntStd,
             content: Cell,
         ): T {
             val contentLayout = content.beginParse().loadUInt(8).toInt()
@@ -38,7 +43,9 @@ interface NFTMetadata {
                     val url = String(rawData)
                     logger.debug { "off-chain content layout, url is: $url" }
 
-                    return mapper.readValue(HttpClient {}.get(url).bodyAsText(), T::class.java)
+                    return mapper.readValue(HttpClient {}.get(url).bodyAsText(), T::class.java).apply {
+                        this.address = addressStd
+                    }
                 }
                 else -> {
                     throw Error("unknown content layout $contentLayout, can't proceed")
@@ -56,7 +63,7 @@ data class NFTCollectionMetadata(
     override val imageData: ByteArray? = null,
     val coverImage: String? = null,
     val coverImageData: ByteArray? = null,
-) : NFTMetadata {
+) : NFTMetadata() {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -104,7 +111,7 @@ data class NFTItemMetadata(
     override val image: String? = null,
     override val imageData: ByteArray? = null,
     val attributes: List<NFTItemAttribute>? = null,
-) : NFTMetadata {
+) : NFTMetadata() {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

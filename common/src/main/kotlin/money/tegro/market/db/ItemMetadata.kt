@@ -13,6 +13,8 @@ class ItemMetadata(
     @Column(name = "name")
     val name: String? = null,
     @Column(name = "description")
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
     val description: String? = null,
     @Column(name = "image")
     val image: String? = null,

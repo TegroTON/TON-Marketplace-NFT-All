@@ -12,6 +12,7 @@ application {
 dependencies {
     implementation(coreLibs.clikt)
     implementation(coreLibs.coroutines)
+    implementation(coreLibs.coroutines.reactive)
     implementation(coreLibs.coroutines.reactor)
     implementation(coreLibs.jackson)
     implementation(coreLibs.reaktive)

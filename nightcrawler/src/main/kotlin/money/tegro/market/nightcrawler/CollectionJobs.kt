@@ -1,10 +1,8 @@
 package money.tegro.market.nightcrawler
 
-import money.tegro.market.db.AddressableEntity
-import money.tegro.market.db.CollectionInfo
-import money.tegro.market.db.CollectionRoyalty
-import money.tegro.market.db.ItemInfo
+import money.tegro.market.db.*
 import money.tegro.market.nft.NFTCollection
+import money.tegro.market.nft.NFTCollectionMetadata
 import money.tegro.market.nft.NFTRoyalty
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
@@ -13,6 +11,7 @@ import org.springframework.batch.core.launch.support.RunIdIncrementer
 import org.springframework.batch.item.ItemProcessor
 import org.springframework.batch.item.ItemReader
 import org.springframework.batch.item.ItemWriter
+import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder
 import org.springframework.batch.item.support.CompositeItemProcessor
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -39,9 +38,22 @@ class CollectionJobs(
 
     val entityAddressProcessor: ItemProcessor<AddressableEntity, MsgAddressIntStd>,
     val missingCollectionItemsProcessor: ItemProcessor<CollectionInfo, List<ItemInfo>>,
+
+    val nftCollectionMetadataProcessor: ItemProcessor<CollectionInfo, NFTCollectionMetadata>,
+    val collectionMetadataProcessor: ItemProcessor<NFTCollectionMetadata, CollectionMetadata>,
+
+    val collectionMetadataWriter: ItemWriter<CollectionMetadata>,
 ) {
-    val initialCollectionsReader =
-        ResourceLineReader("initialCollectionsReader", ClassPathResource("initial_collections.csv"))
+    @Bean
+    fun initialCollectionsReader() = FlatFileItemReaderBuilder<String>()
+        .name("initialCollectionReader")
+        .resource(ClassPathResource("initial_collections.csv"))
+        .delimited()
+        .names("item")
+        .fieldSetMapper {
+            it.values.first()
+        }
+        .build()
 
     @Bean
     fun initializeCollectionInfo() = stepBuilderFactory
@@ -56,7 +68,7 @@ class CollectionJobs(
                 )
             )
         })
-        .reader(initialCollectionsReader)
+        .reader(initialCollectionsReader())
         .writer(collectionInfoWriter)
         .build()
 
@@ -95,6 +107,22 @@ class CollectionJobs(
         .build()
 
     @Bean
+    fun updateCollectionMetadata() = stepBuilderFactory
+        .get("updateCollectionMetadata")
+        .chunk<CollectionInfo, CollectionMetadata>(1)
+        .processor(CompositeItemProcessor<CollectionInfo, CollectionMetadata>().apply {
+            setDelegates(
+                arrayListOf(
+                    nftCollectionMetadataProcessor,
+                    collectionMetadataProcessor,
+                )
+            )
+        })
+        .reader(collectionInfoReader)
+        .writer(collectionMetadataWriter)
+        .build()
+
+    @Bean
     fun discoverMissingItems() = stepBuilderFactory
         .get("discoverMissingItems")
         .chunk<CollectionInfo, List<ItemInfo>>(1)
@@ -103,11 +131,11 @@ class CollectionJobs(
         .writer(itemInfoListWriter)
         .build()
 
-
     @Bean
     fun initializeCollections() = jobBuilderFactory.get("initializeCollections")
         .start(initializeCollectionInfo())
         .next(updateCollectionRoyalty())
+        .next(updateCollectionMetadata())
         .next(discoverMissingItems())
         .build()
 
@@ -116,6 +144,7 @@ class CollectionJobs(
         .incrementer(RunIdIncrementer())
         .start(updateCollectionInfo())
         .next(updateCollectionRoyalty())
+        .next(updateCollectionMetadata())
         .next(discoverMissingItems())
         .build()
 }
