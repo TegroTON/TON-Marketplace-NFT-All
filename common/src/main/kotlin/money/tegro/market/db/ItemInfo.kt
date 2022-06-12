@@ -22,6 +22,9 @@ class ItemInfo(
     var ownerWorkchain: Int? = null,
     @Column(name = "owner_address", length = 32)
     var ownerAddress: ByteArray? = null,
+    @Column(name = "content")
+    @Lob
+    var content: ByteArray? = null,
 
     @OneToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name = "approval")

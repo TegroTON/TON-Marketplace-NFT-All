@@ -11,15 +11,15 @@ class ItemMetadata(
     val item: ItemInfo,
 
     @Column(name = "name")
-    val name: String? = null,
+    var name: String? = null,
     @Column(name = "description")
     @Lob
     @Basic(fetch = FetchType.LAZY)
-    val description: String? = null,
+    var description: String? = null,
     @Column(name = "image")
-    val image: String? = null,
+    var image: String? = null,
     @Column(name = "image_data")
-    val imageData: ByteArray? = null,
+    var imageData: ByteArray? = null,
 
     @OneToMany
     @JoinColumn(name = "attributes")
@@ -28,9 +28,9 @@ class ItemMetadata(
     @Column(name = "discovered", nullable = false)
     override val discovered: Instant = Instant.now(),
     @Column(name = "updated")
-    override val updated: Instant? = null,
+    override var updated: Instant? = null,
     @Column(name = "modified")
-    override val modified: Instant? = null,
+    override var modified: Instant? = null,
     @Id
     var id: Long? = null,
 ) : UpdatableEntity {

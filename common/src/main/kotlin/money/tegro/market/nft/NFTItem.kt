@@ -1,6 +1,5 @@
 package money.tegro.market.nft
 
-import kotlinx.coroutines.runBlocking
 import mu.KLogging
 import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.block.*
@@ -22,10 +21,10 @@ interface NFTItem : NFT {
         suspend fun of(
             address: MsgAddressIntStd,
             liteClient: LiteApi,
-            referenceBlock: TonNodeBlockIdExt = runBlocking { liteClient.getMasterchainInfo().last },
+            referenceBlock: suspend () -> TonNodeBlockIdExt = { liteClient.getMasterchainInfo().last },
         ): NFTItem {
             logger.debug("running method `get_nft_data` on ${address.toString(userFriendly = true)}")
-            val result = liteClient.runSmcMethod(0b100, referenceBlock, LiteServerAccountId(address), "get_nft_data")
+            val result = liteClient.runSmcMethod(0b100, referenceBlock(), LiteServerAccountId(address), "get_nft_data")
 
             logger.debug("response: $result")
             if (result.exitCode != 0) {
@@ -59,12 +58,12 @@ interface NFTItem : NFT {
             collection: MsgAddressIntStd,
             index: Long,
             liteClient: LiteApi,
-            referenceBlock: TonNodeBlockIdExt = runBlocking { liteClient.getMasterchainInfo().last },
+            referenceBlock: suspend () -> TonNodeBlockIdExt = { liteClient.getMasterchainInfo().last },
         ): MsgAddressIntStd {
             logger.debug("running method `get_nft_address_by_index` on ${collection.toString(userFriendly = true)}")
             val result = liteClient.runSmcMethod(
                 0b100,
-                referenceBlock,
+                referenceBlock(),
                 LiteServerAccountId(collection),
                 "get_nft_address_by_index",
                 VmStackValue.TinyInt(index)
@@ -88,7 +87,7 @@ data class NFTItemInitialized(
 ) : NFTItem {
     suspend fun fullContent(
         liteClient: LiteApi,
-        referenceBlock: TonNodeBlockIdExt = runBlocking { liteClient.getMasterchainInfo().last },
+        referenceBlock: suspend () -> TonNodeBlockIdExt = { liteClient.getMasterchainInfo().last },
     ) =
         collection?.let { content(it, index, content, liteClient, referenceBlock) } ?: content
 
@@ -99,12 +98,12 @@ data class NFTItemInitialized(
             index: Long,
             individualContent: Cell,
             liteClient: LiteApi,
-            referenceBlock: TonNodeBlockIdExt = runBlocking { liteClient.getMasterchainInfo().last },
+            referenceBlock: suspend () -> TonNodeBlockIdExt = { liteClient.getMasterchainInfo().last },
         ): Cell {
             logger.debug("running method `get_nft_content` on ${collection.toString(userFriendly = true)}")
             val result = liteClient.runSmcMethod(
                 0b100,
-                referenceBlock,
+                referenceBlock(),
                 LiteServerAccountId(collection),
                 "get_nft_content",
                 VmStackValue.TinyInt(index),

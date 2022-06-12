@@ -14,6 +14,7 @@ class CollectionInfo(
     @Column(name = "next_item_index")
     var nextItemIndex: Long? = null,
     @Column(name = "content")
+    @Lob
     var content: ByteArray? = null,
     @Column(name = "owner_workchain")
     var ownerWorkchain: Int? = null,
