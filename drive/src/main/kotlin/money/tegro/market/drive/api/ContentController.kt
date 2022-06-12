@@ -1,5 +1,6 @@
 package money.tegro.market.drive.api
 
+import io.swagger.v3.oas.annotations.tags.Tag
 import money.tegro.market.db.CollectionInfoRepository
 import money.tegro.market.db.ItemInfoRepository
 import money.tegro.market.db.findByAddress
@@ -14,6 +15,7 @@ import org.ton.block.MsgAddressIntStd
 import java.io.ByteArrayInputStream
 import java.net.URL
 
+@Tag(name = "Content", description = "The API to get NFT content")
 @RestController
 @RequestMapping("/api/v1/content")
 class ContentController(
