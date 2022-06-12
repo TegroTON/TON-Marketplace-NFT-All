@@ -1,6 +1,5 @@
 package money.tegro.market.nft
 
-import kotlinx.coroutines.runBlocking
 import mu.KLogging
 import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.block.MsgAddress
@@ -24,11 +23,11 @@ data class NFTCollection(
         suspend fun of(
             address: MsgAddressIntStd,
             liteClient: LiteApi,
-            referenceBlock: TonNodeBlockIdExt = runBlocking { liteClient.getMasterchainInfo().last },
+            referenceBlock: suspend () -> TonNodeBlockIdExt = { liteClient.getMasterchainInfo().last },
         ): NFTCollection {
             logger.debug("running method `get_collection_data` on ${address.toString(userFriendly = true)}")
             val result =
-                liteClient.runSmcMethod(0b100, referenceBlock, LiteServerAccountId(address), "get_collection_data")
+                liteClient.runSmcMethod(0b100, referenceBlock(), LiteServerAccountId(address), "get_collection_data")
 
             logger.debug("response: $result")
             require(result.exitCode == 0) { "Failed to run the method, exit code is ${result.exitCode}" }
