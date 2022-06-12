@@ -14,7 +14,7 @@ class ItemInfo(
     var initialized: Boolean = false,
     @Column(name = "index")
     var index: Long? = null,
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "collection")
     @JvmField
     final var collection: CollectionInfo? = null,
