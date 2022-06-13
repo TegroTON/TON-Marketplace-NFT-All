@@ -31,16 +31,16 @@ import org.ton.tlb.constructor.AnyTlbConstructor
 class LiteServerOptions : OptionGroup("lite server options") {
     val host by option("--lite-server-host", help = "Lite server host IP address", envvar = "LITE_SERVER_HOST")
         .int()
-        .default(908566172)
+        .default(1426768764)
     val port by option("--lite-server-port", help = "Lite server port number", envvar = "LITE_SERVER_PORT")
         .int()
-        .default(51565)
+        .default(13724)
     val publicKey by option(
         "--lite-server-public-key",
         help = "Lite server public key (base64)",
         envvar = "LITE_SERVER_PUBLIC_KEY"
     )
-        .default("TDg+ILLlRugRB4Kpg3wXjPcoc+d+Eeb7kuVe16CS9z8=")
+        .default("R1KsqYlNks2Zows+I9s4ywhilbSevs9dH1x2KF9MeSU=")
 }
 
 class Tool :
@@ -81,8 +81,8 @@ class QueryItem : CliktCommand(name = "query-item", help = "Query NFT item info"
 
                 NFTRoyalty.of(item.collection ?: item.address, liteClient)
                     ?.let { royalties ->
-                        println("\tRoyalty percentage: ${royalties.value() * 100.0}%")
-                        println("\tRoyalty destination: ${royalties.destination.toString(userFriendly = true)}")
+                        println("\tRoyalty percentage: ${royalties.value()?.times(100.0)}%")
+                        println("\tRoyalty destination: ${royalties.destination?.toString(userFriendly = true)}")
                     }
 
                 NFTSale.of(item.owner, liteClient)?.run {
@@ -95,7 +95,7 @@ class QueryItem : CliktCommand(name = "query-item", help = "Query NFT item info"
                     println("\tRoyalty destination: ${royaltyDestination?.toString(userFriendly = true)}")
                 }
 
-                NFTMetadata.of<NFTItemMetadata>(item.fullContent(liteClient)).run {
+                NFTMetadata.of<NFTItemMetadata>(item.address, item.fullContent(liteClient)).run {
                     println("\tName: ${this.name}")
                     println("\tDescription: ${this.description}")
                     println("\tImage: ${this.image}")
@@ -125,11 +125,11 @@ class QueryCollection :
 
             NFTRoyalty.of(collection.address, liteClient)
                 ?.let { royalties ->
-                    println("\tRoyalty percentage: ${royalties.value() * 100.0}%")
-                    println("\tRoyalty destination: ${royalties.destination.toString(userFriendly = true)}")
+                    println("\tRoyalty percentage: ${royalties.value()?.times(100.0)}%")
+                    println("\tRoyalty destination: ${royalties.destination?.toString(userFriendly = true)}")
                 }
 
-            NFTMetadata.of<NFTCollectionMetadata>(collection.content).run {
+            NFTMetadata.of<NFTCollectionMetadata>(collection.address, collection.content).run {
                 println("\tName: ${this.name}")
                 println("\tDescription: ${this.description}")
                 println("\tImage: ${this.image}")
