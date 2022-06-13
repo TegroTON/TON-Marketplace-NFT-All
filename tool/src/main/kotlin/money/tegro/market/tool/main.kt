@@ -1,11 +1,13 @@
 package money.tegro.market.tool
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.groups.OptionGroup
 import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.default
+import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.int
@@ -28,19 +30,47 @@ import org.ton.lite.client.LiteClient
 import org.ton.smartcontract.wallet.v1.WalletV1R3
 import org.ton.tlb.constructor.AnyTlbConstructor
 
+data class ItemDump(
+    val item: NFTItem,
+    val royalty: NFTRoyalty?,
+    val metadata: NFTItemMetadata?,
+) {
+    companion object {
+        @JvmStatic
+        suspend fun of(address: MsgAddressIntStd, liteClient: LiteApi): ItemDump {
+            val item = NFTItem.of(address, liteClient)
+            val royalty = NFTRoyalty.of(address, liteClient)
+            val metadata = (item as? NFTItemInitialized)?.let {
+                NFTMetadata.of<NFTItemMetadata>(
+                    it.address,
+                    it.fullContent(liteClient)
+                )
+            }
+            return ItemDump(item, royalty, metadata)
+        }
+    }
+}
+
+data class CollectionDump(
+    val collection: NFTCollection,
+    val royalty: NFTRoyalty?,
+    val metadata: NFTCollectionMetadata?,
+    val items: List<ItemDump>?,
+)
+
 class LiteServerOptions : OptionGroup("lite server options") {
     val host by option("--lite-server-host", help = "Lite server host IP address", envvar = "LITE_SERVER_HOST")
         .int()
-        .default(1426768764)
+        .default(908566172)
     val port by option("--lite-server-port", help = "Lite server port number", envvar = "LITE_SERVER_PORT")
         .int()
-        .default(13724)
+        .default(51565)
     val publicKey by option(
         "--lite-server-public-key",
         help = "Lite server public key (base64)",
         envvar = "LITE_SERVER_PUBLIC_KEY"
     )
-        .default("R1KsqYlNks2Zows+I9s4ywhilbSevs9dH1x2KF9MeSU=")
+        .default("TDg+ILLlRugRB4Kpg3wXjPcoc+d+Eeb7kuVe16CS9z8=")
 }
 
 class Tool :
@@ -66,43 +96,57 @@ class Tool :
 }
 
 class QueryItem : CliktCommand(name = "query-item", help = "Query NFT item info") {
+    private val dump by option("-d", "--dump", help = "Dump item information as json").flag()
     private val address by argument(name = "address", help = "NFT item contract address")
+
     override fun run() {
         runBlocking {
             val liteClient = Tool.liteClient
 
-            val item = NFTItem.of(MsgAddressIntStd.parse(address), liteClient)
-            println("NFT Item ${item.address.toString(userFriendly = true)}:")
-            println("\tInitialized: ${item is NFTItemInitialized}")
-            if (item is NFTItemInitialized) {
-                println("\tIndex: ${item.index}")
-                println("\tCollection Address: ${item.collection?.toString(userFriendly = true)}")
-                println("\tOwner Address: ${item.owner.toString(userFriendly = true)}")
 
-                NFTRoyalty.of(item.collection ?: item.address, liteClient)
-                    ?.let { royalties ->
+            if (dump) {
+                jacksonObjectMapper().writeValueAsString(ItemDump.of(MsgAddressIntStd(address), liteClient))
+                    .let { println(it) }
+            } else {
+                val item = NFTItem.of(MsgAddressIntStd.parse(address), liteClient)
+                val royalty = NFTRoyalty.of((item as? NFTItemInitialized)?.collection ?: item.address, liteClient)
+                val metadata = (item as? NFTItemInitialized)?.let {
+                    NFTMetadata.of<NFTItemMetadata>(
+                        it.address,
+                        it.fullContent(liteClient)
+                    )
+                }
+                println("NFT Item ${item.address.toString(userFriendly = true)}:")
+                println("\tInitialized: ${item is NFTItemInitialized}")
+                if (item is NFTItemInitialized) {
+                    println("\tIndex: ${item.index}")
+                    println("\tCollection Address: ${item.collection?.toString(userFriendly = true)}")
+                    println("\tOwner Address: ${item.owner.toString(userFriendly = true)}")
+
+                    royalty.let { royalties ->
                         println("\tRoyalty percentage: ${royalties.value()?.times(100.0)}%")
                         println("\tRoyalty destination: ${royalties.destination?.toString(userFriendly = true)}")
                     }
 
-                NFTSale.of(item.owner, liteClient)?.run {
-                    println("\tOn sale: yes")
-                    println("\tMarketplace: ${marketplace.toString(userFriendly = true)}")
-                    println("\tSeller: ${owner.toString(userFriendly = true)}")
-                    println("\tPrice: $price nTON")
-                    println("\tMarketplace fee: $marketplaceFee nTON")
-                    println("\tRoyalties: $royalty nTON")
-                    println("\tRoyalty destination: ${royaltyDestination?.toString(userFriendly = true)}")
-                }
+                    NFTSale.of(item.owner, liteClient)?.run {
+                        println("\tOn sale: yes")
+                        println("\tMarketplace: ${marketplace.toString(userFriendly = true)}")
+                        println("\tSeller: ${owner.toString(userFriendly = true)}")
+                        println("\tPrice: $price nTON")
+                        println("\tMarketplace fee: $marketplaceFee nTON")
+                        println("\tRoyalties: $royalty nTON")
+                        println("\tRoyalty destination: ${royaltyDestination?.toString(userFriendly = true)}")
+                    }
 
-                NFTMetadata.of<NFTItemMetadata>(item.address, item.fullContent(liteClient)).run {
-                    println("\tName: ${this.name}")
-                    println("\tDescription: ${this.description}")
-                    println("\tImage: ${this.image}")
-                    println("\tImage data: ${this.imageData?.let { hex(it) }}")
-                    println("\tAttributes:")
-                    attributes.orEmpty().forEach {
-                        println("\t\t${it.trait}: ${it.value}")
+                    metadata?.run {
+                        println("\tName: ${this.name}")
+                        println("\tDescription: ${this.description}")
+                        println("\tImage: ${this.image}")
+                        println("\tImage data: ${this.imageData?.let { hex(it) }}")
+                        println("\tAttributes:")
+                        attributes.orEmpty().forEach {
+                            println("\t\t${it.trait}: ${it.value}")
+                        }
                     }
                 }
             }
@@ -112,6 +156,11 @@ class QueryItem : CliktCommand(name = "query-item", help = "Query NFT item info"
 
 class QueryCollection :
     CliktCommand(name = "query-collection", help = "Query NFT collection info") {
+    private val dump by option("-d", "--dump", help = "Dump collection information as json").flag()
+    private val dumpItems by option(
+        "--dump-items",
+        help = "Dump information about each item as well. May take a while"
+    ).flag()
     private val address by argument(name = "address", help = "NFT collection contract address")
 
     override fun run() {
@@ -119,23 +168,36 @@ class QueryCollection :
             val liteClient = Tool.liteClient
 
             val collection = NFTCollection.of(MsgAddressIntStd.parse(address), liteClient)
-            println("NFT Collection ${collection.address.toString(userFriendly = true)}")
-            println("\tNumber of items: ${collection.nextItemIndex}")
-            println("\tOwner address: ${collection.owner.toString(userFriendly = true)}")
+            val royalty = NFTRoyalty.of(collection.address, liteClient)
+            val metadata = NFTMetadata.of<NFTCollectionMetadata>(collection.address, collection.content)
 
-            NFTRoyalty.of(collection.address, liteClient)
-                ?.let { royalties ->
+            if (dump) {
+                jacksonObjectMapper().writeValueAsString(CollectionDump(
+                    collection,
+                    royalty,
+                    metadata,
+                    if (dumpItems) (0 until collection.nextItemIndex)
+                        .map { ItemDump.of(NFTItem.of(collection.address, it, liteClient), liteClient) } else null
+                ))
+                    .let { println(it) }
+            } else {
+                println("NFT Collection ${collection.address.toString(userFriendly = true)}")
+                println("\tNumber of items: ${collection.nextItemIndex}")
+                println("\tOwner address: ${collection.owner.toString(userFriendly = true)}")
+
+                royalty.let { royalties ->
                     println("\tRoyalty percentage: ${royalties.value()?.times(100.0)}%")
                     println("\tRoyalty destination: ${royalties.destination?.toString(userFriendly = true)}")
                 }
 
-            NFTMetadata.of<NFTCollectionMetadata>(collection.address, collection.content).run {
-                println("\tName: ${this.name}")
-                println("\tDescription: ${this.description}")
-                println("\tImage: ${this.image}")
-                println("\tImage data: ${this.imageData?.let { hex(it) }}")
-                println("\tCover image: ${this.coverImage}")
-                println("\tCover image data: ${this.coverImageData?.let { hex(it) }}")
+                metadata.run {
+                    println("\tName: ${this.name}")
+                    println("\tDescription: ${this.description}")
+                    println("\tImage: ${this.image}")
+                    println("\tImage data: ${this.imageData?.let { hex(it) }}")
+                    println("\tCover image: ${this.coverImage}")
+                    println("\tCover image data: ${this.coverImageData?.let { hex(it) }}")
+                }
             }
         }
     }
