@@ -27,8 +27,6 @@ dependencyResolutionManagement {
         create("coreLibs") {
             version("clikt", "3.4.2")
             version("jackson", "2.13.2")
-            version("reaktive", "1.2.1")
-            version("reaktive.coroutines", "1.2.1-nmtc")
             version("reflect", "1.7.0")
             version("ton", "597de41105")
 
@@ -49,9 +47,6 @@ dependencyResolutionManagement {
                 "kotlinx-coroutines-reactor"
             ).version { strictly("1.6.1-native-mt") }
             library("jackson", "com.fasterxml.jackson.module", "jackson-module-kotlin").versionRef("jackson")
-            library("reaktive", "com.badoo.reaktive", "reaktive").versionRef("reaktive")
-            library("reaktive.annotations", "com.badoo.reaktive", "reaktive-annotations").versionRef("reaktive")
-            library("reaktive.coroutines", "com.badoo.reaktive", "coroutines-interop").versionRef("reaktive.coroutines")
             library("reflect", "org.jetbrains.kotlin", "kotlin-reflect").versionRef("reflect")
             library("ton", "com.github.andreypfau.ton-kotlin", "ton-kotlin").versionRef("ton")
         }
