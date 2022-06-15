@@ -61,34 +61,79 @@ data class CollectionDump(
     val items: List<ItemDump>?,
 )
 
-class LiteServerOptions : OptionGroup("lite server options") {
-    val host by option("--lite-server-host", help = "Lite server host IP address", envvar = "LITE_SERVER_HOST")
+interface LiteServerOptions {
+    val host: Int
+    val port: Int
+    val publicKey: String
+}
+
+class MainnetLiteServerOptions : OptionGroup("lite server options [MAINNET]"), LiteServerOptions {
+    override val host by option(
+        "--lite-server-mainnet-host",
+        help = "Lite server host IP address",
+        envvar = "LITE_SERVER_MAINNET_HOST"
+    )
         .int()
         .default(908566172)
-    val port by option("--lite-server-port", help = "Lite server port number", envvar = "LITE_SERVER_PORT")
+    override val port by option(
+        "--lite-server-mainnet-port",
+        help = "Lite server port number",
+        envvar = "LITE_SERVER_MAINNET_PORT"
+    )
         .int()
         .default(51565)
-    val publicKey by option(
-        "--lite-server-public-key",
+    override val publicKey by option(
+        "--lite-server-mainnet-public-key",
         help = "Lite server public key (base64)",
-        envvar = "LITE_SERVER_PUBLIC_KEY"
+        envvar = "LITE_SERVER_MAINNET_PUBLIC_KEY"
     )
         .default("TDg+ILLlRugRB4Kpg3wXjPcoc+d+Eeb7kuVe16CS9z8=")
 }
 
+class SandboxLiteServerOptions : OptionGroup("lite server options [SANDBOX]"), LiteServerOptions {
+    override val host by option(
+        "--lite-server-sandbox-host",
+        help = "Lite server host IP address",
+        envvar = "LITE_SERVER_SANDBOX_HOST"
+    )
+        .int()
+        .default(1426768764)
+    override val port by option(
+        "--lite-server-sandbox-port",
+        help = "Lite server port number",
+        envvar = "LITE_SERVER_SANDBOX_PORT"
+    )
+        .int()
+        .default(13724)
+    override val publicKey by option(
+        "--lite-server-sandbox-public-key",
+        help = "Lite server public key (base64)",
+        envvar = "LITE_SERVER_SANDBOX_PUBLIC_KEY"
+    )
+        .default("R1KsqYlNks2Zows+I9s4ywhilbSevs9dH1x2KF9MeSU=")
+}
+
 class Tool :
     CliktCommand(name = "tool", help = "Your one-stop NFT item/collection shop") {
-    private val liteServerOptions by LiteServerOptions()
+    private val liteServerMainnetOptions by MainnetLiteServerOptions()
+    private val liteServerSandboxOptions by SandboxLiteServerOptions()
+
+    val isMainnet by option(
+        "--mainnet",
+        help = "Work in mainnet instead of the safe sandbox. BEWARE"
+    ).flag(default = false)
 
     override fun run() {
         runBlocking {
             liteClient = ResilientLiteClient(
-                liteServerOptions.host,
-                liteServerOptions.port,
-                base64(liteServerOptions.publicKey)
+                if (isMainnet) liteServerMainnetOptions.host else liteServerSandboxOptions.host,
+                if (isMainnet) liteServerMainnetOptions.port else liteServerSandboxOptions.port,
+                base64(
+                    if (isMainnet) liteServerMainnetOptions.publicKey else liteServerSandboxOptions.publicKey
+                )
             )
 
-            logger.debug("connecting to the lite client at ${liteServerOptions.host}:${liteServerOptions.port}")
+            logger.debug("connecting to the lite client")
             (liteClient as LiteClient).connect()
         }
     }
@@ -264,7 +309,7 @@ class MintItem : CliktCommand(name = "mint-item", help = "Mint a standalone item
             val stub = NFTStubStandaloneItem(
                 address,
                 CellBuilder.createCell {
-                    storeBytes(byteArrayOf(0x01.toByte()) + "https://youtu.be/dQw4w9WgXcQ".toByteArray())
+                    storeBytes(byteArrayOf(0x01.toByte()) + "https://cloudflare-ipfs.com/ipfs/bafybeiayqk3ml3gijcvfzl3qrya6p43darej4zpjln4ptf4v66ffzbnyee/16.json".toByteArray())
                 },
             )
             logger.debug("New NFT item address: ${stub.address.toString(userFriendly = true)}")
@@ -281,7 +326,7 @@ class MintItem : CliktCommand(name = "mint-item", help = "Mint a standalone item
                                 src = MsgAddressExtNone,
                                 dest = stub.address,
                                 value = CurrencyCollection(
-                                    coins = Coins.ofNano(100_000_000L)
+                                    coins = Coins.ofNano(1_000_000L)
                                 )
                             ),
                             init = stub.stateInit(),
