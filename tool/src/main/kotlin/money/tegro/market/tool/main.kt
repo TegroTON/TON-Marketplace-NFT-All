@@ -181,7 +181,7 @@ class QueryItem : CliktCommand(name = "query-item", help = "Query NFT item info"
                         println("\tRoyalty destination: ${destination.toString(userFriendly = true)}")
                     }
 
-                    NFTSell.of(item.owner, liteClient)?.run {
+                    NFTSale.of(item.owner, liteClient)?.run {
                         println("\tOn sale: yes")
                         println("\tMarketplace: ${marketplace.toString(userFriendly = true)}")
                         println("\tSeller: ${owner.toString(userFriendly = true)}")

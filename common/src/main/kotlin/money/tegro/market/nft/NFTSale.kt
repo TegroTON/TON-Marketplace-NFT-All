@@ -8,7 +8,7 @@ import org.ton.lite.api.LiteApi
 import org.ton.lite.api.liteserver.LiteServerAccountId
 import org.ton.tlb.loadTlb
 
-data class NFTSell(
+data class NFTSale(
     val address: MsgAddressIntStd,
     val marketplace: MsgAddressIntStd,
     val item: MsgAddressIntStd,
@@ -25,7 +25,7 @@ data class NFTSell(
         suspend fun of(
             address: MsgAddressIntStd,
             liteApi: LiteApi,
-        ): NFTSell? {
+        ): NFTSale? {
             val referenceBlock = liteApi.getMasterchainInfo().last
 
             logger.debug("running method `get_sale_data` on ${address.toString(userFriendly = true)}")
@@ -42,7 +42,7 @@ data class NFTSell(
             }
 
             return try {
-                NFTSell(
+                NFTSale(
                     address,
                     (result[0] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec) as MsgAddressIntStd,
                     (result[1] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec) as MsgAddressIntStd,
