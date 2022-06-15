@@ -11,17 +11,20 @@ import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.int
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import money.tegro.market.nft.*
 import money.tegro.market.ton.ResilientLiteClient
 import mu.KLogging
 import org.ton.api.pk.PrivateKeyEd25519
-import org.ton.block.CommonMsgInfo
-import org.ton.block.Message
-import org.ton.block.MsgAddressIntStd
-import org.ton.block.VmStackValue
+import org.ton.block.*
 import org.ton.block.tlb.tlbCodec
+import org.ton.cell.Cell
 import org.ton.cell.CellBuilder
+import org.ton.cell.exception.CellOverflowException
 import org.ton.crypto.base64
 import org.ton.crypto.hex
 import org.ton.lite.api.LiteApi
@@ -29,24 +32,24 @@ import org.ton.lite.api.liteserver.LiteServerAccountId
 import org.ton.lite.client.LiteClient
 import org.ton.smartcontract.wallet.v1.WalletV1R3
 import org.ton.tlb.constructor.AnyTlbConstructor
+import org.ton.tlb.storeTlb
 
 data class ItemDump(
     val item: NFTItem,
     val royalty: NFTRoyalty?,
-    val metadata: NFTItemMetadata?,
+    val metadata: NFTMetadata?,
 ) {
     companion object {
         @JvmStatic
-        suspend fun of(address: MsgAddressIntStd, liteClient: LiteApi): ItemDump {
+        suspend fun of(address: MsgAddressIntStd, liteClient: LiteApi): ItemDump? {
             val item = NFTItem.of(address, liteClient)
-            val royalty = NFTRoyalty.of(address, liteClient)
-            val metadata = (item as? NFTItemInitialized)?.let {
-                NFTMetadata.of<NFTItemMetadata>(
-                    it.address,
-                    it.fullContent(liteClient)
+            return item?.let {
+                ItemDump(
+                    it,
+                    NFTRoyalty.of(address, liteClient),
+                    NFTMetadata.of(it.content(liteClient))
                 )
             }
-            return ItemDump(item, royalty, metadata)
         }
     }
 }
@@ -54,7 +57,7 @@ data class ItemDump(
 data class CollectionDump(
     val collection: NFTCollection,
     val royalty: NFTRoyalty?,
-    val metadata: NFTCollectionMetadata?,
+    val metadata: NFTMetadata?,
     val items: List<ItemDump>?,
 )
 
@@ -108,27 +111,32 @@ class QueryItem : CliktCommand(name = "query-item", help = "Query NFT item info"
                 jacksonObjectMapper().writeValueAsString(ItemDump.of(MsgAddressIntStd(address), liteClient))
                     .let { println(it) }
             } else {
-                val item = NFTItem.of(MsgAddressIntStd.parse(address), liteClient)
-                val royalty = NFTRoyalty.of((item as? NFTItemInitialized)?.collection ?: item.address, liteClient)
-                val metadata = (item as? NFTItemInitialized)?.let {
-                    NFTMetadata.of<NFTItemMetadata>(
-                        it.address,
-                        it.fullContent(liteClient)
-                    )
+                val item = NFTItem.of(MsgAddressIntStd(address), liteClient)
+                val royalty = ((item as? NFTDeployedCollectionItem)?.collection ?: item?.address)?.let {
+                    NFTRoyalty.of(it, liteClient)
                 }
-                println("NFT Item ${item.address.toString(userFriendly = true)}:")
-                println("\tInitialized: ${item is NFTItemInitialized}")
-                if (item is NFTItemInitialized) {
-                    println("\tIndex: ${item.index}")
-                    println("\tCollection Address: ${item.collection?.toString(userFriendly = true)}")
-                    println("\tOwner Address: ${item.owner.toString(userFriendly = true)}")
+                val metadata = (item as? NFTDeployedItem)?.let {
+                    NFTMetadata.of(it.content(liteClient))
+                }
+                println("NFT Item ${MsgAddressIntStd(address).toString(userFriendly = true)}:")
+                println("\tInitialized: ${item != null}")
+                item?.run {
+                    println("\tIndex: ${index}")
+                    println(
+                        "\tCollection Address: ${
+                            (this as? NFTDeployedCollectionItem)?.collection?.toString(
+                                userFriendly = true
+                            )
+                        }"
+                    )
+                    println("\tOwner Address: ${owner.toString(userFriendly = true)}")
 
-                    royalty.let { royalties ->
-                        println("\tRoyalty percentage: ${royalties.value()?.times(100.0)}%")
-                        println("\tRoyalty destination: ${royalties.destination?.toString(userFriendly = true)}")
+                    royalty?.run {
+                        println("\tRoyalty percentage: ${value().times(100.0)}%")
+                        println("\tRoyalty destination: ${destination.toString(userFriendly = true)}")
                     }
 
-                    NFTSale.of(item.owner, liteClient)?.run {
+                    NFTSell.of(item.owner, liteClient)?.run {
                         println("\tOn sale: yes")
                         println("\tMarketplace: ${marketplace.toString(userFriendly = true)}")
                         println("\tSeller: ${owner.toString(userFriendly = true)}")
@@ -139,10 +147,10 @@ class QueryItem : CliktCommand(name = "query-item", help = "Query NFT item info"
                     }
 
                     metadata?.run {
-                        println("\tName: ${this.name}")
-                        println("\tDescription: ${this.description}")
-                        println("\tImage: ${this.image}")
-                        println("\tImage data: ${this.imageData?.let { hex(it) }}")
+                        println("\tName: ${name}")
+                        println("\tDescription: ${description}")
+                        println("\tImage: ${image}")
+                        println("\tImage data: ${imageData?.let { hex(it) }}")
                         println("\tAttributes:")
                         attributes.orEmpty().forEach {
                             println("\t\t${it.trait}: ${it.value}")
@@ -167,27 +175,30 @@ class QueryCollection :
         runBlocking {
             val liteClient = Tool.liteClient
 
-            val collection = NFTCollection.of(MsgAddressIntStd.parse(address), liteClient)
+            val collection = NFTCollection.of(MsgAddressIntStd.parse(address), liteClient) as NFTDeployedCollection
             val royalty = NFTRoyalty.of(collection.address, liteClient)
-            val metadata = NFTMetadata.of<NFTCollectionMetadata>(collection.address, collection.content)
+            val metadata = NFTMetadata.of(collection.content)
 
             if (dump) {
-                jacksonObjectMapper().writeValueAsString(CollectionDump(
-                    collection,
-                    royalty,
-                    metadata,
-                    if (dumpItems) (0 until collection.nextItemIndex)
-                        .map { ItemDump.of(NFTItem.of(collection.address, it, liteClient), liteClient) } else null
-                ))
+                jacksonObjectMapper().writeValueAsString(
+                    CollectionDump(
+                        collection,
+                        royalty,
+                        metadata,
+                        if (dumpItems) collection.itemAddresses(liteClient).map { ItemDump.of(it, liteClient) }
+                            .filterNotNull()
+                            .toList() else null
+                    )
+                )
                     .let { println(it) }
             } else {
                 println("NFT Collection ${collection.address.toString(userFriendly = true)}")
                 println("\tNumber of items: ${collection.nextItemIndex}")
                 println("\tOwner address: ${collection.owner.toString(userFriendly = true)}")
 
-                royalty.let { royalties ->
-                    println("\tRoyalty percentage: ${royalties.value()?.times(100.0)}%")
-                    println("\tRoyalty destination: ${royalties.destination?.toString(userFriendly = true)}")
+                royalty?.run {
+                    println("\tRoyalty percentage: ${value().times(100.0)}%")
+                    println("\tRoyalty destination: ${destination.toString(userFriendly = true)}")
                 }
 
                 metadata.run {
@@ -211,21 +222,21 @@ class ListCollection :
         runBlocking {
             val liteClient = Tool.liteClient
 
-            val collection = NFTCollection.of(MsgAddressIntStd.parse(address), liteClient)
+            val collection = NFTCollection.of(MsgAddressIntStd.parse(address), liteClient) as NFTDeployedCollection
 
             println("index | address | owner")
 
-            for (i in 0 until collection.nextItemIndex) {
-                val item = NFTItem.of(NFTItem.of(collection.address, i, liteClient), liteClient)
-                if (item is NFTItemInitialized)
+            collection.items(liteClient)
+                .filterNotNull()
+                .collect {
                     println(
-                        "${item.index} | ${item.address.toString(userFriendly = true)} | ${
-                            item.owner.toString(
+                        "${it.index} | ${it.address.toString(userFriendly = true)} | ${
+                            it.owner.toString(
                                 userFriendly = true
                             )
                         }"
                     )
-            }
+                }
         }
     }
 }
@@ -250,24 +261,36 @@ class MintItem : CliktCommand(name = "mint-item", help = "Mint a standalone item
 
             val lastBlock = liteClient.getMasterchainInfo().last
 
-            val stub = NFTItemStub(
+            val stub = NFTStubStandaloneItem(
+                address,
                 CellBuilder.createCell {
                     storeBytes(byteArrayOf(0x01.toByte()) + "https://youtu.be/dQw4w9WgXcQ".toByteArray())
                 },
-                address,
-                index = 69L
             )
-            logger.debug("stub NFT address: ${stub.address.toString(userFriendly = true)}")
+            logger.debug("New NFT item address: ${stub.address.toString(userFriendly = true)}")
 
-            logger.debug("trying to get wallet's seqno")
-            val seqnoResult = liteClient.runSmcMethod(0b100, lastBlock, LiteServerAccountId(address), "seqno")
-
-            logger.debug("seqno: ${(seqnoResult.first() as VmStackValue.TinyInt).value}")
-            val message =
-                wallet.createSigningMessage((seqnoResult.first() as VmStackValue.TinyInt).value.toInt()) {
-                    storeUInt(3, 8) // mode
-                    storeRef(stub.initMessage())
+            val message = wallet.createSigningMessage(wallet.seqno()) {
+                storeUInt(3, 8) // send mode
+                storeRef {
+                    storeTlb(
+                        MessageRelaxed.tlbCodec(AnyTlbConstructor), MessageRelaxed(
+                            info = CommonMsgInfoRelaxed.IntMsgInfo(
+                                ihrDisabled = true,
+                                bounce = false,
+                                bounced = false,
+                                src = MsgAddressExtNone,
+                                dest = stub.address,
+                                value = CurrencyCollection(
+                                    coins = Coins.ofNano(100_000_000L)
+                                )
+                            ),
+                            init = stub.stateInit(),
+                            body = Cell.of(),
+                            storeBodyInRef = false
+                        )
+                    )
                 }
+            }
 
             val signature = wallet.privateKey.sign(message.hash())
             val body = CellBuilder.createCell {
@@ -275,7 +298,6 @@ class MintItem : CliktCommand(name = "mint-item", help = "Mint a standalone item
                 storeBits(message.bits)
                 storeRefs(message.refs)
             }
-
             logger.debug("sending the message")
             val result = liteClient.sendMessage(
                 Message(

@@ -10,12 +10,11 @@ import org.ton.lite.api.liteserver.LiteServerAccountId
 import org.ton.tlb.loadTlb
 
 data class NFTRoyalty(
-    val address: MsgAddressIntStd,
-    val numerator: Int? = null,
-    val denominator: Int? = null,
-    val destination: MsgAddressIntStd? = null,
+    val numerator: Int,
+    val denominator: Int,
+    val destination: MsgAddressIntStd,
 ) {
-    fun value() = numerator?.let { n -> denominator?.let { d -> n.toFloat() / d } }
+    fun value() = numerator.toFloat() / denominator
 
     companion object : KLogging() {
         @JvmStatic
@@ -23,7 +22,7 @@ data class NFTRoyalty(
             address: MsgAddressIntStd,
             liteClient: LiteApi,
             referenceBlock: suspend () -> TonNodeBlockIdExt = { liteClient.getMasterchainInfo().last }
-        ): NFTRoyalty {
+        ): NFTRoyalty? {
             logger.debug("running method `royalty_params` on ${address.toString(userFriendly = true)}")
             val result =
                 liteClient.runSmcMethod(0b100, referenceBlock(), LiteServerAccountId(address), "royalty_params")
@@ -32,16 +31,15 @@ data class NFTRoyalty(
             if (result.exitCode == 11) { // unknown error, its thrown when no such method exists
                 // NFT Collection/Item doesn't implement NFTRoyalty extension - its ok
                 logger.debug("contract doesn't implement the NFTRoyalty extension")
-                return NFTRoyalty(address)
+                return null
             }
 
             if (result.exitCode != 0) {
                 logger.warn { "Failed to run the method, exit code is ${result.exitCode}. Contract might be uninitialized" }
-                return NFTRoyalty(address)
+                return null
             }
 
             return NFTRoyalty(
-                address,
                 (result[0] as VmStackValue.TinyInt).value.toInt(),
                 (result[1] as VmStackValue.TinyInt).value.toInt(),
                 (result[2] as VmStackValue.Slice).toCellSlice()

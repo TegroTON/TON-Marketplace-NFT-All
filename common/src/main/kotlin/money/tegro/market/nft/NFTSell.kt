@@ -1,8 +1,6 @@
 package money.tegro.market.nft
 
-import kotlinx.coroutines.runBlocking
 import mu.KLogging
-import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.block.MsgAddress
 import org.ton.block.MsgAddressIntStd
 import org.ton.block.VmStackValue
@@ -10,7 +8,7 @@ import org.ton.lite.api.LiteApi
 import org.ton.lite.api.liteserver.LiteServerAccountId
 import org.ton.tlb.loadTlb
 
-data class NFTSale(
+data class NFTSell(
     val address: MsgAddressIntStd,
     val marketplace: MsgAddressIntStd,
     val item: MsgAddressIntStd,
@@ -26,11 +24,12 @@ data class NFTSale(
         @JvmStatic
         suspend fun of(
             address: MsgAddressIntStd,
-            liteClient: LiteApi,
-            referenceBlock: TonNodeBlockIdExt = runBlocking { liteClient.getMasterchainInfo().last },
-        ): NFTSale? {
+            liteApi: LiteApi,
+        ): NFTSell? {
+            val referenceBlock = liteApi.getMasterchainInfo().last
+
             logger.debug("running method `get_sale_data` on ${address.toString(userFriendly = true)}")
-            val result = liteClient.runSmcMethod(
+            val result = liteApi.runSmcMethod(
                 0b100, referenceBlock,
                 LiteServerAccountId(address),
                 "get_sale_data"
@@ -43,7 +42,7 @@ data class NFTSale(
             }
 
             return try {
-                NFTSale(
+                NFTSell(
                     address,
                     (result[0] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec) as MsgAddressIntStd,
                     (result[1] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec) as MsgAddressIntStd,
