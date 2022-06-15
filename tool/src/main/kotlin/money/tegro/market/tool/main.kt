@@ -11,7 +11,6 @@ import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.int
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
@@ -24,11 +23,9 @@ import org.ton.block.*
 import org.ton.block.tlb.tlbCodec
 import org.ton.cell.Cell
 import org.ton.cell.CellBuilder
-import org.ton.cell.exception.CellOverflowException
 import org.ton.crypto.base64
 import org.ton.crypto.hex
 import org.ton.lite.api.LiteApi
-import org.ton.lite.api.liteserver.LiteServerAccountId
 import org.ton.lite.client.LiteClient
 import org.ton.smartcontract.wallet.v1.WalletV1R3
 import org.ton.tlb.constructor.AnyTlbConstructor
@@ -358,5 +355,84 @@ class MintItem : CliktCommand(name = "mint-item", help = "Mint a standalone item
     companion object : KLogging()
 }
 
+class MintCollection : CliktCommand(name = "mint-collection", help = "Mint a collection contract") {
+    private val privateKeyBase64 by option(
+        "--private-key",
+        help = "Your wallet's private key encoded as base64"
+    ).required()
+
+    override fun run() {
+        runBlocking {
+            val liteClient = Tool.liteClient
+
+            val privateKey = PrivateKeyEd25519(base64(privateKeyBase64))
+            val wallet = WalletV1R3(liteClient, privateKey)
+            logger.debug("wallet public key: ${hex(wallet.getPublicKey().toString())}")
+            val address = wallet.address()
+
+            logger.debug("wallet address ${address.toString(bounceable = true)}")
+
+            val lastBlock = liteClient.getMasterchainInfo().last
+
+            val stub = NFTStubCollection(
+                address,
+                CellBuilder.createCell {
+                    storeBytes(byteArrayOf(0x01.toByte()) + "https://s.getgems.io/nft/b/c/626a922e5e67c1f424154711/meta.json".toByteArray())
+                },
+                CellBuilder.createCell {
+                    storeBytes("https://s.getgems.io/nft/b/c/626a922e5e67c1f424154711/".toByteArray())
+                },
+                NFTRoyalty(
+                    15,
+                    100,
+                    address,
+                )
+            )
+            logger.debug("New NFT collection address: ${stub.address.toString(userFriendly = true)}")
+
+            val message = wallet.createSigningMessage(wallet.seqno()) {
+                storeUInt(3, 8) // send mode
+                storeRef {
+                    storeTlb(
+                        MessageRelaxed.tlbCodec(AnyTlbConstructor), MessageRelaxed(
+                            info = CommonMsgInfoRelaxed.IntMsgInfo(
+                                ihrDisabled = true,
+                                bounce = false,
+                                bounced = false,
+                                src = MsgAddressExtNone,
+                                dest = stub.address,
+                                value = CurrencyCollection(
+                                    coins = Coins.ofNano(5_000_000L)
+                                )
+                            ),
+                            init = stub.stateInit(),
+                            body = Cell.of(),
+                            storeBodyInRef = false
+                        )
+                    )
+                }
+            }
+
+            val signature = wallet.privateKey.sign(message.hash())
+            val body = CellBuilder.createCell {
+                storeBytes(signature)
+                storeBits(message.bits)
+                storeRefs(message.refs)
+            }
+            logger.debug("sending the message")
+            val result = liteClient.sendMessage(
+                Message(
+                    CommonMsgInfo.ExtInMsgInfo(wallet.address()),
+                    init = null,
+                    body = body
+                )
+            )
+            logger.info { result.toString() }
+        }
+    }
+
+    companion object : KLogging()
+}
+
 fun main(args: Array<String>) =
-    Tool().subcommands(QueryItem(), QueryCollection(), ListCollection(), MintItem()).main(args)
+    Tool().subcommands(QueryItem(), QueryCollection(), ListCollection(), MintItem(), MintCollection()).main(args)

@@ -97,30 +97,55 @@ data class NFTDeployedCollection(
 }
 
 data class NFTStubCollection(
-    val workchainId: Int,
-    override val content: Cell,
     override val owner: MsgAddressIntStd,
-
-    val code: Cell?,
+    val collectionContent: Cell,
+    val commonContent: Cell = Cell.of(),
+    val royalty: NFTRoyalty? = null,
+    val itemCode: Cell = NFTStubItem.NFT_ITEM_CODE,
+    val code: Cell = NFT_COLLECTION_CODE,
+    val workchainId: Int = owner.workchainId,
 ) : NFTCollection {
+    private val msgAddressCodec by lazy { MsgAddress.tlbCodec() }
     private val stateInitCodec by lazy { StateInit.tlbCodec() }
     private var _nextItemIndex = 0L
 
-    override val address by lazy {
-        MsgAddressIntStd(workchainId, CellBuilder.createCell { storeTlb(stateInitCodec, stateInit()) }.hash())
-    }
+    override val address: MsgAddressIntStd
+        get() = MsgAddressIntStd(workchainId, CellBuilder.createCell { storeTlb(stateInitCodec, stateInit()) }.hash())
+
+    override val content: Cell = collectionContent
 
     override val nextItemIndex: Long
         get() = _nextItemIndex
 
     fun stateInit() = StateInit(createCode(), createData())
 
-    fun createCode() = code ?: NFT_COLLECTION_CODE
+    fun createCode() = code
 
-    fun createData(): Cell {
-        TODO()
+    fun createData(): Cell = CellBuilder.createCell {
+//        ;; default#_ royalty_factor:uint16 royalty_base:uint16 royalty_address:MsgAddress = RoyaltyParams;
+//        ;; storage#_ owner_address:MsgAddress next_item_index:uint64
+//        ;;           ^[collection_content:^Cell common_content:^Cell]
+//        ;;           nft_item_code:^Cell
+//        ;;           royalty_params:^RoyaltyParams
+//        ;;           = Storage;
+        storeTlb(msgAddressCodec, owner)
+        storeUInt(nextItemIndex, 64)
+        storeRef {
+            storeRef(collectionContent)
+            storeRef(commonContent)
+        }
+        storeRef {
+            storeRef(itemCode)
+        }
+        storeRef {
+            royalty?.let {
+                storeUInt(it.numerator, 16)
+                storeUInt(it.denominator, 16)
+                storeTlb(msgAddressCodec, it.destination)
+            }
+        }
     }
-
+    
     companion object {
         val NFT_COLLECTION_CODE = BagOfCells.of(
             hex(
