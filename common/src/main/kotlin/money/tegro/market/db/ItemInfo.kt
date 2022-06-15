@@ -53,7 +53,7 @@ class ItemInfo(
     fun setCollection(value: CollectionInfo) {
         collection = value
         if (value.items != null) {
-            value.items!!.add(this)
+            (value.items ?: return).add(this)
         } else {
             value.items = mutableSetOf(this)
         }

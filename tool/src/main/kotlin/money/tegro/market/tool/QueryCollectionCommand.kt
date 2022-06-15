@@ -38,11 +38,11 @@ class QueryCollectionCommand :
 
                     println("Querying collection metadata")
                     NFTMetadata.of(content).run {
-                        println("\tName: ${name}")
-                        println("\tDescription: ${description}")
-                        println("\tImage: ${image}")
+                        println("\tName: $name")
+                        println("\tDescription: $description")
+                        println("\tImage: $image")
                         println("\tImage data: ${imageData?.let { hex(it) }}")
-                        println("\tCover image: ${coverImage}")
+                        println("\tCover image: $coverImage")
                         println("\tCover image data: ${coverImageData?.let { hex(it) }}")
                     }
                 }

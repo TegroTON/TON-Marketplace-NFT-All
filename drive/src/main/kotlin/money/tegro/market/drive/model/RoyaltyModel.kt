@@ -1,4 +1,4 @@
-package money.tegro.market.drive
+package money.tegro.market.drive.model
 
 import io.swagger.v3.oas.annotations.media.Schema
 import money.tegro.market.db.RoyaltyEntity

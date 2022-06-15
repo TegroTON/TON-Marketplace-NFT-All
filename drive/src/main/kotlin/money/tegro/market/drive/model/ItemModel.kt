@@ -2,8 +2,6 @@ package money.tegro.market.drive.model
 
 import io.swagger.v3.oas.annotations.media.Schema
 import money.tegro.market.db.ItemInfo
-import money.tegro.market.drive.RoyaltyModel
-import money.tegro.market.drive.toGoodString
 import org.ton.block.MsgAddressIntStd
 
 data class ItemModel(

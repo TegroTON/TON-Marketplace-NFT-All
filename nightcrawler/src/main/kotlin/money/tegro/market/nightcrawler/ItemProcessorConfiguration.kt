@@ -157,16 +157,16 @@ class ItemProcessorConfiguration(
         collectionInfoRepository.findByAddress(it.address)?.let { collection ->
             (collectionRoyaltyRepository.findByCollection(collection)
                 ?: CollectionRoyalty(collection)).apply {
-                if (modified == null || numerator != it.numerator || denominator != it.denominator || destinationWorkchain != it.destination?.workchainId || !destinationAddress.contentEquals(
-                        it.destination?.address?.toByteArray()
+                if (modified == null || numerator != it.numerator || denominator != it.denominator || destinationWorkchain != it.destination.workchainId || !destinationAddress.contentEquals(
+                        it.destination.address?.toByteArray()
                     )
                 )
                     modified = Instant.now()
 
                 numerator = it.numerator
                 denominator = it.denominator
-                destinationWorkchain = it.destination?.workchainId
-                destinationAddress = it.destination?.address?.toByteArray()
+                destinationWorkchain = it.destination.workchainId
+                destinationAddress = it.destination.address?.toByteArray()
                 updated = Instant.now()
             }
         }

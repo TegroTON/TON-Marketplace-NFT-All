@@ -2,8 +2,6 @@ package money.tegro.market.drive.model
 
 import io.swagger.v3.oas.annotations.media.Schema
 import money.tegro.market.db.CollectionInfo
-import money.tegro.market.drive.RoyaltyModel
-import money.tegro.market.drive.toGoodString
 
 data class CollectionModel(
     @Schema(description = "Address of the collection, uniquely identifies it. Always base64url, bounceable")

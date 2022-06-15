@@ -24,7 +24,7 @@ class QueryItemCommand :
                 val item = NFTItem.of(address, Tool.currentLiteApi)
                 println("\tInitialized? - ${item != null}")
                 item?.run {
-                    println("\tIndex: ${index}")
+                    println("\tIndex: $index")
                     println("\tBelongs to a collection?: ${this is NFTDeployedCollectionItem}")
                     (this as? NFTDeployedCollectionItem)?.run {
                         println("\tCollection address: ${collection.toString(userFriendly = true)}")
@@ -55,9 +55,9 @@ class QueryItemCommand :
 
                     println("Querying item metadata")
                     NFTMetadata.of(content(Tool.currentLiteApi)).run {
-                        println("\tName: ${name}")
-                        println("\tDescription: ${description}")
-                        println("\tImage: ${image}")
+                        println("\tName: $name")
+                        println("\tDescription: $description")
+                        println("\tImage: $image")
                         println("\tImage data: ${imageData?.let { hex(it) }}")
                         println("\tAttributes:")
                         attributes.orEmpty().forEach {

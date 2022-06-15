@@ -96,9 +96,9 @@ class MintStandaloneItemCommand : CliktCommand(name = "mint-standalone", help = 
             NFTItem.of(stub.address, Tool.currentLiteApi)?.run {
                 println("Success! Item initialized:")
                 println("\tAddress: ${address.toString(userFriendly = true)}")
-                println("\tIndex: ${index}")
+                println("\tIndex: $index")
                 println("\tOwner: ${owner.toString(userFriendly = true)}")
-                println("\tContent: ${individualContent.toString()}")
+                println("\tContent: $individualContent")
             } ?: run {
                 println("Something went wrong. Check your account address, try increasing the init amount")
             }

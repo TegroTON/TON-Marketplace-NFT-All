@@ -96,10 +96,10 @@ class MintCollectionItemCommand :
             NFTItem.of(itemAddress, Tool.currentLiteApi)?.run {
                 println("Success! Item initialized:")
                 println("\tAddress: ${address.toString(userFriendly = true)}")
-                println("\tIndex: ${index}")
+                println("\tIndex: $index")
                 println("\tCollection: ${(this as? NFTDeployedCollectionItem)?.collection?.toString(userFriendly = true)}")
                 println("\tOwner: ${owner.toString(userFriendly = true)}")
-                println("\tContent: ${individualContent.toString()}")
+                println("\tContent: $individualContent")
             } ?: run {
                 println("Something went wrong. Check your account address, try increasing the init amount")
             }

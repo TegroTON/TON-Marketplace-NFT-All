@@ -65,7 +65,7 @@ class MintCollectionCommand : CliktCommand(name = "mint", help = "Mint a new NFT
                     collectionContent?.let { storeBytes(it.toByteArray()) }
                 },
                 commonContent = CellBuilder.createCell {
-                    collectionContent?.let { storeBytes(it.toByteArray()) }
+                    commonContent?.let { storeBytes(it.toByteArray()) }
                 },
                 royalty = collectionRoyaltyDestination?.let {
                     val destination = MsgAddressIntStd(it)
@@ -120,14 +120,14 @@ class MintCollectionCommand : CliktCommand(name = "mint", help = "Mint a new NFT
             println("Result: $result")
 
             runBlocking { delay(10000L) }
-            
+
             println("Checking if contract was correctly initialized")
             NFTCollection.of(stub.address, Tool.currentLiteApi).run {
                 println("Success! Collection initialized:")
                 println("\tAddress: ${address.toString(userFriendly = true)}")
-                println("\tNext item index: ${nextItemIndex}")
+                println("\tNext item index: $nextItemIndex")
                 println("\tOwner: ${owner.toString(userFriendly = true)}")
-                println("\tContent: ${content.toString()}")
+                println("\tContent: $content")
 
                 println("Checking its royalty parameters:")
                 NFTRoyalty.of(address, Tool.currentLiteApi)?.run {

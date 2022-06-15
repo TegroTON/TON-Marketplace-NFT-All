@@ -1,4 +1,4 @@
-package money.tegro.market.drive
+package money.tegro.market.drive.model
 
 import org.ton.block.MsgAddressIntStd
 

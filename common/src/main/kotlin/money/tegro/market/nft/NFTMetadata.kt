@@ -7,7 +7,6 @@ import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import mu.KLogging
-import org.ton.block.MsgAddressIntStd
 import org.ton.cell.Cell
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -38,8 +37,7 @@ data class NFTMetadata(
 
         @JvmStatic
         suspend fun of(content: Cell): NFTMetadata {
-            val contentLayout = content.beginParse().loadUInt(8).toInt()
-            when (contentLayout) {
+            when (val contentLayout = content.beginParse().loadUInt(8).toInt()) {
                 0x00 -> {
                     logger.debug { "on-chain content layout detected" }
                     TODO("on-chain content layout, really?")
