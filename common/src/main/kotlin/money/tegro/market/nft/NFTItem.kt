@@ -76,26 +76,35 @@ data class NFTDeployedCollectionItem(
     override val owner: MsgAddressIntStd,
     override val individualContent: Cell,
 ) : NFTDeployedItem {
-    override suspend fun content(liteApi: LiteApi): Cell {
-        val referenceBlock = liteApi.getMasterchainInfo().last
+    override suspend fun content(liteApi: LiteApi): Cell =
+        contentOf(collection, index, individualContent, liteApi)
 
-        logger.debug("running method `get_nft_content` on ${collection.toString(userFriendly = true)}")
-        val result = liteApi.runSmcMethod(
-            0b100,
-            referenceBlock,
-            LiteServerAccountId(collection),
-            "get_nft_content",
-            VmStackValue.TinyInt(index),
-            VmStackValue.Cell(individualContent)
-        )
+    companion object : KLogging() {
+        @JvmStatic
+        suspend fun contentOf(
+            collection: MsgAddressIntStd,
+            index: Long,
+            individualContent: Cell,
+            liteApi: LiteApi
+        ): Cell {
+            val referenceBlock = liteApi.getMasterchainInfo().last
 
-        logger.debug("response: $result")
-        require(result.exitCode == 0) { "Failed to run the method, exit code is ${result.exitCode}" }
+            logger.debug("running method `get_nft_content` on ${collection.toString(userFriendly = true)}")
+            val result = liteApi.runSmcMethod(
+                0b100,
+                referenceBlock,
+                LiteServerAccountId(collection),
+                "get_nft_content",
+                VmStackValue.TinyInt(index),
+                VmStackValue.Cell(individualContent)
+            )
 
-        return (result.first() as VmStackValue.Cell).cell
+            logger.debug("response: $result")
+            require(result.exitCode == 0) { "Failed to run the method, exit code is ${result.exitCode}" }
+
+            return (result.first() as VmStackValue.Cell).cell
+        }
     }
-
-    companion object : KLogging()
 }
 
 interface NFTStubItem : NFTItem {

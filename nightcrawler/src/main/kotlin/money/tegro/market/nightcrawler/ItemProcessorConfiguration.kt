@@ -29,62 +29,53 @@ class ItemProcessorConfiguration(
     @Bean
     fun nftCollectionProcessor() = ItemProcessor<MsgAddressIntStd, NFTCollection> {
         runBlocking {
-            NFTCollection.of(it, liteApiFactory.getObject(), liteApiFactory.lastMasterchainBlock)
+            NFTCollection.of(it, liteApiFactory.getObject())
         }
     }
 
     @Bean
-    fun nftItemProcessor() = ItemProcessor<MsgAddressIntStd, NFTItem> {
+    fun nftItemProcessor() = ItemProcessor<MsgAddressIntStd, Pair<MsgAddressIntStd, NFTItem?>> {
         runBlocking {
-            NFTItem.of(it, liteApiFactory.getObject(), liteApiFactory.lastMasterchainBlock)
+            it to NFTItem.of(it, liteApiFactory.getObject())
         }
     }
 
     @Bean
-    fun nftRoyaltyProcessor() = ItemProcessor<MsgAddressIntStd, NFTRoyalty> {
+    fun nftRoyaltyProcessor() = ItemProcessor<MsgAddressIntStd, Pair<MsgAddressIntStd, NFTRoyalty?>> {
         runBlocking {
-            NFTRoyalty.of(it, liteApiFactory.getObject(), liteApiFactory.lastMasterchainBlock)
+            it to NFTRoyalty.of(it, liteApiFactory.getObject())
         }
     }
 
     @Bean
     fun nftCollectionMetadataProcessor() =
-        ItemProcessor<CollectionInfo, NFTCollectionMetadata> {
+        ItemProcessor<CollectionInfo, Pair<MsgAddressIntStd, NFTMetadata?>> {
             runBlocking {
-                it.content?.let { content ->
-                    NFTMetadata.of(
-                        it.addressStd(),
-                        BagOfCells(content).roots.first()
-                    )
-                }
+                it.addressStd() to it.content?.let { NFTMetadata.of(BagOfCells(it).roots.first()) }
             }
         }
 
     @Bean
     fun nftItemMetadataProcessor() =
-        ItemProcessor<ItemInfo, NFTItemMetadata> {
+        ItemProcessor<ItemInfo, Pair<MsgAddressIntStd, NFTMetadata?>> {
             runBlocking {
-                if (it.initialized) {
-                    val content = it.collection?.let { collection ->
+                Pair(
+                    it.addressStd(),
+                    it.collection?.let { collection ->
                         it.index?.let { index ->
                             it.content?.let { individualContent ->
-                                NFTItemInitialized.content(
+                                NFTDeployedCollectionItem.contentOf(
                                     collection.addressStd(),
                                     index,
                                     BagOfCells(individualContent).roots.first(),
                                     liteApiFactory.getObject(),
-                                    liteApiFactory.lastMasterchainBlock
-                                )
+                                ).let {
+                                    NFTMetadata.of(it)
+                                }
                             }
                         }
-                    } ?: it.content?.let { BagOfCells(it) }?.roots?.first()
-
-                    content?.let { c ->
-                        NFTMetadata.of(it.addressStd(), c)
-                    }
-                } else {
-                    null
-                }
+                    } ?: it.content?.let { BagOfCells(it).roots.first() }?.let { NFTMetadata.of(it) }
+                )
             }
         }
 
@@ -95,7 +86,7 @@ class ItemProcessorConfiguration(
             collection.nextItemIndex?.let { (0 until it) }
                 ?.filter { !addedIndices.contains(it) }
                 ?.map {
-                    NFTItem.of(collection.addressStd(), it, liteApiFactory.getObject())
+                    NFTDeployedCollection.itemAddressOf(collection.addressStd(), it, liteApiFactory.getObject())
                 }
                 ?.map {
                     (itemInfoRepository.findByAddress(it) ?: ItemInfo(
@@ -126,73 +117,77 @@ class ItemProcessorConfiguration(
     }
 
     @Bean
-    fun itemInfoProcessor() = ItemProcessor<NFTItem, ItemInfo> {
-        (itemInfoRepository.findByAddress(it.address) ?: ItemInfo(
-            it.address.workchainId,
-            it.address.address.toByteArray(),
+    fun itemInfoProcessor() = ItemProcessor<Pair<MsgAddressIntStd, NFTItem?>, ItemInfo> {
+        val (address, item) = it
+        (itemInfoRepository.findByAddress(address) ?: ItemInfo(
+            address.workchainId,
+            address.address.toByteArray(),
         )).apply {
             if (modified == null ||
-                initialized != (it is NFTItemInitialized) ||
-                index != (it as? NFTItemInitialized)?.index ||
-                collection?.addressStd() != (it as? NFTItemInitialized)?.collection ||
-                ownerWorkchain != (it as? NFTItemInitialized)?.owner?.workchainId ||
-                !ownerAddress.contentEquals((it as? NFTItemInitialized)?.owner?.address?.toByteArray()) ||
-                !content.contentEquals((it as? NFTItemInitialized)?.content?.let { BagOfCells(it) }?.toByteArray())
+                initialized != (item != null) ||
+                index != item?.index ||
+                collection?.addressStd() != (item as? NFTDeployedCollectionItem)?.collection ||
+                ownerWorkchain != item?.owner?.workchainId ||
+                !ownerAddress.contentEquals(item?.owner?.address?.toByteArray()) ||
+                !content.contentEquals(item?.individualContent?.let { BagOfCells(it) }?.toByteArray())
             )
                 modified = Instant.now()
 
-            initialized = (it is NFTItemInitialized)
-            index = (it as? NFTItemInitialized)?.index
-            collection = (it as? NFTItemInitialized)?.collection?.let { collectionInfoRepository.findByAddress(it) }
-            ownerWorkchain = (it as? NFTItemInitialized)?.owner?.workchainId
-            ownerAddress = (it as? NFTItemInitialized)?.owner?.address?.toByteArray()
-            content = (it as? NFTItemInitialized)?.content?.let { BagOfCells(it) }?.toByteArray()
+            initialized = item != null
+            index = item?.index
+            collection =
+                (item as? NFTDeployedCollectionItem)?.collection?.let { collectionInfoRepository.findByAddress(it) }
+            ownerWorkchain = item?.owner?.workchainId
+            ownerAddress = item?.owner?.address?.toByteArray()
+            content = item?.individualContent?.let { BagOfCells(it) }?.toByteArray()
 
             updated = Instant.now()
         }
     }
 
     @Bean
-    fun collectionRoyaltyProcessor() = ItemProcessor<NFTRoyalty, CollectionRoyalty> {
-        collectionInfoRepository.findByAddress(it.address)?.let { collection ->
+    fun collectionRoyaltyProcessor() = ItemProcessor<Pair<MsgAddressIntStd, NFTRoyalty?>, CollectionRoyalty> {
+        val (address, royalty) = it
+        collectionInfoRepository.findByAddress(address)?.let { collection ->
             (collectionRoyaltyRepository.findByCollection(collection)
                 ?: CollectionRoyalty(collection)).apply {
-                if (modified == null || numerator != it.numerator || denominator != it.denominator || destinationWorkchain != it.destination.workchainId || !destinationAddress.contentEquals(
-                        it.destination.address?.toByteArray()
+                if (modified == null || numerator != royalty?.numerator || denominator != royalty?.denominator || destinationWorkchain != royalty?.destination?.workchainId || !destinationAddress.contentEquals(
+                        royalty?.destination?.address?.toByteArray()
                     )
                 )
                     modified = Instant.now()
 
-                numerator = it.numerator
-                denominator = it.denominator
-                destinationWorkchain = it.destination.workchainId
-                destinationAddress = it.destination.address?.toByteArray()
+                numerator = royalty?.numerator
+                denominator = royalty?.denominator
+                destinationWorkchain = royalty?.destination?.workchainId
+                destinationAddress = royalty?.destination?.address?.toByteArray()
                 updated = Instant.now()
             }
         }
     }
 
     @Bean
-    fun collectionMetadataProcessor() = ItemProcessor<NFTCollectionMetadata, CollectionMetadata> {
-        collectionInfoRepository.findByAddress(it.address)?.let { collection ->
+    fun collectionMetadataProcessor() = ItemProcessor<Pair<MsgAddressIntStd, NFTMetadata?>, CollectionMetadata> {
+        val (address, metadata) = it
+        collectionInfoRepository.findByAddress(address)?.let { collection ->
             (collectionMetadataRepository.findByCollection(collection)
                 ?: CollectionMetadata(collection)).apply {
                 if (modified == null ||
-                    name != it.name ||
-                    description != it.description ||
-                    image != it.image ||
-                    !imageData.contentEquals(it.imageData) ||
-                    coverImage != it.coverImage ||
-                    !coverImageData.contentEquals(it.coverImageData)
+                    name != metadata?.name ||
+                    description != metadata?.description ||
+                    image != metadata?.image ||
+                    !imageData.contentEquals(metadata?.imageData) ||
+                    coverImage != metadata?.coverImage ||
+                    !coverImageData.contentEquals(metadata?.coverImageData)
                 )
                     modified = Instant.now()
 
-                name = it.name
-                description = it.description
-                image = it.image
-                imageData = it.imageData
-                coverImage = it.coverImage
-                coverImageData = it.coverImageData
+                name = metadata?.name
+                description = metadata?.description
+                image = metadata?.image
+                imageData = metadata?.imageData
+                coverImage = metadata?.coverImage
+                coverImageData = metadata?.coverImageData
 
                 updated = Instant.now()
             }
@@ -200,22 +195,23 @@ class ItemProcessorConfiguration(
     }
 
     @Bean
-    fun itemMetadataProcessor() = ItemProcessor<NFTItemMetadata, ItemMetadata> {
-        itemInfoRepository.findByAddress(it.address)?.let { item ->
+    fun itemMetadataProcessor() = ItemProcessor<Pair<MsgAddressIntStd, NFTMetadata?>, ItemMetadata> {
+        val (address, metadata) = it
+        itemInfoRepository.findByAddress(address)?.let { item ->
             (itemMetadataRepository.findByItem(item)
                 ?: ItemMetadata(item)).apply {
                 if (modified == null ||
-                    name != it.name ||
-                    description != it.description ||
-                    image != it.image ||
-                    !imageData.contentEquals(it.imageData)
+                    name != metadata?.name ||
+                    description != metadata?.description ||
+                    image != metadata?.image ||
+                    !imageData.contentEquals(metadata?.imageData)
                 )
                     modified = Instant.now()
 
-                name = it.name
-                description = it.description
-                image = it.image
-                imageData = it.imageData
+                name = metadata?.name
+                description = metadata?.description
+                image = metadata?.image
+                imageData = metadata?.imageData
 
                 updated = Instant.now()
             }

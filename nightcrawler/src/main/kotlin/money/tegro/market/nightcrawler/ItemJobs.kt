@@ -4,7 +4,7 @@ import money.tegro.market.db.AddressableEntity
 import money.tegro.market.db.ItemInfo
 import money.tegro.market.db.ItemMetadata
 import money.tegro.market.nft.NFTItem
-import money.tegro.market.nft.NFTItemMetadata
+import money.tegro.market.nft.NFTMetadata
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory
@@ -28,11 +28,11 @@ class ItemJobs(
 
     val entityAddressProcessor: ItemProcessor<AddressableEntity, MsgAddressIntStd>,
 
-    val nftItemProcessor: ItemProcessor<MsgAddressIntStd, NFTItem>,
-    val itemInfoProcessor: ItemProcessor<NFTItem, ItemInfo>,
+    val nftItemProcessor: ItemProcessor<MsgAddressIntStd, Pair<MsgAddressIntStd, NFTItem?>>,
+    val itemInfoProcessor: ItemProcessor<Pair<MsgAddressIntStd, NFTItem?>, ItemInfo>,
 
-    val nftItemMetadataProcessor: ItemProcessor<ItemInfo, NFTItemMetadata>,
-    val itemMetadataProcessor: ItemProcessor<NFTItemMetadata, ItemMetadata>,
+    val nftItemMetadataProcessor: ItemProcessor<ItemInfo, Pair<MsgAddressIntStd, NFTMetadata?>>,
+    val itemMetadataProcessor: ItemProcessor<Pair<MsgAddressIntStd, NFTMetadata?>, ItemMetadata>,
 ) {
     @Bean
     fun updateItemInfo() = stepBuilderFactory

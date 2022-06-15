@@ -2,7 +2,7 @@ package money.tegro.market.nightcrawler
 
 import money.tegro.market.db.*
 import money.tegro.market.nft.NFTCollection
-import money.tegro.market.nft.NFTCollectionMetadata
+import money.tegro.market.nft.NFTMetadata
 import money.tegro.market.nft.NFTRoyalty
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
@@ -32,15 +32,14 @@ class CollectionJobs(
     val nftCollectionProcessor: ItemProcessor<MsgAddressIntStd, NFTCollection>,
     val collectionInfoProcessor: ItemProcessor<NFTCollection, CollectionInfo>,
 
-    val nftRoyaltyProcessor: ItemProcessor<MsgAddressIntStd, NFTRoyalty>,
-
-    val collectionRoyaltyProcessor: ItemProcessor<NFTRoyalty, CollectionRoyalty>,
+    val nftRoyaltyProcessor: ItemProcessor<MsgAddressIntStd, Pair<MsgAddressIntStd, NFTRoyalty?>>,
+    val collectionRoyaltyProcessor: ItemProcessor<Pair<MsgAddressIntStd, NFTRoyalty?>, CollectionRoyalty>,
 
     val entityAddressProcessor: ItemProcessor<AddressableEntity, MsgAddressIntStd>,
     val missingCollectionItemsProcessor: ItemProcessor<CollectionInfo, List<ItemInfo>>,
 
-    val nftCollectionMetadataProcessor: ItemProcessor<CollectionInfo, NFTCollectionMetadata>,
-    val collectionMetadataProcessor: ItemProcessor<NFTCollectionMetadata, CollectionMetadata>,
+    val nftCollectionMetadataProcessor: ItemProcessor<CollectionInfo, Pair<MsgAddressIntStd, NFTMetadata?>>,
+    val collectionMetadataProcessor: ItemProcessor<Pair<MsgAddressIntStd, NFTMetadata?>, CollectionMetadata>,
 
     val collectionMetadataWriter: ItemWriter<CollectionMetadata>,
 ) {

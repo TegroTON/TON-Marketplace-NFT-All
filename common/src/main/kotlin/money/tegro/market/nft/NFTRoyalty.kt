@@ -1,7 +1,6 @@
 package money.tegro.market.nft
 
 import mu.KLogging
-import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.block.MsgAddressInt
 import org.ton.block.MsgAddressIntStd
 import org.ton.block.VmStackValue
@@ -20,12 +19,13 @@ data class NFTRoyalty(
         @JvmStatic
         suspend fun of(
             address: MsgAddressIntStd,
-            liteClient: LiteApi,
-            referenceBlock: suspend () -> TonNodeBlockIdExt = { liteClient.getMasterchainInfo().last }
+            liteClient: LiteApi
         ): NFTRoyalty? {
+            val referenceBlock = liteClient.getMasterchainInfo().last
+
             logger.debug("running method `royalty_params` on ${address.toString(userFriendly = true)}")
             val result =
-                liteClient.runSmcMethod(0b100, referenceBlock(), LiteServerAccountId(address), "royalty_params")
+                liteClient.runSmcMethod(0b100, referenceBlock, LiteServerAccountId(address), "royalty_params")
 
             logger.debug("response: $result")
             if (result.exitCode == 11) { // unknown error, its thrown when no such method exists
