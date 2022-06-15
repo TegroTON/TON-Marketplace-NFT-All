@@ -3,7 +3,6 @@ package money.tegro.market.nft
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import mu.KLogging
-import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.block.MsgAddress
 import org.ton.block.MsgAddressIntStd
 import org.ton.block.StateInit
@@ -30,7 +29,7 @@ interface NFTCollection {
         suspend fun of(
             address: MsgAddressIntStd,
             liteClient: LiteApi,
-        ): NFTCollection {
+        ): NFTDeployedCollection {
             val referenceBlock = liteClient.getMasterchainInfo().last
 
             logger.debug("running method `get_collection_data` on ${address.toString(userFriendly = true)}")
@@ -59,7 +58,7 @@ data class NFTDeployedCollection(
 ) : NFTCollection {
     suspend fun itemAddresses(liteApi: LiteApi) = flow {
         (0 until nextItemIndex)
-            .map { itemAddressOf(address, it, liteApi) }
+            .map { itemAddress(it, liteApi) }
             .forEach {
                 emit(it)
             }
@@ -68,6 +67,10 @@ data class NFTDeployedCollection(
     suspend fun items(liteApi: LiteApi) = itemAddresses(liteApi).map {
         NFTItem.of(it, liteApi)
     }
+
+    suspend fun itemAddress(index: Long, liteApi: LiteApi) = itemAddressOf(this.address, index, liteApi)
+
+    suspend fun item(index: Long, liteApi: LiteApi) = NFTItem.of(this.itemAddress(index, liteApi), liteApi)
 
     companion object : KLogging() {
         private val msgAddressCodec by lazy { MsgAddress.tlbCodec() }
