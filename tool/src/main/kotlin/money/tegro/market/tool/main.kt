@@ -355,6 +355,50 @@ class MintItem : CliktCommand(name = "mint-item", help = "Mint a standalone item
     companion object : KLogging()
 }
 
+class MintCollectionItem : CliktCommand(name = "mint-collection-item", help = "Mint a collection item") {
+    private val privateKeyBase64 by option(
+        "--private-key",
+        help = "Your wallet's private key encoded as base64"
+    ).required()
+    private val collection by option("--collection", help = "Collection address").required()
+
+    override fun run() {
+        runBlocking {
+            val liteClient = Tool.liteClient
+
+            val privateKey = PrivateKeyEd25519(base64(privateKeyBase64))
+            val wallet = WalletV1R3(liteClient, privateKey)
+            logger.debug("wallet public key: ${hex(wallet.getPublicKey().toString())}")
+            logger.debug("wallet address ${wallet.address().toString(bounceable = true)}")
+
+            val nftCollection = NFTCollection.of(MsgAddressIntStd(collection), liteClient) as NFTDeployedCollection
+            val itemIndex = nftCollection.nextItemIndex
+            logger.debug("this item index would be $itemIndex")
+
+            wallet.transfer(
+                nftCollection.address, false, Coins.ofNano(100_000_000L), wallet.seqno(),
+                CellBuilder.createCell {
+                    storeUInt(1, 32) // OP, mint
+                    storeUInt(69420, 64) // Query id
+                    storeUInt(itemIndex, 64) // New item index
+                    storeTlb(Coins.tlbCodec(), Coins.ofNano(5_000_000L))
+                    storeRef {
+                        storeTlb(MsgAddress.tlbCodec(), wallet.address())
+                        storeRef {
+                            storeBytes("$itemIndex/meta.json".toByteArray())
+                        } // content
+                    }
+                },
+            )
+
+            val newItem = NFTDeployedCollection.itemAddressOf(nftCollection.address, itemIndex, liteClient)
+            logger.debug("new item address: ${newItem.toString(userFriendly = true)}")
+        }
+    }
+
+    companion object : KLogging()
+}
+
 class MintCollection : CliktCommand(name = "mint-collection", help = "Mint a collection contract") {
     private val privateKeyBase64 by option(
         "--private-key",
@@ -371,8 +415,6 @@ class MintCollection : CliktCommand(name = "mint-collection", help = "Mint a col
             val address = wallet.address()
 
             logger.debug("wallet address ${address.toString(bounceable = true)}")
-
-            val lastBlock = liteClient.getMasterchainInfo().last
 
             val stub = NFTStubCollection(
                 address,
@@ -435,4 +477,11 @@ class MintCollection : CliktCommand(name = "mint-collection", help = "Mint a col
 }
 
 fun main(args: Array<String>) =
-    Tool().subcommands(QueryItem(), QueryCollection(), ListCollection(), MintItem(), MintCollection()).main(args)
+    Tool().subcommands(
+        QueryItem(),
+        QueryCollection(),
+        ListCollection(),
+        MintItem(),
+        MintCollectionItem(),
+        MintCollection()
+    ).main(args)
