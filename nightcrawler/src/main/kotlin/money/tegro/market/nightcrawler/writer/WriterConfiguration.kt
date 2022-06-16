@@ -11,4 +11,16 @@ class WriterConfiguration(private val entityManagerFactory: EntityManagerFactory
 
     @Bean
     fun collectionInfoAsyncWriter() = CollectionInfoAsyncWriter(collectionInfoWriter())
+
+    @Bean
+    fun collectionRoyaltyWriter() = CollectionRoyaltyWriter(entityManagerFactory)
+
+    @Bean
+    fun collectionRoyaltyAsyncWriter() = CollectionRoyaltyAsyncWriter(collectionRoyaltyWriter())
+
+    @Bean
+    fun collectionMetadataWriter() = CollectionMetadataWriter(entityManagerFactory)
+
+    @Bean
+    fun collectionMetadataAsyncWriter() = CollectionMetadataAsyncWriter(collectionMetadataWriter())
 }

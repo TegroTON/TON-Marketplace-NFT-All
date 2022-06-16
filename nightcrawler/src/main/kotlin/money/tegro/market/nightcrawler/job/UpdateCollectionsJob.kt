@@ -13,10 +13,14 @@ class UpdateCollectionsJob(
     private val jobBuilderFactory: JobBuilderFactory,
 
     private val updateCollectionInfo: Step,
+    private val updateCollectionRoyalty: Step,
+    private val updateCollectionMetadata: Step,
 ) {
     @Bean
     fun updateCollections() = jobBuilderFactory.get("updateCollections")
         .incrementer(RunIdIncrementer())
         .start(updateCollectionInfo)
+        .next(updateCollectionRoyalty)
+        .next(updateCollectionMetadata)
         .build()
 }

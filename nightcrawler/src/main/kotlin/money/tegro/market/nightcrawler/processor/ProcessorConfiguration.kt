@@ -10,4 +10,10 @@ class ProcessorConfiguration(
 ) {
     @Bean
     fun collectionInfoUpdateProcessor() = CollectionInfoUpdateProcessor(liteApi)
+
+    @Bean
+    fun collectionRoyaltyUpdateProcessor() = CollectionRoyaltyUpdateProcessor(liteApi)
+
+    @Bean
+    fun collectionMetadataUpdateProcessor() = CollectionMetadataUpdateProcessor()
 }
