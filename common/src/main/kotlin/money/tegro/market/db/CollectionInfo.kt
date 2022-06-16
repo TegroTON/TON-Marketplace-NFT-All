@@ -44,13 +44,5 @@ class CollectionInfo(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
 ) : UpdatableEntity, AddressableEntity() {
-    fun address() = MsgAddressIntStd(workchain, address)
-
-    fun owner() =
-        ownerWorkchain?.let { workchain -> ownerAddress?.let { address -> MsgAddressIntStd(workchain, address) } }
-
-    fun owner(address: MsgAddressIntStd) {
-        ownerWorkchain = address.workchainId
-        ownerAddress = address.address.toByteArray()
-    }
+    constructor(address: MsgAddressIntStd) : this(address.workchainId, address.address.toByteArray())
 }

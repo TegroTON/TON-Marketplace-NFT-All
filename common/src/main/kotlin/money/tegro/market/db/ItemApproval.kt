@@ -14,11 +14,11 @@ class ItemApproval(
     val approved: Boolean? = null,
 
     @Column(name = "discovered", nullable = false)
-    override val discovered: Instant = Instant.now(),
+    override var discovered: Instant = Instant.now(),
     @Column(name = "updated")
-    override val updated: Instant? = null,
+    override var updated: Instant? = null,
     @Column(name = "modified")
-    override val modified: Instant? = null,
+    override var modified: Instant? = null,
     @Id
     var id: Long? = null,
 ) : UpdatableEntity {
