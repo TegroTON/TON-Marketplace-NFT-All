@@ -1,5 +1,6 @@
 package money.tegro.market.db
 
+import org.ton.block.MsgAddressIntStd
 import java.time.Instant
 import javax.persistence.*
 
@@ -49,6 +50,8 @@ class ItemInfo(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
 ) : UpdatableEntity, AddressableEntity() {
+    constructor(address: MsgAddressIntStd) : this(address.workchainId, address.address.toByteArray())
+
     fun getCollection() = collection
     fun setCollection(value: CollectionInfo) {
         collection = value

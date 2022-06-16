@@ -15,6 +15,7 @@ class UpdateCollectionsJob(
     private val updateCollectionInfo: Step,
     private val updateCollectionRoyalty: Step,
     private val updateCollectionMetadata: Step,
+    private val discoverMissingCollectionItems: Step,
 ) {
     @Bean
     fun updateCollections() = jobBuilderFactory.get("updateCollections")
@@ -22,5 +23,6 @@ class UpdateCollectionsJob(
         .start(updateCollectionInfo)
         .next(updateCollectionRoyalty)
         .next(updateCollectionMetadata)
+        .next(discoverMissingCollectionItems)
         .build()
 }

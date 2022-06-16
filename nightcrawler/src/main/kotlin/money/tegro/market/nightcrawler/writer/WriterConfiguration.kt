@@ -1,5 +1,6 @@
 package money.tegro.market.nightcrawler.writer
 
+import money.tegro.market.db.ItemInfo
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import javax.persistence.EntityManagerFactory
@@ -23,4 +24,13 @@ class WriterConfiguration(private val entityManagerFactory: EntityManagerFactory
 
     @Bean
     fun collectionMetadataAsyncWriter() = CollectionMetadataAsyncWriter(collectionMetadataWriter())
+
+    @Bean
+    fun itemInfoWriter() = ItemInfoWriter(entityManagerFactory)
+
+    @Bean
+    fun itemInfoListWriter() = ListWriter<ItemInfo>(itemInfoWriter())
+    
+    @Bean
+    fun itemInfoAsyncListWriter() = AsyncListWriter(itemInfoListWriter())
 }
