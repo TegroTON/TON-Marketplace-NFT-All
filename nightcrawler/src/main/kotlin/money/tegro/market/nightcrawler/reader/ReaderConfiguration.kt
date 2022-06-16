@@ -8,4 +8,7 @@ import javax.persistence.EntityManagerFactory
 class ReaderConfiguration(private val entityManagerFactory: EntityManagerFactory) {
     @Bean
     fun collectionInfoReader() = CollectionInfoReader(entityManagerFactory)
+
+    @Bean
+    fun itemInfoReader() = ItemInfoReader(entityManagerFactory)
 }

@@ -28,4 +28,13 @@ class ProcessorConfiguration(
 
     @Bean
     fun collectionMissingItemsProcessor() = CollectionMissingItemsProcessor(liteApi, itemInfoRepository)
+
+    @Bean
+    fun itemInfoUpdateProcessor() = ItemInfoUpdateProcessor(liteApi, collectionInfoRepository)
+
+    @Bean
+    fun itemRoyaltyUpdateProcessor() = ItemRoyaltyUpdateProcessor(liteApi)
+
+    @Bean
+    fun itemMetadataUpdateProcessor() = ItemMetadataUpdateProcessor(liteApi)
 }

@@ -21,8 +21,7 @@ class ItemMetadata(
     @Column(name = "image_data")
     var imageData: ByteArray? = null,
 
-    @OneToMany
-    @JoinColumn(name = "attributes")
+    @OneToMany(cascade = [CascadeType.ALL], mappedBy = "metadata")
     var attributes: MutableSet<ItemAttribute>? = null,
 
     @Column(name = "discovered", nullable = false)

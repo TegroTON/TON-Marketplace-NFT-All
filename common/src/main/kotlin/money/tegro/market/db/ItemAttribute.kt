@@ -5,7 +5,7 @@ import javax.persistence.*
 @Entity
 @Table(name = "item_attributes")
 class ItemAttribute(
-    @ManyToOne(cascade = [CascadeType.ALL])
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "metadata", nullable = false)
     val metadata: ItemMetadata,
 

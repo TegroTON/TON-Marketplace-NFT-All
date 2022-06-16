@@ -29,8 +29,23 @@ class WriterConfiguration(private val entityManagerFactory: EntityManagerFactory
     fun itemInfoWriter() = ItemInfoWriter(entityManagerFactory)
 
     @Bean
+    fun itemInfoAsyncWriter() = ItemInfoAsyncWriter(itemInfoWriter())
+
+    @Bean
     fun itemInfoListWriter() = ListWriter<ItemInfo>(itemInfoWriter())
-    
+
     @Bean
     fun itemInfoAsyncListWriter() = AsyncListWriter(itemInfoListWriter())
+
+    @Bean
+    fun itemRoyaltyWriter() = ItemRoyaltyWriter(entityManagerFactory)
+
+    @Bean
+    fun itemRoyaltyAsyncWriter() = ItemRoyaltyAsyncWriter(itemRoyaltyWriter())
+
+    @Bean
+    fun itemMetadataWriter() = ItemMetadataWriter(entityManagerFactory)
+
+    @Bean
+    fun itemMetadataAsyncWriter() = ItemMetadataAsyncWriter(itemMetadataWriter())
 }
