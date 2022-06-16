@@ -1,4 +1,4 @@
-package money.tegro.market.nightcrawler
+package money.tegro.market.nightcrawler.reader
 
 import org.springframework.batch.item.database.JpaPagingItemReader
 import javax.persistence.EntityManagerFactory

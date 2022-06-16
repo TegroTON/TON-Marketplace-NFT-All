@@ -1,4 +1,4 @@
-package money.tegro.market.nightcrawler
+package money.tegro.market.nightcrawler.writer
 
 import org.springframework.batch.item.database.JpaItemWriter
 import javax.persistence.EntityManagerFactory
