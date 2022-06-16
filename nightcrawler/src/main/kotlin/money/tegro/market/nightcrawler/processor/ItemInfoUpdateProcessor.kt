@@ -22,6 +22,7 @@ class ItemInfoUpdateProcessor(
 
                 it.apply {
                     updated = Instant.now()
+                    cneq(it::initialized, item != null)
                     cneq(it::index, item?.index)
                     cneq(it::ownerWorkchain, item?.owner?.workchainId)
                     cneq(it::ownerAddress, item?.owner?.address?.toByteArray())
