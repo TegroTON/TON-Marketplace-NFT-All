@@ -52,13 +52,12 @@ dependencyResolutionManagement {
         }
 
         create("logLibs") {
-            version("logback", "1.2.11")
             version("logging", "2.1.23")
             version("slf4j", "1.7.36")
 
-            library("logback", "ch.qos.logback", "logback-classic").versionRef("logback")
             library("logging", "io.github.microutils", "kotlin-logging").versionRef("logging")
             library("slf4j", "org.slf4j", "slf4j-api").versionRef("slf4j")
+            library("slf4j.simple", "org.slf4j", "slf4j-simple").versionRef("slf4j")
         }
 
         create("dbLibs") {
