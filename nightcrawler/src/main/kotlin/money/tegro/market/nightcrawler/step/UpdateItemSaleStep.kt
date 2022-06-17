@@ -9,12 +9,14 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.task.TaskExecutor
 import java.util.concurrent.Future
 
 @Configuration
 @EnableBatchProcessing
 class UpdateItemSaleStep(
     private val stepBuilderFactory: StepBuilderFactory,
+    private val taskExecutor: TaskExecutor,
 
     private val itemInfoReader: ItemInfoReader,
     private val itemSaleUpdateProcessor: ItemSaleUpdateProcessor,
@@ -24,8 +26,9 @@ class UpdateItemSaleStep(
     fun updateItemSale() = stepBuilderFactory
         .get("updateItemSale")
         .chunk<ItemInfo, Future<ItemSale>>(1)
-        .processor(itemSaleUpdateProcessor)
         .reader(itemInfoReader)
+        .processor(itemSaleUpdateProcessor)
         .writer(itemSaleAsyncWriter)
+        .taskExecutor(taskExecutor)
         .build()
 }

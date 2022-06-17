@@ -33,8 +33,8 @@ class PrimeCollectionAddressesStep(
     fun primeCollectionAddresses() = stepBuilderFactory
         .get("primeCollectionAddresses")
         .chunk<String, CollectionInfo>(1)
-        .processor(primeCollectionInfoProcessor)
         .reader(primeCollectionAddressesReader())
+        .processor(primeCollectionInfoProcessor)
         .writer(collectionInfoWriter)
         .build()
 }

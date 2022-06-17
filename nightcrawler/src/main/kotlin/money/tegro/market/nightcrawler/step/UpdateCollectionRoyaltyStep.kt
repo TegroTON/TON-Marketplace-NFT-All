@@ -9,12 +9,14 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.task.TaskExecutor
 import java.util.concurrent.Future
 
 @Configuration
 @EnableBatchProcessing
 class UpdateCollectionRoyaltyStep(
     private val stepBuilderFactory: StepBuilderFactory,
+    private val taskExecutor: TaskExecutor,
 
     private val collectionInfoReader: CollectionInfoReader,
     private val collectionRoyaltyUpdateProcessor: CollectionRoyaltyUpdateProcessor,
@@ -24,8 +26,9 @@ class UpdateCollectionRoyaltyStep(
     fun updateCollectionRoyalty() = stepBuilderFactory
         .get("updateCollectionRoyalty")
         .chunk<CollectionInfo, Future<CollectionRoyalty>>(1)
-        .processor(collectionRoyaltyUpdateProcessor)
         .reader(collectionInfoReader)
+        .processor(collectionRoyaltyUpdateProcessor)
         .writer(collectionRoyaltyAsyncWriter)
+        .taskExecutor(taskExecutor)
         .build()
 }

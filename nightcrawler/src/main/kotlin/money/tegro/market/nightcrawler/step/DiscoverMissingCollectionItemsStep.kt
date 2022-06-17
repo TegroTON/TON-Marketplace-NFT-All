@@ -10,12 +10,14 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.task.TaskExecutor
 import java.util.concurrent.Future
 
 @Configuration
 @EnableBatchProcessing
 class DiscoverMissingCollectionItemsStep(
     private val stepBuilderFactory: StepBuilderFactory,
+    private val taskExecutor: TaskExecutor,
 
     private val collectionInfoReader: CollectionInfoReader,
     private val collectionMissingItemsProcessor: CollectionMissingItemsProcessor,
@@ -26,8 +28,9 @@ class DiscoverMissingCollectionItemsStep(
     fun discoverMissingCollectionItems() = stepBuilderFactory
         .get("discoverMissingCollectionItems")
         .chunk<CollectionInfo, Future<List<ItemInfo>>>(1)
-        .processor(collectionMissingItemsProcessor)
         .reader(collectionInfoReader)
+        .processor(collectionMissingItemsProcessor)
         .writer(itemInfoAsyncListWriter)
+        .taskExecutor(taskExecutor)
         .build()
 }

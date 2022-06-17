@@ -9,12 +9,14 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.task.TaskExecutor
 import java.util.concurrent.Future
 
 @Configuration
 @EnableBatchProcessing
 class UpdateItemMetadataStep(
     private val stepBuilderFactory: StepBuilderFactory,
+    private val taskExecutor: TaskExecutor,
 
     private val itemInfoReader: ItemInfoReader,
     private val itemMetadataUpdateProcessor: ItemMetadataUpdateProcessor,
@@ -24,8 +26,9 @@ class UpdateItemMetadataStep(
     fun updateItemMetadata() = stepBuilderFactory
         .get("updateItemMetadata")
         .chunk<ItemInfo, Future<ItemMetadata>>(1)
-        .processor(itemMetadataUpdateProcessor)
         .reader(itemInfoReader)
+        .processor(itemMetadataUpdateProcessor)
         .writer(itemMetadataAsyncWriter)
+        .taskExecutor(taskExecutor)
         .build()
 }

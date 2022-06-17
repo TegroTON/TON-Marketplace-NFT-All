@@ -33,8 +33,8 @@ class PrimeItemAddressesStep(
     fun primeItemAddresses() = stepBuilderFactory
         .get("primeItemAddresses")
         .chunk<String, ItemInfo>(1)
-        .processor(primeItemInfoProcessor)
         .reader(primeItemAddressesReader())
+        .processor(primeItemInfoProcessor)
         .writer(itemInfoWriter)
         .build()
 }
