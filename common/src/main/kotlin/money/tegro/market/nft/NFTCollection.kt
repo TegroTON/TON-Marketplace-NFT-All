@@ -1,6 +1,6 @@
 package money.tegro.market.nft
 
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.map
 import mu.KLogging
 import org.ton.block.MsgAddress
@@ -56,13 +56,9 @@ data class NFTDeployedCollection(
     override val content: Cell,
     override val owner: MsgAddressIntStd
 ) : NFTCollection {
-    suspend fun itemAddresses(liteApi: LiteApi) = flow {
-        (0 until nextItemIndex)
+    suspend fun itemAddresses(liteApi: LiteApi) =
+        (0 until nextItemIndex).asFlow()
             .map { itemAddress(it, liteApi) }
-            .forEach {
-                emit(it)
-            }
-    }
 
     suspend fun items(liteApi: LiteApi) = itemAddresses(liteApi).map {
         NFTItem.of(it, liteApi)

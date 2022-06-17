@@ -40,4 +40,7 @@ class ProcessorConfiguration(
 
     @Bean
     fun itemSaleUpdateProcessor() = ItemSaleUpdateProcessor(liteApi)
+
+    @Bean
+    fun primeItemInfoProcessor() = PrimeItemInfoProcessor(itemInfoRepository)
 }

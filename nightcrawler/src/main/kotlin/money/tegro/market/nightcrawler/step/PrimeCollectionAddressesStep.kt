@@ -20,7 +20,7 @@ class PrimeCollectionAddressesStep(
 ) {
     @Bean
     fun primeCollectionAddressesReader() = FlatFileItemReaderBuilder<String>()
-        .name("initialCollectionReader")
+        .name("primeCollectionAddressesReader")
         .resource(ClassPathResource("collection_primer.csv"))
         .delimited()
         .names("collection")

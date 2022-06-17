@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import mu.KLogging
@@ -52,7 +53,11 @@ data class NFTMetadata(
                     val url = String(rawData)
                     logger.debug { "off-chain content layout, url is: $url" }
 
-                    return mapper.readValue(HttpClient {}.get(url).bodyAsText(), NFTMetadata::class.java)
+                    return mapper.readValue(HttpClient {
+                        install(HttpTimeout) {
+                            requestTimeoutMillis = 0L
+                        }
+                    }.get(url).bodyAsText(), NFTMetadata::class.java)
                 }
                 else -> {
                     throw Error("unknown content layout $contentLayout, can't proceed")

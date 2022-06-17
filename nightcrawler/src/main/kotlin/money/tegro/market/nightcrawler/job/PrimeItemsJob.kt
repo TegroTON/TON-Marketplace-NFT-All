@@ -8,15 +8,15 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 @EnableBatchProcessing
-class PrimeCollectionsJob(
+class PrimeItemsJob(
     private val jobBuilderFactory: JobBuilderFactory,
 
-    private val primeCollectionAddresses: Step,
-    private val updateCollectionInfo: Step,
+    private val primeItemAddresses: Step,
+    private val updateItemInfo: Step,
 ) {
     @Bean
-    fun primeCollections() = jobBuilderFactory.get("primeCollections")
-        .start(primeCollectionAddresses)
-        .next(updateCollectionInfo)
+    fun primeItems() = jobBuilderFactory.get("primeItems")
+        .start(primeItemAddresses)
+        .next(updateItemInfo)
         .build()
 }

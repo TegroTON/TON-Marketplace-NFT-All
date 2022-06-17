@@ -20,7 +20,6 @@ dependencies {
     implementation(dbLibs.hibernate.core)
     implementation(logLibs.logging)
     implementation(logLibs.slf4j)
-    implementation(logLibs.slf4j.simple)
     implementation(springLibs.core)
     implementation(springLibs.jdbc)
     implementation(springLibs.jpa)
