@@ -4,17 +4,17 @@ import kotlinx.coroutines.runBlocking
 import money.tegro.market.db.ItemInfo
 import money.tegro.market.db.ItemSale
 import money.tegro.market.nft.NFTSale
+import money.tegro.market.ton.LiteApiFactory
 import org.springframework.batch.integration.async.AsyncItemProcessor
-import org.ton.lite.api.LiteApi
 import java.time.Instant
 
 class ItemSaleUpdateProcessor(
-    private val liteApi: LiteApi
+    private val liteApiFactory: LiteApiFactory
 ) : AsyncItemProcessor<ItemInfo, ItemSale>() {
     init {
         setDelegate { item ->
             runBlocking {
-                val sale = NFTSale.of(item.addressStd(), liteApi)
+                val sale = NFTSale.of(item.addressStd(), liteApiFactory.getObject())
 
                 (item.sale ?: ItemSale(item)).apply {
                     updated = Instant.now()

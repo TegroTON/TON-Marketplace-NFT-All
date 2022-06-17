@@ -1,19 +1,33 @@
 package money.tegro.market.ton
 
+import kotlinx.coroutines.runBlocking
 import org.springframework.beans.factory.config.AbstractFactoryBean
 import org.ton.lite.api.LiteApi
+import java.util.concurrent.atomic.AtomicInteger
 
-class LiteApiFactory : AbstractFactoryBean<LiteApi>() {
-    private lateinit var liteApi: LiteApi
+class LiteApiFactory(val ipv4: Int, val port: Int, val publicKey: ByteArray, private val size: Int = 8) :
+    AbstractFactoryBean<LiteApi>() {
+    private var liteApis: MutableList<LiteApi> = mutableListOf()
+    private var current = AtomicInteger(0)
 
-    val lastMasterchainBlock = suspend { liteApi.getMasterchainInfo().last }
+    init {
+        isSingleton = false
+        runBlocking {
+            while (liteApis.size < size)
+                liteApis.add(
+                    ResilientLiteClient(ipv4, port, publicKey).connect()
+                )
+        }
+    }
 
     override fun getObjectType() = LiteApi::class.java
 
-    override fun createInstance() = liteApi
+    override fun createInstance(): LiteApi {
+        println("HIT")
+        current.compareAndExchange(size, 0)
 
-    suspend fun setConnectionParameters(ipv4: Int, port: Int, publicKey: ByteArray) {
-        liteApi = ResilientLiteClient(ipv4, port, publicKey)
-        (liteApi as ResilientLiteClient).connect()
+        return liteApis.get(
+            current.getAndIncrement()
+        )
     }
 }

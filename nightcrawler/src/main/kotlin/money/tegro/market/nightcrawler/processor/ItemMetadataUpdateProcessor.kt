@@ -6,12 +6,14 @@ import money.tegro.market.db.ItemInfo
 import money.tegro.market.db.ItemMetadata
 import money.tegro.market.nft.NFTDeployedCollectionItem
 import money.tegro.market.nft.NFTMetadata
+import money.tegro.market.ton.LiteApiFactory
 import org.springframework.batch.integration.async.AsyncItemProcessor
 import org.ton.boc.BagOfCells
-import org.ton.lite.api.LiteApi
 import java.time.Instant
 
-class ItemMetadataUpdateProcessor(liteApi: LiteApi) : AsyncItemProcessor<ItemInfo, ItemMetadata>() {
+class ItemMetadataUpdateProcessor(
+    private val liteApiFactory: LiteApiFactory
+) : AsyncItemProcessor<ItemInfo, ItemMetadata>() {
     init {
         setDelegate { item ->
             runBlocking {
@@ -24,7 +26,7 @@ class ItemMetadataUpdateProcessor(liteApi: LiteApi) : AsyncItemProcessor<ItemInf
                                         it.addressStd(),
                                         index,
                                         BagOfCells(content).roots.first(),
-                                        liteApi
+                                        liteApiFactory.getObject()
                                     )
                                 )
                             }

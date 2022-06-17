@@ -2,23 +2,23 @@ package money.tegro.market.nightcrawler.processor
 
 import money.tegro.market.db.CollectionInfoRepository
 import money.tegro.market.db.ItemInfoRepository
+import money.tegro.market.ton.LiteApiFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.ton.lite.api.LiteApi
 
 @Configuration
 class ProcessorConfiguration(
-    private val liteApi: LiteApi,
+    private val liteApiFactory: LiteApiFactory,
 
     private val collectionInfoRepository: CollectionInfoRepository,
 
     private val itemInfoRepository: ItemInfoRepository,
 ) {
     @Bean
-    fun collectionInfoUpdateProcessor() = CollectionInfoUpdateProcessor(liteApi)
+    fun collectionInfoUpdateProcessor() = CollectionInfoUpdateProcessor(liteApiFactory)
 
     @Bean
-    fun collectionRoyaltyUpdateProcessor() = CollectionRoyaltyUpdateProcessor(liteApi)
+    fun collectionRoyaltyUpdateProcessor() = CollectionRoyaltyUpdateProcessor(liteApiFactory)
 
     @Bean
     fun collectionMetadataUpdateProcessor() = CollectionMetadataUpdateProcessor()
@@ -27,19 +27,20 @@ class ProcessorConfiguration(
     fun primeCollectionInfoProcessor() = PrimeCollectionInfoProcessor(collectionInfoRepository)
 
     @Bean
-    fun collectionMissingItemsProcessor() = CollectionMissingItemsProcessor(liteApi, itemInfoRepository)
+    fun collectionMissingItemsProcessor() =
+        CollectionMissingItemsProcessor(liteApiFactory, itemInfoRepository)
 
     @Bean
-    fun itemInfoUpdateProcessor() = ItemInfoUpdateProcessor(liteApi, collectionInfoRepository)
+    fun itemInfoUpdateProcessor() = ItemInfoUpdateProcessor(liteApiFactory, collectionInfoRepository)
 
     @Bean
-    fun itemRoyaltyUpdateProcessor() = ItemRoyaltyUpdateProcessor(liteApi)
+    fun itemRoyaltyUpdateProcessor() = ItemRoyaltyUpdateProcessor(liteApiFactory)
 
     @Bean
-    fun itemMetadataUpdateProcessor() = ItemMetadataUpdateProcessor(liteApi)
+    fun itemMetadataUpdateProcessor() = ItemMetadataUpdateProcessor(liteApiFactory)
 
     @Bean
-    fun itemSaleUpdateProcessor() = ItemSaleUpdateProcessor(liteApi)
+    fun itemSaleUpdateProcessor() = ItemSaleUpdateProcessor(liteApiFactory)
 
     @Bean
     fun primeItemInfoProcessor() = PrimeItemInfoProcessor(itemInfoRepository)

@@ -6,19 +6,19 @@ import money.tegro.market.db.ItemInfo
 import money.tegro.market.db.findByAddress
 import money.tegro.market.nft.NFTDeployedCollectionItem
 import money.tegro.market.nft.NFTItem
+import money.tegro.market.ton.LiteApiFactory
 import org.springframework.batch.integration.async.AsyncItemProcessor
 import org.ton.boc.BagOfCells
-import org.ton.lite.api.LiteApi
 import java.time.Instant
 
 class ItemInfoUpdateProcessor(
-    private val liteApi: LiteApi,
+    private val liteApiFactory: LiteApiFactory,
     private val collectionInfoRepository: CollectionInfoRepository,
 ) : AsyncItemProcessor<ItemInfo, ItemInfo>() {
     init {
         setDelegate {
             runBlocking {
-                val item = NFTItem.of(it.addressStd(), liteApi)
+                val item = NFTItem.of(it.addressStd(), liteApiFactory.getObject())
 
                 it.apply {
                     updated = Instant.now()

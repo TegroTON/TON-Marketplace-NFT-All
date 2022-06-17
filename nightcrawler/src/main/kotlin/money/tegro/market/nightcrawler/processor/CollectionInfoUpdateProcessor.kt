@@ -3,19 +3,19 @@ package money.tegro.market.nightcrawler.processor
 import kotlinx.coroutines.runBlocking
 import money.tegro.market.db.CollectionInfo
 import money.tegro.market.nft.NFTCollection
+import money.tegro.market.ton.LiteApiFactory
 import org.springframework.batch.integration.async.AsyncItemProcessor
 import org.ton.boc.BagOfCells
-import org.ton.lite.api.LiteApi
 import java.time.Instant
 
 class CollectionInfoUpdateProcessor(
-    private val liteApi: LiteApi
+    private val liteApiFactory: LiteApiFactory
 ) :
     AsyncItemProcessor<CollectionInfo, CollectionInfo>() {
     init {
         setDelegate {
             runBlocking {
-                val collection = NFTCollection.of(it.addressStd(), liteApi)
+                val collection = NFTCollection.of(it.addressStd(), liteApiFactory.getObject())
 
                 it.updated = Instant.now()
                 it.cneq(it::nextItemIndex, collection.nextItemIndex)

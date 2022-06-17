@@ -9,9 +9,12 @@ import org.springframework.batch.core.launch.support.RunIdIncrementer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.task.TaskExecutor
+import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.scheduling.annotation.Scheduled
 
 @Configuration
 @EnableBatchProcessing
+@EnableScheduling
 class UpdateItemsJob(
     private val jobBuilderFactory: JobBuilderFactory,
     private val taskExecutor: TaskExecutor,
@@ -22,6 +25,7 @@ class UpdateItemsJob(
     private val updateItemSale: Step,
 ) {
     @Bean
+    @Scheduled(initialDelay = 20_000L, fixedDelay = 60_000L)
     fun updateItems() = jobBuilderFactory.get("updateItems")
         .incrementer(RunIdIncrementer())
         .start(

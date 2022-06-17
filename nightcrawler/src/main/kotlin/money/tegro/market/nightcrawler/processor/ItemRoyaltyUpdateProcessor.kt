@@ -4,18 +4,18 @@ import kotlinx.coroutines.runBlocking
 import money.tegro.market.db.ItemInfo
 import money.tegro.market.db.ItemRoyalty
 import money.tegro.market.nft.NFTRoyalty
+import money.tegro.market.ton.LiteApiFactory
 import org.springframework.batch.integration.async.AsyncItemProcessor
-import org.ton.lite.api.LiteApi
 import java.time.Instant
 
 class ItemRoyaltyUpdateProcessor(
-    private val liteApi: LiteApi
+    private val liteApiFactory: LiteApiFactory
 ) : AsyncItemProcessor<ItemInfo, ItemRoyalty>() {
     init {
         setDelegate {
             runBlocking {
                 if (it.collection == null) {
-                    val royalty = NFTRoyalty.of(it.addressStd(), liteApi)
+                    val royalty = NFTRoyalty.of(it.addressStd(), liteApiFactory.getObject())
 
                     (it.royalty ?: ItemRoyalty(it)).apply {
                         updated = Instant.now()
