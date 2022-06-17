@@ -21,11 +21,13 @@ class CollectionMissingItemsProcessor(
                 collection.nextItemIndex?.let { (0 until it) }
                     ?.filter { !addedIndices.contains(it) }
                     ?.map {
-                        NFTDeployedCollection.itemAddressOf(collection.addressStd(), it, liteApi)
+                        it to NFTDeployedCollection.itemAddressOf(collection.addressStd(), it, liteApi)
                     }
                     ?.map {
-                        (itemInfoRepository.findByAddress(it) ?: ItemInfo(it)).apply {
-                            this.setCollection(collection)
+                        val (index, address) = it
+                        (itemInfoRepository.findByAddress(address) ?: ItemInfo(address)).apply {
+                            this.collection = collection
+                            this.index = index
                         }
                     }
             }

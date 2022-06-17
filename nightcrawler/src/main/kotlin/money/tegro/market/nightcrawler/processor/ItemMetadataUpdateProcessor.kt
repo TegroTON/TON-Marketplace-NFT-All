@@ -1,6 +1,7 @@
 package money.tegro.market.nightcrawler.processor
 
 import kotlinx.coroutines.runBlocking
+import money.tegro.market.db.ItemAttribute
 import money.tegro.market.db.ItemInfo
 import money.tegro.market.db.ItemMetadata
 import money.tegro.market.nft.NFTDeployedCollectionItem
@@ -36,22 +37,21 @@ class ItemMetadataUpdateProcessor(liteApi: LiteApi) : AsyncItemProcessor<ItemInf
                 }
 
                 (item.metadata ?: ItemMetadata(item)).apply {
-                    item.metadata = this
                     updated = Instant.now()
                     cneq(this::name, metadata?.name)
                     cneq(this::description, metadata?.description)
                     cneq(this::image, metadata?.image)
                     cneq(this::imageData, metadata?.imageData)
 
-//                    // TODO: Proper modification here, ugly for now
-//                    if (attributes == null && metadata?.attributes.orEmpty().isNotEmpty()) {
-//                        attributes = mutableSetOf()
-//                    }
-//
-//                    metadata?.attributes.orEmpty()
-//                        .forEach {
-//                            attributes?.add(ItemAttribute(this, it.trait, it.value))
-//                        }
+                    // TODO: Proper modification here, ugly for now
+                    if (attributes == null && metadata?.attributes.orEmpty().isNotEmpty()) {
+                        attributes = mutableSetOf()
+                    }
+
+                    metadata?.attributes.orEmpty()
+                        .forEach {
+                            attributes?.add(ItemAttribute(this, it.trait, it.value))
+                        }
                 }
             }
         }

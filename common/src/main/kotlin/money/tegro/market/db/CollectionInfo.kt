@@ -21,14 +21,11 @@ class CollectionInfo(
     @Column(name = "owner_address", length = 32)
     var ownerAddress: ByteArray? = null,
 
-    @OneToOne(cascade = [CascadeType.ALL])
-    @JoinColumn(name = "approval")
+    @OneToOne(cascade = [CascadeType.ALL], mappedBy = "collection")
     var approval: CollectionApproval? = null,
-    @OneToOne(cascade = [CascadeType.ALL])
-    @JoinColumn(name = "royalty")
+    @OneToOne(cascade = [CascadeType.ALL], mappedBy = "collection")
     var royalty: CollectionRoyalty? = null,
-    @OneToOne(cascade = [CascadeType.ALL])
-    @JoinColumn(name = "metadata")
+    @OneToOne(cascade = [CascadeType.ALL], mappedBy = "collection")
     var metadata: CollectionMetadata? = null,
 
     @OneToMany(cascade = [CascadeType.ALL], mappedBy = "collection")

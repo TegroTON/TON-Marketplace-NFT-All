@@ -7,6 +7,7 @@ import javax.persistence.*
 @Table(name = "collection_royalties")
 class CollectionRoyalty(
     @OneToOne(cascade = [CascadeType.ALL])
+    @JoinColumn(name = "id")
     @MapsId
     val collection: CollectionInfo,
 
@@ -27,8 +28,4 @@ class CollectionRoyalty(
     override var modified: Instant? = null,
     @Id
     var id: Long? = null,
-) : RoyaltyEntity, UpdatableEntity {
-    init {
-        collection.royalty = this
-    }
-}
+) : RoyaltyEntity, UpdatableEntity

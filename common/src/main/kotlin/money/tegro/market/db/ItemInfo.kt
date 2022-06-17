@@ -17,8 +17,7 @@ class ItemInfo(
     var index: Long? = null,
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "collection")
-    @JvmField
-    final var collection: CollectionInfo? = null,
+    var collection: CollectionInfo? = null,
     @Column(name = "owner_workchain")
     var ownerWorkchain: Int? = null,
     @Column(name = "owner_address", length = 32)
@@ -47,14 +46,4 @@ class ItemInfo(
     var id: Long? = null,
 ) : UpdatableEntity, AddressableEntity() {
     constructor(address: MsgAddressIntStd) : this(address.workchainId, address.address.toByteArray())
-
-    fun getCollection() = collection
-    fun setCollection(value: CollectionInfo) {
-        collection = value
-        if (value.items != null) {
-            (value.items ?: return).add(this)
-        } else {
-            value.items = mutableSetOf(this)
-        }
-    }
 }

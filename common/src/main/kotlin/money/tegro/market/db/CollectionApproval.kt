@@ -7,6 +7,7 @@ import javax.persistence.*
 @Table(name = "collection_approvals")
 class CollectionApproval(
     @OneToOne(cascade = [CascadeType.ALL])
+    @JoinColumn(name = "id")
     @MapsId
     val collection: CollectionInfo,
 
@@ -21,8 +22,4 @@ class CollectionApproval(
     override var modified: Instant? = null,
     @Id
     var id: Long? = null,
-) : UpdatableEntity {
-    init {
-        collection.approval = this
-    }
-}
+) : UpdatableEntity
