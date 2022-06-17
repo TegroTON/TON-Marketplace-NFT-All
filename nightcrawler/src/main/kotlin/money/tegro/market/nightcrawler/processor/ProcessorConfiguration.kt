@@ -37,4 +37,7 @@ class ProcessorConfiguration(
 
     @Bean
     fun itemMetadataUpdateProcessor() = ItemMetadataUpdateProcessor(liteApi)
+
+    @Bean
+    fun itemSaleUpdateProcessor() = ItemSaleUpdateProcessor(liteApi)
 }

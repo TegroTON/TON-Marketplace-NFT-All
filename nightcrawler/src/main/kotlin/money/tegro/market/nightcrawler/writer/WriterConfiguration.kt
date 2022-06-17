@@ -48,4 +48,10 @@ class WriterConfiguration(private val entityManagerFactory: EntityManagerFactory
 
     @Bean
     fun itemMetadataAsyncWriter() = ItemMetadataAsyncWriter(itemMetadataWriter())
+
+    @Bean
+    fun itemSaleWriter() = ItemSaleWriter(entityManagerFactory)
+
+    @Bean
+    fun itemSaleAsyncWriter() = ItemSaleAsyncWriter(itemSaleWriter())
 }

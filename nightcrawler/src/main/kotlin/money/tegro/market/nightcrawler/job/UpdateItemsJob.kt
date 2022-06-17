@@ -15,6 +15,7 @@ class UpdateItemsJob(
     private val updateItemInfo: Step,
     private val updateItemRoyalty: Step,
     private val updateItemMetadata: Step,
+    private val updateItemSale: Step,
 ) {
     @Bean
     fun updateItems() = jobBuilderFactory.get("updateItems")
@@ -22,5 +23,6 @@ class UpdateItemsJob(
         .start(updateItemInfo)
         .next(updateItemRoyalty)
         .next(updateItemMetadata)
+        .next(updateItemSale)
         .build()
 }

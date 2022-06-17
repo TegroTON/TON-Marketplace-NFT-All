@@ -46,4 +46,6 @@ class ItemInfo(
     var id: Long? = null,
 ) : UpdatableEntity, AddressableEntity() {
     constructor(address: MsgAddressIntStd) : this(address.workchainId, address.address.toByteArray())
+
+    fun ownerAddressStd() = MsgAddressIntStd(workchain, address)
 }

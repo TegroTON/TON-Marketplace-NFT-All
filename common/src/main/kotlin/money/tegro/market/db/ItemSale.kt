@@ -10,28 +10,28 @@ class ItemSale(
     @JoinColumn(name = "id")
     @MapsId
     val item: ItemInfo,
-    @Column(name = "workchain", nullable = false)
-    override val workchain: Int,
-    @Column(name = "address", nullable = false, unique = true, length = 32)
-    override val address: ByteArray,
-    @Column(name = "marketplace_workchain", nullable = false)
-    val marketplaceWorkchain: Int,
-    @Column(name = "marketplace_address", nullable = false, length = 32)
-    val marketplaceAddress: ByteArray,
+    @Column(name = "workchain")
+    var workchain: Int? = null,
+    @Column(name = "address", unique = true, length = 32)
+    var address: ByteArray? = null,
+    @Column(name = "marketplace_workchain")
+    var marketplaceWorkchain: Int? = null,
+    @Column(name = "marketplace_address", length = 32)
+    var marketplaceAddress: ByteArray? = null,
     @Column(name = "marketplace_fee")
-    val marketplaceFee: Long? = null,
-    @Column(name = "owner_workchain", nullable = false)
-    val ownerWorkchain: Int,
-    @Column(name = "owner_address", nullable = false, length = 32)
-    val ownerAddress: ByteArray,
-    @Column(name = "price", nullable = false)
-    val price: Long,
+    var marketplaceFee: Long? = null,
+    @Column(name = "owner_workchain")
+    var ownerWorkchain: Int? = null,
+    @Column(name = "owner_address", length = 32)
+    var ownerAddress: ByteArray? = null,
+    @Column(name = "price")
+    var price: Long? = null,
     @Column(name = "royalty")
-    val royalty: Long? = null,
+    var royalty: Long? = null,
     @Column(name = "royalty_destination_workchain")
-    val royaltyDestinationWorkchain: Int? = null,
+    var royaltyDestinationWorkchain: Int? = null,
     @Column(name = "royalty_destination_address", length = 32)
-    val royaltyDestinationAddress: ByteArray,
+    var royaltyDestinationAddress: ByteArray? = null,
 
     @Column(name = "discovered", nullable = false)
     override val discovered: Instant = Instant.now(),
@@ -41,4 +41,4 @@ class ItemSale(
     override var modified: Instant? = null,
     @Id
     var id: Long? = null,
-) : UpdatableEntity, AddressableEntity()
+) : UpdatableEntity
