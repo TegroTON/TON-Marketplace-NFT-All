@@ -18,7 +18,7 @@ class Tool :
     val sandbox by option(
         "--sandbox",
         help = "Work in sandbox instead of the mainnet. Default"
-    ).flag(default = true)
+    ).flag("--mainnet", default = true)
 
     override fun run() {
         runBlocking {

@@ -11,6 +11,7 @@ fun main(args: Array<String>) =
         ),
         CollectionCommand().subcommands(
             QueryCollectionCommand(),
+            ListCollectionItemsCommand(),
             MintCollectionCommand(),
         )
     ).main(args)
