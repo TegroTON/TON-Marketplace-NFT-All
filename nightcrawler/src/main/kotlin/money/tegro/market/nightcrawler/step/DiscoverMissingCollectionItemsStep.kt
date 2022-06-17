@@ -8,10 +8,9 @@ import money.tegro.market.nightcrawler.writer.AsyncListWriter
 import money.tegro.market.nightcrawler.writer.CollectionInfoAsyncWriter
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory
-import org.springframework.batch.item.ItemProcessor
-import org.springframework.batch.item.ItemWriter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import java.util.concurrent.Future
 
 @Configuration
 @EnableBatchProcessing
@@ -26,9 +25,9 @@ class DiscoverMissingCollectionItemsStep(
     @Bean
     fun discoverMissingCollectionItems() = stepBuilderFactory
         .get("discoverMissingCollectionItems")
-        .chunk<CollectionInfo, List<ItemInfo>>(1)
-        .processor(collectionMissingItemsProcessor as ItemProcessor<in CollectionInfo, out List<ItemInfo>>)
+        .chunk<CollectionInfo, Future<List<ItemInfo>>>(1)
+        .processor(collectionMissingItemsProcessor)
         .reader(collectionInfoReader)
-        .writer(itemInfoAsyncListWriter as ItemWriter<in List<ItemInfo>>)
+        .writer(itemInfoAsyncListWriter)
         .build()
 }

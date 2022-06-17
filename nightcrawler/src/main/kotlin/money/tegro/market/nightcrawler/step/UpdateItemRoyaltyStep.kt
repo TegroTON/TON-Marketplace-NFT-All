@@ -7,10 +7,9 @@ import money.tegro.market.nightcrawler.reader.ItemInfoReader
 import money.tegro.market.nightcrawler.writer.ItemRoyaltyAsyncWriter
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory
-import org.springframework.batch.item.ItemProcessor
-import org.springframework.batch.item.ItemWriter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import java.util.concurrent.Future
 
 @Configuration
 @EnableBatchProcessing
@@ -24,9 +23,9 @@ class UpdateItemRoyaltyStep(
     @Bean
     fun updateItemRoyalty() = stepBuilderFactory
         .get("updateItemRoyalty")
-        .chunk<ItemInfo, ItemRoyalty>(1)
-        .processor(itemRoyaltyUpdateProcessor as ItemProcessor<in ItemInfo, out ItemRoyalty>)
+        .chunk<ItemInfo, Future<ItemRoyalty>>(1)
+        .processor(itemRoyaltyUpdateProcessor)
         .reader(itemInfoReader)
-        .writer(itemRoyaltyAsyncWriter as ItemWriter<in ItemRoyalty>)
+        .writer(itemRoyaltyAsyncWriter)
         .build()
 }

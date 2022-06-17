@@ -6,10 +6,9 @@ import money.tegro.market.nightcrawler.reader.CollectionInfoReader
 import money.tegro.market.nightcrawler.writer.CollectionInfoAsyncWriter
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory
-import org.springframework.batch.item.ItemProcessor
-import org.springframework.batch.item.ItemWriter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import java.util.concurrent.Future
 
 @Configuration
 @EnableBatchProcessing
@@ -23,9 +22,9 @@ class UpdateCollectionInfoStep(
     @Bean
     fun updateCollectionInfo() = stepBuilderFactory
         .get("updateCollectionInfo")
-        .chunk<CollectionInfo, CollectionInfo>(1)
-        .processor(collectionInfoUpdateProcessor as ItemProcessor<in CollectionInfo, out CollectionInfo>)
+        .chunk<CollectionInfo, Future<CollectionInfo>>(1)
+        .processor(collectionInfoUpdateProcessor)
         .reader(collectionInfoReader)
-        .writer(collectionInfoAsyncWriter as ItemWriter<in CollectionInfo>)
+        .writer(collectionInfoAsyncWriter)
         .build()
 }

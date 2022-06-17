@@ -7,10 +7,9 @@ import money.tegro.market.nightcrawler.reader.ItemInfoReader
 import money.tegro.market.nightcrawler.writer.ItemMetadataAsyncWriter
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory
-import org.springframework.batch.item.ItemProcessor
-import org.springframework.batch.item.ItemWriter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import java.util.concurrent.Future
 
 @Configuration
 @EnableBatchProcessing
@@ -24,9 +23,9 @@ class UpdateItemMetadataStep(
     @Bean
     fun updateItemMetadata() = stepBuilderFactory
         .get("updateItemMetadata")
-        .chunk<ItemInfo, ItemMetadata>(1)
-        .processor(itemMetadataUpdateProcessor as ItemProcessor<in ItemInfo, out ItemMetadata>)
+        .chunk<ItemInfo, Future<ItemMetadata>>(1)
+        .processor(itemMetadataUpdateProcessor)
         .reader(itemInfoReader)
-        .writer(itemMetadataAsyncWriter as ItemWriter<in ItemMetadata>)
+        .writer(itemMetadataAsyncWriter)
         .build()
 }
