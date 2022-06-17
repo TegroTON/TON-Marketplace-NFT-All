@@ -7,6 +7,7 @@ import javax.persistence.*
 @Table(name = "item_metadata")
 class ItemMetadata(
     @OneToOne(cascade = [CascadeType.ALL])
+    @JoinColumn(name = "id")
     @MapsId
     val item: ItemInfo,
 
@@ -32,8 +33,4 @@ class ItemMetadata(
     override var modified: Instant? = null,
     @Id
     var id: Long? = null,
-) : UpdatableEntity {
-    init {
-        item.metadata = this
-    }
-}
+) : UpdatableEntity

@@ -27,17 +27,13 @@ class ItemInfo(
     @Lob
     var content: ByteArray? = null,
 
-    @OneToOne(cascade = [CascadeType.ALL])
-    @JoinColumn(name = "approval")
+    @OneToOne(cascade = [CascadeType.ALL], mappedBy = "item")
     var approval: ItemApproval? = null,
-    @OneToOne(cascade = [CascadeType.ALL])
-    @JoinColumn(name = "royalty")
+    @OneToOne(cascade = [CascadeType.ALL], mappedBy = "item")
     var royalty: ItemRoyalty? = null,
-    @OneToOne(cascade = [CascadeType.ALL])
-    @JoinColumn(name = "metadata")
+    @OneToOne(cascade = [CascadeType.ALL], mappedBy = "item")
     var metadata: ItemMetadata? = null,
-    @OneToOne(cascade = [CascadeType.ALL])
-    @JoinColumn(name = "sale")
+    @OneToOne(cascade = [CascadeType.ALL], mappedBy = "item")
     var sale: ItemSale? = null,
 
     @Column(name = "discovered", nullable = false)

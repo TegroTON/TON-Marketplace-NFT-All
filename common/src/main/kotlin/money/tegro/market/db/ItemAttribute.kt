@@ -17,12 +17,4 @@ class ItemAttribute(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
-) {
-    init {
-        if (metadata.attributes != null) {
-            metadata.attributes!!.add(this)
-        } else {
-            metadata.attributes = mutableSetOf(this)
-        }
-    }
-}
+)

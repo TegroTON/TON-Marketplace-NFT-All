@@ -7,6 +7,7 @@ import javax.persistence.*
 @Table(name = "item_sales")
 class ItemSale(
     @OneToOne(cascade = [CascadeType.ALL])
+    @JoinColumn(name = "id")
     @MapsId
     val item: ItemInfo,
     @Column(name = "workchain", nullable = false)
@@ -40,8 +41,4 @@ class ItemSale(
     override var modified: Instant? = null,
     @Id
     var id: Long? = null,
-) : UpdatableEntity, AddressableEntity() {
-    init {
-        item.sale = this
-    }
-}
+) : UpdatableEntity, AddressableEntity()
