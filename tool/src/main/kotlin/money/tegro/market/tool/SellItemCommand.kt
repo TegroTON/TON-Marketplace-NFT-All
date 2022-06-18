@@ -9,7 +9,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import money.tegro.market.nft.NFTItem
 import money.tegro.market.nft.NFTSale
-import money.tegro.market.nft.NFTStubSale
+import money.tegro.market.nft.NFTStubSidorovich
 import org.ton.api.pk.PrivateKeyEd25519
 import org.ton.block.*
 import org.ton.cell.Cell
@@ -66,7 +66,7 @@ class SellItemCommand :
 //                exitProcess(-1)
             }
 
-            val stub = NFTStubSale(
+            val stub = NFTStubSidorovich(
                 marketplaceAddress?.let { MsgAddressIntStd(it) } ?: wallet.address(),
                 item.address,
 //                item.owner,
@@ -145,40 +145,11 @@ class SellItemCommand :
             }
 
             println("Sending an external message to initialize sale contract")
-            val message1 = wallet.createSigningMessage(wallet.seqno()) {
-                storeUInt(3, 8) // send mode
-                storeRef {
-                    storeTlb(
-                        MessageRelaxed.tlbCodec(AnyTlbConstructor), MessageRelaxed(
-                            info = CommonMsgInfoRelaxed.IntMsgInfo(
-                                ihrDisabled = true,
-                                bounce = false,
-                                bounced = false,
-                                src = MsgAddressExtNone,
-                                dest = stub.address,
-                                value = CurrencyCollection(coins = Coins.ofNano(10_000_000))
-                            ),
-                            init = stub.stateInit(),
-                            body = Cell.of(),
-                            storeBodyInRef = false
-                        )
-                    )
-                }
-            }
-
-            val signature1 = wallet.privateKey.sign(message1.hash())
-            val body1 = CellBuilder.createCell {
-                storeBytes(signature1)
-                storeBits(message1.bits)
-                storeRefs(message1.refs)
-            }
-
-            println("Sending the initialization message")
             val result = Tool.currentLiteApi.sendMessage(
                 Message(
-                    CommonMsgInfo.ExtInMsgInfo(wallet.address()),
-                    init = null,
-                    body = body1
+                    CommonMsgInfo.ExtInMsgInfo(stub.address),
+                    init = stub.stateInit(),
+                    body = Cell.of()
                 )
             )
             println("Result: $result")

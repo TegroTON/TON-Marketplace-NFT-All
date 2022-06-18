@@ -33,3 +33,10 @@ nft-marketplace:
     - token-contract/nft/params.fc
     - token-contract/nft/op-codes.fc
     - token-contract/nft/nft-marketplace.fc
+
+sidorovich:
+  func:
+    - func/stdlib_update.fc
+    - token-contract/nft/params.fc
+    - token-contract/nft/op-codes.fc
+    - func/sidorovich.fc
