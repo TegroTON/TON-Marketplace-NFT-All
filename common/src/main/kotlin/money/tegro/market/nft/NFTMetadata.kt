@@ -37,7 +37,14 @@ data class NFTMetadata(
         val mapper by lazy { jacksonObjectMapper() }
 
         @JvmStatic
-        suspend fun of(content: Cell): NFTMetadata {
+        suspend fun of(
+            content: Cell,
+            httpClient: HttpClient = HttpClient {
+                install(HttpTimeout) {
+                    requestTimeoutMillis = HttpTimeout.INFINITE_TIMEOUT_MS
+                }
+            }
+        ): NFTMetadata {
             when (val contentLayout = content.beginParse().loadUInt(8).toInt()) {
                 0x00 -> {
                     logger.debug { "on-chain content layout detected" }
@@ -53,11 +60,7 @@ data class NFTMetadata(
                     val url = String(rawData)
                     logger.debug { "off-chain content layout, url is: $url" }
 
-                    return mapper.readValue(HttpClient {
-                        install(HttpTimeout) {
-                            requestTimeoutMillis = 0L
-                        }
-                    }.get(url).bodyAsText(), NFTMetadata::class.java)
+                    return mapper.readValue(httpClient.get(url).bodyAsText(), NFTMetadata::class.java)
                 }
                 else -> {
                     throw Error("unknown content layout $contentLayout, can't proceed")
