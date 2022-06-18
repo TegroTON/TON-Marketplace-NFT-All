@@ -85,13 +85,20 @@ int min_gas_amount() asm "1000000000 PUSHINT"; ;; 1 TON
     var (marketplace_address, nft_address, nft_owner_address, full_price, fees_cell, initialized) = load_data();
     throw_unless(69, initialized == 1);
 
+    int op = 0;
     if (in_msg_body.slice_empty?()) {
-        buy(my_balance, marketplace_address, nft_address, nft_owner_address, full_price, fees_cell, msg_value, sender_address, 0);
-        return ();
+        op = 0;
+    } else {
+        op = in_msg_body~load_uint(32);
     }
 
-    int op = in_msg_body~load_uint(32);
-    int query_id = in_msg_body~load_uint(64);
+    int query_id = 0;
+    if (op == 0) {
+        ;; for text messages op is 0
+        op = 2; ;; Default to buy
+    } else {
+        query_id = in_msg_body~load_uint(64);
+    }
 
     if (op == 1) { ;; just accept coins
         return ();
