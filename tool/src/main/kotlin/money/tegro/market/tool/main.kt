@@ -8,6 +8,7 @@ fun main(args: Array<String>) =
             QueryItemCommand(),
             MintStandaloneItemCommand(),
             MintCollectionItemCommand(),
+            TransferItemCommand()
         ),
         CollectionCommand().subcommands(
             QueryCollectionCommand(),
