@@ -1,23 +1,26 @@
 package money.tegro.market.nft
 
 import mu.KLogging
-import org.ton.block.MsgAddress
-import org.ton.block.MsgAddressIntStd
-import org.ton.block.VmStackValue
+import org.ton.block.*
+import org.ton.boc.BagOfCells
+import org.ton.cell.Cell
+import org.ton.cell.CellBuilder
+import org.ton.crypto.hex
 import org.ton.lite.api.LiteApi
 import org.ton.lite.api.liteserver.LiteServerAccountId
 import org.ton.tlb.loadTlb
+import org.ton.tlb.storeTlb
 
-data class NFTSale(
-    val address: MsgAddressIntStd,
-    val marketplace: MsgAddressIntStd,
-    val item: MsgAddressIntStd,
-    val owner: MsgAddressIntStd,
-    val price: Long,
-    val marketplaceFee: Long,
-    val royaltyDestination: MsgAddressIntStd?,
-    val royalty: Long?,
-) {
+interface NFTSale {
+    val address: MsgAddressIntStd
+    val marketplace: MsgAddressIntStd
+    val item: MsgAddressIntStd
+    val owner: MsgAddressIntStd
+    val price: Long
+    val marketplaceFee: Long
+    val royaltyDestination: MsgAddressIntStd?
+    val royalty: Long?
+
     companion object : KLogging() {
         private val msgAddressCodec by lazy { MsgAddress.tlbCodec() }
 
@@ -42,7 +45,7 @@ data class NFTSale(
             }
 
             return try {
-                NFTSale(
+                NFTDeployedSale(
                     address,
                     (result[0] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec) as MsgAddressIntStd,
                     (result[1] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec) as MsgAddressIntStd,
@@ -59,3 +62,63 @@ data class NFTSale(
         }
     }
 }
+
+data class NFTDeployedSale(
+    override val address: MsgAddressIntStd,
+    override val marketplace: MsgAddressIntStd,
+    override val item: MsgAddressIntStd,
+    override val owner: MsgAddressIntStd,
+    override val price: Long,
+    override val marketplaceFee: Long,
+    override val royaltyDestination: MsgAddressIntStd?,
+    override val royalty: Long?,
+) : NFTSale
+
+
+data class NFTStubSale(
+    override val marketplace: MsgAddressIntStd,
+    override val item: MsgAddressIntStd,
+    override val owner: MsgAddressIntStd,
+    override val price: Long,
+    override val marketplaceFee: Long,
+    override val royaltyDestination: MsgAddressIntStd?,
+    override val royalty: Long?,
+
+    val code: Cell = NFT_SALE_CODE,
+    val workchainId: Int = owner.workchainId,
+) : NFTSale {
+    private val msgAddressCodec by lazy { MsgAddress.tlbCodec() }
+    private val coinsCodec by lazy { Coins.tlbCodec() }
+    private val stateInitCodec by lazy { StateInit.tlbCodec() }
+
+    override val address: MsgAddressIntStd
+        get() = MsgAddressIntStd(workchainId, CellBuilder.createCell { storeTlb(stateInitCodec, stateInit()) }.hash())
+
+    fun stateInit() = StateInit(createCode(), createData())
+
+    fun createCode() = code
+
+    fun createData(): Cell = CellBuilder.createCell {
+        storeTlb(msgAddressCodec, marketplace)
+        storeTlb(msgAddressCodec, item)
+        storeTlb(msgAddressCodec, owner)
+        storeTlb(coinsCodec, Coins.ofNano(price))
+        storeRef {
+            storeTlb(coinsCodec, Coins.ofNano(marketplaceFee))
+            storeTlb(msgAddressCodec, royaltyDestination ?: MsgAddressExtNone)
+            storeTlb(coinsCodec, Coins.ofNano(royalty ?: 0))
+        }
+    }
+
+    companion object {
+        val NFT_SALE_CODE = BagOfCells.of(
+            hex(
+                "B5EE9C7241020A010001B4000114FF00F4A413F4BCF2C80B01020120020302014804050004F2300202CD0607002FA03859DA89A1F481F481F481F401A861A1F401F481F4006101F7D00E8698180B8D8492F82707D201876A2687D207D207D207D006A18116BA4E10159C71D991B1B2990E382C92F837028916382F970FA01698FC1080289C6C8895D7970FAE99F98FD2018201A642802E78B2801E78B00E78B00FD016664F6AA701363804C9B081B2299823878027003698FE99F9810E000C92F857010C0801F5D41081DCD650029285029185F7970E101E87D007D207D0018384008646582A804E78B28B9D090D0A85AD08A500AFD010AE5B564B8FD80384008646582AC678B2803FD010B65B564B8FD80384008646582A802E78B00FD0109E5B564B8FD80381041082FE61E8A10C00C646582A802E78B117D010A65B509E58F8A40900C8C0029A3110471036454012F004E032363704C0038E4782103B9ACA0015BEF2E1C95312C70559C705B1F2E1CA702082105FCC3D14218010C8CB055006CF1622FA0215CB6A14CB1F14CB3F21CF1601CF16CA0021FA02CA00C98100A0FB00E05F06840FF2F0002ACB3F22CF1658CF16CA0021FA02CA00C98100A0FB00AECABAD1"
+            )
+        ).roots.first()
+    }
+}
+
+
+
+

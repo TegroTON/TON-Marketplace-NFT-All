@@ -75,7 +75,7 @@ class TransferItemCommand :
                         MessageRelaxed.tlbCodec(AnyTlbConstructor), MessageRelaxed(
                             info = CommonMsgInfoRelaxed.IntMsgInfo(
                                 ihrDisabled = true,
-                                bounce = false,
+                                bounce = true,
                                 bounced = false,
                                 src = MsgAddressExtNone,
                                 dest = item.address,
