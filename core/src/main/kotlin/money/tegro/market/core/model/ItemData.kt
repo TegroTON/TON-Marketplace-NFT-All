@@ -10,7 +10,7 @@ data class ItemData(
     val address: ByteArray,
 
     @Relation(Relation.Kind.MANY_TO_ONE)
-    val collection: CollectionData? = null,
+    var collection: CollectionData? = null,
 
     // Basic info
     var initialized: Boolean = false,
