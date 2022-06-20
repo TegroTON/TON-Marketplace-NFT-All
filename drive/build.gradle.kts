@@ -1,33 +1,44 @@
 plugins {
-    application
-    id("com.github.johnrengelman.shadow")
-    id("org.springframework.boot")
-    id("org.springdoc.openapi-gradle-plugin")
-    id("io.spring.dependency-management")
-    kotlin("plugin.spring")
+    id(libs.plugins.kotlin.kapt.get().pluginId)
+    alias(libs.plugins.kotlin.plugin.allopen)
+    alias(libs.plugins.shadow)
+    alias(libs.plugins.micronaut.application)
 }
 
 application {
     mainClass.set("money.tegro.market.drive.ApplicationKt")
 }
 
-dependencies {
-    implementation(coreLibs.clikt)
-    implementation(coreLibs.coroutines)
-    implementation(coreLibs.jackson)
-    implementation(coreLibs.reflect)
-    implementation(coreLibs.ton)
-    implementation(dbLibs.h2)
-    implementation(dbLibs.hibernate.core)
-    implementation(logLibs.logging)
-    implementation(logLibs.slf4j)
-    implementation(logLibs.slf4j.simple)
-    implementation(springLibs.core)
-    implementation(springLibs.jdbc)
-    implementation(springLibs.jpa)
-    implementation(springLibs.openapi.ui)
-    implementation(springLibs.openapi.kotlin)
-    implementation(springLibs.web)
+micronaut {
+    version("3.5.1")
+    processing {
+        incremental(true)
+        annotations("money.tegro.market.drive.*")
+    }
+}
 
-    implementation(projects.common)
+dependencies {
+    kapt(libs.micronaut.data.processor)
+    kapt(libs.picocli.codegen)
+    kapt(libs.micronaut.http.validation)
+
+    implementation(libs.picocli)
+    implementation(libs.micronaut.http.client)
+    implementation(libs.micronaut.jackson.databind)
+    implementation(libs.micronaut.data.r2dbc)
+    implementation(libs.micronaut.kotlin.extensions)
+    implementation(libs.micronaut.kotlin.runtime)
+    implementation(libs.micronaut.picocli)
+    implementation(libs.micronaut.reactor)
+    implementation(libs.micronaut.reactor.http.client)
+    implementation(libs.jakarta.annotation)
+    implementation(libs.reflect)
+
+    runtimeOnly(libs.r2dbc.h2)
+    runtimeOnly(libs.slf4j.simple)
+
+    implementation(libs.micronaut.validation)
+    implementation(libs.ton)
+
+    runtimeOnly(libs.jackson)
 }

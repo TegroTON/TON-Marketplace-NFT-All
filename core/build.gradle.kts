@@ -1,19 +1,14 @@
 plugins {
     id(libs.plugins.kotlin.kapt.get().pluginId)
     alias(libs.plugins.kotlin.plugin.allopen)
-    alias(libs.plugins.shadow)
-    alias(libs.plugins.micronaut.application)
-}
-
-application {
-    mainClass.set("money.tegro.market.nightcrawler.ApplicationKt")
+    alias(libs.plugins.micronaut.library)
 }
 
 micronaut {
     version("3.5.1")
     processing {
         incremental(true)
-        annotations("money.tegro.market.nightcrawler.*")
+        annotations("money.tegro.market.core.*")
     }
 }
 
@@ -31,18 +26,7 @@ dependencies {
     implementation(libs.micronaut.reactor.http.client)
     implementation(libs.jakarta.annotation)
     implementation(libs.reflect)
-    implementation(libs.logging)
-    implementation(libs.bundles.coroutines)
-    implementation(libs.bundles.reactor)
-
-    runtimeOnly(libs.r2dbc.h2)
-    runtimeOnly(libs.slf4j.simple)
 
     implementation(libs.micronaut.validation)
     implementation(libs.ton)
-
-    runtimeOnly(libs.jackson)
-
-    implementation(projects.blockchain)
-    implementation(projects.core)
 }

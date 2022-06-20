@@ -1,0 +1,72 @@
+[versions]
+clikt = { prefer = "3.4.2" }
+coroutines = { strictly = "1.6.1-native-mt" }
+jackson = { prefer = "2.13.2" }
+picocli = { prefer = "4.6.3" }
+reactor = { prefer = "3.4.18" }
+reactor-kotlin = { prefer = "1.1.6" }
+reflect = { prefer = "1.7.0" }
+ton = { strictly = "597de41105" }
+ktor = { prefer = "2.0.2" }
+logging = { prefer = "2.1.23" }
+slf4j = { prefer = "1.7.36" }
+jakarta = { prefer = "2.1.1" }
+h2 = { prefer = "2.1.212" }
+r2dbc = { prefer = "0.8.5.RELEASE" }
+micronaut = { prefer = "3.5.1" }
+micronaut-data = { prefer = "3.4.2" }
+micronaut-kotlin = { prefer = "3.2.2" }
+micronaut-picocli = { prefer = "4.2.1" }
+micronaut-reactor = { prefer = "2.2.2" }
+swagger = { prefer = "2.2.1" }
+kotlin = "1.7.0"
+shadow = "7.1.2"
+micronaut-plugins = "3.4.1"
+
+[libraries]
+clikt = { module = "com.github.ajalt.clikt:clikt", version.ref = "clikt" }
+coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core-jvm", version.ref = "coroutines" }
+coroutines-reactive = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-reactive", version.ref = "coroutines" }
+coroutines-reactor = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-reactor", version.ref = "coroutines" }
+jackson = { group = "com.fasterxml.jackson.module", name = "jackson-module-kotlin", version.ref = "jackson" }
+ktor-bom = { group = "io.ktor", name = "ktor-bom", version.ref = "ktor" }
+picocli = { group = "info.picocli", name = "picocli", version.ref = "picocli" }
+picocli-codegen = { group = "info.picocli", name = "picocli-codegen", version.ref = "picocli" }
+reactor-core = { group = "io.projectreactor", name = "reactor-core", version.ref = "reactor" }
+reactor-kotlin = { group = "io.projectreactor.kotlin", name = "reactor-kotlin-extensions", version.ref = "reactor-kotlin" }
+reactor-test = { group = "io.projectreactor", name = "reactor-test", version.ref = "reactor" }
+reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "reflect" }
+ton = { group = "com.github.andreypfau.ton-kotlin", name = "ton-kotlin", version.ref = "ton" }
+logging = { group = "io.github.microutils", name = "kotlin-logging", version.ref = "logging" }
+slf4j = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
+slf4j-simple = { group = "org.slf4j", name = "slf4j-simple", version.ref = "slf4j" }
+jakarta-annotation = { group = "jakarta.annotation", name = "jakarta.annotation-api", version.ref = "jakarta" }
+h2 = { group = "com.h2database", name = "h2", version.ref = "h2" }
+r2dbc-h2 = { group = "io.r2dbc", name = "r2dbc-h2", version.ref = "r2dbc" }
+
+micronaut-reactor = { group = "io.micronaut.reactor", name = "micronaut-reactor", version.ref = "micronaut-reactor" }
+micronaut-reactor-http-client = { group = "io.micronaut.reactor", name = "micronaut-reactor-http-client", version.ref = "micronaut-reactor" }
+micronaut-data-processor = { group = "io.micronaut.data", name = "micronaut-data-processor", version.ref = "micronaut-data" }
+micronaut-data-r2dbc = { group = "io.micronaut.data", name = "micronaut-data-r2dbc", version.ref = "micronaut-data" }
+
+micronaut-inject = { group = "io.micronaut", name = "micronaut-inject-java", version.ref = "micronaut" }
+micronaut-http-client = { group = "io.micronaut", name = "micronaut-http-client", version.ref = "micronaut" }
+micronaut-http-validation = { group = "io.micronaut", name = "micronaut-http-validation", version.ref = "micronaut" }
+micronaut-jackson-databind = { group = "io.micronaut", name = "micronaut-jackson-databind", version.ref = "micronaut" }
+micronaut-kotlin-runtime = { group = "io.micronaut.kotlin", name = "micronaut-kotlin-runtime", version.ref = "micronaut-kotlin" }
+micronaut-kotlin-extensions = { group = "io.micronaut.kotlin", name = "micronaut-kotlin-extension-functions", version.ref = "micronaut-kotlin" }
+swagger-annotations = { group = "io.swagger.core.v3", name = "swagger-annotations", version.ref = "swagger" }
+micronaut-validation = { group = "io.micronaut", name = "micronaut-validation", version.ref = "micronaut" }
+micronaut-picocli = { group = "io.micronaut.picocli", name = "micronaut-picocli", version.ref = "micronaut-picocli" }
+
+[bundles]
+coroutines = ["coroutines-core", "coroutines-reactive", "coroutines-reactor"]
+reactor = ["reactor-core", "reactor-kotlin"]
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+kotlin-plugin-allopen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "kotlin" }
+shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
+micronaut-application = { id = "io.micronaut.application", version.ref = "micronaut-plugins" }
+micronaut-library = { id = "io.micronaut.library", version.ref = "micronaut-plugins" }
