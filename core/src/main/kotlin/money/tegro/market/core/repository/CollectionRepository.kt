@@ -6,6 +6,7 @@ import io.micronaut.data.r2dbc.annotation.R2dbcRepository
 import io.micronaut.data.repository.reactive.ReactorCrudRepository
 import money.tegro.market.core.model.CollectionData
 import org.ton.block.MsgAddressIntStd
+import reactor.core.publisher.Mono
 import java.time.Instant
 
 @R2dbcRepository(dialect = Dialect.H2)
@@ -14,6 +15,11 @@ abstract class CollectionRepository : ReactorCrudRepository<CollectionData, Long
 
     fun existsByAddressStd(address: MsgAddressIntStd) =
         existsByWorkchainAndAddress(address.workchainId, address.address.toByteArray())
+
+    abstract fun findByWorkchainAndAddress(workchain: Int, address: ByteArray): Mono<CollectionData>
+
+    fun findByAddressStd(address: MsgAddressIntStd) =
+        findByWorkchainAndAddress(address.workchainId, address.address.toByteArray())
 
     abstract fun update(
         @Id id: Long,

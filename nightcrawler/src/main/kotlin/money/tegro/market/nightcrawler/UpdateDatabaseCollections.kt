@@ -121,18 +121,16 @@ class UpdateDatabaseCollections(
         updatedCollections
             .concatMap { original ->
                 mono {
-                    original.content?.let {
-                        val nftRoyalty = NFTRoyalty.of(original.addressStd(), liteApi)
+                    val nftRoyalty = NFTRoyalty.of(original.addressStd(), liteApi)
 
-                        val new = original.copy().apply { // To check if anything was modified
-                            numerator = nftRoyalty?.numerator
-                            denominator = nftRoyalty?.denominator
-                            destinationWorkchain = nftRoyalty?.destination?.workchainId
-                            destinationAddress = nftRoyalty?.destination?.address?.toByteArray()
-                        }
-
-                        if (new == original) null else new
+                    val new = original.copy().apply { // To check if anything was modified
+                        numerator = nftRoyalty?.numerator
+                        denominator = nftRoyalty?.denominator
+                        destinationWorkchain = nftRoyalty?.destination?.workchainId
+                        destinationAddress = nftRoyalty?.destination?.address?.toByteArray()
                     }
+
+                    if (new == original) null else new
                 }
             }.subscribe {
                 val id = it.id

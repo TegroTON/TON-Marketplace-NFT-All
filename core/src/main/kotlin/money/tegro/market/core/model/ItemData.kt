@@ -37,11 +37,14 @@ data class ItemData(
     @DateUpdated
     var updated: Instant? = null,
     var modified: Instant? = null,
-) {
+    
     @field:Id
     @GeneratedValue
     var id: Long? = null
+) {
 
     constructor(addressStd: MsgAddressIntStd) : this(addressStd.workchainId, addressStd.address.toByteArray())
+
+    fun addressStd() = MsgAddressIntStd(workchain, address)
 }
 
