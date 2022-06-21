@@ -9,9 +9,7 @@ import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.long
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import money.tegro.market.blockchain.nft.NFTCollection
-import money.tegro.market.blockchain.nft.NFTRoyalty
-import money.tegro.market.blockchain.nft.NFTStubCollection
+import money.tegro.market.blockchain.nft.*
 import org.ton.api.pk.PrivateKeyEd25519
 import org.ton.bitstring.BitString
 import org.ton.block.*
@@ -35,7 +33,7 @@ class CloneCollectionCommand : CliktCommand(name = "clone", help = "Clone a main
     ).flag(default = false)
     private val collectionInitAmount by option(
         "--collection-init-amount",
-        help = "Amount used to initialize an NFT collection, in nanotons"
+        help = "Amount used to initialize an NFT collection, Additional 20_000_000L is added per item, in nanotons"
     ).long()
         .default(100_000_000L)
     private val itemInitAmount by option(
@@ -53,8 +51,11 @@ class CloneCollectionCommand : CliktCommand(name = "clone", help = "Clone a main
             val original = NFTCollection.of(MsgAddressIntStd(collection), Tool.mainnetLiteApi)
             val originalRoyalty = NFTRoyalty.of(MsgAddressIntStd(collection), Tool.mainnetLiteApi)
             val randomItem = original.item((0 until original.nextItemIndex).random(), Tool.mainnetLiteApi)!!
-            val content = randomItem.content(Tool.mainnetLiteApi).bits.toByteArray().drop(1).toByteArray()
-                .let { Cell.of(BitString.of(it)) } // TODODOO
+            val randomContent = randomItem.content(Tool.mainnetLiteApi)
+            val content = randomContent.bits.toByteArray().drop(1).plus(
+                randomContent.treeWalk().map { it.bits.toByteArray() }
+                    .reduceOrNull { acc, bytes -> acc + bytes }
+                    ?.toList() ?: listOf()).toByteArray().let { Cell.of(BitString(it)) }
 
             println("Content" + content.toString())
 
@@ -63,7 +64,7 @@ class CloneCollectionCommand : CliktCommand(name = "clone", help = "Clone a main
                 owner = wallet.address(),
                 collectionContent = original.content,
                 commonContent = content, // No way to easy get it, so we just use one item's full content instead
-                royalty = originalRoyalty?.apply { NFTRoyalty(numerator, denominator, wallet.address()) }
+                royalty = originalRoyalty?.run { NFTRoyalty(numerator, denominator, wallet.address()) }
             )
 
             println("New NFT collection address will be ${stub.address.toString(userFriendly = true)}")
@@ -82,7 +83,7 @@ class CloneCollectionCommand : CliktCommand(name = "clone", help = "Clone a main
                                     src = MsgAddressExtNone,
                                     dest = stub.address,
                                     value = CurrencyCollection(
-                                        coins = Coins.ofNano(collectionInitAmount)
+                                        coins = Coins.ofNano(collectionInitAmount + 20_000_000L * original.nextItemIndex)
                                     )
                                 ),
                                 init = stub.stateInit(),
@@ -132,28 +133,44 @@ class CloneCollectionCommand : CliktCommand(name = "clone", help = "Clone a main
 
             println("Initializing all ${original.nextItemIndex} collection items")
             for (index in 0 until original.nextItemIndex) {
-                val item = original.item(index, Tool.mainnetLiteApi)
-
+                var successful = false
                 println("Sending a message to the collection with a request to mint item no. $index")
-                wallet.transfer(
-                    dest = stub.address,
-                    bounce = true,
-                    Coins.ofNano(itemInitAmount),
-                    wallet.seqno(),
-                    CellBuilder.createCell {
-                        storeUInt(1, 32) // OP, mint
-                        storeUInt(0, 64) // Query id
-                        storeUInt(index, 64) // New item index
-                        storeTlb(Coins.tlbCodec(), Coins.ofNano(itemInitAmount))
-                        storeRef {// Body that is sent to the item
-                            storeTlb(MsgAddress.tlbCodec(), wallet.address())
-                            storeRef {
-                                Cell.of()
-                            } // content
+                do {
+                    wallet.transfer(
+                        dest = stub.address,
+                        bounce = true,
+                        Coins.ofNano(itemInitAmount),
+                        wallet.seqno(),
+                        CellBuilder.createCell {
+                            storeUInt(1, 32) // OP, mint
+                            storeUInt(0, 64) // Query id
+                            storeUInt(index, 64) // New item index
+                            storeTlb(Coins.tlbCodec(), Coins.ofNano(itemInitAmount))
+                            storeRef {// Body that is sent to the item
+                                storeTlb(MsgAddress.tlbCodec(), wallet.address())
+                                storeRef {
+                                    Cell.of()
+                                } // content
+                            }
+                        },
+                    )
+                    delay(10_000L) // Delay just in case
+
+                    try {
+                        val itemAddress = NFTDeployedCollection.itemAddressOf(stub.address, index, Tool.sandboxLiteApi)
+                        val item = NFTItem.of(itemAddress, Tool.sandboxLiteApi)
+                        if (item == null) {
+                            println("Something's wrong, I can feel it. Trying again")
+                            successful = false
+                        } else {
+                            println("Success! Item no. ${item.index} is ${item.address.toString(userFriendly = true)}")
+                            successful = true
                         }
-                    },
-                )
-                delay(20_000L) // Delay just in case
+                    } catch (e: Exception) {
+                        successful = false
+                        println("This doesnt seem to have worked, trying again: $e")
+                    }
+                } while (!successful)
             }
         }
     }
