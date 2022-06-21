@@ -25,7 +25,7 @@ class UpdateDatabaseItems(
 
         val updatedItems = itemRepository.findAll()
             .concatMap(itemUpdater)
-            .replay()
+            .publish()
 
         val a = updatedItems
             .subscribe(itemWriter)
@@ -40,7 +40,7 @@ class UpdateDatabaseItems(
             .subscribe(itemRoyaltyWriter)
 
         updatedItems.connect()
-        
+
         while (!a.isDisposed && !b.isDisposed && !c.isDisposed) {
         }
     }

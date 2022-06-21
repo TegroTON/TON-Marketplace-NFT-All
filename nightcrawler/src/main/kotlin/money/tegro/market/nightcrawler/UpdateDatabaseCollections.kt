@@ -65,7 +65,7 @@ class UpdateDatabaseCollections(
 
         val updatedCollections = collectionRepository.findAll()
             .concatMap(collectionUpdater)
-            .replay()
+            .publish()
 
         val a = updatedCollections
             .subscribe(collectionWriter)
