@@ -31,7 +31,7 @@ class UpdateDatabaseCollections(
     private val collectionWriter: CollectionWriter,
 
     private val metadataUpdater: MetadataUpdater<CollectionModel>,
-    private val metadataWriter: MetadataWriter<CollectionRepository>,
+    private val metadataWriter: MetadataWriter<CollectionModel, CollectionRepository>,
 
     private val royaltyUpdater: RoyaltyUpdater<CollectionModel>,
     private val royaltyWriter: RoyaltyWriter<CollectionRepository>,

@@ -6,7 +6,7 @@ import io.micronaut.data.annotation.MappedEntity
 import io.micronaut.data.annotation.Relation
 
 @MappedEntity("ITEM_ATTRIBUTES")
-data class ItemAttribute(
+data class ItemAttributeModel(
     @Relation(Relation.Kind.MANY_TO_ONE)
     val item: ItemModel,
 

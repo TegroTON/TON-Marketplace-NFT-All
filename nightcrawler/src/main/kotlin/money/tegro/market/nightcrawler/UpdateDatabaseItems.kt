@@ -14,7 +14,7 @@ class UpdateDatabaseItems(
     private val itemWriter: ItemWriter,
 
     private val itemMetadataUpdater: MetadataUpdater<ItemModel>,
-    private val itemMetadataWriter: MetadataWriter<ItemRepository>,
+    private val itemMetadataWriter: MetadataWriter<ItemModel, ItemRepository>,
 
     private val itemRoyaltyUpdater: RoyaltyUpdater<ItemModel>,
     private val itemRoyaltyWriter: RoyaltyWriter<ItemRepository>,

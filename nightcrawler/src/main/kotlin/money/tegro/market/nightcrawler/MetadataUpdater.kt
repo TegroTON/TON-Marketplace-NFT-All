@@ -6,10 +6,7 @@ import kotlinx.coroutines.runBlocking
 import money.tegro.market.blockchain.client.ResilientLiteClient
 import money.tegro.market.blockchain.nft.NFTDeployedCollectionItem
 import money.tegro.market.blockchain.nft.NFTMetadata
-import money.tegro.market.core.model.CollectionModel
-import money.tegro.market.core.model.ItemModel
-import money.tegro.market.core.model.MetadataModel
-import money.tegro.market.core.model.addressStd
+import money.tegro.market.core.model.*
 import org.reactivestreams.Publisher
 import org.ton.boc.BagOfCells
 import org.ton.cell.Cell
@@ -20,6 +17,8 @@ import java.time.Instant
 
 open class MetadataUpdater<M : MetadataModel> : java.util.function.Function<M, Publisher<M>> {
     open fun getContent(it: M): Mono<Cell> = it.content?.let { BagOfCells(it).roots.first() }.toMono()
+
+    open fun extraMetadata(it: M, nftMetadata: NFTMetadata): M = it
 
     override fun apply(it: M): Publisher<M> =
         getContent(it)
@@ -34,7 +33,10 @@ open class MetadataUpdater<M : MetadataModel> : java.util.function.Function<M, P
                         imageData = nftMetadata.imageData
                         coverImage = nftMetadata.coverImage
                         coverImageData = nftMetadata.coverImageData
+
                         metadataModified = Instant.now() // TODO
+                    }.let {
+                        extraMetadata(it, nftMetadata)
                     }
                 }
             }
@@ -60,4 +62,17 @@ class ItemMetadataUpdater(private val liteApi: LiteApi) : MetadataUpdater<ItemMo
             }
         } ?: it.content?.let { BagOfCells(it).roots.first() }
     }
+
+    override fun extraMetadata(it: ItemModel, nftMetadata: NFTMetadata): ItemModel =
+        it.copy(attributes = mutableSetOf()).apply {
+            nftMetadata.attributes.orEmpty().forEach { attribute ->
+                attributes?.add(
+                    ItemAttributeModel(
+                        it, // to avoid stack overflow we use shallow `it`
+                        attribute.trait,
+                        attribute.value
+                    )
+                )
+            }
+        }
 }

@@ -36,7 +36,7 @@ data class ItemModel(
     override var coverImageData: ByteArray? = null,
 
     @Relation(Relation.Kind.ONE_TO_MANY, mappedBy = "item")
-    val attributes: List<ItemAttribute>? = null,
+    val attributes: MutableSet<ItemAttributeModel>? = null,
 
     override var metadataUpdated: Instant? = null,
     override var metadataModified: Instant? = null,
