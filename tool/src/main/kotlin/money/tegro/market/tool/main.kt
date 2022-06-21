@@ -15,5 +15,6 @@ fun main(args: Array<String>) =
             QueryCollectionCommand(),
             ListCollectionItemsCommand(),
             MintCollectionCommand(),
+            CloneCollectionCommand(),
         )
     ).main(args)
