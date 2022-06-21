@@ -8,9 +8,9 @@ import com.github.ajalt.clikt.parameters.types.int
 import com.github.ajalt.clikt.parameters.types.long
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import money.tegro.market.nft.NFTCollection
-import money.tegro.market.nft.NFTRoyalty
-import money.tegro.market.nft.NFTStubCollection
+import money.tegro.market.blockchain.nft.NFTCollection
+import money.tegro.market.blockchain.nft.NFTRoyalty
+import money.tegro.market.blockchain.nft.NFTStubCollection
 import org.ton.api.pk.PrivateKeyEd25519
 import org.ton.block.*
 import org.ton.cell.Cell

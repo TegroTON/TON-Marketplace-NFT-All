@@ -5,7 +5,7 @@ import com.github.ajalt.clikt.parameters.groups.provideDelegate
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import kotlinx.coroutines.runBlocking
-import money.tegro.market.ton.ResilientLiteClient
+import money.tegro.market.blockchain.client.ResilientLiteClient
 import mu.KLogging
 import org.ton.crypto.base64
 import org.ton.lite.api.LiteApi

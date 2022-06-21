@@ -4,7 +4,7 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.multiple
 import kotlinx.coroutines.runBlocking
-import money.tegro.market.nft.NFTCollection
+import money.tegro.market.blockchain.nft.NFTCollection
 import org.ton.block.MsgAddressIntStd
 
 class ListCollectionItemsCommand :

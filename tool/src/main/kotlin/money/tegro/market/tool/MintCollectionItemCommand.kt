@@ -7,9 +7,9 @@ import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.long
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import money.tegro.market.nft.NFTCollection
-import money.tegro.market.nft.NFTDeployedCollectionItem
-import money.tegro.market.nft.NFTItem
+import money.tegro.market.blockchain.nft.NFTCollection
+import money.tegro.market.blockchain.nft.NFTDeployedCollectionItem
+import money.tegro.market.blockchain.nft.NFTItem
 import org.ton.api.pk.PrivateKeyEd25519
 import org.ton.block.Coins
 import org.ton.block.MsgAddress

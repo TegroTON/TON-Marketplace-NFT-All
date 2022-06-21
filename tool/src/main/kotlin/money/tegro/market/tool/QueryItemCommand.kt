@@ -4,7 +4,7 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.multiple
 import kotlinx.coroutines.runBlocking
-import money.tegro.market.nft.*
+import money.tegro.market.blockchain.nft.*
 import org.ton.block.MsgAddressIntStd
 import org.ton.crypto.hex
 import kotlin.math.pow

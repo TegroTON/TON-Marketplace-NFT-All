@@ -14,7 +14,7 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
             from(files("libs.versions.toml"))
-        }   
+        }
     }
 }
 
@@ -22,4 +22,4 @@ include(":blockchain")
 include(":core")
 include(":drive")
 include(":nightcrawler")
-// include(":tool")
+include(":tool")

@@ -1,6 +1,6 @@
 plugins {
     application
-    id("com.github.johnrengelman.shadow")
+    alias(libs.plugins.shadow)
 }
 
 application {
@@ -8,13 +8,12 @@ application {
 }
 
 dependencies {
-    implementation(coreLibs.clikt)
-    implementation(coreLibs.coroutines)
-    implementation(coreLibs.jackson)
-    implementation(coreLibs.ton)
-    implementation(logLibs.logging)
-    implementation(logLibs.slf4j)
-    implementation(logLibs.slf4j.simple)
+    implementation(libs.clikt)
+    implementation(libs.bundles.coroutines)
+    implementation(libs.jackson)
+    implementation(libs.ton)
+    implementation(libs.logging)
+    implementation(libs.slf4j.simple)
 
-    implementation(projects.common)
+    implementation(projects.blockchain)
 }
