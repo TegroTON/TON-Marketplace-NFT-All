@@ -7,6 +7,9 @@ interface BasicModel {
     val workchain: Int
     val address: ByteArray
 
+    var ownerWorkchain: Int?
+    var ownerAddress: ByteArray?
+
     val discovered: Instant
     var dataUpdated: Instant?
     var dataModified: Instant?
@@ -15,3 +18,4 @@ interface BasicModel {
 }
 
 fun BasicModel.addressStd() = MsgAddressIntStd(workchain, address)
+fun BasicModel.ownerStd() = ownerWorkchain?.let { wc -> ownerAddress?.let { addr -> MsgAddressIntStd(wc, addr) } }

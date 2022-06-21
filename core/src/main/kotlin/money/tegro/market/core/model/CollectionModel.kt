@@ -4,10 +4,12 @@ import io.micronaut.data.annotation.GeneratedValue
 import io.micronaut.data.annotation.Id
 import io.micronaut.data.annotation.MappedEntity
 import io.micronaut.data.annotation.Relation
+import io.swagger.v3.oas.annotations.media.Schema
 import org.ton.block.MsgAddressIntStd
 import java.time.Instant
 
 @MappedEntity("COLLECTIONS")
+@Schema(hidden = true)
 data class CollectionModel(
     override val workchain: Int,
     override val address: ByteArray,
@@ -18,8 +20,8 @@ data class CollectionModel(
     // Basic info
     var nextItemIndex: Long? = null,
     override var content: ByteArray? = null,
-    var ownerWorkchain: Int? = null,
-    var ownerAddress: ByteArray? = null,
+    override var ownerWorkchain: Int? = null,
+    override var ownerAddress: ByteArray? = null,
 
     override var dataUpdated: Instant? = null,
     override var dataModified: Instant? = null,

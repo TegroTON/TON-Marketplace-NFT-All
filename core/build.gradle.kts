@@ -25,6 +25,7 @@ dependencies {
     implementation(libs.micronaut.reactor)
     implementation(libs.micronaut.reactor.http.client)
     implementation(libs.jakarta.annotation)
+    implementation(libs.swagger.annotations)
     implementation(libs.reflect)
 
     implementation(libs.micronaut.validation)

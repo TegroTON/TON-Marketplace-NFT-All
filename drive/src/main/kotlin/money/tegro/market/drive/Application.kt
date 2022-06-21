@@ -1,7 +1,18 @@
 package money.tegro.market.drive
 
 import io.micronaut.runtime.Micronaut
+import io.swagger.v3.oas.annotations.OpenAPIDefinition
+import io.swagger.v3.oas.annotations.info.Info
 
-fun main() {
-    Micronaut.run()
+@OpenAPIDefinition(
+    info = Info(
+        title = "Market API",
+        version = "0.0.1"
+    )
+)
+object Application {
+    @JvmStatic
+    fun main(args: Array<String>) {
+        Micronaut.run(*args)
+    }
 }

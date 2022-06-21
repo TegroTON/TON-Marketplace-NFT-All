@@ -6,7 +6,7 @@ plugins {
 }
 
 application {
-    mainClass.set("money.tegro.market.drive.ApplicationKt")
+    mainClass.set("money.tegro.market.drive.Application")
 }
 
 micronaut {
@@ -21,18 +21,22 @@ dependencies {
     kapt(libs.micronaut.data.processor)
     kapt(libs.picocli.codegen)
     kapt(libs.micronaut.http.validation)
+    kapt(libs.micronaut.openapi)
 
-    implementation(libs.picocli)
     implementation(libs.micronaut.http.client)
+    implementation(libs.micronaut.http.server.netty)
     implementation(libs.micronaut.jackson.databind)
     implementation(libs.micronaut.data.r2dbc)
     implementation(libs.micronaut.kotlin.extensions)
     implementation(libs.micronaut.kotlin.runtime)
-    implementation(libs.micronaut.picocli)
     implementation(libs.micronaut.reactor)
     implementation(libs.micronaut.reactor.http.client)
     implementation(libs.jakarta.annotation)
+    implementation(libs.swagger.annotations)
     implementation(libs.reflect)
+
+    implementation(libs.bundles.coroutines)
+    implementation(libs.bundles.reactor)
 
     runtimeOnly(libs.r2dbc.h2)
     runtimeOnly(libs.slf4j.simple)
@@ -41,4 +45,6 @@ dependencies {
     implementation(libs.ton)
 
     runtimeOnly(libs.jackson)
+
+    implementation(projects.core)
 }
