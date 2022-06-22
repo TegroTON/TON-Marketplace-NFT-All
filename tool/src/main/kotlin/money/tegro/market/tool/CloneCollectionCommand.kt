@@ -33,9 +33,9 @@ class CloneCollectionCommand : CliktCommand(name = "clone", help = "Clone a main
     ).flag(default = false)
     private val collectionInitAmount by option(
         "--collection-init-amount",
-        help = "Amount used to initialize an NFT collection, Additional 20_000_000L is added per item, in nanotons"
+        help = "Amount used to initialize an NFT collection, in nanotons"
     ).long()
-        .default(100_000_000L)
+        .default(1_000_000_000L)
     private val itemInitAmount by option(
         "--item-init-amount",
         help = "Amount used to initialize each item in the NFT collection, in nanotons"
@@ -83,7 +83,7 @@ class CloneCollectionCommand : CliktCommand(name = "clone", help = "Clone a main
                                     src = MsgAddressExtNone,
                                     dest = stub.address,
                                     value = CurrencyCollection(
-                                        coins = Coins.ofNano(collectionInitAmount + 20_000_000L * original.nextItemIndex)
+                                        coins = Coins.ofNano(collectionInitAmount)
                                     )
                                 ),
                                 init = stub.stateInit(),
