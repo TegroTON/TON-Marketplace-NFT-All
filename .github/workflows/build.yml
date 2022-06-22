@@ -36,4 +36,4 @@ jobs:
           name: market
           path: |
             build/**/libs/*-all.jar
-            build/drive/tmp/kapt4/classes/main/META-INF/swagger/*.yml
+            build/drive/tmp/kapt3/classes/main/META-INF/swagger/*.yml
