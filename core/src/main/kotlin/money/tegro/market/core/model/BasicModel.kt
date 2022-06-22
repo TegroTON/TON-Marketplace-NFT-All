@@ -1,21 +1,12 @@
 package money.tegro.market.core.model
 
-import org.ton.block.MsgAddressIntStd
+import money.tegro.market.core.key.AddressKey
 import java.time.Instant
 
 interface BasicModel {
-    val workchain: Int
-    val address: ByteArray
-
-    var ownerWorkchain: Int?
-    var ownerAddress: ByteArray?
+    val address: AddressKey
 
     val discovered: Instant
-    var dataUpdated: Instant?
-    var dataModified: Instant?
-
-    var id: Long?
+    var updated: Instant
+    var modified: Instant
 }
-
-fun BasicModel.addressStd() = MsgAddressIntStd(workchain, address)
-fun BasicModel.ownerStd() = ownerWorkchain?.let { wc -> ownerAddress?.let { addr -> MsgAddressIntStd(wc, addr) } }

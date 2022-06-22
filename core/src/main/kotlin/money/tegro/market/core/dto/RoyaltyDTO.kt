@@ -2,7 +2,6 @@ package money.tegro.market.core.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
 import money.tegro.market.core.model.RoyaltyModel
-import money.tegro.market.core.model.destinationStd
 
 @Schema(name = "Royalty", description = "Royalty information related to a specific item/collection")
 data class RoyaltyDTO(
@@ -14,10 +13,8 @@ data class RoyaltyDTO(
 ) {
     companion object {
         @JvmStatic
-        fun of(it: RoyaltyModel) = it.numerator?.let { n ->
-            it.denominator?.let { d ->
-                it.destinationStd()?.let { dest -> RoyaltyDTO(n.toFloat() / d, dest.toSafeBounceable()) }
-            }
+        fun of(it: RoyaltyModel) = it.royalty?.let {
+            RoyaltyDTO(it.numerator.toFloat() / it.denominator, it.destination.to().toSafeBounceable())
         }
     }
 }

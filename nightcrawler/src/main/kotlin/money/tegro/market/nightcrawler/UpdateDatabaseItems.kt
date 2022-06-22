@@ -17,11 +17,15 @@ class UpdateDatabaseItems(
     private val itemUpdater: ItemUpdater,
     private val itemWriter: ItemWriter,
 
-    private val itemMetadataUpdater: MetadataUpdater<ItemModel>,
-    private val itemMetadataWriter: MetadataWriter<ItemModel, ItemRepository>,
+    private val metadataFetcher: MetadataFetcher<ItemModel>,
+    private val metadataUpdater: MetadataUpdater<ItemModel>,
+    private val metadataWriter: MetadataWriter<ItemModel, ItemRepository>,
 
-    private val itemRoyaltyUpdater: RoyaltyUpdater<ItemModel>,
-    private val itemRoyaltyWriter: RoyaltyWriter<ItemRepository>,
+    private val attributeUpdater: ItemAttributeUpdater,
+    private val attributeWriter: ItemAttributeWriter,
+
+    private val royaltyUpdater: RoyaltyUpdater<ItemModel>,
+    private val royaltyWriter: RoyaltyWriter<ItemRepository>,
 ) {
     @Scheduled(initialDelay = "30s", fixedDelay = "5m")
     fun updateEverything() {
@@ -29,12 +33,7 @@ class UpdateDatabaseItems(
 
         val updatedItems = itemRepository.findAll()
             .concatMap {
-                if (it.dataUpdated?.let {
-                        Duration.between(
-                            it,
-                            Instant.now()
-                        ) < configuration.dataUpdateThreshold
-                    } != false) {
+                if (Duration.between(it.updated, Instant.now()) < configuration.dataUpdateThreshold) {
                     itemUpdater.apply(it)
                 } else {
                     it.toMono()
@@ -46,34 +45,31 @@ class UpdateDatabaseItems(
         val a = updatedItems
             .subscribe(itemWriter)
 
-        val b = updatedItems
-            .filter {
-                it.metadataUpdated?.let {
-                    Duration.between(
-                        it,
-                        Instant.now()
-                    ) < configuration.metadataUpdateThreshold
-                } != false
-            }
-            .concatMap(itemMetadataUpdater)
-            .subscribe(itemMetadataWriter)
+        val updatedMetadata = updatedItems
+            .filter { Duration.between(it.metadataUpdated, Instant.now()) < configuration.metadataUpdateThreshold }
+            .concatMap(metadataFetcher)
+            .publish()
 
-        val c = updatedItems
+        val b = updatedMetadata
+            .concatMap(metadataUpdater)
+            .subscribe(metadataWriter)
+
+        val c = updatedMetadata
+            .concatMap(attributeUpdater)
+            .subscribe(attributeWriter)
+
+        val d = updatedItems
             .filter {
                 it.collection == null && // Only stand-alone items
-                        it.royaltyUpdated?.let {
-                            Duration.between(
-                                it,
-                                Instant.now()
-                            ) < configuration.royaltyUpdateThreshold
-                        } != false
+                        Duration.between(it.royaltyUpdated, Instant.now()) < configuration.royaltyUpdateThreshold
             }
-            .concatMap(itemRoyaltyUpdater)
-            .subscribe(itemRoyaltyWriter)
+            .concatMap(royaltyUpdater)
+            .subscribe(royaltyWriter)
 
         updatedItems.connect()
+        updatedMetadata.connect()
 
-        while (!a.isDisposed && !b.isDisposed && !c.isDisposed) {
+        while (!a.isDisposed && !b.isDisposed && !c.isDisposed && !d.isDisposed) {
         }
     }
 

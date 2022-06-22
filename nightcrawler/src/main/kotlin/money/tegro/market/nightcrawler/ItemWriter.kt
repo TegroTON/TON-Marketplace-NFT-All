@@ -10,17 +10,14 @@ class ItemWriter(
     private val repository: ItemRepository
 ) : Consumer<ItemModel> {
     override fun accept(it: ItemModel) {
-        val id = it.id
-        requireNotNull(id)
         repository.update(
-            id,
+            it.address,
             it.initialized,
             it.index,
             it.collection,
-            it.ownerWorkchain,
-            it.ownerAddress,
+            it.owner,
             it.content,
-            it.dataModified,
+            it.modified,
         )
     }
 }

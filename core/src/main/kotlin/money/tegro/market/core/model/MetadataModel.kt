@@ -12,6 +12,6 @@ interface MetadataModel : BasicModel {
     var coverImage: String?
     var coverImageData: ByteArray?
 
-    var metadataUpdated: Instant?
-    var metadataModified: Instant?
+    var metadataUpdated: Instant
+    var metadataModified: Instant
 }

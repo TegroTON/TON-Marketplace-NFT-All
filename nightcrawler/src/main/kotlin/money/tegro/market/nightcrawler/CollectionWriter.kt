@@ -10,15 +10,12 @@ class CollectionWriter(
     private val repository: CollectionRepository
 ) : Consumer<CollectionModel> {
     override fun accept(it: CollectionModel) {
-        val id = it.id
-        requireNotNull(id)
         repository.update(
-            id,
+            it.address,
             it.nextItemIndex,
-            it.ownerWorkchain,
-            it.ownerAddress,
+            it.owner,
             it.content,
-            it.dataModified,
+            it.modified,
         )
     }
 }

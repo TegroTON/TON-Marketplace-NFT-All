@@ -7,9 +7,9 @@ import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
 import money.tegro.market.blockchain.client.ResilientLiteClient
 import money.tegro.market.blockchain.nft.NFTDeployedCollection
+import money.tegro.market.core.key.AddressKey
 import money.tegro.market.core.model.CollectionModel
 import money.tegro.market.core.model.ItemModel
-import money.tegro.market.core.model.addressStd
 import money.tegro.market.core.repository.CollectionRepository
 import money.tegro.market.core.repository.ItemRepository
 import money.tegro.market.core.repository.existsByAddressStd
@@ -30,6 +30,7 @@ class UpdateDatabaseCollections(
     private val collectionUpdater: CollectionUpdater,
     private val collectionWriter: CollectionWriter,
 
+    private val metadataFetcher: MetadataFetcher<CollectionModel>,
     private val metadataUpdater: MetadataUpdater<CollectionModel>,
     private val metadataWriter: MetadataWriter<CollectionModel, CollectionRepository>,
 
@@ -71,6 +72,7 @@ class UpdateDatabaseCollections(
             .subscribe(collectionWriter)
 
         val b = updatedCollections
+            .concatMap(metadataFetcher)
             .concatMap(metadataUpdater)
             .subscribe(metadataWriter)
 
@@ -93,20 +95,20 @@ class UpdateDatabaseCollections(
                 collection.nextItemIndex?.let { nextItemIndex ->
                     (0 until nextItemIndex).toFlux()
                         // Ignore items that are already added and indexed
-                        .filter { !itemRepository.existsByIndexAndCollection(it, collection) }
-                        .map { collection to it }
+                        .filter { !itemRepository.existsByIndexAndCollection(it, collection.address) }
+                        .map { collection.address.to() to it }
                 }
             }
             .parallel()
             .runOn(Schedulers.boundedElastic())
             .concatMap {
                 mono {
-                    it.first to NFTDeployedCollection.itemAddressOf(it.first.addressStd(), it.second, liteApi)
+                    it.first to NFTDeployedCollection.itemAddressOf(it.first, it.second, liteApi)
                 }
             }
             .filter { !itemRepository.existsByAddressStd(it.second) }
             .subscribe {
-                itemRepository.save(ItemModel(it.second).apply { collection = it.first }).subscribe()
+                itemRepository.save(ItemModel(it.second).apply { collection = AddressKey.of(it.first) }).subscribe()
             }
     }
 

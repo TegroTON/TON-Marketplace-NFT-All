@@ -3,8 +3,6 @@ package money.tegro.market.core.dto
 import io.swagger.v3.oas.annotations.media.Schema
 import money.tegro.market.core.model.CollectionModel
 import money.tegro.market.core.model.ItemModel
-import money.tegro.market.core.model.addressStd
-import money.tegro.market.core.model.ownerStd
 
 @Schema(name = "Item", description = "Information about an NFT item")
 data class ItemDTO(
@@ -33,10 +31,10 @@ data class ItemDTO(
     val royalty: RoyaltyDTO?,
 ) {
     constructor(it: ItemModel, collection: CollectionModel?) : this(
-        address = it.addressStd().toSafeBounceable(),
+        address = it.address.to().toSafeBounceable(),
         index = it.index,
-        collection = collection?.addressStd()?.toSafeBounceable(),
-        owner = it.ownerStd()?.toSafeBounceable(),
+        collection = collection?.address?.to()?.toSafeBounceable(),
+        owner = it.owner?.to()?.toSafeBounceable(),
         name = it.name,
         description = it.description,
         image = it.image,

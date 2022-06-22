@@ -1,23 +1,11 @@
 package money.tegro.market.core.model
 
-import org.ton.block.MsgAddressIntStd
+import money.tegro.market.core.key.RoyaltyKey
 import java.time.Instant
 
 interface RoyaltyModel : BasicModel {
-    var numerator: Int?
-    var denominator: Int?
-    var destinationWorkchain: Int?
-    var destinationAddress: ByteArray?
+    var royalty: RoyaltyKey?
 
-    var royaltyUpdated: Instant?
-    var royaltyModified: Instant?
-}
-
-fun RoyaltyModel.destinationStd() = destinationWorkchain?.let { wc ->
-    destinationAddress?.let { addr ->
-        MsgAddressIntStd(
-            wc,
-            addr
-        )
-    }
+    var royaltyUpdated: Instant
+    var royaltyModified: Instant
 }

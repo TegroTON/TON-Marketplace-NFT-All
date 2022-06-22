@@ -11,14 +11,9 @@ open class RoyaltyWriter<R : RoyaltyRepository>(
     private val repository: R
 ) : Consumer<RoyaltyModel> {
     override fun accept(it: RoyaltyModel) {
-        val id = it.id
-        requireNotNull(id)
         repository.update(
-            id,
-            it.numerator,
-            it.denominator,
-            it.destinationWorkchain,
-            it.destinationAddress,
+            it.address,
+            it.royalty,
             it.royaltyModified,
         )
     }

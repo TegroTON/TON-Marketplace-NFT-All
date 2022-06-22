@@ -1,16 +1,17 @@
 package money.tegro.market.core.repository
 
+import money.tegro.market.core.key.AddressKey
 import money.tegro.market.core.model.BasicModel
 import org.ton.block.MsgAddressIntStd
 import reactor.core.publisher.Mono
 
 interface BasicRepository<E : BasicModel> {
-    fun existsByWorkchainAndAddress(workchain: Int, address: ByteArray): Boolean
-    fun findByWorkchainAndAddress(workchain: Int, address: ByteArray): Mono<E>
+    fun existsByAddress(address: AddressKey): Boolean
+    fun findByAddress(address: AddressKey): Mono<E>
 }
 
 fun <E : BasicModel> BasicRepository<E>.existsByAddressStd(address: MsgAddressIntStd) =
-    existsByWorkchainAndAddress(address.workchainId, address.address.toByteArray())
+    existsByAddress(AddressKey.of(address))
 
 fun <E : BasicModel> BasicRepository<E>.findByAddressStd(address: MsgAddressIntStd) =
-    findByWorkchainAndAddress(address.workchainId, address.address.toByteArray())
+    findByAddress(AddressKey.of(address))

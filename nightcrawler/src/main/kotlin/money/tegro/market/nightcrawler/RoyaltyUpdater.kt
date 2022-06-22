@@ -5,10 +5,11 @@ import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
 import money.tegro.market.blockchain.client.ResilientLiteClient
 import money.tegro.market.blockchain.nft.NFTRoyalty
+import money.tegro.market.core.key.AddressKey
+import money.tegro.market.core.key.RoyaltyKey
 import money.tegro.market.core.model.CollectionModel
 import money.tegro.market.core.model.ItemModel
 import money.tegro.market.core.model.RoyaltyModel
-import money.tegro.market.core.model.addressStd
 import org.reactivestreams.Publisher
 import org.ton.lite.api.LiteApi
 import java.time.Instant
@@ -24,13 +25,12 @@ open class RoyaltyUpdater<M : RoyaltyModel>(
 
     override fun apply(it: M): Publisher<M> =
         mono {
-            val nftRoyalty = NFTRoyalty.of(it.addressStd(), liteApi)
+            val nftRoyalty = NFTRoyalty.of(it.address.to(), liteApi)
 
             it.apply {
-                numerator = nftRoyalty?.numerator
-                denominator = nftRoyalty?.denominator
-                destinationWorkchain = nftRoyalty?.destination?.workchainId
-                destinationAddress = nftRoyalty?.destination?.address?.toByteArray()
+                royalty = nftRoyalty?.let {
+                    RoyaltyKey(it.numerator, it.denominator, AddressKey.of(it.destination))
+                }
                 royaltyModified = Instant.now() // TODO
             }
         }
