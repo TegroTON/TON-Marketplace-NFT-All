@@ -33,7 +33,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: market.zip
+          name: market
           path: |
             build/**/libs/*-all.jar
             build/drive/tmp/kapt4/classes/main/META-INF/swagger/*.yml
