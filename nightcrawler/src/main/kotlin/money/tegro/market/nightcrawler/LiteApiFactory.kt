@@ -6,7 +6,7 @@ import money.tegro.market.blockchain.client.ResilientLiteClient
 import org.ton.crypto.base64
 
 @Factory
-class LiteApiFactory {
+class LiteApiFactory(private var configuration: LiteApiFactoryConfiguration) {
     @Prototype
-    fun liteApi() = ResilientLiteClient(908566172, 51565, base64("TDg+ILLlRugRB4Kpg3wXjPcoc+d+Eeb7kuVe16CS9z8="))
+    fun liteApi() = ResilientLiteClient(configuration.ipv4, configuration.port, base64(configuration.key))
 }
