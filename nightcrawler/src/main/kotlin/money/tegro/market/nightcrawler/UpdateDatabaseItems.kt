@@ -2,6 +2,7 @@ package money.tegro.market.nightcrawler
 
 import io.micronaut.scheduling.annotation.Scheduled
 import jakarta.inject.Singleton
+import kotlinx.coroutines.reactor.mono
 import money.tegro.market.core.model.ItemModel
 import money.tegro.market.core.repository.ItemRepository
 import mu.KLogging
@@ -26,6 +27,9 @@ class UpdateDatabaseItems(
 
     private val royaltyUpdater: RoyaltyUpdater<ItemModel>,
     private val royaltyWriter: RoyaltyWriter<ItemRepository>,
+
+    private val saleUpdater: SaleUpdater,
+    private val saleWriter: SaleWriter,
 ) {
     @Scheduled(initialDelay = "30s", fixedDelay = "5m")
     fun updateEverything() {
@@ -66,10 +70,15 @@ class UpdateDatabaseItems(
             .concatMap(royaltyUpdater)
             .subscribe(royaltyWriter)
 
+        val e = updatedItems
+            .concatMap { mono { it.address.to() } }
+            .concatMap(saleUpdater)
+            .subscribe(saleWriter)
+
         updatedItems.connect()
         updatedMetadata.connect()
 
-        while (!a.isDisposed && !b.isDisposed && !c.isDisposed && !d.isDisposed) {
+        while (!a.isDisposed && !b.isDisposed && !c.isDisposed && !d.isDisposed && !e.isDisposed) {
         }
     }
 

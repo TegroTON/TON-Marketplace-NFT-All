@@ -7,7 +7,7 @@ import io.micronaut.data.annotation.Relation
 import io.swagger.v3.oas.annotations.media.Schema
 import money.tegro.market.core.key.AddressKey
 
-@MappedEntity("ITEM_ATTRIBUTES")
+@MappedEntity("ATTRIBUTES")
 @Schema(hidden = true)
 data class AttributeModel(
     @Relation(Relation.Kind.EMBEDDED)
