@@ -9,7 +9,7 @@ import money.tegro.market.core.key.AddressKey
 
 @MappedEntity("ITEM_ATTRIBUTES")
 @Schema(hidden = true)
-data class ItemAttributeModel(
+data class AttributeModel(
     @Relation(Relation.Kind.EMBEDDED)
     val item: AddressKey,
 
