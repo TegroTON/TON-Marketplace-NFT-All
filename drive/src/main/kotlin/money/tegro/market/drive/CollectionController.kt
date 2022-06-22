@@ -19,6 +19,7 @@ import money.tegro.market.core.repository.CollectionRepository
 import money.tegro.market.core.repository.ItemRepository
 import money.tegro.market.core.repository.findByAddressStd
 import org.ton.block.MsgAddressIntStd
+import reactor.kotlin.core.publisher.toFlux
 
 @Tag(name = "Collection", description = "Set of methods to interact with NFT collections")
 @Controller("/collection")
@@ -45,6 +46,9 @@ class CollectionController(
         @Parameter(description = "Pageable properties")
         @QueryValue(defaultValue = "null") pageable: Pageable?
     ) = collectionRepository.findAll(pageable ?: Pageable.UNPAGED)
+        .flatMapMany {
+            it.toFlux().map { CollectionDTO(it) }
+        }
 
     @Operation(summary = "Get collection information")
     @ApiResponses(
@@ -95,8 +99,10 @@ class CollectionController(
         @QueryValue(defaultValue = "null") pageable: Pageable?
     ) =
         collectionRepository.findByAddressStd(MsgAddressIntStd(address))
-            .flatMap { collection ->
-                itemRepository.findByCollection(collection, pageable ?: Pageable.UNPAGED)
-                    .map { it.map { ItemDTO(it, collection) } }
-            }.flatMapIterable { it }
+            .flatMapMany { collection ->
+                itemRepository.findByCollection(collection.address, pageable ?: Pageable.UNPAGED)
+                    .flatMapMany {
+                        it.toFlux().map { ItemDTO(it, collection) }
+                    }
+            }
 }

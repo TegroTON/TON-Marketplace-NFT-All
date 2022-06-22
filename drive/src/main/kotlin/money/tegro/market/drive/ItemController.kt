@@ -14,13 +14,16 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import money.tegro.market.core.dto.ItemDTO
+import money.tegro.market.core.repository.CollectionRepository
 import money.tegro.market.core.repository.ItemRepository
 import money.tegro.market.core.repository.findByAddressStd
 import org.ton.block.MsgAddressIntStd
+import reactor.kotlin.core.publisher.toFlux
 
 @Tag(name = "Item", description = "The API to get and interact with NFT items")
 @Controller("/item")
 class ItemController(
+    val collectionRepository: CollectionRepository,
     val itemRepository: ItemRepository,
 ) {
     @Operation(summary = "Get all items in the database")
@@ -44,7 +47,11 @@ class ItemController(
         )
         @QueryValue(defaultValue = "null") pageable: Pageable?
     ) =
-        itemRepository.findAll(pageable ?: Pageable.UNPAGED).flatMapIterable { it }
+        itemRepository.findAll(pageable ?: Pageable.UNPAGED).flatMapMany {
+            it.toFlux().map { item ->
+                ItemDTO(item, item.collection?.let { collectionRepository.findById(it).block() })
+            }
+        }
 
 
     @Operation(summary = "Get item information")
@@ -70,5 +77,5 @@ class ItemController(
         @PathVariable address: String
     ) =
         itemRepository.findByAddressStd(MsgAddressIntStd(address))
-            .map { ItemDTO(it, it.collection) }
+            .map { ItemDTO(it, it.collection?.let { collectionRepository.findById(it).block() }) }
 }
