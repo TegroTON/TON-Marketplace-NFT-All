@@ -1,27 +1,31 @@
 package money.tegro.market.tool
 
-import com.github.ajalt.clikt.core.CliktCommand
-import com.github.ajalt.clikt.parameters.arguments.argument
-import com.github.ajalt.clikt.parameters.arguments.multiple
+import jakarta.inject.Inject
 import kotlinx.coroutines.runBlocking
+import money.tegro.market.blockchain.client.ResilientLiteClient
 import money.tegro.market.blockchain.nft.*
 import org.ton.block.MsgAddressIntStd
 import org.ton.crypto.hex
+import org.ton.lite.api.LiteApi
+import picocli.CommandLine
+import picocli.CommandLine.Parameters
 import kotlin.math.pow
 
-class QueryItemCommand :
-    CliktCommand(name = "query", help = "Query blockchain for the information about NFT items") {
-    private val addresses by argument(
-        name = "addresses",
-        help = "Addresses of the items to query"
-    ).multiple(required = true)
+@CommandLine.Command(name = "query-item", description = ["Query api/blockchain for the information about NFT items"])
+class QueryItemCommand : Runnable {
+    @Inject
+    private lateinit var liteApi: LiteApi
+
+    @Parameters(description = ["Addresses of the items to query"])
+    private lateinit var addresses: List<String>
 
     override fun run() {
         runBlocking {
+            (liteApi as ResilientLiteClient).connect()
             for (addressStr in addresses) {
                 val address = MsgAddressIntStd(addressStr)
                 println("Querying an NFT item ${address.toString(userFriendly = true)}")
-                val item = NFTItem.of(address, Tool.currentLiteApi)
+                val item = NFTItem.of(address, liteApi)
                 println("\tInitialized? - ${item != null}")
                 item?.run {
                     println("\tIndex: $index")
@@ -34,7 +38,10 @@ class QueryItemCommand :
 
                     println("Querying ${if (this is NFTDeployedCollectionItem) "collection" else "item"} royalty information")
                     val royalty =
-                        NFTRoyalty.of((this as? NFTDeployedCollectionItem)?.collection ?: address, Tool.currentLiteApi)
+                        NFTRoyalty.of(
+                            (this as? NFTDeployedCollectionItem)?.collection ?: address,
+                            liteApi
+                        )
                     royalty?.run {
                         println("\tRoyalty percentage: ${value().times(100.0)}%")
                         println("\tRoyalty destination: ${destination.toString(userFriendly = true)}")
@@ -43,7 +50,7 @@ class QueryItemCommand :
                     }
 
                     println("Querying owner of this item")
-                    NFTSale.of(owner, Tool.currentLiteApi)?.run {
+                    NFTSale.of(owner, liteApi)?.run {
                         println("\tOwner account ${this.address.toString(userFriendly = true)} implements an NFT-sale contract")
                         println("\tMarketplace: ${marketplace.toString(userFriendly = true)}")
                         println("\tSeller: ${owner.toString(userFriendly = true)}")
@@ -54,7 +61,7 @@ class QueryItemCommand :
                     }
 
                     println("Querying item metadata")
-                    NFTMetadata.of(content(Tool.currentLiteApi)).run {
+                    NFTMetadata.of(content(liteApi)).run {
                         println("\tName: $name")
                         println("\tDescription: $description")
                         println("\tImage: $image")

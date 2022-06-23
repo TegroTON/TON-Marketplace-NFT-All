@@ -1,59 +1,72 @@
 package money.tegro.market.tool
 
-import com.github.ajalt.clikt.core.CliktCommand
-import com.github.ajalt.clikt.parameters.options.default
-import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.clikt.parameters.options.required
-import com.github.ajalt.clikt.parameters.types.long
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import money.tegro.market.blockchain.client.ResilientLiteClient
 import money.tegro.market.blockchain.nft.NFTItem
 import org.ton.api.pk.PrivateKeyEd25519
 import org.ton.block.*
 import org.ton.cell.Cell
 import org.ton.cell.CellBuilder
 import org.ton.crypto.base64
+import org.ton.lite.api.LiteApi
 import org.ton.smartcontract.wallet.v1.WalletV1R3
 import org.ton.tlb.constructor.AnyTlbConstructor
 import org.ton.tlb.constructor.tlbCodec
 import org.ton.tlb.storeTlb
+import picocli.CommandLine
 import kotlin.system.exitProcess
 
-class TransferItemCommand :
-    CliktCommand(name = "transfer", help = "Transfer an item to another account") {
-    private val privateKey by option("--private-key", help = "Your wallet's private key (base64)").required()
-    private val itemAddress by option("--item", help = "Item that is to be transferred").required()
 
-    private val newOwnerAddress by option("--new-owner", help = "New owner's address").required()
+@CommandLine.Command(name = "transfer", description = ["Transfer an item to another account"])
+class TransferCommand(
+) : Runnable {
+    private lateinit var liteApi: LiteApi
 
-    private val responseDestination by option(
-        "--response-destination",
-        help = "Address to send response confirmation to, defaults to your wallet's address"
+    @CommandLine.Parameters(description = ["Addresses of the items to query"])
+    private lateinit var addresses: List<String>
+
+    @CommandLine.Option(names = ["--private-key"], description = ["Your wallet's private key (base64)"])
+    private lateinit var privateKey: String
+
+    @CommandLine.Option(names = ["--item"], description = ["Item that will be transferred"])
+    private lateinit var itemAddress: String
+
+    @CommandLine.Option(names = ["--destination"], description = ["Address that the item will be transferred to"])
+    private lateinit var destinationAddress: String
+
+    @CommandLine.Option(
+        names = ["--response"],
+        description = ["Address to send confirmation to, defaults to your wallet's address"]
     )
-    private val forwardPayload by option(
-        "--forward-payload",
-        help = "Base64-encoded payload to be sent to the response destination alongside the confirmation"
-    )
-    private val sendAmount by option(
-        "--send-amount",
-        help = "Amount that is sent to the NFT item contract, in nanotons"
-    ).long()
-        .default(100_000_000L)
-    private val forwardAmount by option(
-        "--forward-amount",
-        help = "Amount that is sent to the new owner, in nanotons"
-    ).long()
-        .default(10_000_000L)
+    private var responseAddress: String? = null
 
-    private val queryId by option("--query-id", help = "Querry ID of the outbound message").long().default(0L)
+    @CommandLine.Option(
+        names = ["--payload"],
+        description = ["Extra base64-encoded payload that will be sent to the response address"]
+    )
+    private var payload: String? = null
+
+    @CommandLine.Option(
+        names = ["--send"],
+        description = ["Amount of nanotons that will be sent to the NFT item contract"]
+    )
+    private var sendAmount: Long = 100_000_000L
+
+    @CommandLine.Option(names = ["--forward"], description = ["Amount of nanotons that will be sent to the new owners"])
+    private var forwardAmount: Long = 10_000_000L
+
+    @CommandLine.Option(names = ["--query-id"], description = ["Query id"])
+    private var queryId: Long = 0L
 
     override fun run() {
         runBlocking {
-            val wallet = WalletV1R3(Tool.currentLiteApi, PrivateKeyEd25519(base64(privateKey)))
+            (liteApi as ResilientLiteClient).connect()
+            val wallet = WalletV1R3(liteApi, PrivateKeyEd25519(base64(privateKey)))
             println("Your wallet address is ${wallet.address().toString(userFriendly = true)}")
 
             println("Querying item ${MsgAddressIntStd(itemAddress).toString(userFriendly = true)} information")
-            val item = NFTItem.of(MsgAddressIntStd(itemAddress), Tool.currentLiteApi) ?: run {
+            val item = NFTItem.of(MsgAddressIntStd(itemAddress), liteApi) ?: run {
                 println("No such item, quitting")
                 exitProcess(-1)
             }
@@ -64,7 +77,7 @@ class TransferItemCommand :
                 exitProcess(-1)
             }
 
-            val newOwner = MsgAddressIntStd(newOwnerAddress)
+            val newOwner = MsgAddressIntStd(destinationAddress)
             println(
                 "Preparing a message to the item with a request to transfer item to ${newOwner.toString(userFriendly = true)}"
             )
@@ -90,7 +103,7 @@ class TransferItemCommand :
                                 storeTlb(MsgAddress.tlbCodec(), newOwner) // new owner
                                 storeTlb(
                                     MsgAddress.tlbCodec(),
-                                    responseDestination?.let { MsgAddressIntStd(it) } ?: wallet.address()
+                                    responseAddress?.let { MsgAddressIntStd(it) } ?: wallet.address()
                                 ) // response destination
                                 // in_msg_body~load_int(1); ;; this nft don't use custom_payload
                                 // bruh moment
@@ -103,7 +116,7 @@ class TransferItemCommand :
                                     Either.of(
                                         null,
                                         CellBuilder.createCell {
-                                            forwardPayload?.let { storeBytes(base64(it)) }
+                                            payload?.let { storeBytes(base64(it)) }
                                         }
                                     )
                                 )
@@ -122,7 +135,7 @@ class TransferItemCommand :
             }
 
             println("Sending the message")
-            val result = Tool.currentLiteApi.sendMessage(
+            val result = liteApi.sendMessage(
                 Message(
                     CommonMsgInfo.ExtInMsgInfo(wallet.address()),
                     init = null,
@@ -134,7 +147,7 @@ class TransferItemCommand :
             runBlocking { delay(10000L) }
 
             println("Checking if item was correctly transferred")
-            val itemUpdated = NFTItem.of(item.address, Tool.currentLiteApi)
+            val itemUpdated = NFTItem.of(item.address, liteApi)
             println("Tranfer ${item.owner.toString(userFriendly = true)} -> ${itemUpdated?.owner?.toString(userFriendly = true)}")
             if (itemUpdated != null && itemUpdated.owner == newOwner) {
                 println("Huge success!")

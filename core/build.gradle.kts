@@ -27,7 +27,10 @@ dependencies {
     implementation(libs.jakarta.annotation)
     implementation(libs.swagger.annotations)
     implementation(libs.reflect)
+    implementation(libs.logging)
 
     implementation(libs.micronaut.validation)
     implementation(libs.ton)
+
+    implementation(projects.blockchain)
 }
