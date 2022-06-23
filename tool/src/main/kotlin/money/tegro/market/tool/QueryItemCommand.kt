@@ -1,20 +1,29 @@
 package money.tegro.market.tool
 
 import jakarta.inject.Inject
+import kotlinx.coroutines.reactor.awaitSingleOrNull
+import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
 import money.tegro.market.blockchain.client.ResilientLiteClient
-import money.tegro.market.blockchain.nft.*
+import money.tegro.market.blockchain.nft.NFTDeployedCollectionItem
+import money.tegro.market.blockchain.nft.NFTItem
+import money.tegro.market.blockchain.nft.NFTMetadata
+import money.tegro.market.blockchain.nft.NFTRoyalty
+import money.tegro.market.core.dto.ItemDTO
+import money.tegro.market.core.dto.RoyaltyDTO
+import money.tegro.market.core.dto.toSafeBounceable
 import org.ton.block.MsgAddressIntStd
-import org.ton.crypto.hex
 import org.ton.lite.api.LiteApi
 import picocli.CommandLine
 import picocli.CommandLine.Parameters
-import kotlin.math.pow
 
 @CommandLine.Command(name = "query-item", description = ["Query api/blockchain for the information about NFT items"])
 class QueryItemCommand : Runnable {
     @Inject
     private lateinit var liteApi: LiteApi
+
+    @Inject
+    private lateinit var client: ItemClient
 
     @Parameters(description = ["Addresses of the items to query"])
     private lateinit var addresses: List<String>
@@ -25,54 +34,40 @@ class QueryItemCommand : Runnable {
             for (addressStr in addresses) {
                 val address = MsgAddressIntStd(addressStr)
                 println("Querying an NFT item ${address.toString(userFriendly = true)}")
-                val item = NFTItem.of(address, liteApi)
-                println("\tInitialized? - ${item != null}")
-                item?.run {
-                    println("\tIndex: $index")
-                    println("\tBelongs to a collection?: ${this is NFTDeployedCollectionItem}")
-                    (this as? NFTDeployedCollectionItem)?.run {
-                        println("\tCollection address: ${collection.toString(userFriendly = true)}")
-                    }
-
-                    println("\tOwner Address: ${owner.toString(userFriendly = true)}")
-
-                    println("Querying ${if (this is NFTDeployedCollectionItem) "collection" else "item"} royalty information")
-                    val royalty =
-                        NFTRoyalty.of(
-                            (this as? NFTDeployedCollectionItem)?.collection ?: address,
-                            liteApi
-                        )
-                    royalty?.run {
-                        println("\tRoyalty percentage: ${value().times(100.0)}%")
-                        println("\tRoyalty destination: ${destination.toString(userFriendly = true)}")
-                    } ?: run {
-                        println("\tNo royalty information")
-                    }
-
-                    println("Querying owner of this item")
-                    NFTSale.of(owner, liteApi)?.run {
-                        println("\tOwner account ${this.address.toString(userFriendly = true)} implements an NFT-sale contract")
-                        println("\tMarketplace: ${marketplace.toString(userFriendly = true)}")
-                        println("\tSeller: ${owner.toString(userFriendly = true)}")
-                        println("\tPrice: ${price.toFloat() / 10f.pow(9f)} TON ($price nanoTON)")
-                        println("\tMarketplace fee:  ${marketplaceFee.toFloat() / 10f.pow(9f)} TON ($marketplaceFee nanoTON)")
-                        println("\tRoyalties:  ${this.royalty?.toFloat()?.div(10f.pow(9f))} TON ($royalty nanoTON)")
-                        println("\tRoyalty destination: ${royaltyDestination?.toString(userFriendly = true)}")
-                    }
-
-                    println("Querying item metadata")
-                    NFTMetadata.of(content(liteApi)).run {
-                        println("\tName: $name")
-                        println("\tDescription: $description")
-                        println("\tImage: $image")
-                        println("\tImage data: ${imageData?.let { hex(it) }}")
-                        println("\tAttributes:")
-                        attributes.orEmpty().forEach {
-                            println("\t\t${it.trait}: ${it.value}")
-                        }
-                    }
+                client.getItem(addressStr).awaitSingleOrNull()?.let {
+                    println("Found in the Market API:")
+                    println(ppDataClass(it))
+                }
+                queryBlockchain(address).awaitSingleOrNull()?.let {
+                    println("Blockchain information:")
+                    println(ppDataClass(it))
                 }
             }
+        }
+    }
+
+    fun queryBlockchain(address: MsgAddressIntStd) = mono {
+        val item = NFTItem.of(address, liteApi)
+        val royalty = (item as? NFTDeployedCollectionItem)?.collection?.let { NFTRoyalty.of(it, liteApi) }
+            ?: NFTRoyalty.of(address, liteApi)
+        val metadata = item?.content(liteApi)?.let { NFTMetadata.of(it) }
+
+        item?.let {
+            ItemDTO(
+                address = it.address.toSafeBounceable(),
+                index = it.index,
+                collection = (it as? NFTDeployedCollectionItem)?.collection?.toSafeBounceable(),
+                owner = it.owner.toSafeBounceable(),
+                name = metadata?.name,
+                description = metadata?.description,
+                image = metadata?.image,
+                royalty = royalty?.let {
+                    RoyaltyDTO(
+                        it.numerator.toFloat() / it.denominator,
+                        it.destination.toSafeBounceable()
+                    )
+                }
+            )
         }
     }
 }

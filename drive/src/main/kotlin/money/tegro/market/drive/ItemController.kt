@@ -10,7 +10,7 @@ import money.tegro.market.core.repository.findByAddressStd
 import org.ton.block.MsgAddressIntStd
 import reactor.kotlin.core.publisher.toFlux
 
-@Controller("/item")
+@Controller("/items")
 class ItemController(
     val collectionRepository: CollectionRepository,
     val itemRepository: ItemRepository,
