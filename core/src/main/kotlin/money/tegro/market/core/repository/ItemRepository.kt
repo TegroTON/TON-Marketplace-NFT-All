@@ -16,6 +16,7 @@ abstract class ItemRepository : ReactorPageableRepository<ItemModel, AddressKey>
     BasicRepository<ItemModel>, MetadataRepository, RoyaltyRepository {
     abstract fun existsByIndexAndCollection(index: Long, collection: AddressKey): Boolean
 
+    abstract fun countByCollection(collection: AddressKey): Long
     abstract fun findByCollection(collection: AddressKey, pageable: Pageable): Mono<Page<ItemModel>>
 
     abstract fun update(

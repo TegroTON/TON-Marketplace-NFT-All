@@ -9,6 +9,7 @@ import money.tegro.market.core.dto.ItemDTO
 import money.tegro.market.core.dto.TransactionRequestDTO
 import money.tegro.market.core.dto.toSafeBounceable
 import money.tegro.market.core.operations.ItemOperations
+import money.tegro.market.core.repository.AttributeRepository
 import money.tegro.market.core.repository.CollectionRepository
 import money.tegro.market.core.repository.ItemRepository
 import money.tegro.market.core.repository.findByAddressStd
@@ -29,17 +30,28 @@ class ItemController(
 
     private val collectionRepository: CollectionRepository,
     private val itemRepository: ItemRepository,
+    private val attributeRepository: AttributeRepository,
 ) : ItemOperations {
     override fun getAll(pageable: Pageable?) =
         itemRepository.findAll(pageable ?: Pageable.UNPAGED).flatMapMany {
             it.toFlux().map { item ->
-                ItemDTO(item, item.collection?.let { collectionRepository.findById(it).block() })
+                ItemDTO(
+                    item,
+                    item.collection?.let { collectionRepository.findById(it).block() },
+                    attributeRepository.findByItem(item.address).toIterable()
+                )
             }
         }
 
     override fun getItem(item: String) =
         itemRepository.findByAddressStd(MsgAddressIntStd(item))
-            .map { ItemDTO(it, it.collection?.let { collectionRepository.findById(it).block() }) }
+            .map {
+                ItemDTO(
+                    it,
+                    it.collection?.let { collectionRepository.findById(it).block() },
+                    attributeRepository.findByItem(it.address).toIterable()
+                )
+            }
 
     override fun transferItem(
         item: String,

@@ -22,9 +22,9 @@ data class CollectionDTO(
     @field:Schema(description = "Collection royalty parameters")
     val royalty: RoyaltyDTO?,
 ) {
-    constructor(it: CollectionModel) : this(
+    constructor(it: CollectionModel, numberOfItems: Long? = it.nextItemIndex) : this(
         address = it.address.to().toSafeBounceable(),
-        size = it.nextItemIndex,
+        size = numberOfItems,
         owner = it.owner?.to()?.toSafeBounceable(),
         name = it.name,
         description = it.description,

@@ -6,10 +6,12 @@ import io.micronaut.data.r2dbc.annotation.R2dbcRepository
 import io.micronaut.data.repository.reactive.ReactorPageableRepository
 import money.tegro.market.core.key.AddressKey
 import money.tegro.market.core.model.AttributeModel
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @R2dbcRepository(dialect = Dialect.H2)
 abstract class AttributeRepository : ReactorPageableRepository<AttributeModel, Long> {
+    abstract fun findByItem(item: AddressKey): Flux<AttributeModel>
     abstract fun findByItemAndTrait(item: AddressKey, trait: String): Mono<AttributeModel>
 
     abstract fun update(
