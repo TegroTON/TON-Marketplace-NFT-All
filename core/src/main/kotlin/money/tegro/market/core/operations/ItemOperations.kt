@@ -132,6 +132,7 @@ interface ItemOperations {
             description = "Price of the item (in nanotons); This is the amount seller will receive, fees are added extra",
             required = true
         )
+        @QueryValue
         price: Long,
     ): Mono<TransactionRequestDTO>
 }

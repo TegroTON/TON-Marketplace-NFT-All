@@ -15,8 +15,8 @@ import picocli.CommandLine
 import kotlin.system.exitProcess
 
 
-@CommandLine.Command(name = "transfer", description = ["Transfer an item to another account"])
-class TransferCommand(
+@CommandLine.Command(name = "sell", description = ["Put an item up for sale"])
+class SellCommand(
 ) : Runnable {
     @Inject
     private lateinit var liteApi: LiteApi
@@ -30,8 +30,12 @@ class TransferCommand(
     @CommandLine.Option(names = ["--item"], description = ["Item that will be transferred"])
     private lateinit var itemAddress: String
 
-    @CommandLine.Option(names = ["--destination"], description = ["Address that the item will be transferred to"])
-    private lateinit var destinationAddress: String
+    @CommandLine.Option(
+        names = ["--price"],
+        description = ["Amount of nanotons you will receive if the sale was successful, doesn't include fees"],
+        required = true
+    )
+    private var price: Long = Long.MAX_VALUE
 
     override fun run() {
         runBlocking {
@@ -51,10 +55,10 @@ class TransferCommand(
                 exitProcess(-1)
             }
 
-            client.transferItem(
+            client.sellItem(
                 item.address.toSafeBounceable(),
-                MsgAddressIntStd(destinationAddress).toSafeBounceable(),
                 wallet.address().toSafeBounceable(),
+                price
             ).awaitSingle().performTransaction(wallet, liteApi)
         }
     }

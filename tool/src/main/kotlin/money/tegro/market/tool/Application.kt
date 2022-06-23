@@ -5,7 +5,7 @@ import picocli.CommandLine
 
 @CommandLine.Command(
     name = "tool",
-    subcommands = [QueryItemCommand::class, QueryCollectionCommand::class, TransferCommand::class]
+    subcommands = [QueryItemCommand::class, QueryCollectionCommand::class, TransferCommand::class, SellCommand::class]
 )
 class Application : Runnable {
     override fun run() {

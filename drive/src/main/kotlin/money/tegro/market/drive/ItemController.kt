@@ -92,17 +92,21 @@ class ItemController(
                 storeInt(0, 1) // custom_data, unused
                 storeTlb(Coins.tlbCodec(), Coins.ofNano(configuration.saleInitializationFee))
                 // Extra payload here, used by the market contract to do its magic
-                storeTlb(Coins.tlbCodec(), Coins.ofNano(price)) // Pure amount user will receive
-                storeTlb(
-                    Coins.tlbCodec(),
-                    Coins.ofNano(price * configuration.feeNumerator / configuration.feeDenominator)
-                ) // Amount taken by the marketplace
-                storeTlb(
-                    Coins.tlbCodec(),
-                    Coins.ofNano(royalty?.let { price * it.numerator * it.denominator }
-                        ?: 0L)) // Optional royalty amount
-                storeTlb(MsgAddress.tlbCodec(), royalty?.destination?.to() ?: MsgAddressExtNone) // Royalty destination
-
+                storeRef {
+                    storeTlb(Coins.tlbCodec(), Coins.ofNano(price)) // Pure amount user will receive
+                    storeTlb(
+                        Coins.tlbCodec(),
+                        Coins.ofNano(price * configuration.feeNumerator / configuration.feeDenominator)
+                    ) // Amount taken by the marketplace
+                    storeTlb(
+                        Coins.tlbCodec(),
+                        Coins.ofNano(royalty?.let { price * it.numerator * it.denominator }
+                            ?: 0L)) // Optional royalty amount
+                    storeTlb(
+                        MsgAddress.tlbCodec(),
+                        royalty?.destination?.to() ?: MsgAddressExtNone
+                    ) // Royalty destination
+                }
                 // TODO: SEVERE: UNLESS  THIS DATA IS SIGNED AND THEN CHECKED BY THE CONTRACT, IT WOULD BE POSSIBLE
                 // FOR A MALICIOUS USER TO PUT UP ITEMS FOR SALE WITH NO MARKETPLACE FEE AND/OR ROYALTY
             }.let { BagOfCells(it) }.toByteArray().let { base64(it) }
