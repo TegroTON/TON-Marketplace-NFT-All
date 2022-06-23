@@ -34,8 +34,8 @@ class ItemController(
             }
         }
 
-    override fun getItem(address: String) =
-        itemRepository.findByAddressStd(MsgAddressIntStd(address))
+    override fun getItem(item: String) =
+        itemRepository.findByAddressStd(MsgAddressIntStd(item))
             .map { ItemDTO(it, it.collection?.let { collectionRepository.findById(it).block() }) }
 
     override fun transferItem(

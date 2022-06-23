@@ -55,19 +55,46 @@ interface ItemOperations {
             )
         ]
     )
-    @Get("/{address}")
+    @Get("/{item}")
     fun getItem(
         @Parameter(
             description = "Item address, can be base64(url) or raw",
             required = true
         )
-        @PathVariable address: String
+        @PathVariable item: String
     ): Mono<ItemDTO>
 
+    @Operation(summary = "Build a message to transfer an item")
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200", description = "Successful operation",
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        array = ArraySchema(schema = Schema(implementation = TransactionRequestDTO::class))
+                    )
+                ]
+            )
+        ]
+    )
     @Get("/{item}/transfer")
     fun transferItem(
+        @Parameter(
+            description = "Item address, can be base64(url) or raw",
+            required = true
+        )
         @PathVariable item: String,
+
+        @Parameter(
+            description = "Owner's address, this is where excess coins will be returned to, can be base64(url) or raw",
+            required = true
+        )
         @QueryValue from: String,
+
+        @Parameter(
+            description = "Destination address, new owner of the item, can be base64(url) or raw"
+        )
         @QueryValue to: String,
     ): Mono<TransactionRequestDTO>
 }
