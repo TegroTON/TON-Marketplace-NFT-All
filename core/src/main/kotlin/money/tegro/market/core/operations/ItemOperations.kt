@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import money.tegro.market.core.dto.ItemDTO
+import money.tegro.market.core.dto.TransactionRequestDTO
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
@@ -62,4 +63,11 @@ interface ItemOperations {
         )
         @PathVariable address: String
     ): Mono<ItemDTO>
+
+    @Get("/{item}/transfer")
+    fun transferItem(
+        @PathVariable item: String,
+        @QueryValue from: String,
+        @QueryValue to: String,
+    ): Mono<TransactionRequestDTO>
 }
