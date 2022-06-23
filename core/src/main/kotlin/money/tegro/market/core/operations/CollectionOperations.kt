@@ -50,13 +50,13 @@ interface CollectionOperations {
             )
         ]
     )
-    @Get("/{address}")
+    @Get("/{collection}")
     fun getCollection(
         @Parameter(
             description = "Collection address, can be base64(url) or raw",
             required = true
         )
-        @PathVariable address: String
+        @PathVariable collection: String
     ): Mono<CollectionDTO>
 
     @Operation(summary = "Get collection items")
@@ -73,13 +73,14 @@ interface CollectionOperations {
             )
         ]
     )
-    @Get("/{address}/items")
+    @Get("/{collection}/items")
     fun getCollectionItems(
         @Parameter(
             description = "Collection address, can be base64(url) or raw",
             required = true
         )
-        @PathVariable address: String,
+        @PathVariable collection: String,
+        
         @Parameter(
             description = "Pageable properties"
         )

@@ -21,16 +21,16 @@ class CollectionController(
             it.toFlux().map { CollectionDTO(it) }
         }
 
-    override fun getCollection(address: String) =
-        collectionRepository.findByAddressStd(MsgAddressIntStd(address))
+    override fun getCollection(collection: String) =
+        collectionRepository.findByAddressStd(MsgAddressIntStd(collection))
             .map { CollectionDTO(it) }
 
-    override fun getCollectionItems(address: String, pageable: Pageable?) =
-        collectionRepository.findByAddressStd(MsgAddressIntStd(address))
-            .flatMapMany { collection ->
-                itemRepository.findByCollection(collection.address, pageable ?: Pageable.UNPAGED)
+    override fun getCollectionItems(collection: String, pageable: Pageable?) =
+        collectionRepository.findByAddressStd(MsgAddressIntStd(collection))
+            .flatMapMany { coll ->
+                itemRepository.findByCollection(coll.address, pageable ?: Pageable.UNPAGED)
                     .flatMapMany {
-                        it.toFlux().map { ItemDTO(it, collection) }
+                        it.toFlux().map { ItemDTO(it, coll) }
                     }
             }
 }
