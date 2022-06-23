@@ -87,14 +87,14 @@ interface ItemOperations {
         @PathVariable item: String,
 
         @Parameter(
-            description = "Owner's address, this is where excess coins will be returned to, can be base64(url) or raw",
+            description = "Destination address, new owner of the item, can be base64(url) or raw",
             required = true
         )
-        @QueryValue from: String,
+        @QueryValue to: String,
 
         @Parameter(
-            description = "Destination address, new owner of the item, can be base64(url) or raw"
+            description = "Address were rest of the coins is sent, can be base64(url) or raw or null",
         )
-        @QueryValue to: String,
+        @QueryValue response: String?,
     ): Mono<TransactionRequestDTO>
 }

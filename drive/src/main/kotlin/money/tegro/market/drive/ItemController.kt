@@ -11,13 +11,12 @@ import money.tegro.market.core.repository.CollectionRepository
 import money.tegro.market.core.repository.ItemRepository
 import money.tegro.market.core.repository.findByAddressStd
 import org.ton.block.Coins
-import org.ton.block.Either
 import org.ton.block.MsgAddress
+import org.ton.block.MsgAddressExtNone
 import org.ton.block.MsgAddressIntStd
-import org.ton.cell.Cell
+import org.ton.boc.BagOfCells
 import org.ton.cell.CellBuilder
 import org.ton.crypto.base64
-import org.ton.tlb.constructor.tlbCodec
 import org.ton.tlb.storeTlb
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toFlux
@@ -40,8 +39,8 @@ class ItemController(
 
     override fun transferItem(
         item: String,
-        from: String,
         to: String,
+        response: String?,
     ): Mono<TransactionRequestDTO> = mono {
         TransactionRequestDTO(
             to = MsgAddressIntStd(item).toSafeBounceable(),
@@ -51,16 +50,14 @@ class ItemController(
                 storeUInt(0x5fcc3d14, 32) // OP, transfer
                 storeUInt(0, 64) // Query id
                 storeTlb(MsgAddress.tlbCodec(), MsgAddressIntStd(to)) // new owner
-                storeTlb(MsgAddress.tlbCodec(), MsgAddressIntStd(from)) // response destination
-                // in_msg_body~load_int(1); ;; this nft don't use custom_payload
-                // bruh moment
-                storeInt(0, 1)
-                storeTlb(Coins.tlbCodec(), Coins.ofNano(6_900_000)) // 0.0069 because funny, forward amount
                 storeTlb(
-                    Either.tlbCodec(Cell.tlbCodec(), Cell.tlbCodec()),
-                    Either.of(Cell.of(), null)
-                )
-            }.bits.toByteArray().let { base64(it) }
+                    MsgAddress.tlbCodec(),
+                    response?.let { MsgAddressIntStd(it) }
+                        ?: MsgAddressExtNone) // response destination. Rest of coins is sent there
+                storeInt(0, 1) // custom_data, unused
+                storeTlb(Coins.tlbCodec(), Coins.ofNano(6_900_000)) // 0.0069 because funny, forward amount
+                // Extra payload here, unused in this case
+            }.let { BagOfCells(it) }.toByteArray().let { base64(it) }
         )
     }
 }

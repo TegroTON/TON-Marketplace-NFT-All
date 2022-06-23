@@ -7,8 +7,8 @@ import money.tegro.market.blockchain.client.ResilientLiteClient
 import money.tegro.market.blockchain.nft.NFTItem
 import money.tegro.market.core.dto.toSafeBounceable
 import org.ton.api.pk.PrivateKeyEd25519
-import org.ton.bitstring.BitString
 import org.ton.block.*
+import org.ton.boc.BagOfCells
 import org.ton.cell.Cell
 import org.ton.cell.CellBuilder
 import org.ton.crypto.base64
@@ -58,8 +58,8 @@ class TransferCommand(
 
             client.transferItem(
                 item.address.toSafeBounceable(),
-                wallet.address().toSafeBounceable(),
                 MsgAddressIntStd(destinationAddress).toSafeBounceable(),
+                wallet.address().toSafeBounceable(),
             ).awaitSingle().let {
                 val message = wallet.createSigningMessage(wallet.seqno()) {
                     storeUInt(3, 8) // send mode
@@ -77,7 +77,7 @@ class TransferCommand(
                                     )
                                 ),
                                 init = null,
-                                body = it.payload?.let { Cell.of(BitString.of(base64(it))) } ?: Cell.of(),
+                                body = it.payload?.let { BagOfCells(base64(it)) }?.roots?.first() ?: Cell.of(),
                                 storeBodyInRef = true,
                             )
                         )
