@@ -97,4 +97,41 @@ interface ItemOperations {
         )
         @QueryValue response: String?,
     ): Mono<TransactionRequestDTO>
+
+    @Operation(summary = "Build a message to put an item up for sale")
+    @ApiResponses(
+        value = [
+            ApiResponse(
+                responseCode = "200", description = "Successful operation",
+                content = [
+                    Content(
+                        mediaType = "application/json",
+                        array = ArraySchema(schema = Schema(implementation = TransactionRequestDTO::class))
+                    )
+                ]
+            )
+        ]
+    )
+    @Get("/{item}/sell")
+    fun sellItem(
+        @Parameter(
+            description = "Item address, can be base64(url) or raw",
+            required = true
+        )
+        @PathVariable
+        item: String,
+
+        @Parameter(
+            description = "Address were rest of the coins is sent, usually it's current item owner, can be base64(url) or raw",
+            required = true
+        )
+        @QueryValue
+        from: String,
+
+        @Parameter(
+            description = "Price of the item (in nanotons); This is the amount seller will receive, fees are added extra",
+            required = true
+        )
+        price: Long,
+    ): Mono<TransactionRequestDTO>
 }
