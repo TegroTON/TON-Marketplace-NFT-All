@@ -3,15 +3,14 @@
 
 int min_gas_amount() asm "1000000000 PUSHINT"; ;; 1 TON
 
-(slice, slice, slice, int, cell, int) load_data() inline {
+(slice, slice, slice, int, cell) load_data() inline {
     var ds = get_data().begin_parse();
     return
             (ds~load_msg_addr(), ;; marketplace_address
                     ds~load_msg_addr(), ;; nft_address
                     ds~load_msg_addr(), ;; nft_owner_address
                     ds~load_coins(), ;; full_price
-                    ds~load_ref(), ;; fees_cell
-                    ds~load_uint(1) ;; initialization flag, used to prevent replay attacks on recv_external
+                    ds~load_ref() ;; fees_cell
             );
 }
 
@@ -22,6 +21,16 @@ int min_gas_amount() asm "1000000000 PUSHINT"; ;; 1 TON
                     ds~load_msg_addr(), ;; royalty_address
                     ds~load_coins() ;; royalty_amount
             );
+}
+
+() save_data(slice marketplace_address, slice nft_address, slice nft_owner_address, int full_price, cell fees_cell) impure inline {
+    set_data(begin_cell()
+            .store_slice(marketplace_address)
+            .store_slice(nft_address)
+            .store_slice(nft_owner_address)
+            .store_coins(full_price)
+            .store_ref(fees_cell)
+            .end_cell());
 }
 
 () buy(int my_balance, slice marketplace_address, slice nft_address, slice nft_owner_address, int full_price, cell fees_cell, int msg_value, slice sender_address, int query_id) impure {
@@ -82,8 +91,26 @@ int min_gas_amount() asm "1000000000 PUSHINT"; ;; 1 TON
 
     slice sender_address = cs~load_msg_addr();
 
-    var (marketplace_address, nft_address, nft_owner_address, full_price, fees_cell, initialized) = load_data();
-    throw_unless(69, initialized == 1);
+    var (marketplace_address, nft_address, nft_owner_address, full_price, fees_cell) = load_data();
+    var is_initialized = nft_owner_address.slice_bits() > 2; ;; not initialized if null address
+
+    if (~ is_initialized) {
+
+        if (equal_slices(sender_address, marketplace_address)) {
+            return (); ;; just accept coins on deploy
+        }
+
+        throw_unless(500, equal_slices(sender_address, nft_address));
+        int op = in_msg_body~load_uint(32);
+        throw_unless(501, op == op::ownership_assigned());
+        int query_id = in_msg_body~load_uint(64);
+        slice prev_owner_address = in_msg_body~load_msg_addr();
+
+        save_data(marketplace_address, nft_address, prev_owner_address, full_price, fees_cell);
+
+        return ();
+
+    }
 
     int op = 0;
     if (in_msg_body.slice_empty?()) {
@@ -136,21 +163,11 @@ int min_gas_amount() asm "1000000000 PUSHINT"; ;; 1 TON
 }
 
 () recv_external(slice in_msg) impure {
-    var (marketplace_address, nft_address, nft_owner_address, full_price, fees_cell, initialized) = load_data();
-    throw_unless(69, initialized == 0);
-    accept_message();
-    set_data(begin_cell()
-            .store_slice(marketplace_address)
-            .store_slice(nft_address)
-            .store_slice(nft_owner_address)
-            .store_coins(full_price)
-            .store_ref(fees_cell)
-            .store_uint(1, 1) ;; Initialized now
-            .end_cell());
+    
 }
 
 (slice, slice, slice, int, int, slice, int) get_sale_data() method_id {
-    var (marketplace_address, nft_address, nft_owner_address, full_price, fees_cell, initialized) = load_data();
+    var (marketplace_address, nft_address, nft_owner_address, full_price, fees_cell) = load_data();
     var (marketplace_fee, royalty_address, royalty_amount) = load_fees(fees_cell);
     return (marketplace_address, nft_address, nft_owner_address, full_price, marketplace_fee, royalty_address, royalty_amount);
 }
