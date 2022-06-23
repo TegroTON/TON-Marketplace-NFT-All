@@ -5,10 +5,10 @@ import money.tegro.market.core.model.RoyaltyModel
 
 @Schema(name = "Royalty", description = "Royalty information related to a specific item/collection")
 data class RoyaltyDTO(
-    @Schema(description = "Royalty value: 0 - no royalty, 0.15 - royalty of 15%")
+    @get:Schema(description = "Royalty value: 0 - no royalty, 0.15 - royalty of 15%")
     val value: Float,
 
-    @Schema(description = "Address, to which royalty will be sent. Always base64url, bounceable")
+    @get:Schema(description = "Address, to which royalty will be sent. Always base64url, bounceable")
     val destination: String?,
 ) {
     companion object {
