@@ -40,3 +40,10 @@ sidorovich:
     - token-contract/nft/params.fc
     - token-contract/nft/op-codes.fc
     - func/sidorovich.fc
+
+bazaar:
+  func:
+    - func/stdlib_update.fc
+    - token-contract/nft/params.fc
+    - token-contract/nft/op-codes.fc
+    - func/bazaar.fc

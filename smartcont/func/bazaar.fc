@@ -1,0 +1,71 @@
+;; NFT marketplace smart contract
+;; Improved and enhanced
+;; NOT READY FOR PRODUCTION I SWEAR TO GOD DO NOT TRY USING IT IN THE MAINNET
+
+int deploy_amount() asm "50000000 PUSHINT"; ;; 0.05 TON
+
+(slice, cell) load_data() inline {
+    var ds = get_data().begin_parse();
+    return
+            (ds~load_msg_addr(), ;; owner_address
+                    ds~load_ref() ;; sale_code
+            );
+}
+
+() recv_internal(int msg_value, cell in_msg_full, slice in_msg_body) impure {
+    if (in_msg_body.slice_empty?()) { ;; ignore empty messages
+        return ();
+    }
+    slice cs = in_msg_full.begin_parse();
+    int flags = cs~load_uint(4);
+
+    if (flags & 1) { ;; ignore all bounced messages
+        return ();
+    }
+    slice sender_address = cs~load_msg_addr();
+
+    var (owner_address, sale_code) = load_data();
+
+    int op = in_msg_body~load_uint(32);
+    int query_id = in_msg_body~load_uint(64);
+    if(op == op::ownership_assigned()) { ;; It's showtime
+        slice prev_owner_address = in_msg_body~load_msg_addr(); ;; Previous owner is the account that put item up for sale
+        slice payload = in_msg_body~load_ref().begin_parse(); ;; Load all of the necessary info
+
+        int price = payload~load_coins(); ;; What seller will receive on a successful sale
+        int marketplace_fee = payload~load_coins(); ;; Amount the marketplace receives
+        slice royalty_address = payload~load_msg_addr(); ;; Where royalties will be sent
+        int royalty_amount = payload~load_coins(); ;; Amount sent to the royalty_address
+
+        cell fees_cell = begin_cell()
+                .store_coins(marketplace_fee)
+                .store_slice(royalty_address)
+                .store_coins(royalty_amount)
+                .end_cell();
+
+        cell sale_data = begin_cell()
+                .store_slice(my_address()) ;; marketplace_address
+                .store_slice(sender_address) ;; nft_address
+                .store_slice(prev_owner_address) ;; nft_owner_address
+                .store_coins(price + marketplace_fee + royalty_amount)
+                .store_ref(fees_cell)
+                .end_cell();
+
+        cell state_init = begin_cell().store_uint(0, 2).store_dict(sale_code).store_dict(sale_data).store_uint(0, 1).end_cell();
+        int state_init_hash = cell_hash(state_init);
+        slice dest_address = begin_cell().store_int(0, 8).store_uint(state_init_hash, 256).end_cell().begin_parse();
+
+        var msg = begin_cell()
+                .store_uint(0x18, 6)
+                .store_uint(4, 3).store_slice(dest_address)
+                .store_grams(deploy_amount())
+                .store_uint(4 + 2 + 1, 1 + 4 + 4 + 64 + 32 + 1 + 1 + 1)
+                .store_ref(state_init); ;; No body
+        send_raw_message(msg.end_cell(), 1); ;; paying fees, revert on errors
+    }
+
+    throw(0xFFFF);
+}
+
+() recv_external(slice in_msg) impure {
+}
