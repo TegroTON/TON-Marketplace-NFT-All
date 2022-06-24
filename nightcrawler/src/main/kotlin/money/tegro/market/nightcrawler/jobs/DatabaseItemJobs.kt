@@ -1,10 +1,14 @@
-package money.tegro.market.nightcrawler
+package money.tegro.market.nightcrawler.jobs
 
 import io.micronaut.scheduling.annotation.Scheduled
 import jakarta.inject.Singleton
 import kotlinx.coroutines.reactor.mono
 import money.tegro.market.core.model.ItemModel
 import money.tegro.market.core.repository.ItemRepository
+import money.tegro.market.nightcrawler.MetadataFetcher
+import money.tegro.market.nightcrawler.NightcrawlerConfiguration
+import money.tegro.market.nightcrawler.updater.*
+import money.tegro.market.nightcrawler.writer.*
 import mu.KLogging
 import reactor.core.publisher.BufferOverflowStrategy
 import reactor.kotlin.core.publisher.toMono
@@ -12,7 +16,7 @@ import java.time.Duration
 import java.time.Instant
 
 @Singleton
-class UpdateDatabaseItems(
+class DatabaseItemJobs(
     private val configuration: NightcrawlerConfiguration,
     private val itemRepository: ItemRepository,
 

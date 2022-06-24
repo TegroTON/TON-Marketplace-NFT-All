@@ -1,4 +1,4 @@
-package money.tegro.market.nightcrawler
+package money.tegro.market.nightcrawler.updater
 
 import jakarta.inject.Singleton
 import kotlinx.coroutines.reactor.mono

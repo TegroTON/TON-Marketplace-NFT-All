@@ -1,4 +1,4 @@
-package money.tegro.market.nightcrawler
+package money.tegro.market.nightcrawler.jobs
 
 import io.micronaut.core.io.scan.ClassPathResourceLoader
 import io.micronaut.scheduling.annotation.Scheduled
@@ -13,6 +13,14 @@ import money.tegro.market.core.model.ItemModel
 import money.tegro.market.core.repository.CollectionRepository
 import money.tegro.market.core.repository.ItemRepository
 import money.tegro.market.core.repository.existsByAddressStd
+import money.tegro.market.nightcrawler.MetadataFetcher
+import money.tegro.market.nightcrawler.NightcrawlerConfiguration
+import money.tegro.market.nightcrawler.updater.CollectionUpdater
+import money.tegro.market.nightcrawler.updater.MetadataUpdater
+import money.tegro.market.nightcrawler.updater.RoyaltyUpdater
+import money.tegro.market.nightcrawler.writer.CollectionWriter
+import money.tegro.market.nightcrawler.writer.MetadataWriter
+import money.tegro.market.nightcrawler.writer.RoyaltyWriter
 import mu.KLogging
 import org.ton.block.MsgAddressIntStd
 import org.ton.lite.api.LiteApi
@@ -22,7 +30,7 @@ import reactor.core.scheduler.Schedulers
 import reactor.kotlin.core.publisher.toFlux
 
 @Singleton
-class UpdateDatabaseCollections(
+class DatabaseCollectionJobs(
     private val configuration: NightcrawlerConfiguration,
 
     private val resourceLoader: ClassPathResourceLoader,

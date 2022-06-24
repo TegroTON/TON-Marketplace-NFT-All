@@ -1,4 +1,4 @@
-package money.tegro.market.nightcrawler
+package money.tegro.market.nightcrawler.writer
 
 import jakarta.inject.Singleton
 import money.tegro.market.core.model.RoyaltyModel
