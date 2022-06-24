@@ -14,7 +14,7 @@ import org.reactivestreams.Publisher
 import org.ton.lite.api.LiteApi
 import java.time.Instant
 
-open class RoyaltyUpdater<M : RoyaltyModel>(
+abstract class RoyaltyUpdater<M : RoyaltyModel>(
     private val liteApi: LiteApi,
 ) : java.util.function.Function<M, Publisher<M>> {
     init {
@@ -23,21 +23,28 @@ open class RoyaltyUpdater<M : RoyaltyModel>(
         }
     }
 
+    abstract fun copy(it: M): M // Similar to what we do in MetadataUpdater
+
     override fun apply(it: M): Publisher<M> =
         mono {
             val nftRoyalty = NFTRoyalty.of(it.address.to(), liteApi)
 
-            it.apply {
+            val new = copy(it).apply {
                 royalty = nftRoyalty?.let {
                     RoyaltyKey(it.numerator, it.denominator, AddressKey.of(it.destination))
                 }
-                royaltyModified = Instant.now() // TODO
             }
+
+            if (new == it) it else new.apply { royaltyModified = Instant.now() }
         }
 }
 
 @Singleton
-class CollectionRoyaltyUpdater(liteApi: LiteApi) : RoyaltyUpdater<CollectionModel>(liteApi)
+class CollectionRoyaltyUpdater(liteApi: LiteApi) : RoyaltyUpdater<CollectionModel>(liteApi) {
+    override fun copy(it: CollectionModel): CollectionModel = it.copy()
+}
 
 @Singleton
-class ItemRoyaltyUpdater(liteApi: LiteApi) : RoyaltyUpdater<ItemModel>(liteApi)
+class ItemRoyaltyUpdater(liteApi: LiteApi) : RoyaltyUpdater<ItemModel>(liteApi) {
+    override fun copy(it: ItemModel): ItemModel = it.copy()
+}
