@@ -16,11 +16,15 @@ import money.tegro.market.core.repository.existsByAddressStd
 import mu.KLogging
 import org.ton.block.MsgAddressIntStd
 import org.ton.lite.api.LiteApi
+import reactor.core.publisher.BufferOverflowStrategy
+import reactor.core.publisher.Flux
 import reactor.core.scheduler.Schedulers
 import reactor.kotlin.core.publisher.toFlux
 
 @Singleton
 class UpdateDatabaseCollections(
+    private val configuration: NightcrawlerConfiguration,
+
     private val resourceLoader: ClassPathResourceLoader,
     private val liteApi: LiteApi,
 
@@ -43,7 +47,6 @@ class UpdateDatabaseCollections(
         }
     }
 
-    @Scheduled(initialDelay = "0s")
     fun initializeCollections() {
         logger.info { "Loading initial collections" }
 
@@ -60,37 +63,41 @@ class UpdateDatabaseCollections(
         }
     }
 
-    @Scheduled(initialDelay = "5s", fixedDelay = "5m")
+    @Scheduled(initialDelay = "0s")
     fun updateEverything() {
+        initializeCollections()
+
         logger.info { "Updating database collections" }
 
-        val updatedCollections = collectionRepository.findAll()
+        val updatedCollections = collectionRepository.findAll().repeat()
+            .onBackpressureBuffer(69, BufferOverflowStrategy.DROP_OLDEST)
             .concatMap(collectionUpdater)
             .publish()
 
-        val a = updatedCollections
+        updatedCollections
             .subscribe(collectionWriter)
 
-        val b = updatedCollections
+        updatedCollections
             .concatMap(metadataFetcher)
             .concatMap(metadataUpdater)
             .subscribe(metadataWriter)
 
-        val c = updatedCollections
+        updatedCollections
             .concatMap(royaltyUpdater)
             .subscribe(royaltyWriter)
 
         updatedCollections.connect()
 
-        while (!a.isDisposed && !b.isDisposed && !c.isDisposed) {
-        }
+        logger.info { "Going dark" }
     }
 
-    @Scheduled(initialDelay = "10s")
+    @Scheduled(initialDelay = "0s")
     fun discoverMissingItems() {
         logger.info { "Discovering missing collection items" }
 
-        collectionRepository.findAll()
+        Flux.interval(configuration.missingItemsDiscoveryPeriod)
+            .flatMap { tick -> collectionRepository.findAll() }
+            .onBackpressureBuffer(69, BufferOverflowStrategy.DROP_OLDEST)
             .concatMap { collection ->
                 collection.nextItemIndex?.let { nextItemIndex ->
                     (0 until nextItemIndex).toFlux()
@@ -110,6 +117,8 @@ class UpdateDatabaseCollections(
             .subscribe {
                 itemRepository.save(ItemModel(it.second).apply { collection = AddressKey.of(it.first) }).subscribe()
             }
+
+        logger.info { "Going dark" }
     }
 
     companion object : KLogging()
