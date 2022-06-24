@@ -12,6 +12,7 @@ import money.tegro.market.nightcrawler.updater.*
 import money.tegro.market.nightcrawler.writer.*
 import mu.KLogging
 import reactor.core.publisher.BufferOverflowStrategy
+import reactor.core.publisher.Flux
 import reactor.core.scheduler.Schedulers
 import reactor.kotlin.core.publisher.toMono
 import java.time.Duration
@@ -42,17 +43,19 @@ class DatabaseItemJobs(
     fun updateEverything() {
         logger.info { "Updating database items" }
 
-        val updatedItems = itemRepository.findAll(Sort.of(Sort.Order.asc("updated"))).repeat()
-            .onBackpressureBuffer(configuration.backpressureBufferSize, BufferOverflowStrategy.DROP_OLDEST)
-            .publishOn(Schedulers.boundedElastic())
-            .concatMap {
-                if (Duration.between(it.updated, Instant.now()) < configuration.dataUpdateThreshold) {
-                    itemUpdater.apply(it)
-                } else {
-                    it.toMono()
+        val updatedItems =
+            Flux.interval(Duration.ZERO, configuration.itemUpdatePeriod)
+                .flatMap { itemRepository.findAll(Sort.of(Sort.Order.asc("updated"))) }
+                .onBackpressureBuffer(configuration.backpressureBufferSize, BufferOverflowStrategy.DROP_OLDEST)
+                .publishOn(Schedulers.boundedElastic())
+                .concatMap {
+                    if (Duration.between(it.updated, Instant.now()) < configuration.dataUpdateThreshold) {
+                        itemUpdater.apply(it)
+                    } else {
+                        it.toMono()
+                    }
                 }
-            }
-            .publish()
+                .publish()
 
         updatedItems
             .subscribe(itemWriter)

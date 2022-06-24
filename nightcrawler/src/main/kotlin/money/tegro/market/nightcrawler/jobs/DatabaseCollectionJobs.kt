@@ -82,7 +82,6 @@ class DatabaseCollectionJobs(
         val updatedCollections =
             Flux.interval(Duration.ZERO, configuration.collectionUpdatePeriod)
                 .flatMap { collectionRepository.findAll(Sort.of(Sort.Order.asc("updated"))) }
-                .repeat()
                 .onBackpressureBuffer(configuration.backpressureBufferSize, BufferOverflowStrategy.DROP_OLDEST)
                 .publishOn(Schedulers.boundedElastic())
                 .concatMap(collectionUpdater)

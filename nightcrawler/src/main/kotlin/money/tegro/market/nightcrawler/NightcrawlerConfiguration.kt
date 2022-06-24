@@ -8,6 +8,8 @@ class NightcrawlerConfiguration {
     var backpressureBufferSize = 69
 
     var collectionUpdatePeriod = Duration.ofMinutes(30)
+    
+    var itemUpdatePeriod = Duration.ofMinutes(1)
 
     var missingItemsDiscoveryPeriod = Duration.ofMinutes(10)
 
