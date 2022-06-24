@@ -17,6 +17,7 @@ dependencies {
     kapt(libs.micronaut.http.validation)
 
     implementation(libs.micronaut.http.client)
+    implementation(libs.micronaut.http.server)
     implementation(libs.micronaut.jackson.databind)
     implementation(libs.micronaut.data.r2dbc)
     implementation(libs.micronaut.kotlin.extensions)

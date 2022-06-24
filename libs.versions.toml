@@ -52,6 +52,7 @@ micronaut-data-r2dbc = { group = "io.micronaut.data", name = "micronaut-data-r2d
 
 micronaut-inject = { group = "io.micronaut", name = "micronaut-inject-java", version.ref = "micronaut" }
 micronaut-http-client = { group = "io.micronaut", name = "micronaut-http-client", version.ref = "micronaut" }
+micronaut-http-server = { group = "io.micronaut", name = "micronaut-http-server", version.ref = "micronaut" }
 micronaut-http-server-netty = { group = "io.micronaut", name = "micronaut-http-server-netty", version.ref = "micronaut" }
 micronaut-http-validation = { group = "io.micronaut", name = "micronaut-http-validation", version.ref = "micronaut" }
 micronaut-jackson-databind = { group = "io.micronaut", name = "micronaut-jackson-databind", version.ref = "micronaut" }
