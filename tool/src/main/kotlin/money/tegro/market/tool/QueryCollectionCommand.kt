@@ -59,8 +59,6 @@ class QueryCollectionCommand : Runnable {
             owner = collection.owner.toSafeBounceable(),
             name = metadata.name,
             description = metadata.description,
-            image = metadata.image,
-            coverImage = metadata.coverImage,
             royalty = royalty?.let {
                 RoyaltyDTO(
                     it.numerator.toFloat() / it.denominator,

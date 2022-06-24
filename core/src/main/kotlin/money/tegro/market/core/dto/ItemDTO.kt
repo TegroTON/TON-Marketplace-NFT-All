@@ -25,9 +25,6 @@ data class ItemDTO(
     @get:Schema(description = "Description of the item")
     val description: String?,
 
-    @get:Schema(description = "Item image information")
-    val image: String?,
-
     @field:Schema(description = "Item attributes")
     val attributes: Map<String, String>?,
 
@@ -41,7 +38,6 @@ data class ItemDTO(
         owner = it.owner?.to()?.toSafeBounceable(),
         name = it.name,
         description = it.description,
-        image = it.image,
         attributes = attributes?.map { it.trait to it.value }?.toMap() ?: mapOf(),
         royalty = collection?.let { RoyaltyDTO.of(it) } ?: RoyaltyDTO.of(it)
     )

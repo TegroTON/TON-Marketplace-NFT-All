@@ -15,10 +15,6 @@ data class CollectionDTO(
     val name: String?,
     @get:Schema(description = "Collection description")
     val description: String?,
-    @get:Schema(description = "Collection title image information")
-    val image: String?,
-    @get:Schema(description = "Collection cover image (banner) information")
-    val coverImage: String?,
     @field:Schema(description = "Collection royalty parameters")
     val royalty: RoyaltyDTO?,
 ) {
@@ -28,8 +24,6 @@ data class CollectionDTO(
         owner = it.owner?.to()?.toSafeBounceable(),
         name = it.name,
         description = it.description,
-        image = it.image,
-        coverImage = it.coverImage,
         royalty = RoyaltyDTO.of(it)
     )
 }
