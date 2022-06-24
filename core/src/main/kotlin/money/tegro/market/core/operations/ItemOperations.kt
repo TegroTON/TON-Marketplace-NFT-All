@@ -33,12 +33,12 @@ interface ItemOperations {
             )
         ]
     )
-    @Get("/")
+    @Get("/{?pageable*}")
     fun getAll(
         @Parameter(
             description = "Pageable properties"
         )
-        @QueryValue(defaultValue = "null") pageable: Pageable?
+        pageable: Pageable
     ): Flux<ItemDTO>
 
     @Operation(summary = "Get item information")

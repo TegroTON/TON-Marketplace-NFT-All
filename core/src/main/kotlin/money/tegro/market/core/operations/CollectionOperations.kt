@@ -3,7 +3,6 @@ package money.tegro.market.core.operations
 import io.micronaut.data.model.Pageable
 import io.micronaut.http.annotation.Get
 import io.micronaut.http.annotation.PathVariable
-import io.micronaut.http.annotation.QueryValue
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.ArraySchema
@@ -33,10 +32,12 @@ interface CollectionOperations {
             )
         ]
     )
-    @Get("/")
+    @Get("/{?pageable*}")
     fun getAll(
-        @Parameter(description = "Pageable properties")
-        @QueryValue(defaultValue = "null") pageable: Pageable?
+        @Parameter(
+            description = "Pageable properties"
+        )
+        pageable: Pageable
     ): Flux<CollectionDTO>
 
     @Operation(summary = "Get collection information")
@@ -73,17 +74,17 @@ interface CollectionOperations {
             )
         ]
     )
-    @Get("/{collection}/items")
+    @Get("/{collection}/items{?pageable*}")
     fun getCollectionItems(
         @Parameter(
             description = "Collection address, can be base64(url) or raw",
             required = true
         )
         @PathVariable collection: String,
-        
+
         @Parameter(
             description = "Pageable properties"
         )
-        @QueryValue(defaultValue = "null") pageable: Pageable?
+        pageable: Pageable
     ): Flux<ItemDTO>
 }

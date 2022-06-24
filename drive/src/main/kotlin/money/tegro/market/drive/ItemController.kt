@@ -32,25 +32,30 @@ class ItemController(
     private val itemRepository: ItemRepository,
     private val attributeRepository: AttributeRepository,
 ) : ItemOperations {
-    override fun getAll(pageable: Pageable?) =
-        itemRepository.findAll(pageable ?: Pageable.UNPAGED).flatMapMany {
-            it.toFlux().map { item ->
-                ItemDTO(
-                    item,
-                    item.collection?.let { collectionRepository.findById(it).block() },
-                    attributeRepository.findByItem(item.address).toIterable()
-                )
+    override fun getAll(pageable: Pageable) =
+        itemRepository.findAll(pageable)
+            .flatMapMany {
+                it.toFlux().flatMap { item ->
+                    mono {
+                        ItemDTO(
+                            item,
+                            item.collection?.let { collectionRepository.findById(it).awaitSingle() },
+                            attributeRepository.findByItem(item.address).collectList().awaitSingle()
+                        )
+                    }
+                }
             }
-        }
 
     override fun getItem(item: String) =
         itemRepository.findByAddressStd(MsgAddressIntStd(item))
-            .map {
-                ItemDTO(
-                    it,
-                    it.collection?.let { collectionRepository.findById(it).block() },
-                    attributeRepository.findByItem(it.address).toIterable()
-                )
+            .flatMap {
+                mono {
+                    ItemDTO(
+                        it,
+                        it.collection?.let { collectionRepository.findById(it).awaitSingle() },
+                        attributeRepository.findByItem(it.address).collectList().awaitSingle()
+                    )
+                }
             }
 
     override fun transferItem(
