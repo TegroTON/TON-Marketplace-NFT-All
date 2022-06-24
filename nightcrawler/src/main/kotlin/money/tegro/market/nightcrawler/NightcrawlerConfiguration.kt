@@ -5,6 +5,8 @@ import java.time.Duration
 
 @ConfigurationProperties("money.tegro.market.nightcrawler")
 class NightcrawlerConfiguration {
+    var backpressureBufferSize = 69
+
     var missingItemsDiscoveryPeriod = Duration.ofMinutes(10)
 
     var dataUpdateThreshold = Duration.ofMinutes(30)

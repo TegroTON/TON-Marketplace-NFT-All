@@ -1,5 +1,6 @@
 package money.tegro.market.nightcrawler.jobs
 
+import io.micronaut.data.model.Sort
 import io.micronaut.scheduling.annotation.Scheduled
 import jakarta.inject.Singleton
 import kotlinx.coroutines.reactor.mono
@@ -11,6 +12,7 @@ import money.tegro.market.nightcrawler.updater.*
 import money.tegro.market.nightcrawler.writer.*
 import mu.KLogging
 import reactor.core.publisher.BufferOverflowStrategy
+import reactor.core.scheduler.Schedulers
 import reactor.kotlin.core.publisher.toMono
 import java.time.Duration
 import java.time.Instant
@@ -40,8 +42,9 @@ class DatabaseItemJobs(
     fun updateEverything() {
         logger.info { "Updating database items" }
 
-        val updatedItems = itemRepository.findAll().repeat()
-            .onBackpressureBuffer(69, BufferOverflowStrategy.DROP_OLDEST)
+        val updatedItems = itemRepository.findAll(Sort.of(Sort.Order.asc("updated"))).repeat()
+            .onBackpressureBuffer(configuration.backpressureBufferSize, BufferOverflowStrategy.DROP_OLDEST)
+            .publishOn(Schedulers.boundedElastic())
             .concatMap {
                 if (Duration.between(it.updated, Instant.now()) < configuration.dataUpdateThreshold) {
                     itemUpdater.apply(it)

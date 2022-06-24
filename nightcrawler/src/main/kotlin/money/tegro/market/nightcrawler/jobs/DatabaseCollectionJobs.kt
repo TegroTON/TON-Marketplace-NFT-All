@@ -1,6 +1,7 @@
 package money.tegro.market.nightcrawler.jobs
 
 import io.micronaut.core.io.scan.ClassPathResourceLoader
+import io.micronaut.data.model.Sort
 import io.micronaut.scheduling.annotation.Scheduled
 import jakarta.inject.Singleton
 import kotlinx.coroutines.reactor.mono
@@ -28,6 +29,7 @@ import reactor.core.publisher.BufferOverflowStrategy
 import reactor.core.publisher.Flux
 import reactor.core.scheduler.Schedulers
 import reactor.kotlin.core.publisher.toFlux
+import java.time.Duration
 
 @Singleton
 class DatabaseCollectionJobs(
@@ -77,8 +79,9 @@ class DatabaseCollectionJobs(
 
         logger.info { "Updating database collections" }
 
-        val updatedCollections = collectionRepository.findAll().repeat()
-            .onBackpressureBuffer(69, BufferOverflowStrategy.DROP_OLDEST)
+        val updatedCollections = collectionRepository.findAll(Sort.of(Sort.Order.asc("updated"))).repeat()
+            .onBackpressureBuffer(configuration.backpressureBufferSize, BufferOverflowStrategy.DROP_OLDEST)
+            .publishOn(Schedulers.boundedElastic())
             .concatMap(collectionUpdater)
             .publish()
 
@@ -103,19 +106,22 @@ class DatabaseCollectionJobs(
     fun discoverMissingItems() {
         logger.info { "Discovering missing collection items" }
 
-        Flux.interval(configuration.missingItemsDiscoveryPeriod)
-            .flatMap { tick -> collectionRepository.findAll() }
-            .onBackpressureBuffer(69, BufferOverflowStrategy.DROP_OLDEST)
+        Flux.interval(Duration.ZERO, configuration.missingItemsDiscoveryPeriod)
+            .flatMap { collectionRepository.findAll() }
+            .onBackpressureBuffer(configuration.backpressureBufferSize, BufferOverflowStrategy.DROP_OLDEST)
             .concatMap { collection ->
                 collection.nextItemIndex?.let { nextItemIndex ->
                     (0 until nextItemIndex).toFlux()
-                        // Ignore items that are already added and indexed
-                        .filter { !itemRepository.existsByIndexAndCollection(it, collection.address) }
-                        .map { collection.address.to() to it }
+                        .filterWhen {
+                            // Ignore items that are already added and indexed
+                            itemRepository.existsByIndexAndCollection(it, collection.address).map { !it }
+                        }
+                        .map {
+                            collection.address.to() to it
+                        }
                 }
             }
-            .parallel()
-            .runOn(Schedulers.boundedElastic())
+            .publishOn(Schedulers.boundedElastic())
             .concatMap {
                 mono {
                     it.first to NFTDeployedCollection.itemAddressOf(it.first, it.second, liteApi)
