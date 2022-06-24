@@ -79,11 +79,14 @@ class DatabaseCollectionJobs(
 
         logger.info { "Updating database collections" }
 
-        val updatedCollections = collectionRepository.findAll(Sort.of(Sort.Order.asc("updated"))).repeat()
-            .onBackpressureBuffer(configuration.backpressureBufferSize, BufferOverflowStrategy.DROP_OLDEST)
-            .publishOn(Schedulers.boundedElastic())
-            .concatMap(collectionUpdater)
-            .publish()
+        val updatedCollections =
+            Flux.interval(Duration.ZERO, configuration.collectionUpdatePeriod)
+                .flatMap { collectionRepository.findAll(Sort.of(Sort.Order.asc("updated"))) }
+                .repeat()
+                .onBackpressureBuffer(configuration.backpressureBufferSize, BufferOverflowStrategy.DROP_OLDEST)
+                .publishOn(Schedulers.boundedElastic())
+                .concatMap(collectionUpdater)
+                .publish()
 
         updatedCollections
             .subscribe(collectionWriter)
@@ -107,7 +110,7 @@ class DatabaseCollectionJobs(
         logger.info { "Discovering missing collection items" }
 
         Flux.interval(Duration.ZERO, configuration.missingItemsDiscoveryPeriod)
-            .flatMap { collectionRepository.findAll() }
+            .flatMap { collectionRepository.findAll(Sort.of(Sort.Order.asc("updated"))) }
             .onBackpressureBuffer(configuration.backpressureBufferSize, BufferOverflowStrategy.DROP_OLDEST)
             .concatMap { collection ->
                 collection.nextItemIndex?.let { nextItemIndex ->
