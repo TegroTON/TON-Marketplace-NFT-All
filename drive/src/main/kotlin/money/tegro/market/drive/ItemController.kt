@@ -13,10 +13,10 @@ import money.tegro.market.core.repository.AttributeRepository
 import money.tegro.market.core.repository.CollectionRepository
 import money.tegro.market.core.repository.ItemRepository
 import money.tegro.market.core.repository.findByAddressStd
+import org.ton.block.AddrNone
+import org.ton.block.AddrStd
 import org.ton.block.Coins
 import org.ton.block.MsgAddress
-import org.ton.block.MsgAddressExtNone
-import org.ton.block.MsgAddressIntStd
 import org.ton.boc.BagOfCells
 import org.ton.cell.CellBuilder
 import org.ton.crypto.base64
@@ -47,7 +47,7 @@ class ItemController(
             }
 
     override fun getItem(item: String) =
-        itemRepository.findByAddressStd(MsgAddressIntStd(item))
+        itemRepository.findByAddressStd(AddrStd(item))
             .flatMap {
                 mono {
                     ItemDTO(
@@ -64,17 +64,17 @@ class ItemController(
         response: String?,
     ): Mono<TransactionRequestDTO> = mono {
         TransactionRequestDTO(
-            to = MsgAddressIntStd(item).toSafeBounceable(),
+            to = AddrStd(item).toSafeBounceable(),
             value = 100_000_000, // 0.1 TON
             stateInit = null,
             payload = CellBuilder.createCell {
                 storeUInt(0x5fcc3d14, 32) // OP, transfer
                 storeUInt(0, 64) // Query id
-                storeTlb(MsgAddress.tlbCodec(), MsgAddressIntStd(to)) // new owner
+                storeTlb(MsgAddress.tlbCodec(), AddrStd(to)) // new owner
                 storeTlb(
                     MsgAddress.tlbCodec(),
-                    response?.let { MsgAddressIntStd(it) }
-                        ?: MsgAddressExtNone) // response destination. Rest of coins is sent there
+                    response?.let { AddrStd(it) }
+                        ?: AddrNone) // response destination. Rest of coins is sent there
                 storeInt(0, 1) // custom_data, unused
                 storeTlb(Coins.tlbCodec(), Coins.ofNano(6_900_000)) // 0.0069 because funny, forward amount
                 // Extra payload here, unused in this case
@@ -87,12 +87,12 @@ class ItemController(
         from: String,
         price: Long,
     ): Mono<TransactionRequestDTO> = mono {
-        val it = itemRepository.findByAddressStd(MsgAddressIntStd(item)).awaitSingle()
+        val it = itemRepository.findByAddressStd(AddrStd(item)).awaitSingle()
         val royalty = it.collection?.let { collectionRepository.findByAddress(it).awaitSingle().royalty }
             ?: it.royalty
 
         TransactionRequestDTO(
-            to = MsgAddressIntStd(item).toSafeBounceable(),
+            to = AddrStd(item).toSafeBounceable(),
             value = configuration.saleInitializationFee + configuration.blockchainFee,
             stateInit = null,
             payload = CellBuilder.createCell {
@@ -104,7 +104,7 @@ class ItemController(
                 ) // new owner, item is transferred to the marketplace
                 storeTlb(
                     MsgAddress.tlbCodec(),
-                    MsgAddressIntStd(from)
+                    AddrStd(from)
                 ) // response destination. Rest of coins is sent back
                 storeInt(0, 1) // custom_data, unused
                 storeTlb(Coins.tlbCodec(), Coins.ofNano(configuration.saleInitializationFee))
@@ -117,7 +117,7 @@ class ItemController(
                     ) // Amount taken by the marketplace
                     storeTlb(
                         MsgAddress.tlbCodec(),
-                        royalty?.destination?.to() ?: MsgAddressExtNone
+                        royalty?.destination?.to() ?: AddrNone
                     ) // Royalty destination
                     storeTlb(
                         Coins.tlbCodec(),

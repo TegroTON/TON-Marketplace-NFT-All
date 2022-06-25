@@ -23,7 +23,7 @@ import money.tegro.market.nightcrawler.writer.CollectionWriter
 import money.tegro.market.nightcrawler.writer.MetadataWriter
 import money.tegro.market.nightcrawler.writer.RoyaltyWriter
 import mu.KLogging
-import org.ton.block.MsgAddressIntStd
+import org.ton.block.AddrStd
 import org.ton.lite.api.LiteApi
 import reactor.core.publisher.BufferOverflowStrategy
 import reactor.core.publisher.Flux
@@ -63,7 +63,7 @@ class DatabaseCollectionJobs(
         resourceLoader.classLoader.getResource("init_collections.csv")?.readText()?.let {
             it.lineSequence()
                 .filter { it.isNotBlank() }
-                .map { MsgAddressIntStd(it) }
+                .map { AddrStd(it) }
                 .filter { !collectionRepository.existsByAddressStd(it) }
                 .forEach {
                     collectionRepository.save(CollectionModel(it)).subscribe()
@@ -121,7 +121,7 @@ class DatabaseCollectionJobs(
                         .map {
                             collection.address.to() to it
                         }
-                }
+                } ?: Flux.empty()
             }
             .publishOn(Schedulers.boundedElastic())
             .concatMap {

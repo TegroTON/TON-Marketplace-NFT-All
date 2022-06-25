@@ -12,13 +12,13 @@ import org.ton.tlb.loadTlb
 import org.ton.tlb.storeTlb
 
 interface NFTSale {
-    val address: MsgAddressIntStd
-    val marketplace: MsgAddressIntStd
-    val item: MsgAddressIntStd
-    val owner: MsgAddressIntStd
+    val address: AddrStd
+    val marketplace: AddrStd
+    val item: AddrStd
+    val owner: AddrStd
     val price: Long
     val marketplaceFee: Long
-    val royaltyDestination: MsgAddressIntStd?
+    val royaltyDestination: AddrStd?
     val royalty: Long?
 
     companion object : KLogging() {
@@ -26,7 +26,7 @@ interface NFTSale {
 
         @JvmStatic
         suspend fun of(
-            address: MsgAddressIntStd,
+            address: AddrStd,
             liteApi: LiteApi,
         ): NFTSale? {
             val referenceBlock = liteApi.getMasterchainInfo().last
@@ -47,12 +47,12 @@ interface NFTSale {
             return try {
                 NFTDeployedSale(
                     address,
-                    (result[0] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec) as MsgAddressIntStd,
-                    (result[1] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec) as MsgAddressIntStd,
-                    (result[2] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec) as MsgAddressIntStd,
+                    (result[0] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec) as AddrStd,
+                    (result[1] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec) as AddrStd,
+                    (result[2] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec) as AddrStd,
                     (result[3] as VmStackValue.TinyInt).value,
                     (result[4] as VmStackValue.TinyInt).value,
-                    (result[5] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec) as? MsgAddressIntStd,
+                    (result[5] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec) as? AddrStd,
                     (result[6] as VmStackValue.TinyInt).value,
                 )
             } catch (e: Exception) {
@@ -64,13 +64,13 @@ interface NFTSale {
 }
 
 data class NFTDeployedSale(
-    override val address: MsgAddressIntStd,
-    override val marketplace: MsgAddressIntStd,
-    override val item: MsgAddressIntStd,
-    override val owner: MsgAddressIntStd,
+    override val address: AddrStd,
+    override val marketplace: AddrStd,
+    override val item: AddrStd,
+    override val owner: AddrStd,
     override val price: Long,
     override val marketplaceFee: Long,
-    override val royaltyDestination: MsgAddressIntStd?,
+    override val royaltyDestination: AddrStd?,
     override val royalty: Long?,
 ) : NFTSale
 
@@ -78,12 +78,12 @@ data class NFTDeployedSale(
 // Custom NFT sale contract on steroids
 // Implements basic nft sale interface as well
 data class NFTStubSidorovich(
-    override val marketplace: MsgAddressIntStd,
-    override val item: MsgAddressIntStd,
-    override val owner: MsgAddressIntStd,
+    override val marketplace: AddrStd,
+    override val item: AddrStd,
+    override val owner: AddrStd,
     override val price: Long,
     override val marketplaceFee: Long,
-    override val royaltyDestination: MsgAddressIntStd?,
+    override val royaltyDestination: AddrStd?,
     override val royalty: Long?,
 
     val code: Cell = NFT_SALE_CODE,
@@ -93,8 +93,8 @@ data class NFTStubSidorovich(
     private val coinsCodec by lazy { Coins.tlbCodec() }
     private val stateInitCodec by lazy { StateInit.tlbCodec() }
 
-    override val address: MsgAddressIntStd
-        get() = MsgAddressIntStd(workchainId, CellBuilder.createCell { storeTlb(stateInitCodec, stateInit()) }.hash())
+    override val address: AddrStd
+        get() = AddrStd(workchainId, CellBuilder.createCell { storeTlb(stateInitCodec, stateInit()) }.hash())
 
     fun stateInit() = StateInit(createCode(), createData())
 
@@ -107,7 +107,7 @@ data class NFTStubSidorovich(
         storeTlb(coinsCodec, Coins.ofNano(price))
         storeRef {
             storeTlb(coinsCodec, Coins.ofNano(marketplaceFee))
-            storeTlb(msgAddressCodec, royaltyDestination ?: MsgAddressExtNone)
+            storeTlb(msgAddressCodec, royaltyDestination ?: AddrNone)
             storeTlb(coinsCodec, Coins.ofNano(royalty ?: 0))
         }
         storeUInt(0, 1) // Custom contract uses this bit to check if it was initialized

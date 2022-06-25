@@ -12,9 +12,9 @@ import org.ton.tlb.loadTlb
 import org.ton.tlb.storeTlb
 
 interface NFTItem {
-    val address: MsgAddressIntStd
+    val address: AddrStd
     val index: Long
-    val owner: MsgAddressIntStd
+    val owner: AddrStd
     val individualContent: Cell
 
     suspend fun content(liteApi: LiteApi): Cell
@@ -24,7 +24,7 @@ interface NFTItem {
 
         @JvmStatic
         suspend fun of(
-            address: MsgAddressIntStd,
+            address: AddrStd,
             liteApi: LiteApi,
         ): NFTItem? {
             val referenceBlock = liteApi.getMasterchainInfo().last
@@ -41,9 +41,9 @@ interface NFTItem {
             if ((result[0] as VmStackValue.TinyInt).value == -1L) {
                 val index = (result[1] as VmStackValue.TinyInt).value
                 val collection = (result[2] as VmStackValue.Slice).toCellSlice()
-                    .loadTlb(msgAddressCodec) as? MsgAddressIntStd
+                    .loadTlb(msgAddressCodec) as? AddrStd
                 val owner = (result[3] as VmStackValue.Slice).toCellSlice()
-                    .loadTlb(msgAddressCodec) as MsgAddressIntStd
+                    .loadTlb(msgAddressCodec) as AddrStd
                 val content = (result[4] as VmStackValue.Cell).cell
 
                 return if (collection == null) {
@@ -61,19 +61,19 @@ interface NFTItem {
 interface NFTDeployedItem : NFTItem
 
 data class NFTDeployedStandaloneItem(
-    override val address: MsgAddressIntStd,
+    override val address: AddrStd,
     override val index: Long,
-    override val owner: MsgAddressIntStd,
+    override val owner: AddrStd,
     override val individualContent: Cell,
 ) : NFTDeployedItem {
     override suspend fun content(liteApi: LiteApi) = individualContent
 }
 
 data class NFTDeployedCollectionItem(
-    override val address: MsgAddressIntStd,
+    override val address: AddrStd,
     override val index: Long,
-    val collection: MsgAddressIntStd,
-    override val owner: MsgAddressIntStd,
+    val collection: AddrStd,
+    override val owner: AddrStd,
     override val individualContent: Cell,
 ) : NFTDeployedItem {
     override suspend fun content(liteApi: LiteApi): Cell =
@@ -82,7 +82,7 @@ data class NFTDeployedCollectionItem(
     companion object : KLogging() {
         @JvmStatic
         suspend fun contentOf(
-            collection: MsgAddressIntStd,
+            collection: AddrStd,
             index: Long,
             individualContent: Cell,
             liteApi: LiteApi
@@ -118,7 +118,7 @@ interface NFTStubItem : NFTItem {
 }
 
 data class NFTStubStandaloneItem(
-    override val owner: MsgAddressIntStd,
+    override val owner: AddrStd,
     override val individualContent: Cell,
     val code: Cell = NFTStubItem.NFT_ITEM_CODE,
     val workchainId: Int = owner.workchainId,
@@ -127,8 +127,8 @@ data class NFTStubStandaloneItem(
     private val msgAddressCodec by lazy { MsgAddress.tlbCodec() }
     private val stateInitCodec by lazy { StateInit.tlbCodec() }
 
-    override val address: MsgAddressIntStd
-        get() = MsgAddressIntStd(workchainId, CellBuilder.createCell { storeTlb(stateInitCodec, stateInit()) }.hash())
+    override val address: AddrStd
+        get() = AddrStd(workchainId, CellBuilder.createCell { storeTlb(stateInitCodec, stateInit()) }.hash())
 
     override suspend fun content(liteApi: LiteApi) = individualContent
 
@@ -138,7 +138,7 @@ data class NFTStubStandaloneItem(
 
     fun createData(): Cell = CellBuilder.createCell {
         storeUInt(index, 64)
-        storeTlb(msgAddressCodec, MsgAddressExtNone)
+        storeTlb(msgAddressCodec, AddrNone)
         storeTlb(msgAddressCodec, owner)
         storeRef(individualContent)
     }

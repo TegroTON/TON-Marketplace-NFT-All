@@ -6,7 +6,7 @@ import io.micronaut.data.annotation.Relation
 import io.swagger.v3.oas.annotations.media.Schema
 import money.tegro.market.core.key.AddressKey
 import money.tegro.market.core.key.RoyaltyKey
-import org.ton.block.MsgAddressIntStd
+import org.ton.block.AddrStd
 import java.time.Instant
 
 @MappedEntity("COLLECTIONS")
@@ -43,6 +43,6 @@ data class CollectionModel(
     override var royaltyUpdated: Instant = Instant.MIN,
     override var royaltyModified: Instant = Instant.MIN,
 ) : BasicModel, MetadataModel, RoyaltyModel {
-    constructor(address: MsgAddressIntStd) : this(AddressKey.of(address))
+    constructor(address: AddrStd) : this(AddressKey.of(address))
 }
 

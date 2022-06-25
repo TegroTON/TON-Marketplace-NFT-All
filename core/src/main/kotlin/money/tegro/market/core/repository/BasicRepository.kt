@@ -2,7 +2,7 @@ package money.tegro.market.core.repository
 
 import money.tegro.market.core.key.AddressKey
 import money.tegro.market.core.model.BasicModel
-import org.ton.block.MsgAddressIntStd
+import org.ton.block.AddrStd
 import reactor.core.publisher.Mono
 
 interface BasicRepository<E : BasicModel> {
@@ -10,8 +10,8 @@ interface BasicRepository<E : BasicModel> {
     fun findByAddress(address: AddressKey): Mono<E>
 }
 
-fun <E : BasicModel> BasicRepository<E>.existsByAddressStd(address: MsgAddressIntStd) =
+fun <E : BasicModel> BasicRepository<E>.existsByAddressStd(address: AddrStd) =
     existsByAddress(AddressKey.of(address))
 
-fun <E : BasicModel> BasicRepository<E>.findByAddressStd(address: MsgAddressIntStd) =
+fun <E : BasicModel> BasicRepository<E>.findByAddressStd(address: AddrStd) =
     findByAddress(AddressKey.of(address))

@@ -9,7 +9,7 @@ import money.tegro.market.core.operations.ContentOperations
 import money.tegro.market.core.repository.CollectionRepository
 import money.tegro.market.core.repository.ItemRepository
 import money.tegro.market.core.repository.findByAddressStd
-import org.ton.block.MsgAddressIntStd
+import org.ton.block.AddrStd
 import java.io.ByteArrayInputStream
 import java.net.URL
 
@@ -20,17 +20,17 @@ class ContentController(
 ) : ContentOperations {
     override fun getCollectionImage(collection: String) =
         collectionRepository
-            .findByAddressStd(MsgAddressIntStd(collection))
+            .findByAddressStd(AddrStd(collection))
             .flatMap { mono { getImage(it) } }
 
     override fun getCollectionCoverImage(collection: String) =
         collectionRepository
-            .findByAddressStd(MsgAddressIntStd(collection))
+            .findByAddressStd(AddrStd(collection))
             .flatMap { mono { getCoverImage(it) } }
 
     override fun getItemImage(item: String) =
         itemRepository
-            .findByAddressStd(MsgAddressIntStd(item))
+            .findByAddressStd(AddrStd(item))
             .flatMap { mono { getImage(it) } }
 
     private fun getImage(model: MetadataModel) =

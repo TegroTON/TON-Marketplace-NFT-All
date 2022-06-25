@@ -8,20 +8,20 @@ import money.tegro.market.blockchain.nft.NFTSale
 import money.tegro.market.core.key.AddressKey
 import money.tegro.market.core.model.SaleModel
 import org.reactivestreams.Publisher
-import org.ton.block.MsgAddressIntStd
+import org.ton.block.AddrStd
 import org.ton.lite.api.LiteApi
 
 @Singleton
 class SaleUpdater(
     private val liteApi: LiteApi,
-) : java.util.function.Function<MsgAddressIntStd, Publisher<SaleModel>> {
+) : java.util.function.Function<AddrStd, Publisher<SaleModel>> {
     init {
         runBlocking {
             (liteApi as ResilientLiteClient).connect()
         }
     }
 
-    override fun apply(it: MsgAddressIntStd): Publisher<SaleModel> =
+    override fun apply(it: AddrStd): Publisher<SaleModel> =
         mono {
             NFTSale.of(it, liteApi)?.let { nftSale ->
                 SaleModel(

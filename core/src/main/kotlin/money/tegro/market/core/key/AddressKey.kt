@@ -2,7 +2,7 @@ package money.tegro.market.core.key
 
 import io.micronaut.data.annotation.Embeddable
 import io.micronaut.data.annotation.MappedProperty
-import org.ton.block.MsgAddressIntStd
+import org.ton.block.AddrStd
 
 @Embeddable
 data class AddressKey(
@@ -10,11 +10,11 @@ data class AddressKey(
     @MappedProperty(definition = "BINARY(32)")
     val address: ByteArray
 ) {
-    fun to() = MsgAddressIntStd(workchain, address)
+    fun to() = AddrStd(workchain, address)
 
     companion object {
         @JvmStatic
-        fun of(it: MsgAddressIntStd) = AddressKey(it.workchainId, it.address.toByteArray())
+        fun of(it: AddrStd) = AddressKey(it.workchainId, it.address.toByteArray())
     }
 
     override fun equals(other: Any?): Boolean {

@@ -11,7 +11,7 @@ import money.tegro.market.core.repository.AttributeRepository
 import money.tegro.market.core.repository.CollectionRepository
 import money.tegro.market.core.repository.ItemRepository
 import money.tegro.market.core.repository.findByAddressStd
-import org.ton.block.MsgAddressIntStd
+import org.ton.block.AddrStd
 import reactor.kotlin.core.publisher.toFlux
 
 @Controller("/collections")
@@ -26,11 +26,11 @@ class CollectionController(
         }
 
     override fun getCollection(collection: String) =
-        collectionRepository.findByAddressStd(MsgAddressIntStd(collection))
+        collectionRepository.findByAddressStd(AddrStd(collection))
             .map { CollectionDTO(it, itemRepository.countByCollection(it.address)) }
 
     override fun getCollectionItems(collection: String, pageable: Pageable) =
-        collectionRepository.findByAddressStd(MsgAddressIntStd(collection))
+        collectionRepository.findByAddressStd(AddrStd(collection))
             .flatMapMany { coll ->
                 itemRepository.findByCollection(coll.address, pageable)
                     .flatMapMany {

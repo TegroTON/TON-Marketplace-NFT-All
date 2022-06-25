@@ -12,7 +12,7 @@ import money.tegro.market.blockchain.nft.NFTRoyalty
 import money.tegro.market.core.dto.ItemDTO
 import money.tegro.market.core.dto.RoyaltyDTO
 import money.tegro.market.core.dto.toSafeBounceable
-import org.ton.block.MsgAddressIntStd
+import org.ton.block.AddrStd
 import org.ton.lite.api.LiteApi
 import picocli.CommandLine
 import picocli.CommandLine.Parameters
@@ -32,7 +32,7 @@ class QueryItemCommand : Runnable {
         runBlocking {
             (liteApi as ResilientLiteClient).connect()
             for (addressStr in addresses) {
-                val address = MsgAddressIntStd(addressStr)
+                val address = AddrStd(addressStr)
                 println("Querying an NFT item ${address.toString(userFriendly = true)}")
                 client.getItem(addressStr).awaitSingleOrNull()?.let {
                     println("Found in the Market API:")
@@ -46,7 +46,7 @@ class QueryItemCommand : Runnable {
         }
     }
 
-    fun queryBlockchain(address: MsgAddressIntStd) = mono {
+    fun queryBlockchain(address: AddrStd) = mono {
         val item = NFTItem.of(address, liteApi)
         val royalty = (item as? NFTDeployedCollectionItem)?.collection?.let { NFTRoyalty.of(it, liteApi) }
             ?: NFTRoyalty.of(address, liteApi)

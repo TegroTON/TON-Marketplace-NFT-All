@@ -7,7 +7,7 @@ import money.tegro.market.blockchain.client.ResilientLiteClient
 import money.tegro.market.blockchain.nft.NFTItem
 import money.tegro.market.core.dto.toSafeBounceable
 import org.ton.api.pk.PrivateKeyEd25519
-import org.ton.block.MsgAddressIntStd
+import org.ton.block.AddrStd
 import org.ton.crypto.base64
 import org.ton.lite.api.LiteApi
 import org.ton.smartcontract.wallet.v1.WalletV1R3
@@ -39,8 +39,8 @@ class TransferCommand(
             val wallet = WalletV1R3(liteApi, PrivateKeyEd25519(base64(privateKey)))
             println("Your wallet address is ${wallet.address().toString(userFriendly = true)}")
 
-            println("Querying item ${MsgAddressIntStd(itemAddress).toString(userFriendly = true)} information")
-            val item = NFTItem.of(MsgAddressIntStd(itemAddress), liteApi) ?: run {
+            println("Querying item ${AddrStd(itemAddress).toString(userFriendly = true)} information")
+            val item = NFTItem.of(AddrStd(itemAddress), liteApi) ?: run {
                 println("No such item, quitting")
                 exitProcess(-1)
             }
@@ -53,7 +53,7 @@ class TransferCommand(
 
             client.transferItem(
                 item.address.toSafeBounceable(),
-                MsgAddressIntStd(destinationAddress).toSafeBounceable(),
+                AddrStd(destinationAddress).toSafeBounceable(),
                 wallet.address().toSafeBounceable(),
             ).awaitSingle().performTransaction(wallet, liteApi)
         }

@@ -10,7 +10,7 @@ class SaleWriter(
     private val repository: SaleRepository
 ) : Consumer<SaleModel> {
     override fun accept(it: SaleModel) {
-        repository.findById(it.address).block()?.let { sale ->
+        repository.findById(it.address).block()?.let { _ ->
             repository.update(it).subscribe()
         } ?: run {
             repository.save(it).subscribe()

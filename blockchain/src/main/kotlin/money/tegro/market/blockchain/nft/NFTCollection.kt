@@ -3,8 +3,8 @@ package money.tegro.market.blockchain.nft
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.map
 import mu.KLogging
+import org.ton.block.AddrStd
 import org.ton.block.MsgAddress
-import org.ton.block.MsgAddressIntStd
 import org.ton.block.StateInit
 import org.ton.block.VmStackValue
 import org.ton.boc.BagOfCells
@@ -17,17 +17,17 @@ import org.ton.tlb.loadTlb
 import org.ton.tlb.storeTlb
 
 interface NFTCollection {
-    val address: MsgAddressIntStd
+    val address: AddrStd
     val nextItemIndex: Long
     val content: Cell
-    val owner: MsgAddressIntStd
+    val owner: AddrStd
 
     companion object : KLogging() {
         private val msgAddressCodec by lazy { MsgAddress.tlbCodec() }
 
         @JvmStatic
         suspend fun of(
-            address: MsgAddressIntStd,
+            address: AddrStd,
             liteClient: LiteApi,
         ): NFTDeployedCollection {
             val referenceBlock = liteClient.getMasterchainInfo().last
@@ -44,17 +44,17 @@ interface NFTCollection {
                 (result[0] as VmStackValue.TinyInt).value,
                 (result[1] as VmStackValue.Cell).cell,
                 (result[2] as VmStackValue.Slice).toCellSlice()
-                    .loadTlb(msgAddressCodec) as MsgAddressIntStd
+                    .loadTlb(msgAddressCodec) as AddrStd
             )
         }
     }
 }
 
 data class NFTDeployedCollection(
-    override val address: MsgAddressIntStd,
+    override val address: AddrStd,
     override val nextItemIndex: Long,
     override val content: Cell,
-    override val owner: MsgAddressIntStd
+    override val owner: AddrStd
 ) : NFTCollection {
     suspend fun itemAddresses(liteApi: LiteApi) =
         (0 until nextItemIndex).asFlow()
@@ -72,10 +72,10 @@ data class NFTDeployedCollection(
         private val msgAddressCodec by lazy { MsgAddress.tlbCodec() }
 
         suspend fun itemAddressOf(
-            collection: MsgAddressIntStd,
+            collection: AddrStd,
             index: Long,
             liteApi: LiteApi,
-        ): MsgAddressIntStd {
+        ): AddrStd {
             val referenceBlock = liteApi.getMasterchainInfo().last
 
             logger.debug("running method `get_nft_address_by_index` on ${collection.toString(userFriendly = true)}")
@@ -91,13 +91,13 @@ data class NFTDeployedCollection(
             require(result.exitCode == 0) { "Failed to run the method, exit code is ${result.exitCode}" }
 
             return (result.first() as VmStackValue.Slice).toCellSlice()
-                .loadTlb(msgAddressCodec) as MsgAddressIntStd
+                .loadTlb(msgAddressCodec) as AddrStd
         }
     }
 }
 
 data class NFTStubCollection(
-    override val owner: MsgAddressIntStd,
+    override val owner: AddrStd,
     val collectionContent: Cell,
     val commonContent: Cell = Cell.of(),
     val royalty: NFTRoyalty? = null,
@@ -109,8 +109,8 @@ data class NFTStubCollection(
     private val stateInitCodec by lazy { StateInit.tlbCodec() }
     private var _nextItemIndex = 0L
 
-    override val address: MsgAddressIntStd
-        get() = MsgAddressIntStd(workchainId, CellBuilder.createCell { storeTlb(stateInitCodec, stateInit()) }.hash())
+    override val address: AddrStd
+        get() = AddrStd(workchainId, CellBuilder.createCell { storeTlb(stateInitCodec, stateInit()) }.hash())
 
     override val content: Cell = collectionContent
 

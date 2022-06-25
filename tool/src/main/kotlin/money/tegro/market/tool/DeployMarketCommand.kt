@@ -45,7 +45,7 @@ class DeployMarketCommand(
             )
 
             val address =
-                MsgAddressIntStd(0, CellBuilder.createCell { storeTlb(StateInit.tlbCodec(), stateInit) }.hash())
+                AddrStd(0, CellBuilder.createCell { storeTlb(StateInit.tlbCodec(), stateInit) }.hash())
             println("Its address will be ${address.toSafeBounceable()}")
 
             val message = wallet.createSigningMessage(wallet.seqno()) {
@@ -57,7 +57,7 @@ class DeployMarketCommand(
                                 ihrDisabled = true,
                                 bounce = false,
                                 bounced = false,
-                                src = MsgAddressExtNone,
+                                src = AddrNone,
                                 dest = address,
                                 value = CurrencyCollection(
                                     coins = Coins.ofNano(amount)

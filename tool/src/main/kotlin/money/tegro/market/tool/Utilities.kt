@@ -22,8 +22,8 @@ suspend fun TransactionRequestDTO.performTransaction(wallet: WalletV1R3, liteApi
                         ihrDisabled = true,
                         bounce = it.to.startsWith("E"), // Janky way to check if bounceable
                         bounced = false,
-                        src = MsgAddressExtNone,
-                        dest = it.to.let { MsgAddressIntStd(it) },
+                        src = AddrNone,
+                        dest = it.to.let { AddrStd(it) },
                         value = CurrencyCollection(
                             coins = Coins.ofNano(it.value)
                         )
