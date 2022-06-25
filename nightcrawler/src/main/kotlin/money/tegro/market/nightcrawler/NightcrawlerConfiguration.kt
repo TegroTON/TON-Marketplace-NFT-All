@@ -7,13 +7,13 @@ import java.time.Duration
 class NightcrawlerConfiguration {
     var backpressureBufferSize = 69
 
-    var collectionUpdatePeriod = Duration.ofMinutes(30)
-    
-    var itemUpdatePeriod = Duration.ofMinutes(1)
+    var collectionUpdatePeriod: Duration = Duration.ofMinutes(30)
 
-    var missingItemsDiscoveryPeriod = Duration.ofMinutes(10)
+    var itemUpdatePeriod: Duration = Duration.ofMinutes(1)
 
-    var dataUpdateThreshold = Duration.ofMinutes(30)
-    var metadataUpdateThreshold = Duration.ofHours(12)
-    var royaltyUpdateThreshold = Duration.ofHours(24)
+    var missingItemsDiscoveryPeriod: Duration = Duration.ofMinutes(10)
+
+    var dataUpdateThreshold: Duration = Duration.ofMinutes(30)
+    var metadataUpdateThreshold: Duration = Duration.ofHours(12)
+    var royaltyUpdateThreshold: Duration = Duration.ofHours(24)
 }

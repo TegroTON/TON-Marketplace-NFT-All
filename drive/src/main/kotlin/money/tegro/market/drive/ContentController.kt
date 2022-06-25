@@ -18,17 +18,17 @@ class ContentController(
     private val collectionRepository: CollectionRepository,
     private val itemRepository: ItemRepository,
 ) : ContentOperations {
-    override fun getCollectionImage(collection: String) =
+    override fun getCollectionImage(collection: String): Mono<StreamedFile> =
         collectionRepository
             .findByAddressStd(AddrStd(collection))
             .flatMap { mono { getImage(it) } }
 
-    override fun getCollectionCoverImage(collection: String) =
+    override fun getCollectionCoverImage(collection: String): Mono<StreamedFile> =
         collectionRepository
             .findByAddressStd(AddrStd(collection))
             .flatMap { mono { getCoverImage(it) } }
 
-    override fun getItemImage(item: String) =
+    override fun getItemImage(item: String): Mono<StreamedFile> =
         itemRepository
             .findByAddressStd(AddrStd(item))
             .flatMap { mono { getImage(it) } }

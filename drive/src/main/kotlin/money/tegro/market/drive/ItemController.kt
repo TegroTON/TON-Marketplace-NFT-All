@@ -32,7 +32,7 @@ class ItemController(
     private val itemRepository: ItemRepository,
     private val attributeRepository: AttributeRepository,
 ) : ItemOperations {
-    override fun getAll(pageable: Pageable) =
+    override fun getAll(pageable: Pageable): Flux<ItemDTO> =
         itemRepository.findAll(pageable)
             .flatMapMany {
                 it.toFlux().flatMap { item ->
@@ -46,7 +46,7 @@ class ItemController(
                 }
             }
 
-    override fun getItem(item: String) =
+    override fun getItem(item: String): Mono<ItemDTO> =
         itemRepository.findByAddressStd(AddrStd(item))
             .flatMap {
                 mono {

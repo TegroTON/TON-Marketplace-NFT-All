@@ -38,7 +38,7 @@ data class ItemDTO(
         owner = it.owner?.to()?.toSafeBounceable(),
         name = it.name,
         description = it.description,
-        attributes = attributes?.map { it.trait to it.value }?.toMap() ?: mapOf(),
+        attributes = attributes?.associate { it.trait to it.value } ?: mapOf(),
         royalty = collection?.let { RoyaltyDTO.of(it) } ?: RoyaltyDTO.of(it)
     )
 }

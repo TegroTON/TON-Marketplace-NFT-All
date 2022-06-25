@@ -60,7 +60,7 @@ class QueryItemCommand : Runnable {
                 owner = it.owner.toSafeBounceable(),
                 name = metadata?.name,
                 description = metadata?.description,
-                attributes = metadata?.attributes?.map { it.trait to it.value }?.toMap() ?: mapOf(),
+                attributes = metadata?.attributes?.associate { it.trait to it.value } ?: mapOf(),
                 royalty = royalty?.let {
                     RoyaltyDTO(
                         it.numerator.toFloat() / it.denominator,

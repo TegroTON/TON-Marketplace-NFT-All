@@ -104,22 +104,22 @@ class DatabaseCollectionJobs(
         logger.info { "Going dark" }
     }
 
-    @Scheduled(initialDelay = "0s")
+    @Scheduled(initialDelay = "20s")
     fun discoverMissingItems() {
         logger.info { "Discovering missing collection items" }
 
         Flux.interval(Duration.ZERO, configuration.missingItemsDiscoveryPeriod)
             .flatMap { collectionRepository.findAll(Sort.of(Sort.Order.asc("updated"))) }
             .onBackpressureBuffer(configuration.backpressureBufferSize, BufferOverflowStrategy.DROP_OLDEST)
-            .concatMap { collection ->
-                collection.nextItemIndex?.let { nextItemIndex ->
+            .concatMap { (address, nextItemIndex1) ->
+                nextItemIndex1?.let { nextItemIndex ->
                     (0 until nextItemIndex).toFlux()
                         .filterWhen {
                             // Ignore items that are already added and indexed
-                            itemRepository.existsByIndexAndCollection(it, collection.address).map { !it }
+                            itemRepository.existsByIndexAndCollection(it, address).map { !it }
                         }
                         .map {
-                            collection.address.to() to it
+                            address.to() to it
                         }
                 } ?: Flux.empty()
             }

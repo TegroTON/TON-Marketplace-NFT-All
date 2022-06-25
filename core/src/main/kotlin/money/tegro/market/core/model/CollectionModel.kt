@@ -44,5 +44,64 @@ data class CollectionModel(
     override var royaltyModified: Instant = Instant.MIN,
 ) : BasicModel, MetadataModel, RoyaltyModel {
     constructor(address: AddrStd) : this(AddressKey.of(address))
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as CollectionModel
+
+        if (address != other.address) return false
+        if (nextItemIndex != other.nextItemIndex) return false
+        if (content != null) {
+            if (other.content == null) return false
+            if (!content.contentEquals(other.content)) return false
+        } else if (other.content != null) return false
+        if (owner != other.owner) return false
+        if (discovered != other.discovered) return false
+        if (updated != other.updated) return false
+        if (modified != other.modified) return false
+        if (name != other.name) return false
+        if (description != other.description) return false
+        if (image != other.image) return false
+        if (imageData != null) {
+            if (other.imageData == null) return false
+            if (!imageData.contentEquals(other.imageData)) return false
+        } else if (other.imageData != null) return false
+        if (coverImage != other.coverImage) return false
+        if (coverImageData != null) {
+            if (other.coverImageData == null) return false
+            if (!coverImageData.contentEquals(other.coverImageData)) return false
+        } else if (other.coverImageData != null) return false
+        if (metadataUpdated != other.metadataUpdated) return false
+        if (metadataModified != other.metadataModified) return false
+        if (royalty != other.royalty) return false
+        if (royaltyUpdated != other.royaltyUpdated) return false
+        if (royaltyModified != other.royaltyModified) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = address.hashCode()
+        result = 31 * result + (nextItemIndex?.hashCode() ?: 0)
+        result = 31 * result + (content?.contentHashCode() ?: 0)
+        result = 31 * result + (owner?.hashCode() ?: 0)
+        result = 31 * result + discovered.hashCode()
+        result = 31 * result + updated.hashCode()
+        result = 31 * result + modified.hashCode()
+        result = 31 * result + (name?.hashCode() ?: 0)
+        result = 31 * result + (description?.hashCode() ?: 0)
+        result = 31 * result + (image?.hashCode() ?: 0)
+        result = 31 * result + (imageData?.contentHashCode() ?: 0)
+        result = 31 * result + (coverImage?.hashCode() ?: 0)
+        result = 31 * result + (coverImageData?.contentHashCode() ?: 0)
+        result = 31 * result + metadataUpdated.hashCode()
+        result = 31 * result + metadataModified.hashCode()
+        result = 31 * result + (royalty?.hashCode() ?: 0)
+        result = 31 * result + royaltyUpdated.hashCode()
+        result = 31 * result + royaltyModified.hashCode()
+        return result
+    }
 }
 

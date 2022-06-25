@@ -19,6 +19,5 @@ data class AttributeModel(
     @field:Id
     @field:GeneratedValue
     var id: Long? = null
-) {
-}
+)
 

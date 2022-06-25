@@ -11,7 +11,7 @@ internal fun <T : Any> ppDataClass(data: T, indent: Int = 2): String {
     val propsInObject = klass.declaredMemberProperties
         .associate { it.name to it.get(data) }
     // extract the properties present in toString(), preserving order
-    val orderedPropsInToString = "([A-Za-z0-9_]+)=".toRegex()
+    val orderedPropsInToString = "(\\w+)=".toRegex()
         .findAll(data.toString()).map { it.groupValues[1] }
 
     return with(StringBuilder()) {

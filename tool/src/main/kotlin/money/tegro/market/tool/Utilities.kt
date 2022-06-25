@@ -18,12 +18,12 @@ suspend fun TransactionRequestDTO.performTransaction(wallet: WalletV1R3, liteApi
         storeRef {
             storeTlb(
                 MessageRelaxed.tlbCodec(AnyTlbConstructor), MessageRelaxed(
-                    info = CommonMsgInfoRelaxed.IntMsgInfo(
+                    info = CommonMsgInfoRelaxed.IntMsgInfoRelaxed(
                         ihrDisabled = true,
                         bounce = it.to.startsWith("E"), // Janky way to check if bounceable
                         bounced = false,
                         src = AddrNone,
-                        dest = it.to.let { AddrStd(it) },
+                        dest = AddrStd(it.to),
                         value = CurrencyCollection(
                             coins = Coins.ofNano(it.value)
                         )
@@ -41,7 +41,7 @@ suspend fun TransactionRequestDTO.performTransaction(wallet: WalletV1R3, liteApi
     println("Sending the message")
     liteApi.sendMessage(
         Message(
-            CommonMsgInfo.ExtInMsgInfo(wallet.address()),
+            ExtInMsgInfo(wallet.address()),
             init = null,
             body = CellBuilder.createCell {
                 storeBytes(signature)

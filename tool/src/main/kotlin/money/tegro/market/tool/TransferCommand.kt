@@ -16,8 +16,7 @@ import kotlin.system.exitProcess
 
 
 @CommandLine.Command(name = "transfer", description = ["Transfer an item to another account"])
-class TransferCommand(
-) : Runnable {
+class TransferCommand : Runnable {
     @Inject
     private lateinit var liteApi: LiteApi
 

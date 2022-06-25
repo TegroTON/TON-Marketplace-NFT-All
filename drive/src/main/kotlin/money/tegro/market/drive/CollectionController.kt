@@ -20,16 +20,16 @@ class CollectionController(
     private val itemRepository: ItemRepository,
     private val attributeRepository: AttributeRepository,
 ) : CollectionOperations {
-    override fun getAll(pageable: Pageable) = collectionRepository.findAll(pageable)
+    override fun getAll(pageable: Pageable): Flux<CollectionDTO> = collectionRepository.findAll(pageable)
         .flatMapMany {
             it.toFlux().map { CollectionDTO(it, itemRepository.countByCollection(it.address)) }
         }
 
-    override fun getCollection(collection: String) =
+    override fun getCollection(collection: String): Mono<CollectionDTO> =
         collectionRepository.findByAddressStd(AddrStd(collection))
             .map { CollectionDTO(it, itemRepository.countByCollection(it.address)) }
 
-    override fun getCollectionItems(collection: String, pageable: Pageable) =
+    override fun getCollectionItems(collection: String, pageable: Pageable): Flux<ItemDTO> =
         collectionRepository.findByAddressStd(AddrStd(collection))
             .flatMapMany { coll ->
                 itemRepository.findByCollection(coll.address, pageable)

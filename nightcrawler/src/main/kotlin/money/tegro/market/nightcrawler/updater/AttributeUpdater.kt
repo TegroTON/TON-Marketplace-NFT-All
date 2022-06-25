@@ -11,5 +11,5 @@ import reactor.kotlin.core.publisher.toFlux
 class AttributeUpdater : java.util.function.Function<Pair<ItemModel, NFTMetadata>, Publisher<AttributeModel>> {
     override fun apply(it: Pair<ItemModel, NFTMetadata>): Publisher<AttributeModel> =
         it.second.attributes.orEmpty().toFlux()
-            .map { attribute -> AttributeModel(it.first.address, attribute.trait, attribute.value) }
+            .map { (trait, value) -> AttributeModel(it.first.address, trait, value) }
 }

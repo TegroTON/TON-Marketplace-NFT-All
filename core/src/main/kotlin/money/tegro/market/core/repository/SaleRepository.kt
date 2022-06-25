@@ -8,6 +8,5 @@ import money.tegro.market.core.model.SaleModel
 
 @R2dbcRepository(dialect = Dialect.H2)
 abstract class SaleRepository : ReactorPageableRepository<SaleModel, AddressKey>,
-    BasicRepository<SaleModel> {
-}
+    BasicRepository<SaleModel>
 

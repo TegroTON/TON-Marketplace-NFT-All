@@ -19,8 +19,7 @@ import picocli.CommandLine
 
 
 @CommandLine.Command(name = "deploy-market", description = ["Deploy the main market contract"])
-class DeployMarketCommand(
-) : Runnable {
+class DeployMarketCommand : Runnable {
     @Inject
     private lateinit var liteApi: LiteApi
 
@@ -53,7 +52,7 @@ class DeployMarketCommand(
                 storeRef {
                     storeTlb(
                         MessageRelaxed.tlbCodec(AnyTlbConstructor), MessageRelaxed(
-                            info = CommonMsgInfoRelaxed.IntMsgInfo(
+                            info = CommonMsgInfoRelaxed.IntMsgInfoRelaxed(
                                 ihrDisabled = true,
                                 bounce = false,
                                 bounced = false,
@@ -81,7 +80,7 @@ class DeployMarketCommand(
             println("Sending the initialization message")
             val result = liteApi.sendMessage(
                 Message(
-                    CommonMsgInfo.ExtInMsgInfo(wallet.address()),
+                    ExtInMsgInfo(wallet.address()),
                     init = null,
                     body = body
                 )

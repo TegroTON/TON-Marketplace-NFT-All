@@ -16,8 +16,7 @@ import kotlin.system.exitProcess
 
 
 @CommandLine.Command(name = "sell", description = ["Put an item up for sale"])
-class SellCommand(
-) : Runnable {
+class SellCommand : Runnable {
     @Inject
     private lateinit var liteApi: LiteApi
 
