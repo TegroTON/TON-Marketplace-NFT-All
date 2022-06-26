@@ -78,7 +78,7 @@ data class NFTDeployedCollection(
         ): AddrStd {
             val referenceBlock = liteApi.getMasterchainInfo().last
 
-            logger.debug("running method `get_nft_address_by_index` on ${collection.toString(userFriendly = true)}")
+            logger.debug("running method `get_nft_address_by_index` on ${collection.toString(userFriendly = true)} for index $index")
             val result = liteApi.runSmcMethod(
                 0b100,
                 referenceBlock,
