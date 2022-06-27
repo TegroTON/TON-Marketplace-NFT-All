@@ -17,6 +17,7 @@ import org.ton.block.Coins
 import org.ton.block.MsgAddress
 import org.ton.boc.BagOfCells
 import org.ton.cell.CellBuilder
+import org.ton.crypto.Ed25519
 import org.ton.crypto.base64
 import org.ton.tlb.storeTlb
 import reactor.core.publisher.Flux
@@ -97,6 +98,18 @@ class ItemController(
         val royaltyValue = royalty?.let { price * it.numerator / it.denominator } ?: 0L
         val fullPrice = price + marketplaceFee + royaltyValue
 
+        val payloadCell = CellBuilder.createCell {
+            storeTlb(MsgAddress.tlbCodec(), configuration.marketplaceAddress) // marketplace_address
+            storeTlb(MsgAddress.tlbCodec(), AddrStd(item)) // nft_address
+            storeTlb(MsgAddress.tlbCodec(), AddrStd(from)) // nft_owner_address
+            storeTlb(Coins.tlbCodec(), Coins.ofNano(fullPrice)) // full_price
+            storeRef { // fees_cell
+                storeTlb(Coins.tlbCodec(), Coins.ofNano(marketplaceFee))
+                storeTlb(MsgAddress.tlbCodec(), royalty?.destination?.to() ?: AddrNone)
+                storeTlb(Coins.tlbCodec(), Coins.ofNano(royaltyValue))
+            }
+        }
+
         TransactionRequestDTO(
             to = AddrStd(item).toSafeBounceable(),
             value = configuration.saleInitializationFee + configuration.blockchainFee,
@@ -115,19 +128,11 @@ class ItemController(
                 storeInt(0, 1) // custom_data, unused
                 storeTlb(Coins.tlbCodec(), Coins.ofNano(configuration.saleInitializationFee))
                 // Extra payload here, used by the market contract to do its magic
+                storeRef(payloadCell)
                 storeRef {
-                    storeTlb(MsgAddress.tlbCodec(), configuration.marketplaceAddress) // marketplace_address
-                    storeTlb(MsgAddress.tlbCodec(), AddrStd(item)) // nft_address
-                    storeTlb(MsgAddress.tlbCodec(), AddrStd(from)) // nft_owner_address
-                    storeTlb(Coins.tlbCodec(), Coins.ofNano(fullPrice)) // full_price
-                    storeRef { // fees_cell
-                        storeTlb(Coins.tlbCodec(), Coins.ofNano(marketplaceFee))
-                        storeTlb(MsgAddress.tlbCodec(), royalty?.destination?.to() ?: AddrNone)
-                        storeTlb(Coins.tlbCodec(), Coins.ofNano(royaltyValue))
-                    }
+                    // Signature to make sure that the message came from our server and wasn't messed with by someone else
+                    storeBytes(Ed25519.sign(configuration.marketplaceAuthorizationPrivateKey, payloadCell.hash()))
                 }
-                // TODO: SEVERE: UNLESS  THIS DATA IS SIGNED AND THEN CHECKED BY THE CONTRACT, IT WOULD BE POSSIBLE
-                // FOR A MALICIOUS USER TO PUT UP ITEMS FOR SALE WITH NO MARKETPLACE FEE AND/OR ROYALTY
             }.let { BagOfCells(it) }.toByteArray().let { base64(it) }
         )
     }
