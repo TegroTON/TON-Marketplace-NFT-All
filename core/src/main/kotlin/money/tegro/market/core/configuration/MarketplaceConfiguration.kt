@@ -6,7 +6,7 @@ import org.ton.block.AddrStd
 @ConfigurationProperties("money.tegro.market.marketplace")
 class MarketplaceConfiguration {
     /** Address of market's main contract */
-    var marketplaceAddress = AddrStd("kQBBCW5MYUEjNUCemgZaHF8ZHf1lbjq0k8qBonydAlfXz5a9")
+    var marketplaceAddress = AddrStd("kQDZoy5eJAqm9cZoFnHzuoUDeMPUE_KETDsq7jeWnR20GwGK")
 
     /** What percentage from each sale goes to the market, numerator part of the fraction */
     var feeNumerator = 5
@@ -18,5 +18,5 @@ class MarketplaceConfiguration {
     var blockchainFee = 50_000_000L
 
     /** Fixed amount taken for putting an item up for sale, includes all processing fees */
-    var saleInitializationFee = 100_000_000L
+    var saleInitializationFee = 150_000_000L
 }
