@@ -19,6 +19,7 @@ micronaut-kotlin = { prefer = "3.2.2" }
 micronaut-picocli = { prefer = "4.2.1" }
 micronaut-reactor = { prefer = "2.2.2" }
 micronaut-openapi = { prefer = "4.3.0" }
+micronaut-security = { prefer = "3.6.1" }
 swagger = { prefer = "2.2.1" }
 kotlin = "1.7.0"
 shadow = "7.1.2"
@@ -62,6 +63,7 @@ swagger-annotations = { group = "io.swagger.core.v3", name = "swagger-annotation
 micronaut-validation = { group = "io.micronaut", name = "micronaut-validation", version.ref = "micronaut" }
 micronaut-picocli = { group = "io.micronaut.picocli", name = "micronaut-picocli", version.ref = "micronaut-picocli" }
 micronaut-openapi = { group = "io.micronaut.openapi", name = "micronaut-openapi", version.ref = "micronaut-openapi" }
+micronaut-security = { group = "io.micronaut.security", name = "micronaut-security", version.ref = "micronaut-security" }
 
 [bundles]
 coroutines = ["coroutines-core", "coroutines-reactive", "coroutines-reactor"]
