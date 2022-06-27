@@ -26,4 +26,9 @@ class MarketplaceConfiguration {
 
     /** Fixed amount taken for putting an item up for sale, includes all processing fees */
     var saleInitializationFee = 150_000_000L
+
+    /** Amount that is required to transfer an item from one account to another. Only used in /item/{}/transfer,
+     * half of the sum is forwarded to the new owner
+     */
+    var itemTransferAmount = 100_000_000L
 }

@@ -68,7 +68,7 @@ class ItemController(
     ): Mono<TransactionRequestDTO> = mono {
         TransactionRequestDTO(
             to = AddrStd(item).toSafeBounceable(),
-            value = 100_000_000, // 0.1 TON
+            value = configuration.itemTransferAmount, // 0.1 TON
             stateInit = null,
             payload = CellBuilder.createCell {
                 storeUInt(0x5fcc3d14, 32) // OP, transfer
@@ -79,7 +79,7 @@ class ItemController(
                     response?.let { AddrStd(it) }
                         ?: AddrNone) // response destination. Rest of coins is sent there
                 storeInt(0, 1) // custom_data, unused
-                storeTlb(Coins.tlbCodec(), Coins.ofNano(6_900_000)) // 0.0069 because funny, forward amount
+                storeTlb(Coins.tlbCodec(), Coins.ofNano(configuration.itemTransferAmount / 2))
                 // Extra payload here, unused in this case
             }.let { BagOfCells(it) }.toByteArray().let { base64(it) }
         )
