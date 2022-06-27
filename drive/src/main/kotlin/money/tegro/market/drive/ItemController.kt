@@ -93,6 +93,10 @@ class ItemController(
         val royalty = it.collection?.let { collectionRepository.findByAddress(it).awaitSingle().royalty }
             ?: it.royalty
 
+        val marketplaceFee = price * configuration.feeNumerator / configuration.feeDenominator
+        val royaltyValue = royalty?.let { price * it.numerator / it.denominator } ?: 0L
+        val fullPrice = price + marketplaceFee + royaltyValue
+
         TransactionRequestDTO(
             to = AddrStd(item).toSafeBounceable(),
             value = configuration.saleInitializationFee + configuration.blockchainFee,
@@ -112,19 +116,15 @@ class ItemController(
                 storeTlb(Coins.tlbCodec(), Coins.ofNano(configuration.saleInitializationFee))
                 // Extra payload here, used by the market contract to do its magic
                 storeRef {
-                    storeTlb(Coins.tlbCodec(), Coins.ofNano(price)) // Pure amount user will receive
-                    storeTlb(
-                        Coins.tlbCodec(),
-                        Coins.ofNano(price * configuration.feeNumerator / configuration.feeDenominator)
-                    ) // Amount taken by the marketplace
-                    storeTlb(
-                        MsgAddress.tlbCodec(),
-                        royalty?.destination?.to() ?: AddrNone
-                    ) // Royalty destination
-                    storeTlb(
-                        Coins.tlbCodec(),
-                        Coins.ofNano(royalty?.let { price * it.numerator * it.denominator }
-                            ?: 0L)) // Optional royalty amount
+                    storeTlb(MsgAddress.tlbCodec(), configuration.marketplaceAddress) // marketplace_address
+                    storeTlb(MsgAddress.tlbCodec(), AddrStd(item)) // nft_address
+                    storeTlb(MsgAddress.tlbCodec(), AddrStd(from)) // nft_owner_address
+                    storeTlb(Coins.tlbCodec(), Coins.ofNano(fullPrice)) // full_price
+                    storeRef { // fees_cell
+                        storeTlb(Coins.tlbCodec(), Coins.ofNano(marketplaceFee))
+                        storeTlb(MsgAddress.tlbCodec(), royalty?.destination?.to() ?: AddrNone)
+                        storeTlb(Coins.tlbCodec(), Coins.ofNano(royaltyValue))
+                    }
                 }
                 // TODO: SEVERE: UNLESS  THIS DATA IS SIGNED AND THEN CHECKED BY THE CONTRACT, IT WOULD BE POSSIBLE
                 // FOR A MALICIOUS USER TO PUT UP ITEMS FOR SALE WITH NO MARKETPLACE FEE AND/OR ROYALTY

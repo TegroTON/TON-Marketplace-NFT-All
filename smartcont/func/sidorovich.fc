@@ -23,16 +23,6 @@ int min_gas_amount() asm "1000000000 PUSHINT"; ;; 1 TON
             );
 }
 
-() save_data(slice marketplace_address, slice nft_address, slice nft_owner_address, int full_price, cell fees_cell) impure inline {
-    set_data(begin_cell()
-            .store_slice(marketplace_address)
-            .store_slice(nft_address)
-            .store_slice(nft_owner_address)
-            .store_coins(full_price)
-            .store_ref(fees_cell)
-            .end_cell());
-}
-
 () buy(int my_balance, slice marketplace_address, slice nft_address, slice nft_owner_address, int full_price, cell fees_cell, int msg_value, slice sender_address, int query_id) impure {
     throw_unless(450, msg_value >= full_price + min_gas_amount());
 
@@ -77,7 +67,6 @@ int min_gas_amount() asm "1000000000 PUSHINT"; ;; 1 TON
             .store_coins(0) ;; forward amount to new_owner_address
             .store_int(0, 1); ;; empty forward_payload
 
-
     send_raw_message(nft_msg.end_cell(), 128 + 32);
 }
 
@@ -92,24 +81,9 @@ int min_gas_amount() asm "1000000000 PUSHINT"; ;; 1 TON
     slice sender_address = cs~load_msg_addr();
 
     var (marketplace_address, nft_address, nft_owner_address, full_price, fees_cell) = load_data();
-    var is_initialized = nft_owner_address.slice_bits() > 2; ;; not initialized if null address
 
-    if (~ is_initialized) {
-
-        if (equal_slices(sender_address, marketplace_address)) {
-            return (); ;; just accept coins on deploy
-        }
-
-        throw_unless(500, equal_slices(sender_address, nft_address));
-        int op = in_msg_body~load_uint(32);
-        throw_unless(501, op == op::ownership_assigned());
-        int query_id = in_msg_body~load_uint(64);
-        slice prev_owner_address = in_msg_body~load_msg_addr();
-
-        save_data(marketplace_address, nft_address, prev_owner_address, full_price, fees_cell);
-
-        return ();
-
+    if (equal_slices(marketplace_address, sender_address)) {
+        return (); ;; just accept coins on deploy
     }
 
     int op = 0;
@@ -163,7 +137,6 @@ int min_gas_amount() asm "1000000000 PUSHINT"; ;; 1 TON
 }
 
 () recv_external(slice in_msg) impure {
-    
 }
 
 (slice, slice, slice, int, int, slice, int) get_sale_data() method_id {

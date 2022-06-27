@@ -6,7 +6,7 @@ import org.ton.block.AddrStd
 @ConfigurationProperties("money.tegro.market.marketplace")
 class MarketplaceConfiguration {
     /** Address of market's main contract */
-    var marketplaceAddress = AddrStd("kQDZoy5eJAqm9cZoFnHzuoUDeMPUE_KETDsq7jeWnR20GwGK")
+    var marketplaceAddress = AddrStd("kQDv7ls8bwag53uhH-W5CLdHsNWZyp28AqWkOul-54KaibiT")
 
     /** What percentage from each sale goes to the market, numerator part of the fraction */
     var feeNumerator = 5

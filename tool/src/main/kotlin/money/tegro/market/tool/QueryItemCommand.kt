@@ -5,12 +5,10 @@ import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
 import money.tegro.market.blockchain.client.ResilientLiteClient
-import money.tegro.market.blockchain.nft.NFTDeployedCollectionItem
-import money.tegro.market.blockchain.nft.NFTItem
-import money.tegro.market.blockchain.nft.NFTMetadata
-import money.tegro.market.blockchain.nft.NFTRoyalty
+import money.tegro.market.blockchain.nft.*
 import money.tegro.market.core.dto.ItemDTO
 import money.tegro.market.core.dto.RoyaltyDTO
+import money.tegro.market.core.dto.SaleDTO
 import money.tegro.market.core.dto.toSafeBounceable
 import org.ton.block.AddrStd
 import org.ton.lite.api.LiteApi
@@ -51,6 +49,7 @@ class QueryItemCommand : Runnable {
         val royalty = (item as? NFTDeployedCollectionItem)?.collection?.let { NFTRoyalty.of(it, liteApi) }
             ?: NFTRoyalty.of(address, liteApi)
         val metadata = item?.content(liteApi)?.let { NFTMetadata.of(it) }
+        val sale = item?.owner?.let { NFTSale.of(it, liteApi) }
 
         item?.let {
             ItemDTO(
@@ -65,6 +64,18 @@ class QueryItemCommand : Runnable {
                     RoyaltyDTO(
                         it.numerator.toFloat() / it.denominator,
                         it.destination.toSafeBounceable()
+                    )
+                },
+                sale = sale?.let {
+                    SaleDTO(
+                        address = it.address.toSafeBounceable(),
+                        marketplace = it.marketplace.toSafeBounceable(),
+                        item = it.item.toSafeBounceable(),
+                        owner = it.owner.toSafeBounceable(),
+                        fullPrice = it.price,
+                        marketplaceFee = it.marketplaceFee,
+                        royalty = it.royalty,
+                        royaltyDestination = it.royaltyDestination?.toSafeBounceable()
                     )
                 }
             )
