@@ -2,6 +2,7 @@ package money.tegro.market.drive
 
 import io.micronaut.http.annotation.Controller
 import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.reactor.mono
 import money.tegro.market.core.dto.AccountDTO
 import money.tegro.market.core.dto.CollectionDTO
@@ -35,7 +36,8 @@ class AccountController(
                     ItemDTO(
                         it,
                         it.collection?.let { collectionRepository.findById(it).awaitSingle() },
-                        attributeRepository.findByItem(it.address).collectList().awaitSingle()
+                        attributeRepository.findByItem(it.address).collectList().awaitSingle(),
+                        saleRepository.findByItem(it.address).awaitSingleOrNull(),
                     )
                 }
             }

@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import money.tegro.market.core.model.AttributeModel
 import money.tegro.market.core.model.CollectionModel
 import money.tegro.market.core.model.ItemModel
+import money.tegro.market.core.model.SaleModel
 
 @Schema(name = "Item", description = "Information about an NFT item")
 data class ItemDTO(
@@ -16,7 +17,7 @@ data class ItemDTO(
     @get:Schema(description = "NFT collection address, uniquely identifies it. Always base64url, bounceable")
     val collection: String?,
 
-    @get:Schema(description = "Address of the item owner, uniquely identifies the account. Base64url, bounceable")
+    @get:Schema(description = "Address of the item owner or seller contract, uniquely identifies the account. Base64url, bounceable")
     val owner: String?,
 
     @get:Schema(description = "Item name")
@@ -30,8 +31,16 @@ data class ItemDTO(
 
     @field:Schema(description = "Item royalty parameters, may be inherited from the collection or set up by the item itself")
     val royalty: RoyaltyDTO?,
+
+    @field:Schema(description = "Sale information if the item is on sale")
+    val sale: SaleDTO?,
 ) {
-    constructor(it: ItemModel, collection: CollectionModel?, attributes: Iterable<AttributeModel>?) : this(
+    constructor(
+        it: ItemModel,
+        collection: CollectionModel?,
+        attributes: Iterable<AttributeModel>?,
+        sale: SaleModel?
+    ) : this(
         address = it.address.to().toSafeBounceable(),
         index = it.index,
         collection = collection?.address?.to()?.toSafeBounceable(),
@@ -39,6 +48,7 @@ data class ItemDTO(
         name = it.name,
         description = it.description,
         attributes = attributes?.associate { it.trait to it.value } ?: mapOf(),
-        royalty = collection?.let { RoyaltyDTO.of(it) } ?: RoyaltyDTO.of(it)
+        royalty = collection?.let { RoyaltyDTO.of(it) } ?: RoyaltyDTO.of(it),
+        sale = sale?.let { SaleDTO(it) }
     )
 }

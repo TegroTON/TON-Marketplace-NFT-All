@@ -3,16 +3,14 @@ package money.tegro.market.drive
 import io.micronaut.data.model.Pageable
 import io.micronaut.http.annotation.Controller
 import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.reactor.mono
 import money.tegro.market.core.configuration.MarketplaceConfiguration
 import money.tegro.market.core.dto.ItemDTO
 import money.tegro.market.core.dto.TransactionRequestDTO
 import money.tegro.market.core.dto.toSafeBounceable
 import money.tegro.market.core.operations.ItemOperations
-import money.tegro.market.core.repository.AttributeRepository
-import money.tegro.market.core.repository.CollectionRepository
-import money.tegro.market.core.repository.ItemRepository
-import money.tegro.market.core.repository.findByAddressStd
+import money.tegro.market.core.repository.*
 import org.ton.block.AddrNone
 import org.ton.block.AddrStd
 import org.ton.block.Coins
@@ -32,6 +30,7 @@ class ItemController(
     private val collectionRepository: CollectionRepository,
     private val itemRepository: ItemRepository,
     private val attributeRepository: AttributeRepository,
+    private val saleRepository: SaleRepository,
 ) : ItemOperations {
     override fun getAll(pageable: Pageable): Flux<ItemDTO> =
         itemRepository.findAll(pageable)
@@ -41,7 +40,8 @@ class ItemController(
                         ItemDTO(
                             item,
                             item.collection?.let { collectionRepository.findById(it).awaitSingle() },
-                            attributeRepository.findByItem(item.address).collectList().awaitSingle()
+                            attributeRepository.findByItem(item.address).collectList().awaitSingle(),
+                            saleRepository.findByItem(item.address).awaitSingleOrNull(),
                         )
                     }
                 }
@@ -54,7 +54,8 @@ class ItemController(
                     ItemDTO(
                         it,
                         it.collection?.let { collectionRepository.findById(it).awaitSingle() },
-                        attributeRepository.findByItem(it.address).collectList().awaitSingle()
+                        attributeRepository.findByItem(it.address).collectList().awaitSingle(),
+                        saleRepository.findByItem(it.address).awaitSingleOrNull(),
                     )
                 }
             }

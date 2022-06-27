@@ -5,8 +5,11 @@ import io.micronaut.data.r2dbc.annotation.R2dbcRepository
 import io.micronaut.data.repository.reactive.ReactorPageableRepository
 import money.tegro.market.core.key.AddressKey
 import money.tegro.market.core.model.SaleModel
+import reactor.core.publisher.Mono
 
 @R2dbcRepository(dialect = Dialect.H2)
 abstract class SaleRepository : ReactorPageableRepository<SaleModel, AddressKey>,
-    BasicRepository<SaleModel>
+    BasicRepository<SaleModel> {
+    abstract fun findByItem(item: AddressKey): Mono<SaleModel>
+}
 

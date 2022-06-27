@@ -19,7 +19,7 @@ data class SaleModel(
     val item: AddressKey,
     @Relation(Relation.Kind.EMBEDDED)
     val owner: AddressKey,
-    val price: Long,
+    val fullPrice: Long,
     val marketplaceFee: Long,
     val royalty: Long?,
     @Relation(Relation.Kind.EMBEDDED)

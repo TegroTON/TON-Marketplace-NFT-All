@@ -3,14 +3,12 @@ package money.tegro.market.drive
 import io.micronaut.data.model.Pageable
 import io.micronaut.http.annotation.Controller
 import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.reactor.mono
 import money.tegro.market.core.dto.CollectionDTO
 import money.tegro.market.core.dto.ItemDTO
 import money.tegro.market.core.operations.CollectionOperations
-import money.tegro.market.core.repository.AttributeRepository
-import money.tegro.market.core.repository.CollectionRepository
-import money.tegro.market.core.repository.ItemRepository
-import money.tegro.market.core.repository.findByAddressStd
+import money.tegro.market.core.repository.*
 import org.ton.block.AddrStd
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -21,6 +19,7 @@ class CollectionController(
     private val collectionRepository: CollectionRepository,
     private val itemRepository: ItemRepository,
     private val attributeRepository: AttributeRepository,
+    private val saleRepository: SaleRepository,
 ) : CollectionOperations {
     override fun getAll(pageable: Pageable): Flux<CollectionDTO> = collectionRepository.findAll(pageable)
         .flatMapMany {
@@ -42,7 +41,8 @@ class CollectionController(
                                     ItemDTO(
                                         it,
                                         coll,
-                                        attributeRepository.findByItem(it.address).collectList().awaitSingle()
+                                        attributeRepository.findByItem(it.address).collectList().awaitSingle(),
+                                        saleRepository.findByItem(it.address).awaitSingleOrNull(),
                                     )
                                 }
                             }

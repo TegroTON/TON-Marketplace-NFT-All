@@ -29,7 +29,7 @@ class SaleUpdater(
                     marketplace = AddressKey.of(nftSale.marketplace),
                     item = AddressKey.of(nftSale.item),
                     owner = AddressKey.of(nftSale.owner),
-                    price = nftSale.price,
+                    fullPrice = nftSale.price,
                     marketplaceFee = nftSale.marketplaceFee,
                     royalty = nftSale.royalty,
                     royaltyDestination = nftSale.royaltyDestination?.let { AddressKey.of(it) }
