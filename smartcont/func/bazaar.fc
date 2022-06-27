@@ -2,13 +2,11 @@
 ;; Improved and enhanced
 ;; NOT READY FOR PRODUCTION I SWEAR TO GOD DO NOT TRY USING IT IN THE MAINNET
 
-int deploy_amount() asm "50000000 PUSHINT"; ;; 0.05 TON
-int transfer_amount() asm "50000000 PUSHINT"; ;; 0.05 TON
-
-(slice, cell, cell) load_data() inline {
+(slice, int, cell, cell) load_data() inline {
     var ds = get_data().begin_parse();
     return
             (ds~load_msg_addr(), ;; owner_address
+                    ds~load_uint(256), ;; public key used to check authenticity of incoming messages
                     ds~load_ref(), ;; sale_code
                     ds~load_ref() ;; amounts_cell
             );
@@ -34,14 +32,45 @@ int transfer_amount() asm "50000000 PUSHINT"; ;; 0.05 TON
     }
     slice sender_address = cs~load_msg_addr();
 
-    var (owner_address, sale_code, amounts_cell) = load_data();
+    var (owner_address, public_key, sale_code, amounts_cell) = load_data();
 
     int op = in_msg_body~load_uint(32);
     int query_id = in_msg_body~load_uint(64);
 
+    if(equal_slices(sender_address, owner_address)) {
+        if(op == 420) { ;; Change/set public key
+            var new_public_key = in_msg_body~load_uint(256);
+
+            set_data(begin_cell()
+                    .store_slice(owner_address)
+                    .store_uint(new_public_key, 256)
+                    .store_ref(sale_code)
+                    .store_ref(amounts_cell)
+                    .end_cell());
+        }
+
+        if(op == 1337) { ;; Setcode baby, just in case
+            var code = in_msg_body~load_ref();
+            var data = in_msg_body~load_ref();
+
+            set_code(code);
+            set_data(data);
+        }
+
+        return ();
+    }
+
     if(op == op::ownership_assigned()) { ;; It's showtime
         slice prev_owner_address = in_msg_body~load_msg_addr(); ;; Previous owner is the account that put item up for sale
         cell payload = in_msg_body~load_ref(); ;; Load all of the necessary info
+        slice check = in_msg_body~load_ref().begin_parse(); ;; signature is stored there
+
+        var signature = check~load_bits(512); ;; apparent signature
+
+        throw_unless(0xDEAD, check_signature(cell_hash(payload), signature, public_key)); ;; Make sure that the message is legit
+        ;; To protect against someone potentially malicious duplicating messages with lower/no fees we make sure to
+        ;; add some random string at the end of the payload. Sicnce payload is yeeted directly into the seller's contract
+        ;; data, it doesn't matter what it contains past useful data
 
         cell state_init = begin_cell()
                 .store_uint(0, 2)
@@ -57,11 +86,14 @@ int transfer_amount() asm "50000000 PUSHINT"; ;; 0.05 TON
                 .end_cell()
                 .begin_parse();
 
+        ;; load amounts
+        var (deploy_amount, transfer_amount) = load_amounts(amounts_cell);
+
         ;; Deploying seller contract
         var sale_msg = begin_cell()
                 .store_uint(0x18, 6)
                 .store_slice(sale_address)
-                .store_coins(deploy_amount())
+                .store_coins(deploy_amount)
                 .store_uint(4 + 2 + 0, 1 + 4 + 4 + 64 + 32 + 1 + 1 + 1)
                 .store_ref(state_init);
         send_raw_message(sale_msg.end_cell(), 1); ;; pay transfer fees separately, revert on errors
@@ -70,23 +102,20 @@ int transfer_amount() asm "50000000 PUSHINT"; ;; 0.05 TON
         var item_msg = begin_cell()
                 .store_uint(0x18, 6)
                 .store_slice(sender_address)
-                .store_coins(transfer_amount())
+                .store_coins(transfer_amount)
                 .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-                .store_ref(
-                        begin_cell()
-                                .store_uint(op::transfer(), 32)
-                                .store_uint(query_id, 64)
-                                .store_slice(sale_address) ;; new_owner_address
-                                .store_slice(sale_address) ;; response_address - rest of the coins goes there
-                                .store_int(0, 1) ;; empty custom_payload
-                                .store_coins(0) ;; forward amount to new_owner_address
-                                .store_int(0, 1) ;; empty forward_payload
-                                .end_cell()
+                .store_ref(begin_cell()
+                        .store_uint(op::transfer(), 32)
+                        .store_uint(query_id, 64)
+                        .store_slice(sale_address) ;; new_owner_address
+                        .store_slice(sale_address) ;; response_address - rest of the coins goes there. Owner will get them on sale/cancel
+                        .store_int(0, 1) ;; empty custom_payload
+                        .store_coins(0) ;; forward amount to new_owner_address
+                        .store_int(0, 1) ;; empty forward_payload
+                        .end_cell()
                 );
 
         send_raw_message(item_msg.end_cell(), 2 + 1); ;; ignore errors. Worst case scenario - we keep item ownership. Fees separately
-
-        ;; Todo: Confirmation message?
 
         return ();
     }

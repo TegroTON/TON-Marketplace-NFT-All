@@ -87,22 +87,31 @@ int min_gas_amount() asm "1000000000 PUSHINT"; ;; 1 TON
     }
 
     int op = 0;
+    int query_id = 0;
+
     if (in_msg_body.slice_empty?()) {
-        op = 0;
+        op = 2; ;; empty text messages default to buying stuff
     } else {
         op = in_msg_body~load_uint(32);
+
+        if(op == 0) { ;; a text command
+            int first_character = in_msg_body~load_uint(8);
+            if(first_character == 0x62) { ;; 'b'
+                throw_unless(0xB000, in_msg_body~load_uint(16) == 0x7579); ;; 'uy'
+                op = 2; ;; buy command
+            }
+            if(first_character == 0x63) { ;; 'c'
+                throw_unless(0xB000, in_msg_body~load_uint(40) == 0x616e63656c); ;; 'ancel'
+                op = 3; ;; cancel sale
+            }
+            ;; well idk just see what happens
+        } else {
+            query_id = in_msg_body~load_uint(64);
+        }
     }
 
-    int query_id = 0;
-    if (op == 0) {
-        ;; for text messages op is 0
-        op = 2; ;; Default to buy
-    } else {
-        query_id = in_msg_body~load_uint(64);
-    }
-
-    if (op == 1) { ;; just accept coins
-        return ();
+    if(op == 1) {
+        return (); ;; accept coins
     }
 
     if (op == 2) { ;; buy
