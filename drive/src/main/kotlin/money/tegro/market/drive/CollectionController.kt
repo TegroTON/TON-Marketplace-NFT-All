@@ -29,7 +29,7 @@ class CollectionController(
 
     override fun getCollection(collection: String): Mono<CollectionDTO> =
         collectionRepository.findByAddressStd(AddrStd(collection))
-            .map { CollectionDTO(it, itemRepository.countByCollection(it.address)) }
+            .flatMap { mono { CollectionDTO(it, itemRepository.countByCollection(it.address)) } }
 
     override fun getCollectionItems(collection: String, pageable: Pageable): Flux<ItemDTO> =
         collectionRepository.findByAddressStd(AddrStd(collection))
