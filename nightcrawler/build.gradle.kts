@@ -6,7 +6,7 @@ plugins {
 }
 
 application {
-    mainClass.set("money.tegro.market.nightcrawler.ApplicationKt")
+    mainClass.set("money.tegro.market.nightcrawler.Application")
 }
 
 micronaut {

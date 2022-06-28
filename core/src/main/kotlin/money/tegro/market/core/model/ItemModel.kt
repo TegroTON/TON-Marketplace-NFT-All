@@ -6,6 +6,7 @@ import io.micronaut.data.annotation.Relation
 import io.swagger.v3.oas.annotations.media.Schema
 import money.tegro.market.core.key.AddressKey
 import org.ton.block.AddrStd
+import org.ton.boc.BagOfCells
 import java.time.Instant
 
 @MappedEntity("ITEMS")
@@ -35,5 +36,6 @@ data class ItemModel(
     var metadataUpdated: Instant = Instant.MIN,
 ) {
     constructor(address: AddrStd) : this(AddressKey.of(address))
-}
 
+    fun content() = content?.let { BagOfCells(it).roots.first() }
+}
