@@ -2,6 +2,7 @@ package money.tegro.market.core.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
 import money.tegro.market.core.model.CollectionModel
+import money.tegro.market.core.model.RoyaltyModel
 
 @Schema(name = "Collection", description = "Information about an NFT collection")
 data class CollectionDTO(
@@ -18,12 +19,12 @@ data class CollectionDTO(
     @field:Schema(description = "Collection royalty parameters")
     val royalty: RoyaltyDTO?,
 ) {
-    constructor(it: CollectionModel, numberOfItems: Long? = it.nextItemIndex) : this(
+    constructor(it: CollectionModel, royalty: RoyaltyModel?, numberOfItems: Long? = it.nextItemIndex) : this(
         address = it.address.to().toSafeBounceable(),
         size = numberOfItems,
         owner = it.owner?.to()?.toSafeBounceable(),
         name = it.name,
         description = it.description,
-        royalty = RoyaltyDTO.of(it)
+        royalty = royalty?.let { it -> RoyaltyDTO(it) }
     )
 }

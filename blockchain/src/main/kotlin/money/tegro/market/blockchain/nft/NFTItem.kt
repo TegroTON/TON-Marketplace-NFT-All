@@ -1,6 +1,7 @@
 package money.tegro.market.blockchain.nft
 
 import mu.KLogging
+import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.block.*
 import org.ton.boc.BagOfCells
 import org.ton.cell.Cell
@@ -17,7 +18,10 @@ interface NFTItem {
     val owner: AddrStd
     val individualContent: Cell
 
-    suspend fun content(liteApi: LiteApi): Cell
+    suspend fun content(
+        liteApi: LiteApi,
+        referenceBlock: suspend () -> TonNodeBlockIdExt = { liteApi.getMasterchainInfo().last },
+    ): Cell
 
     companion object : KLogging() {
         private val msgAddressCodec by lazy { MsgAddress.tlbCodec() }
@@ -26,15 +30,14 @@ interface NFTItem {
         suspend fun of(
             address: AddrStd,
             liteApi: LiteApi,
+            referenceBlock: suspend () -> TonNodeBlockIdExt = { liteApi.getMasterchainInfo().last },
         ): NFTItem? {
-            val referenceBlock = liteApi.getMasterchainInfo().last
+            logger.debug { "running method `get_nft_data` on ${address.toString(userFriendly = true)}" }
+            val result = liteApi.runSmcMethod(0b100, referenceBlock(), LiteServerAccountId(address), "get_nft_data")
 
-            logger.debug("running method `get_nft_data` on ${address.toString(userFriendly = true)}")
-            val result = liteApi.runSmcMethod(0b100, referenceBlock, LiteServerAccountId(address), "get_nft_data")
-
-            logger.debug("response: $result")
+            logger.debug { "response: $result" }
             if (result.exitCode != 0) {
-                logger.warn("Method exit code was ${result.exitCode}. NFT is most likely not initialized")
+                logger.warn { "Method exit code was ${result.exitCode}. NFT is most likely not initialized" }
                 return null
             }
 
@@ -66,7 +69,10 @@ data class NFTDeployedStandaloneItem(
     override val owner: AddrStd,
     override val individualContent: Cell,
 ) : NFTDeployedItem {
-    override suspend fun content(liteApi: LiteApi) = individualContent
+    override suspend fun content(
+        liteApi: LiteApi,
+        referenceBlock: suspend () -> TonNodeBlockIdExt
+    ) = individualContent
 }
 
 data class NFTDeployedCollectionItem(
@@ -76,8 +82,11 @@ data class NFTDeployedCollectionItem(
     override val owner: AddrStd,
     override val individualContent: Cell,
 ) : NFTDeployedItem {
-    override suspend fun content(liteApi: LiteApi): Cell =
-        contentOf(collection, index, individualContent, liteApi)
+    override suspend fun content(
+        liteApi: LiteApi,
+        referenceBlock: suspend () -> TonNodeBlockIdExt
+    ): Cell =
+        contentOf(collection, index, individualContent, liteApi, referenceBlock)
 
     companion object : KLogging() {
         @JvmStatic
@@ -85,14 +94,13 @@ data class NFTDeployedCollectionItem(
             collection: AddrStd,
             index: Long,
             individualContent: Cell,
-            liteApi: LiteApi
+            liteApi: LiteApi,
+            referenceBlock: suspend () -> TonNodeBlockIdExt = { liteApi.getMasterchainInfo().last },
         ): Cell {
-            val referenceBlock = liteApi.getMasterchainInfo().last
-
             logger.debug("running method `get_nft_content` on ${collection.toString(userFriendly = true)}")
             val result = liteApi.runSmcMethod(
                 0b100,
-                referenceBlock,
+                referenceBlock(),
                 LiteServerAccountId(collection),
                 "get_nft_content",
                 VmStackValue.TinyInt(index),
@@ -130,7 +138,7 @@ data class NFTStubStandaloneItem(
     override val address: AddrStd
         get() = AddrStd(workchainId, CellBuilder.createCell { storeTlb(stateInitCodec, stateInit()) }.hash())
 
-    override suspend fun content(liteApi: LiteApi) = individualContent
+    override suspend fun content(liteApi: LiteApi, referenceBlock: suspend () -> TonNodeBlockIdExt) = individualContent
 
     fun stateInit() = StateInit(createCode(), createData())
 

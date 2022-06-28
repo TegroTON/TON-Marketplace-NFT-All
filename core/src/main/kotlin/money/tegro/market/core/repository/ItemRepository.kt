@@ -8,15 +8,18 @@ import io.micronaut.data.r2dbc.annotation.R2dbcRepository
 import io.micronaut.data.repository.reactive.ReactorPageableRepository
 import money.tegro.market.core.key.AddressKey
 import money.tegro.market.core.model.ItemModel
+import org.ton.block.AddrStd
 import reactor.core.publisher.Mono
 import java.time.Instant
 
 @R2dbcRepository(dialect = Dialect.H2)
-abstract class ItemRepository : ReactorPageableRepository<ItemModel, AddressKey>,
-    BasicRepository<ItemModel>, MetadataRepository, RoyaltyRepository {
+abstract class ItemRepository : ReactorPageableRepository<ItemModel, AddressKey> {
+    abstract fun existsByAddress(address: AddressKey): Mono<Boolean>
+    fun existsByAddress(address: AddrStd) = existsByAddress(AddressKey.of(address))
+
     abstract fun existsByIndexAndCollection(index: Long, collection: AddressKey): Mono<Boolean>
 
-    abstract fun countByCollection(collection: AddressKey): Long
+    abstract fun countByCollection(collection: AddressKey): Mono<Long>
     abstract fun findByCollection(collection: AddressKey, pageable: Pageable): Mono<Page<ItemModel>>
 
     abstract fun update(
@@ -26,8 +29,16 @@ abstract class ItemRepository : ReactorPageableRepository<ItemModel, AddressKey>
         collection: AddressKey?,
         owner: AddressKey?,
         content: ByteArray?,
-        modified: Instant? = Instant.now(),
         updated: Instant = Instant.now(),
-    ): Unit
+    )
+
+    abstract fun update(
+        @Id address: AddressKey,
+        name: String?,
+        description: String?,
+        image: String?,
+        imageData: ByteArray?,
+        metadataUpdated: Instant = Instant.now()
+    )
 }
 

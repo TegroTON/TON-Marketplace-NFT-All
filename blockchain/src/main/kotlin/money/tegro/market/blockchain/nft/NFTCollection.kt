@@ -3,6 +3,7 @@ package money.tegro.market.blockchain.nft
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.map
 import mu.KLogging
+import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.block.AddrStd
 import org.ton.block.MsgAddress
 import org.ton.block.StateInit
@@ -28,13 +29,12 @@ interface NFTCollection {
         @JvmStatic
         suspend fun of(
             address: AddrStd,
-            liteClient: LiteApi,
+            liteApi: LiteApi,
+            referenceBlock: suspend () -> TonNodeBlockIdExt = { liteApi.getMasterchainInfo().last },
         ): NFTDeployedCollection {
-            val referenceBlock = liteClient.getMasterchainInfo().last
-
             logger.debug("running method `get_collection_data` on ${address.toString(userFriendly = true)}")
             val result =
-                liteClient.runSmcMethod(0b100, referenceBlock, LiteServerAccountId(address), "get_collection_data")
+                liteApi.runSmcMethod(0b100, referenceBlock(), LiteServerAccountId(address), "get_collection_data")
 
             logger.debug("response: $result")
             require(result.exitCode == 0) { "Failed to run the method, exit code is ${result.exitCode}" }
@@ -75,13 +75,12 @@ data class NFTDeployedCollection(
             collection: AddrStd,
             index: Long,
             liteApi: LiteApi,
+            referenceBlock: suspend () -> TonNodeBlockIdExt = { liteApi.getMasterchainInfo().last },
         ): AddrStd {
-            val referenceBlock = liteApi.getMasterchainInfo().last
-
             logger.debug("running method `get_nft_address_by_index` on ${collection.toString(userFriendly = true)} for index $index")
             val result = liteApi.runSmcMethod(
                 0b100,
-                referenceBlock,
+                referenceBlock(),
                 LiteServerAccountId(collection),
                 "get_nft_address_by_index",
                 VmStackValue.TinyInt(index)

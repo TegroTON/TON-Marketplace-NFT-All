@@ -1,6 +1,7 @@
 package money.tegro.market.blockchain.nft
 
 import mu.KLogging
+import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.block.*
 import org.ton.boc.BagOfCells
 import org.ton.cell.Cell
@@ -28,12 +29,11 @@ interface NFTSale {
         suspend fun of(
             address: AddrStd,
             liteApi: LiteApi,
+            referenceBlock: suspend () -> TonNodeBlockIdExt = { liteApi.getMasterchainInfo().last },
         ): NFTSale? {
-            val referenceBlock = liteApi.getMasterchainInfo().last
-
             logger.debug("running method `get_sale_data` on ${address.toString(userFriendly = true)}")
             val result = liteApi.runSmcMethod(
-                0b100, referenceBlock,
+                0b100, referenceBlock(),
                 LiteServerAccountId(address),
                 "get_sale_data"
             )

@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono
 @R2dbcRepository(dialect = Dialect.H2)
 abstract class AttributeRepository : ReactorPageableRepository<AttributeModel, Long> {
     abstract fun findByItem(item: AddressKey): Flux<AttributeModel>
-    abstract fun findByItemAndTrait(item: AddressKey, trait: String): Mono<AttributeModel>
+    abstract fun findByItemAndTraitForUpdate(item: AddressKey, trait: String): Mono<AttributeModel>
 
     abstract fun update(
         @Id id: Long,

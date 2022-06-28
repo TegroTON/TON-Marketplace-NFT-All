@@ -33,5 +33,8 @@ dependencies {
     implementation(libs.micronaut.validation)
     implementation(libs.ton)
 
+    implementation(libs.bundles.coroutines)
+    implementation(libs.bundles.reactor)
+
     implementation(projects.blockchain)
 }

@@ -11,10 +11,8 @@ data class RoyaltyDTO(
     @get:Schema(description = "Address, to which royalty will be sent. Always base64url, bounceable")
     val destination: String?,
 ) {
-    companion object {
-        @JvmStatic
-        fun of(it: RoyaltyModel) = it.royalty?.let {
-            RoyaltyDTO(it.numerator.toFloat() / it.denominator, it.destination.to().toSafeBounceable())
-        }
-    }
+    constructor(it: RoyaltyModel) : this(
+        it.numerator.toFloat() / it.denominator,
+        it.destination.to().toSafeBounceable()
+    )
 }

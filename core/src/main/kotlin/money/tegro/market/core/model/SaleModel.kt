@@ -11,7 +11,7 @@ import java.time.Instant
 @Schema(hidden = true)
 data class SaleModel(
     @EmbeddedId
-    override val address: AddressKey,
+    val address: AddressKey,
 
     @Relation(Relation.Kind.EMBEDDED)
     val marketplace: AddressKey,
@@ -25,7 +25,6 @@ data class SaleModel(
     @Relation(Relation.Kind.EMBEDDED)
     val royaltyDestination: AddressKey?,
 
-    override val discovered: Instant = Instant.now(),
-    override var updated: Instant = Instant.MIN,
-    override var modified: Instant = Instant.MIN,
-) : BasicModel
+    val discovered: Instant = Instant.now(),
+    var updated: Instant = Instant.MIN,
+)
