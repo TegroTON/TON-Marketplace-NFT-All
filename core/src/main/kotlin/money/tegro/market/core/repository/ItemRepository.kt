@@ -14,6 +14,8 @@ import java.time.Instant
 
 @R2dbcRepository(dialect = Dialect.H2)
 abstract class ItemRepository : ReactorPageableRepository<ItemModel, AddressKey> {
+    fun findById(address: AddrStd) = findById(AddressKey.of(address))
+    
     abstract fun existsByAddress(address: AddressKey): Mono<Boolean>
     fun existsByAddress(address: AddrStd) = existsByAddress(AddressKey.of(address))
 

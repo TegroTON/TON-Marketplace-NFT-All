@@ -6,6 +6,7 @@ import org.ton.block.*
 import org.ton.boc.BagOfCells
 import org.ton.cell.Cell
 import org.ton.cell.CellBuilder
+import org.ton.cell.storeRef
 import org.ton.crypto.hex
 import org.ton.lite.api.LiteApi
 import org.ton.lite.api.liteserver.LiteServerAccountId

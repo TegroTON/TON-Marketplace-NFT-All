@@ -9,12 +9,14 @@ import kotlinx.coroutines.reactor.mono
 import money.tegro.market.blockchain.nft.NFTSale
 import money.tegro.market.core.key.AddressKey
 import money.tegro.market.core.model.SaleModel
+import org.ton.block.AddrStd
 import reactor.core.publisher.Mono
 import java.time.Instant
 import javax.transaction.Transactional
 
 @R2dbcRepository(dialect = Dialect.H2)
 abstract class SaleRepository : ReactorPageableRepository<SaleModel, AddressKey> {
+    fun findById(address: AddrStd) = findById(AddressKey.of(address))
     abstract fun findByItem(item: AddressKey): Mono<SaleModel>
 
     abstract fun findByIdForUpdate(id: AddressKey): Mono<SaleModel>

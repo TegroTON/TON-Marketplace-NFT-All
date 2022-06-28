@@ -2,7 +2,6 @@ package money.tegro.market.nightcrawler
 
 import io.micronaut.context.ApplicationContext
 import io.micronaut.runtime.context.scope.refresh.RefreshEvent
-import io.micronaut.scheduling.annotation.Scheduled
 import jakarta.inject.Singleton
 import kotlinx.coroutines.runBlocking
 import mu.KLogging
@@ -13,7 +12,7 @@ import java.time.Instant
 class CatchUpJob(
     private val context: ApplicationContext,
 ) {
-    @Scheduled(initialDelay = "0s", fixedDelay = "60m")
+    //    @Scheduled(initialDelay = "0s", fixedDelay = "60m")
     fun run() {
         runBlocking {
             logger.info { "Starting catching up" }
