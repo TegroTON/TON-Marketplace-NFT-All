@@ -9,10 +9,8 @@ import org.ton.crypto.base64
 
 @Factory
 class LiteApiFactory(private var configuration: LiteApiConfiguration) {
-    private val liteApi = runBlocking {
+    @Singleton
+    fun liteApi() = runBlocking {
         ResilientLiteClient(configuration.ipv4, configuration.port, base64(configuration.key)).connect()
     }
-
-    @Singleton
-    fun liteApi() = liteApi
 }
