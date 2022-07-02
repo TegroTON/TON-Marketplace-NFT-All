@@ -8,6 +8,7 @@ import kotlinx.coroutines.reactor.mono
 import money.tegro.market.core.key.AddressKey
 import money.tegro.market.core.model.CollectionModel
 import org.ton.block.AddrStd
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import javax.transaction.Transactional
 
@@ -19,6 +20,9 @@ abstract class CollectionRepository : ReactorPageableRepository<CollectionModel,
 
     abstract fun existsByAddress(address: AddressKey): Mono<Boolean>
     fun existsByAddress(address: AddrStd) = existsByAddress(AddressKey.of(address))
+
+    abstract fun findByOwner(owner: AddressKey): Flux<CollectionModel>
+    fun findByOwner(owner: AddrStd) = findByOwner(AddressKey.of(owner))
 
     @Transactional
     fun upsert(it: CollectionModel) = mono {

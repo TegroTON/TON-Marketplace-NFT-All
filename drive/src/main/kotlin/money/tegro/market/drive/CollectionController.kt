@@ -20,18 +20,35 @@ class CollectionController(
     private val itemRepository: ItemRepository,
     private val attributeRepository: AttributeRepository,
     private val saleRepository: SaleRepository,
+    private val royaltyRepository: RoyaltyRepository,
 ) : CollectionOperations {
     override fun getAll(pageable: Pageable): Flux<CollectionDTO> = collectionRepository.findAll(pageable)
         .flatMapMany {
-            it.toFlux().map { CollectionDTO(it, itemRepository.countByCollection(it.address)) }
+            it.toFlux().flatMap {
+                mono {
+                    CollectionDTO(
+                        it,
+                        royaltyRepository.findById(it.address).awaitSingleOrNull(),
+                        itemRepository.countByCollection(it.address).awaitSingleOrNull()
+                    )
+                }
+            }
         }
 
     override fun getCollection(collection: String): Mono<CollectionDTO> =
-        collectionRepository.findByAddressStd(AddrStd(collection))
-            .flatMap { mono { CollectionDTO(it, itemRepository.countByCollection(it.address)) } }
+        collectionRepository.findById(AddrStd(collection))
+            .flatMap {
+                mono {
+                    CollectionDTO(
+                        it,
+                        royaltyRepository.findById(it.address).awaitSingleOrNull(),
+                        itemRepository.countByCollection(it.address).awaitSingleOrNull()
+                    )
+                }
+            }
 
     override fun getCollectionItems(collection: String, pageable: Pageable): Flux<ItemDTO> =
-        collectionRepository.findByAddressStd(AddrStd(collection))
+        collectionRepository.findById(AddrStd(collection))
             .flatMapMany { coll ->
                 itemRepository.findByCollection(coll.address, pageable)
                     .flatMapMany {
@@ -40,7 +57,8 @@ class CollectionController(
                                 mono {
                                     ItemDTO(
                                         it,
-                                        coll,
+                                        it.collection?.let { royaltyRepository.findById(it).awaitSingleOrNull() }
+                                            ?: royaltyRepository.findById(it.address).awaitSingleOrNull(),
                                         attributeRepository.findByItem(it.address).collectList().awaitSingle(),
                                         saleRepository.findByItem(it.address).awaitSingleOrNull(),
                                     )

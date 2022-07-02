@@ -15,6 +15,8 @@ import javax.transaction.Transactional
 abstract class SaleRepository : ReactorPageableRepository<SaleModel, AddressKey> {
     fun findById(address: AddrStd) = findById(AddressKey.of(address))
     abstract fun findByItem(item: AddressKey): Mono<SaleModel>
+    abstract fun findByOwner(owner: AddressKey): Mono<SaleModel>
+    fun findByOwner(owner: AddrStd) = findByOwner(AddressKey.of(owner))
 
     abstract fun findByIdForUpdate(id: AddressKey): Mono<SaleModel>
 

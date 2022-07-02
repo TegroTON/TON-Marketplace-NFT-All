@@ -15,6 +15,7 @@ import org.ton.block.Coins
 import org.ton.block.MsgAddress
 import org.ton.block.StateInit
 import org.ton.cell.CellBuilder
+import org.ton.cell.storeRef
 import org.ton.crypto.base64
 import org.ton.smartcontract.SmartContract
 import org.ton.smartcontract.wallet.v4.WalletV4R2

@@ -20,22 +20,24 @@ class AccountController(
     private val itemRepository: ItemRepository,
     private val saleRepository: SaleRepository,
     private val attributeRepository: AttributeRepository,
+    private val royaltyRepository: RoyaltyRepository,
 ) : AccountOperations {
     override fun getAccount(account: String): Mono<AccountDTO> = mono {
         AccountDTO(AddrStd(account).toSafeBounceable())
     }
 
     override fun getAccountItems(account: String): Flux<ItemDTO> =
-        saleRepository.findByOwnerStd(AddrStd(account))
-            .flatMap {
+        saleRepository.findByOwner(AddrStd(account))
+            .flatMapMany {
                 itemRepository.findByOwner(it.address).take(1)
             } // Items owned by the seller contract owned by the account. We only expect 1 item = 1 sale
-            .concatWith(itemRepository.findByOwnerStd(AddrStd(account))) // Items not on sale            .
+            .concatWith(itemRepository.findByOwner(AddrStd(account))) // Items not on sale            .
             .flatMap {
                 mono {
                     ItemDTO(
                         it,
-                        it.collection?.let { collectionRepository.findById(it).awaitSingle() },
+                        it.collection?.let { royaltyRepository.findById(it).awaitSingleOrNull() }
+                            ?: royaltyRepository.findById(it.address).awaitSingleOrNull(),
                         attributeRepository.findByItem(it.address).collectList().awaitSingle(),
                         saleRepository.findByItem(it.address).awaitSingleOrNull(),
                     )
@@ -43,6 +45,14 @@ class AccountController(
             }
 
     override fun getAccountCollections(account: String): Flux<CollectionDTO> =
-        collectionRepository.findByOwnerStd(AddrStd(account))
-            .flatMap { mono { CollectionDTO(it, itemRepository.countByCollection(it.address)) } }
+        collectionRepository.findByOwner(AddrStd(account))
+            .flatMap {
+                mono {
+                    CollectionDTO(
+                        it,
+                        royaltyRepository.findById(it.address).awaitSingleOrNull(),
+                        itemRepository.countByCollection(it.address).awaitSingleOrNull()
+                    )
+                }
+            }
 }

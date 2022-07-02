@@ -10,6 +10,7 @@ import kotlinx.coroutines.reactor.mono
 import money.tegro.market.core.key.AddressKey
 import money.tegro.market.core.model.ItemModel
 import org.ton.block.AddrStd
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import javax.transaction.Transactional
 
@@ -25,6 +26,9 @@ abstract class ItemRepository : ReactorPageableRepository<ItemModel, AddressKey>
 
     abstract fun countByCollection(collection: AddressKey): Mono<Long>
     abstract fun findByCollection(collection: AddressKey, pageable: Pageable): Mono<Page<ItemModel>>
+
+    abstract fun findByOwner(owner: AddressKey): Flux<ItemModel>
+    fun findByOwner(owner: AddrStd) = findByOwner(AddressKey.of(owner))
 
     @Transactional
     fun upsert(it: ItemModel) = mono {

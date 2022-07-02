@@ -17,6 +17,7 @@ import org.ton.block.Coins
 import org.ton.block.MsgAddress
 import org.ton.boc.BagOfCells
 import org.ton.cell.CellBuilder
+import org.ton.cell.storeRef
 import org.ton.crypto.Ed25519
 import org.ton.crypto.base64
 import org.ton.tlb.storeTlb
@@ -32,29 +33,32 @@ class ItemController(
     private val itemRepository: ItemRepository,
     private val attributeRepository: AttributeRepository,
     private val saleRepository: SaleRepository,
+    private val royaltyRepository: RoyaltyRepository,
 ) : ItemOperations {
     override fun getAll(pageable: Pageable): Flux<ItemDTO> =
         itemRepository.findAll(pageable)
             .flatMapMany {
-                it.toFlux().flatMap { item ->
+                it.toFlux().flatMap {
                     mono {
                         ItemDTO(
-                            item,
-                            item.collection?.let { collectionRepository.findById(it).awaitSingle() },
-                            attributeRepository.findByItem(item.address).collectList().awaitSingle(),
-                            saleRepository.findByItem(item.address).awaitSingleOrNull(),
+                            it,
+                            it.collection?.let { royaltyRepository.findById(it).awaitSingleOrNull() }
+                                ?: royaltyRepository.findById(it.address).awaitSingleOrNull(),
+                            attributeRepository.findByItem(it.address).collectList().awaitSingle(),
+                            saleRepository.findByItem(it.address).awaitSingleOrNull(),
                         )
                     }
                 }
             }
 
     override fun getItem(item: String): Mono<ItemDTO> =
-        itemRepository.findByAddressStd(AddrStd(item))
+        itemRepository.findById(AddrStd(item))
             .flatMap {
                 mono {
                     ItemDTO(
                         it,
-                        it.collection?.let { collectionRepository.findById(it).awaitSingle() },
+                        it.collection?.let { royaltyRepository.findById(it).awaitSingleOrNull() }
+                            ?: royaltyRepository.findById(it.address).awaitSingleOrNull(),
                         attributeRepository.findByItem(it.address).collectList().awaitSingle(),
                         saleRepository.findByItem(it.address).awaitSingleOrNull(),
                     )
@@ -90,9 +94,9 @@ class ItemController(
         from: String,
         price: Long,
     ): Mono<TransactionRequestDTO> = mono {
-        val it = itemRepository.findByAddressStd(AddrStd(item)).awaitSingle()
-        val royalty = it.collection?.let { collectionRepository.findByAddress(it).awaitSingle().royalty }
-            ?: it.royalty
+        val it = itemRepository.findById(AddrStd(item)).awaitSingle()
+        val royalty = it.collection?.let { royaltyRepository.findById(it).awaitSingleOrNull() }
+            ?: royaltyRepository.findById(it.address).awaitSingleOrNull()
 
         val marketplaceFee = price * configuration.feeNumerator / configuration.feeDenominator
         val royaltyValue = royalty?.let { price * it.numerator / it.denominator } ?: 0L
