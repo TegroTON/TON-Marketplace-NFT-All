@@ -7,7 +7,7 @@ import org.ton.adnl.AdnlPublicKey
 import org.ton.adnl.AdnlTcpClient
 import org.ton.adnl.AdnlTcpClientImpl
 import org.ton.lite.client.LiteClient
-import org.ton.tl.TlConstructor
+import org.ton.tl.TlCodec
 
 open class ResilientLiteClient(
     adnlTcpClient: AdnlTcpClient
@@ -34,15 +34,11 @@ open class ResilientLiteClient(
         }
     }
 
-    override suspend fun <Q : Any, A : Any> sendQuery(
-        query: Q,
-        queryCodec: TlConstructor<Q>,
-        answerCodec: TlConstructor<A>
-    ): A {
+    override suspend fun <Q : Any, A : Any> query(query: Q, queryCodec: TlCodec<Q>, answerCodec: TlCodec<A>): A {
         var attempt = 1
         while (true) {
             try {
-                return super.sendQuery(query, queryCodec, answerCodec)
+                return super.query(query, queryCodec, answerCodec)
             } catch (e: Exception) {
                 if (attempt >= 100) {
                     logger.info { "too many attempts, giving up" }

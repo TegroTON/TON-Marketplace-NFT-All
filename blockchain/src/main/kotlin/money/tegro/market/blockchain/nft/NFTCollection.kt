@@ -103,7 +103,7 @@ data class NFTStubCollection(
     val royalty: NFTRoyalty? = null,
     val itemCode: Cell = NFTStubItem.NFT_ITEM_CODE,
     val code: Cell = NFT_COLLECTION_CODE,
-    val workchainId: Int = owner.workchainId,
+    val workchainId: Int = owner.workchain_id,
 ) : NFTCollection {
     private val msgAddressCodec by lazy { MsgAddress.tlbCodec() }
     private val stateInitCodec by lazy { StateInit.tlbCodec() }

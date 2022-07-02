@@ -6,7 +6,7 @@ picocli = { prefer = "4.6.3" }
 reactor = { prefer = "3.4.18" }
 reactor-kotlin = { prefer = "1.1.6" }
 reflect = { prefer = "1.7.0" }
-ton = { strictly = "d85877b84c" }
+ton = { strictly = "ab41e6b3fb" }
 ktor = { prefer = "2.0.2" }
 logging = { prefer = "2.1.23" }
 slf4j = { prefer = "1.7.36" }

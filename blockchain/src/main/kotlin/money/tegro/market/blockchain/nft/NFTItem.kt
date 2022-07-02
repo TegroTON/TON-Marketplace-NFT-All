@@ -129,7 +129,7 @@ data class NFTStubStandaloneItem(
     override val owner: AddrStd,
     override val individualContent: Cell,
     val code: Cell = NFTStubItem.NFT_ITEM_CODE,
-    val workchainId: Int = owner.workchainId,
+    val workchainId: Int = owner.workchain_id,
     override val index: Long = 0L,
 ) : NFTStubItem {
     private val msgAddressCodec by lazy { MsgAddress.tlbCodec() }

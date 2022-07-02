@@ -88,7 +88,7 @@ data class NFTStubSidorovich(
     override val royalty: Long?,
 
     val code: Cell = NFT_SALE_CODE,
-    val workchainId: Int = owner.workchainId,
+    val workchainId: Int = owner.workchain_id,
 ) : NFTSale {
     private val msgAddressCodec by lazy { MsgAddress.tlbCodec() }
     private val coinsCodec by lazy { Coins.tlbCodec() }
