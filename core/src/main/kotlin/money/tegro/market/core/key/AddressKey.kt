@@ -14,7 +14,7 @@ data class AddressKey(
 
     companion object {
         @JvmStatic
-        fun of(it: AddrStd) = AddressKey(it.workchainId, it.address.toByteArray())
+        fun of(it: AddrStd) = AddressKey(it.workchain_id, it.address.toByteArray())
     }
 
     override fun equals(other: Any?): Boolean {
