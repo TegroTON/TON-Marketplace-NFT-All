@@ -32,7 +32,7 @@ open class MissingItemProcessor<RB : ReferenceBlock>(
                 mono { NFTDeployedCollection.itemAddressOf(it.first, it.second, liteApi, referenceBlock()) }
             }
             .filterWhen { itemRepository.existsByAddress(it).map { !it } }
-            .concatMap { itemRepository.save(ItemModel(it)) }
+            .map { ItemModel(it) }
 }
 
 @Prototype
