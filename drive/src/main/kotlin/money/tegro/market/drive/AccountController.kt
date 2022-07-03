@@ -13,7 +13,9 @@ import money.tegro.market.core.repository.*
 import org.ton.block.AddrStd
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import javax.annotation.security.PermitAll
 
+@PermitAll
 @Controller("/accounts")
 class AccountController(
     private val collectionRepository: CollectionRepository,

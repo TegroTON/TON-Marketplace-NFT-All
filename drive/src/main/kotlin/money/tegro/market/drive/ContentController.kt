@@ -11,7 +11,9 @@ import org.ton.block.AddrStd
 import reactor.core.publisher.Mono
 import java.io.ByteArrayInputStream
 import java.net.URL
+import javax.annotation.security.PermitAll
 
+@PermitAll
 @Controller("/content")
 class ContentController(
     private val collectionRepository: CollectionRepository,

@@ -24,7 +24,9 @@ import org.ton.tlb.storeTlb
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toFlux
+import javax.annotation.security.PermitAll
 
+@PermitAll
 @Controller("/items")
 class ItemController(
     private val configuration: MarketplaceConfiguration,

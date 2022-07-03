@@ -13,7 +13,9 @@ import org.ton.block.AddrStd
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toFlux
+import javax.annotation.security.PermitAll
 
+@PermitAll
 @Controller("/collections")
 class CollectionController(
     private val collectionRepository: CollectionRepository,
