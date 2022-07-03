@@ -10,6 +10,7 @@ import org.ton.block.*
 import org.ton.boc.BagOfCells
 import org.ton.cell.Cell
 import org.ton.cell.CellBuilder
+import org.ton.cell.storeRef
 import org.ton.crypto.Ed25519
 import org.ton.crypto.base64
 import org.ton.crypto.hex
