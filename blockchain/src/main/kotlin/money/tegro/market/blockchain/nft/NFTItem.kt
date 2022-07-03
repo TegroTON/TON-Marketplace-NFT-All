@@ -1,27 +1,60 @@
 package money.tegro.market.blockchain.nft
 
+import io.ktor.client.*
+import io.ktor.client.plugins.*
+import money.tegro.market.blockchain.referenceBlock
 import mu.KLogging
 import org.ton.api.tonnode.TonNodeBlockIdExt
-import org.ton.block.*
-import org.ton.boc.BagOfCells
+import org.ton.block.AddrStd
+import org.ton.block.MsgAddress
+import org.ton.block.VmStackValue
 import org.ton.cell.Cell
-import org.ton.cell.CellBuilder
-import org.ton.crypto.hex
 import org.ton.lite.api.LiteApi
 import org.ton.lite.api.liteserver.LiteServerAccountId
 import org.ton.tlb.loadTlb
-import org.ton.tlb.storeTlb
 
-interface NFTItem {
-    val address: AddrStd
-    val index: Long
-    val owner: AddrStd
-    val individualContent: Cell
+abstract class NFTItem : Addressable {
+    abstract val initialized: Boolean
+    abstract val index: Long
+    abstract val collection: MsgAddress
+    abstract val owner: MsgAddress
+    abstract val individualContent: Cell
+
+    fun isInCollection() = collection is AddrStd
+
+    suspend fun collection(
+        liteApi: LiteApi,
+        referenceBlock: suspend () -> TonNodeBlockIdExt = { liteApi.getMasterchainInfo().last }
+    ) = (collection as? AddrStd)?.let { NFTCollection.of(it, liteApi, referenceBlock) }
+
+    suspend fun royalty(
+        liteApi: LiteApi,
+        referenceBlock: suspend () -> TonNodeBlockIdExt = { liteApi.getMasterchainInfo().last }
+    ) = (collection as? AddrStd)?.let { NFTRoyalty.of(it, liteApi, referenceBlock) }
+        ?: NFTRoyalty.of(address as AddrStd, liteApi, referenceBlock)
 
     suspend fun content(
         liteApi: LiteApi,
         referenceBlock: suspend () -> TonNodeBlockIdExt = { liteApi.getMasterchainInfo().last },
-    ): Cell
+    ): Cell = (collection as? AddrStd)?.let {
+        NFTCollection.itemContent(
+            it,
+            index,
+            individualContent,
+            liteApi,
+            referenceBlock
+        )
+    } ?: individualContent
+
+    suspend fun metadata(
+        liteApi: LiteApi,
+        referenceBlock: suspend () -> TonNodeBlockIdExt = { liteApi.getMasterchainInfo().last },
+        httpClient: HttpClient = HttpClient {
+            install(HttpTimeout) {
+                requestTimeoutMillis = HttpTimeout.INFINITE_TIMEOUT_MS
+            }
+        }
+    ) = NFTItemMetadata.of(address, content(liteApi, referenceBlock), httpClient)
 
     companion object : KLogging() {
         private val msgAddressCodec by lazy { MsgAddress.tlbCodec() }
@@ -30,124 +63,31 @@ interface NFTItem {
         suspend fun of(
             address: AddrStd,
             liteApi: LiteApi,
-            referenceBlock: suspend () -> TonNodeBlockIdExt = { liteApi.getMasterchainInfo().last },
-        ): NFTItem? {
-            logger.debug { "running method `get_nft_data` on ${address.toString(userFriendly = true)}" }
-            val result = liteApi.runSmcMethod(0b100, referenceBlock(), LiteServerAccountId(address), "get_nft_data")
+            referenceBlock: suspend () -> TonNodeBlockIdExt = liteApi.referenceBlock(),
+        ): NFTItem =
+            liteApi.runSmcMethod(0b100, referenceBlock(), LiteServerAccountId(address), "get_nft_data")
+                .let {
+                    require(it.exitCode == 0) { "Failed to run the method, exit code is ${it.exitCode}" }
 
-            logger.debug { "response: $result" }
-            if (result.exitCode != 0) {
-                logger.warn { "Method exit code was ${result.exitCode}. NFT is most likely not initialized" }
-                return null
-            }
-
-            if ((result[0] as VmStackValue.TinyInt).value == -1L) {
-                val index = (result[1] as VmStackValue.TinyInt).value
-                val collection = (result[2] as VmStackValue.Slice).toCellSlice()
-                    .loadTlb(msgAddressCodec) as? AddrStd
-                val owner = (result[3] as VmStackValue.Slice).toCellSlice()
-                    .loadTlb(msgAddressCodec) as AddrStd
-                val content = (result[4] as VmStackValue.Cell).cell
-
-                return if (collection == null) {
-                    NFTDeployedStandaloneItem(address, index, owner, content)
-                } else {
-                    NFTDeployedCollectionItem(address, index, collection, owner, content)
+                    NFTItemImpl(
+                        address,
+                        (it[0] as VmStackValue.TinyInt).value == -1L,
+                        (it[1] as VmStackValue.TinyInt).value,
+                        (it[2] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec),
+                        (it[3] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec),
+                        (it[4] as VmStackValue.Cell).cell,
+                    )
                 }
-            } else {
-                return null
-            }
-        }
     }
 }
 
-interface NFTDeployedItem : NFTItem
-
-data class NFTDeployedStandaloneItem(
-    override val address: AddrStd,
+private data class NFTItemImpl(
+    override val address: MsgAddress,
+    override val initialized: Boolean,
     override val index: Long,
-    override val owner: AddrStd,
-    override val individualContent: Cell,
-) : NFTDeployedItem {
-    override suspend fun content(
-        liteApi: LiteApi,
-        referenceBlock: suspend () -> TonNodeBlockIdExt
-    ) = individualContent
-}
+    override val collection: MsgAddress,
+    override val owner: MsgAddress,
+    override val individualContent: Cell
+) : NFTItem() {
 
-data class NFTDeployedCollectionItem(
-    override val address: AddrStd,
-    override val index: Long,
-    val collection: AddrStd,
-    override val owner: AddrStd,
-    override val individualContent: Cell,
-) : NFTDeployedItem {
-    override suspend fun content(
-        liteApi: LiteApi,
-        referenceBlock: suspend () -> TonNodeBlockIdExt
-    ): Cell =
-        contentOf(collection, index, individualContent, liteApi, referenceBlock)
-
-    companion object : KLogging() {
-        @JvmStatic
-        suspend fun contentOf(
-            collection: AddrStd,
-            index: Long,
-            individualContent: Cell,
-            liteApi: LiteApi,
-            referenceBlock: suspend () -> TonNodeBlockIdExt = { liteApi.getMasterchainInfo().last },
-        ): Cell {
-            logger.debug("running method `get_nft_content` on ${collection.toString(userFriendly = true)}")
-            val result = liteApi.runSmcMethod(
-                0b100,
-                referenceBlock(),
-                LiteServerAccountId(collection),
-                "get_nft_content",
-                VmStackValue.TinyInt(index),
-                VmStackValue.Cell(individualContent)
-            )
-
-            logger.debug("response: $result")
-            require(result.exitCode == 0) { "Failed to run the method, exit code is ${result.exitCode}" }
-
-            return (result.first() as VmStackValue.Cell).cell
-        }
-    }
-}
-
-interface NFTStubItem : NFTItem {
-    companion object {
-        val NFT_ITEM_CODE = BagOfCells.of(
-            hex(
-                "B5EE9C7241020D010001D0000114FF00F4A413F4BCF2C80B0102016202030202CE04050009A11F9FE00502012006070201200B0C02D70C8871C02497C0F83434C0C05C6C2497C0F83E903E900C7E800C5C75C87E800C7E800C3C00812CE3850C1B088D148CB1C17CB865407E90350C0408FC00F801B4C7F4CFE08417F30F45148C2EA3A1CC840DD78C9004F80C0D0D0D4D60840BF2C9A884AEB8C097C12103FCBC20080900113E910C1C2EBCB8536001F65135C705F2E191FA4021F001FA40D20031FA00820AFAF0801BA121945315A0A1DE22D70B01C300209206A19136E220C2FFF2E192218E3E821005138D91C85009CF16500BCF16712449145446A0708010C8CB055007CF165005FA0215CB6A12CB1FCB3F226EB39458CF17019132E201C901FB00104794102A375BE20A00727082108B77173505C8CBFF5004CF1610248040708010C8CB055007CF165005FA0215CB6A12CB1FCB3F226EB39458CF17019132E201C901FB000082028E3526F0018210D53276DB103744006D71708010C8CB055007CF165005FA0215CB6A12CB1FCB3F226EB39458CF17019132E201C901FB0093303234E25502F003003B3B513434CFFE900835D27080269FC07E90350C04090408F80C1C165B5B60001D00F232CFD633C58073C5B3327B5520BF75041B"
-            )
-        ).roots.first()
-    }
-}
-
-data class NFTStubStandaloneItem(
-    override val owner: AddrStd,
-    override val individualContent: Cell,
-    val code: Cell = NFTStubItem.NFT_ITEM_CODE,
-    val workchainId: Int = owner.workchain_id,
-    override val index: Long = 0L,
-) : NFTStubItem {
-    private val msgAddressCodec by lazy { MsgAddress.tlbCodec() }
-    private val stateInitCodec by lazy { StateInit.tlbCodec() }
-
-    override val address: AddrStd
-        get() = AddrStd(workchainId, CellBuilder.createCell { storeTlb(stateInitCodec, stateInit()) }.hash())
-
-    override suspend fun content(liteApi: LiteApi, referenceBlock: suspend () -> TonNodeBlockIdExt) = individualContent
-
-    fun stateInit() = StateInit(createCode(), createData())
-
-    fun createCode() = code
-
-    fun createData(): Cell = CellBuilder.createCell {
-        storeUInt(index, 64)
-        storeTlb(msgAddressCodec, AddrNone)
-        storeTlb(msgAddressCodec, owner)
-        storeRef(individualContent)
-    }
 }
