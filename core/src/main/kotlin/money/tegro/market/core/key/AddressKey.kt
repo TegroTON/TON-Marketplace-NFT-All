@@ -3,6 +3,7 @@ package money.tegro.market.core.key
 import io.micronaut.data.annotation.Embeddable
 import io.micronaut.data.annotation.MappedProperty
 import org.ton.block.AddrStd
+import org.ton.block.MsgAddress
 
 @Embeddable
 data class AddressKey(
@@ -15,6 +16,9 @@ data class AddressKey(
     companion object {
         @JvmStatic
         fun of(it: AddrStd) = AddressKey(it.workchain_id, it.address.toByteArray())
+
+        @JvmStatic
+        fun of(it: MsgAddress) = (it as? AddrStd)?.let { of(it) }
     }
 
     override fun equals(other: Any?): Boolean {

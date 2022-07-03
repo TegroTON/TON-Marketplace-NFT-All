@@ -5,23 +5,25 @@ import io.micronaut.data.annotation.Id
 import io.micronaut.data.annotation.MappedEntity
 import io.micronaut.data.annotation.Relation
 import io.swagger.v3.oas.annotations.media.Schema
-import money.tegro.market.blockchain.nft.NFTMetadataAttribute
+import money.tegro.market.blockchain.nft.NFTItemMetadataAttribute
 import money.tegro.market.core.key.AddressKey
 
 @MappedEntity("ATTRIBUTES")
 @Schema(hidden = true)
 data class AttributeModel(
+    /** Item that this attribute applies to */
     @Relation(Relation.Kind.EMBEDDED)
     val item: AddressKey,
 
-    var trait: String,
-    var value: String,
+    val trait: String,
+
+    val value: String,
 
     @field:Id
     @field:GeneratedValue
     var id: Long? = null
 ) {
-    constructor(item: AddressKey, attribute: NFTMetadataAttribute) : this(
+    constructor(item: AddressKey, attribute: NFTItemMetadataAttribute) : this(
         item,
         attribute.trait,
         attribute.value

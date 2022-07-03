@@ -1,5 +1,6 @@
 package money.tegro.market.blockchain.nft
 
+import money.tegro.market.blockchain.referenceBlock
 import mu.KLogging
 import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.block.AddrStd
@@ -13,7 +14,7 @@ interface NFTSale : Addressable {
     val marketplace: MsgAddress
     val item: MsgAddress
     val owner: MsgAddress
-    val price: Long
+    val fullPrice: Long
     val marketplaceFee: Long
     val royaltyDestination: MsgAddress
     val royalty: Long
@@ -25,7 +26,7 @@ interface NFTSale : Addressable {
         suspend fun of(
             address: AddrStd,
             liteApi: LiteApi,
-            referenceBlock: suspend () -> TonNodeBlockIdExt = { liteApi.getMasterchainInfo().last },
+            referenceBlock: suspend () -> TonNodeBlockIdExt = liteApi.referenceBlock(),
         ): NFTSale =
             liteApi.runSmcMethod(0b100, referenceBlock(), LiteServerAccountId(address), "get_sale_data").let {
                 require(it.exitCode == 0) { "Failed to run the method, exit code is ${it.exitCode}" }
@@ -49,7 +50,7 @@ private data class NFTSaleImpl(
     override val marketplace: MsgAddress,
     override val item: MsgAddress,
     override val owner: MsgAddress,
-    override val price: Long,
+    override val fullPrice: Long,
     override val marketplaceFee: Long,
     override val royaltyDestination: MsgAddress,
     override val royalty: Long

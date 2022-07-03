@@ -33,6 +33,11 @@ abstract class NFTItem : Addressable {
     ) = (collection as? AddrStd)?.let { NFTRoyalty.of(it, liteApi, referenceBlock) }
         ?: NFTRoyalty.of(address as AddrStd, liteApi, referenceBlock)
 
+    suspend fun sale(
+        liteApi: LiteApi,
+        referenceBlock: suspend () -> TonNodeBlockIdExt = { liteApi.getMasterchainInfo().last }
+    ) = (owner as? AddrStd)?.let { NFTSale.of(it, liteApi, referenceBlock) }
+
     suspend fun content(
         liteApi: LiteApi,
         referenceBlock: suspend () -> TonNodeBlockIdExt = { liteApi.getMasterchainInfo().last },

@@ -5,6 +5,7 @@ import io.micronaut.data.annotation.MappedEntity
 import io.micronaut.data.annotation.Relation
 import io.swagger.v3.oas.annotations.media.Schema
 import money.tegro.market.blockchain.nft.NFTRoyalty
+import money.tegro.market.core.dto.toKey
 import money.tegro.market.core.key.AddressKey
 import java.time.Instant
 
@@ -14,18 +15,28 @@ data class RoyaltyModel(
     @EmbeddedId
     val address: AddressKey,
 
-    var numerator: Int,
-    var denominator: Int,
-    @Relation(Relation.Kind.EMBEDDED)
-    var destination: AddressKey,
+    val numerator: Int,
 
+    val denominator: Int,
+
+    @Relation(Relation.Kind.EMBEDDED)
+    val destination: AddressKey,
+
+    
     val discovered: Instant = Instant.now(),
-    var updated: Instant = Instant.MIN
+    val updated: Instant = Instant.MIN
 ) {
-    constructor(address: AddressKey, royalty: NFTRoyalty) : this(
-        address,
-        royalty.numerator,
-        royalty.denominator,
-        AddressKey.of(royalty.destination)
-    )
+    companion object {
+        @JvmStatic
+        fun of(royalty: NFTRoyalty): RoyaltyModel? = royalty.destination.toKey()?.let { destination ->
+            royalty.address.toKey()?.let { address ->
+                RoyaltyModel(
+                    address = address,
+                    numerator = royalty.numerator,
+                    denominator = royalty.denominator,
+                    destination = destination
+                )
+            }
+        }
+    }
 }

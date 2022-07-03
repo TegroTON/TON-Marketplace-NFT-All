@@ -1,7 +1,6 @@
 package money.tegro.market.nightcrawler.job
 
 import io.micronaut.context.ApplicationContext
-import io.micronaut.scheduling.annotation.Scheduled
 import jakarta.inject.Singleton
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
@@ -10,7 +9,6 @@ import money.tegro.market.core.repository.CollectionRepository
 import money.tegro.market.core.repository.ItemRepository
 import money.tegro.market.core.repository.RoyaltyRepository
 import money.tegro.market.core.repository.SaleRepository
-import money.tegro.market.nightcrawler.LatestReferenceBlock
 import money.tegro.market.nightcrawler.process.*
 import mu.KLogging
 import org.ton.api.tonnode.TonNodeBlockIdExt
@@ -19,8 +17,9 @@ import org.ton.bitstring.BitString
 import org.ton.block.*
 import org.ton.lite.api.LiteApi
 import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
+import reactor.core.scheduler.Schedulers
 import reactor.kotlin.core.publisher.toFlux
+import reactor.kotlin.core.publisher.toMono
 import java.time.Duration
 
 @Singleton
@@ -33,16 +32,13 @@ class LiveJob(
     private val saleRepository: SaleRepository,
     private val royaltyRepository: RoyaltyRepository,
 
-    private val collectionDataProcess: CollectionDataProcess<LatestReferenceBlock>,
-    private val collectionMetadataProcess: CollectionMetadataProcess,
-
-    private val itemDataProcess: ItemDataProcess<LatestReferenceBlock>,
-    private val itemMetadataProcess: ItemMetadataProcess,
-
-    private val saleProcess: SaleProcess<LatestReferenceBlock>,
-    private val royaltyProcess: RoyaltyProcess<LatestReferenceBlock>,
+    private val collectionProcess: CollectionProcess,
+    private val itemProcess: ItemProcess,
+    private val missingItemsProcess: MissingItemsProcess,
+    private val royaltyProcess: RoyaltyProcess,
+    private val saleProcess: SaleProcess,
 ) {
-    @Scheduled(initialDelay = "0s")
+    //    @Scheduled(initialDelay = "0s")
     fun run() {
         runBlocking {
             logger.info { "Remember, use your zoom, steady hands." }
@@ -115,52 +111,42 @@ class LiveJob(
                     }
                     .replay()
 
-            val items = affectedAccounts
+            affectedAccounts
+                .publishOn(Schedulers.boundedElastic())
                 .flatMap { itemRepository.findById(it) }
-                .doOnNext { logger.info { "Updating item ${it.address.to().toSafeBounceable()}" } }
-                .concatMap(itemDataProcess)
-                .replay()
-
-            // Update item sale
-            items
-                .concatMap {
-                    it.owner?.let { saleProcess.apply(it) } ?: Mono.empty()
+                .doOnNext { logger.info { "Updating Iitem ${it.address.toSafeBounceable()}" } }
+                .concatMap(itemProcess()) // Data and metadata
+                .doOnNext { itemRepository.upsert(it) }
+                .doOnNext { // Royalty
+                    if (it.collection != null)
+                        it.address.toMono()
+                            .flatMap(royaltyProcess())
+                            .subscribe { royaltyRepository.upsert(it) }
                 }
-                .subscribe { saleRepository.upsert(it) }
-
-            // Update item metadata too
-            items
-                .concatMap(itemMetadataProcess)
-                .subscribe { itemRepository.upsert(it) }
-
-            // Update item royalty
-            items
-                .filter { it.collection != null } // only stand-alone items
-                .map { it.address }
-                .concatMap(royaltyProcess)
-                .subscribe { royaltyRepository.upsert(it) }
-
-            items.connect()
+                .doOnNext { // Sale
+                    it.address.toMono()
+                        .flatMap(saleProcess())
+                        .subscribe { saleRepository.upsert(it) }
+                }
+                .then()
+                .subscribe {}
 
 
-            val collections = affectedAccounts
+            affectedAccounts
+                .publishOn(Schedulers.boundedElastic())
                 .flatMap { collectionRepository.findById(it) }
-                .doOnNext { logger.info { "Updating collection ${it.address.to().toSafeBounceable()}" } }
-                .replay()
-
-            // Collection data+metadata
-            collections
-                .concatMap(collectionDataProcess)
-                .concatMap(collectionMetadataProcess)
-                .subscribe { collectionRepository.upsert(it) }
-
-            // Update collection royalty
-            collections
-                .map { it.address }
-                .concatMap(royaltyProcess)
-                .subscribe { royaltyRepository.upsert(it) }
-
-            collections.connect()
+                .doOnNext { logger.info { "Updating collection ${it.address.toSafeBounceable()}" } }
+                .concatMap(collectionProcess()) // Data and metadata
+                .doOnNext { collectionRepository.upsert(it) }
+                .doOnNext { // Royalty
+                    it.address.toMono()
+                        .flatMap(royaltyProcess())
+                        .subscribe { royaltyRepository.upsert(it) }
+                }
+                .concatMap(missingItemsProcess())
+                .doOnNext { itemRepository.save(it) }
+                .then()
+                .subscribe {}
 
             affectedAccounts.connect()
         }

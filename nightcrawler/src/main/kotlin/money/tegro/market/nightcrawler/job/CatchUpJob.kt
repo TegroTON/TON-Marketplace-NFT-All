@@ -5,23 +5,25 @@ import io.micronaut.context.annotation.Prototype
 import io.micronaut.core.io.scan.ClassPathResourceLoader
 import io.micronaut.data.model.Sort
 import io.micronaut.kotlin.context.getBean
-import io.micronaut.runtime.context.scope.refresh.RefreshEvent
 import io.micronaut.scheduling.annotation.Scheduled
 import jakarta.inject.Singleton
 import kotlinx.coroutines.reactor.awaitSingleOrNull
+import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
+import money.tegro.market.blockchain.nft.NFTCollection
 import money.tegro.market.core.model.CollectionModel
 import money.tegro.market.core.repository.CollectionRepository
 import money.tegro.market.core.repository.ItemRepository
 import money.tegro.market.core.repository.RoyaltyRepository
 import money.tegro.market.core.repository.SaleRepository
-import money.tegro.market.nightcrawler.FixedReferenceBlock
 import money.tegro.market.nightcrawler.process.*
 import mu.KLogging
+import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.block.AddrStd
-import reactor.core.publisher.Mono
-import reactor.core.scheduler.Schedulers
+import org.ton.lite.api.LiteApi
 import reactor.kotlin.core.publisher.toFlux
+import reactor.kotlin.core.publisher.toMono
+import reactor.kotlin.extra.bool.not
 import java.time.Duration
 import java.time.Instant
 
@@ -29,18 +31,17 @@ import java.time.Instant
 class CatchUpJob(
     private val context: ApplicationContext,
 ) {
-    @Scheduled(initialDelay = "0s", fixedDelay = "\${money.tegro.market.nightcrawler.catchup-period:60m}")
+    @Scheduled(initialDelay = "0s")//, fixedDelay = "\${money.tegro.market.nightcrawler.catchup-period:60m}")
     fun run() {
         runBlocking {
             logger.info { "Starting catching up" }
             val started = Instant.now()
 
-            context.getEventPublisher(RefreshEvent::class.java)
-                .publishEvent(RefreshEvent()) // To update the reference block
+            val referenceBlock = context.getBean<LiteApi>().getMasterchainInfo().last
 
-            context.getBean<LoadInitialCollections>().run()
-            context.getBean<CatchUpOnCollections>().run()
-            context.getBean<CatchUpOnItems>().run()
+            context.getBean<LoadInitialCollections>().run { referenceBlock }
+            context.getBean<CatchUpOnCollections>().run { referenceBlock }
+            context.getBean<CatchUpOnItems>().run { referenceBlock }
 
             logger.info { "Caught up in ${Duration.between(started, Instant.now())}" }
         }
@@ -48,10 +49,11 @@ class CatchUpJob(
 
     @Prototype
     class LoadInitialCollections(
+        private val liteApi: LiteApi,
         private val resourceLoader: ClassPathResourceLoader,
         private val collectionRepository: CollectionRepository,
     ) {
-        fun run() {
+        suspend fun run(referenceBlock: suspend () -> TonNodeBlockIdExt) {
             logger.info { "Loading initial collections" }
 
             resourceLoader.classLoader.getResource("init_collections.csv")?.readText()?.let {
@@ -59,13 +61,18 @@ class CatchUpJob(
                     .toFlux()
                     .filter { it.isNotBlank() }
                     .map { AddrStd(it) }
-                    .filterWhen { collectionRepository.existsByAddress(it).map { !it } }
+                    .filterWhen { collectionRepository.existsByAddress(it).not() }
                     .concatMap {
-                        collectionRepository.save(CollectionModel(it))
+                        mono {
+                            val collection = NFTCollection.of(it, liteApi, referenceBlock)
+                            CollectionModel.of(collection, collection.metadata())
+                        }
                     }
-                    .blockLast()
-            } ?: run {
-                CatchUpJob.logger.debug { "No file with initial collections found in the classpath" }
+                    .doOnNext { collectionRepository.save(it) }
+                    .then()
+                    .awaitSingleOrNull()
+            } ?: apply {
+                logger.info { "No file with initial collections found in the classpath" }
             }
         }
 
@@ -74,44 +81,37 @@ class CatchUpJob(
 
     @Prototype
     class CatchUpOnCollections(
-        private val referenceBlock: FixedReferenceBlock,
         private val collectionRepository: CollectionRepository,
         private val itemRepository: ItemRepository,
         private val royaltyRepository: RoyaltyRepository,
 
-        private val collectionDataProcess: CollectionDataProcess<FixedReferenceBlock>,
-        private val collectionMetadataProcess: CollectionMetadataProcess,
-        private val missingItemProcessor: MissingItemProcessor<FixedReferenceBlock>,
-
-        private val royaltyProcess: RoyaltyProcess<FixedReferenceBlock>,
+        private val collectionProcess: CollectionProcess,
+        private val royaltyProcess: RoyaltyProcess,
+        private val missingItemsProcess: MissingItemsProcess,
     ) {
-        suspend fun run() {
-            val seqno = referenceBlock()().seqno
+        suspend fun run(referenceBlock: suspend () -> TonNodeBlockIdExt) {
+            val seqno = referenceBlock.invoke().seqno
+
             logger.info { "Updating collections up to block no. $seqno" }
-
-            val collections = collectionRepository.findAll(Sort.of(Sort.Order.asc("updated")))
-                .publishOn(Schedulers.boundedElastic())
-                .replay()
-
-            val data = collections
-                .concatMap(collectionDataProcess)
-                .concatMap(collectionMetadataProcess)
-                .concatMap { collectionRepository.upsert(it) }
-
-            val royalty = collections
-                .map { it.address }
-                .concatMap(royaltyProcess)
-                .concatMap { royaltyRepository.upsert(it) }
-
-            collections.connect()
-
-            Mono.`when`(data, royalty)
+            collectionRepository
+                .findAll(Sort.of(Sort.Order.asc("updated")))
+//                .publishOn(Schedulers.boundedElastic())
+                .concatMap(collectionProcess(referenceBlock)) // Data and metadata
+                .doOnNext { collectionRepository.upsert(it) }
+                .doOnNext { // Royalty
+                    it.address.toMono()
+                        .flatMap(royaltyProcess(referenceBlock))
+                        .subscribe { royaltyRepository.upsert(it) }
+                }
+                .then()
                 .awaitSingleOrNull()
 
             logger.info { "Discovering missing items" }
-            collectionRepository.findAll(Sort.of(Sort.Order.asc("updated")))
-                .concatMap(missingItemProcessor)
-                .concatMap { itemRepository.save(it) }
+            collectionRepository
+                .findAll(Sort.of(Sort.Order.asc("updated")))
+//                .publishOn(Schedulers.boundedElastic())
+                .concatMap(missingItemsProcess(referenceBlock))
+                .doOnNext { itemRepository.save(it) }
                 .then()
                 .awaitSingleOrNull()
 
@@ -123,50 +123,36 @@ class CatchUpJob(
 
     @Prototype
     class CatchUpOnItems(
-        private val referenceBlock: FixedReferenceBlock,
-
         private val itemRepository: ItemRepository,
         private val saleRepository: SaleRepository,
         private val royaltyRepository: RoyaltyRepository,
 
-        private val itemDataProcess: ItemDataProcess<FixedReferenceBlock>,
-        private val itemMetadataProcess: ItemMetadataProcess,
-
-        private val saleProcess: SaleProcess<FixedReferenceBlock>,
-        private val royaltyProcess: RoyaltyProcess<FixedReferenceBlock>,
+        private val itemProcess: ItemProcess,
+        private val royaltyProcess: RoyaltyProcess,
+        private val saleProcess: SaleProcess,
     ) {
-        suspend fun run() {
-            val seqno = referenceBlock()().seqno
+        suspend fun run(referenceBlock: suspend () -> TonNodeBlockIdExt) {
+            val seqno = referenceBlock.invoke().seqno
+
             logger.info { "Updating items up to block no. $seqno" }
-
-            val items = itemRepository.findAll(Sort.of(Sort.Order.asc("updated")))
-                .publishOn(Schedulers.boundedElastic())
-                .replay()
-
-            val data = items
-                .concatMap(itemDataProcess)
-                .replay()
-
-            val sale = data
-                .concatMap {
-                    it.owner?.let { saleProcess.apply(it) } ?: Mono.empty()
+            itemRepository
+                .findAll(Sort.of(Sort.Order.asc("updated")))
+//                .publishOn(Schedulers.boundedElastic())
+                .concatMap(itemProcess(referenceBlock)) // Data and metadata
+                .doOnNext { itemRepository.upsert(it) }
+                .doOnNext { // Royalty
+                    if (it.collection != null)
+                        it.address.toMono()
+                            .flatMap(royaltyProcess(referenceBlock))
+                            .subscribe { royaltyRepository.upsert(it) }
                 }
-                .concatMap { saleRepository.upsert(it) }
-
-            val metadata = data
-                .concatMap(itemMetadataProcess)
-                .concatMap { itemRepository.upsert(it) }
-
-            val royalty = items
-                .filter { it.collection != null } // only stand-alone items
-                .map { it.address }
-                .concatMap(royaltyProcess)
-                .concatMap { royaltyRepository.upsert(it) }
-
-            data.connect()
-            items.connect()
-
-            Mono.`when`(data, sale, metadata, royalty).awaitSingleOrNull() // Wait for all of them to complete
+                .doOnNext { // Sale
+                    it.address.toMono()
+                        .flatMap(saleProcess(referenceBlock))
+                        .subscribe { saleRepository.upsert(it) }
+                }
+                .then()
+                .awaitSingleOrNull()
 
             logger.info { "Items up-to-date at block height $seqno" }
         }

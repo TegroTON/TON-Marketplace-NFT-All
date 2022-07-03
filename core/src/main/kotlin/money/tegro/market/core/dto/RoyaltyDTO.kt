@@ -13,6 +13,6 @@ data class RoyaltyDTO(
 ) {
     constructor(it: RoyaltyModel) : this(
         it.numerator.toFloat() / it.denominator,
-        it.destination.to().toSafeBounceable()
+        it.destination?.toSafeBounceable()
     )
 }

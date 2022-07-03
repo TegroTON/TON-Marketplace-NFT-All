@@ -5,11 +5,12 @@ import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
 import money.tegro.market.blockchain.client.ResilientLiteClient
-import money.tegro.market.blockchain.nft.*
+import money.tegro.market.blockchain.nft.NFTItem
 import money.tegro.market.core.dto.ItemDTO
-import money.tegro.market.core.dto.RoyaltyDTO
-import money.tegro.market.core.dto.SaleDTO
-import money.tegro.market.core.dto.toSafeBounceable
+import money.tegro.market.core.model.AttributeModel
+import money.tegro.market.core.model.ItemModel
+import money.tegro.market.core.model.RoyaltyModel
+import money.tegro.market.core.model.SaleModel
 import org.ton.block.AddrStd
 import org.ton.lite.api.LiteApi
 import picocli.CommandLine
@@ -46,38 +47,16 @@ class QueryItemCommand : Runnable {
 
     fun queryBlockchain(address: AddrStd) = mono {
         val item = NFTItem.of(address, liteApi)
-        val royalty = (item as? NFTDeployedCollectionItem)?.collection?.let { NFTRoyalty.of(it, liteApi) }
-            ?: NFTRoyalty.of(address, liteApi)
-        val metadata = item?.content(liteApi)?.let { NFTMetadata.of(it) }
-        val sale = item?.owner?.let { NFTSale.of(it, liteApi) }
+        val royalty = item.royalty(liteApi)
+        val metadata = item.metadata(liteApi)
+        val sale = item.sale(liteApi)
 
-        item?.let {
+        ItemModel.of(item, metadata)?.let { model ->
             ItemDTO(
-                address = it.address.toSafeBounceable(),
-                index = it.index,
-                collection = (it as? NFTDeployedCollectionItem)?.collection?.toSafeBounceable(),
-                owner = it.owner.toSafeBounceable(),
-                name = metadata?.name,
-                description = metadata?.description,
-                attributes = metadata?.attributes?.associate { it.trait to it.value } ?: mapOf(),
-                royalty = royalty?.let {
-                    RoyaltyDTO(
-                        it.numerator.toFloat() / it.denominator,
-                        it.destination.toSafeBounceable()
-                    )
-                },
-                sale = sale?.let {
-                    SaleDTO(
-                        address = it.address.toSafeBounceable(),
-                        marketplace = it.marketplace.toSafeBounceable(),
-                        item = it.item.toSafeBounceable(),
-                        owner = it.owner.toSafeBounceable(),
-                        fullPrice = it.price,
-                        marketplaceFee = it.marketplaceFee,
-                        royalty = it.royalty,
-                        royaltyDestination = it.royaltyDestination?.toSafeBounceable()
-                    )
-                }
+                model,
+                sale?.let { SaleModel.of(it) },
+                RoyaltyModel.of(royalty),
+                metadata.attributes?.asSequence()?.map { AttributeModel(model.address, it) }?.asIterable()
             )
         }
     }

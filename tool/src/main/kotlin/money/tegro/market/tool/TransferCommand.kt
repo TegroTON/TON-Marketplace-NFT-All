@@ -45,13 +45,13 @@ class TransferCommand : Runnable {
             }
 
             if (item.owner != wallet.address()) {
-                println("Item owner address (${item.owner.toString(userFriendly = true)}) differs from provided address")
+                println("Item owner address (${(item.owner as AddrStd).toString(userFriendly = true)}) differs from provided address")
                 println("Cannot proceed, quitting")
                 exitProcess(-1)
             }
 
             client.transferItem(
-                item.address.toSafeBounceable(),
+                item.address.toSafeBounceable()!!,
                 AddrStd(destinationAddress).toSafeBounceable(),
                 wallet.address().toSafeBounceable(),
             ).awaitSingle().performTransaction(wallet, liteApi)

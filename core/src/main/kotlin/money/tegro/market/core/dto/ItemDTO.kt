@@ -26,29 +26,29 @@ data class ItemDTO(
     @get:Schema(description = "Description of the item")
     val description: String?,
 
-    @field:Schema(description = "Item attributes")
-    val attributes: Map<String, String>?,
+    @field:Schema(description = "Sale information if the item is on sale")
+    val sale: SaleDTO?,
 
     @field:Schema(description = "Item royalty parameters, may be inherited from the collection or set up by the item itself")
     val royalty: RoyaltyDTO?,
 
-    @field:Schema(description = "Sale information if the item is on sale")
-    val sale: SaleDTO?,
+    @field:Schema(description = "Item attributes")
+    val attributes: Map<String, String>?,
 ) {
     constructor(
         it: ItemModel,
+        sale: SaleModel?,
         royalty: RoyaltyModel?,
         attributes: Iterable<AttributeModel>?,
-        sale: SaleModel?
     ) : this(
-        address = it.address.to().toSafeBounceable(),
+        address = it.address.toSafeBounceable(),
         index = it.index,
-        collection = it.collection?.to()?.toSafeBounceable(),
-        owner = it.owner?.to()?.toSafeBounceable(),
+        collection = it.collection?.toSafeBounceable(),
+        owner = it.owner?.toSafeBounceable(),
         name = it.name,
         description = it.description,
-        attributes = attributes?.associate { it.trait to it.value } ?: mapOf(),
+        sale = sale?.let { SaleDTO(it) },
         royalty = royalty?.let { RoyaltyDTO(it) },
-        sale = sale?.let { SaleDTO(it) }
+        attributes = attributes?.associate { it.trait to it.value } ?: mapOf(),
     )
 }

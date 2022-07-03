@@ -31,7 +31,6 @@ class CollectionController(
                     CollectionDTO(
                         it,
                         royaltyRepository.findById(it.address).awaitSingleOrNull(),
-                        itemRepository.countByCollection(it.address).awaitSingleOrNull()
                     )
                 }
             }
@@ -44,7 +43,6 @@ class CollectionController(
                     CollectionDTO(
                         it,
                         royaltyRepository.findById(it.address).awaitSingleOrNull(),
-                        itemRepository.countByCollection(it.address).awaitSingleOrNull()
                     )
                 }
             }
@@ -59,10 +57,10 @@ class CollectionController(
                                 mono {
                                     ItemDTO(
                                         it,
+                                        saleRepository.findByItem(it.address).awaitSingleOrNull(),
                                         it.collection?.let { royaltyRepository.findById(it).awaitSingleOrNull() }
                                             ?: royaltyRepository.findById(it.address).awaitSingleOrNull(),
                                         attributeRepository.findByItem(it.address).collectList().awaitSingle(),
-                                        saleRepository.findByItem(it.address).awaitSingleOrNull(),
                                     )
                                 }
                             }

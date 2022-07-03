@@ -30,13 +30,13 @@ data class SaleDTO(
     val royaltyDestination: String?,
 ) {
     constructor(it: SaleModel) : this(
-        address = it.address.to().toSafeBounceable(),
-        marketplace = it.marketplace.to().toSafeBounceable(),
-        item = it.item.to().toSafeBounceable(),
-        owner = it.owner.to().toSafeBounceable(),
+        address = it.address.toSafeBounceable(),
+        marketplace = it.marketplace.toSafeBounceable(),
+        item = it.item.toSafeBounceable(),
+        owner = it.owner.toSafeBounceable(),
         fullPrice = it.fullPrice,
         marketplaceFee = it.marketplaceFee,
         royalty = it.royalty,
-        royaltyDestination = it.royaltyDestination?.to()?.toSafeBounceable()
+        royaltyDestination = it.royaltyDestination?.toSafeBounceable()
     )
 }

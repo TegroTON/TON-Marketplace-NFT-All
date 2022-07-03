@@ -4,6 +4,7 @@ coroutines = { strictly = "1.6.1-native-mt" }
 jackson = { prefer = "2.13.2" }
 picocli = { prefer = "4.6.3" }
 reactor = { prefer = "3.4.18" }
+reactor-extra = { prefer = "3.4.8" }
 reactor-kotlin = { prefer = "1.1.6" }
 reflect = { prefer = "1.7.0" }
 ton = { strictly = "ab41e6b3fb" }
@@ -35,6 +36,7 @@ ktor-bom = { group = "io.ktor", name = "ktor-bom", version.ref = "ktor" }
 picocli = { group = "info.picocli", name = "picocli", version.ref = "picocli" }
 picocli-codegen = { group = "info.picocli", name = "picocli-codegen", version.ref = "picocli" }
 reactor-core = { group = "io.projectreactor", name = "reactor-core", version.ref = "reactor" }
+reactor-extra = { group = "io.projectreactor.addons", name = "reactor-extra", version.ref = "reactor-extra" }
 reactor-kotlin = { group = "io.projectreactor.kotlin", name = "reactor-kotlin-extensions", version.ref = "reactor-kotlin" }
 reactor-test = { group = "io.projectreactor", name = "reactor-test", version.ref = "reactor" }
 reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "reflect" }
@@ -67,7 +69,7 @@ micronaut-security = { group = "io.micronaut.security", name = "micronaut-securi
 
 [bundles]
 coroutines = ["coroutines-core", "coroutines-reactive", "coroutines-reactor"]
-reactor = ["reactor-core", "reactor-kotlin"]
+reactor = ["reactor-core", "reactor-extra", "reactor-kotlin"]
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
