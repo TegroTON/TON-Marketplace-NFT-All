@@ -3,7 +3,6 @@ package money.tegro.market.tool
 import jakarta.inject.Inject
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.runBlocking
-import money.tegro.market.blockchain.client.ResilientLiteClient
 import money.tegro.market.blockchain.nft.NFTItem
 import money.tegro.market.core.dto.toSafeBounceable
 import org.ton.api.pk.PrivateKeyEd25519
@@ -34,7 +33,6 @@ class TransferCommand : Runnable {
 
     override fun run() {
         runBlocking {
-            (liteApi as ResilientLiteClient).connect()
             val wallet = WalletV1R3(liteApi, PrivateKeyEd25519(base64(privateKey)))
             println("Your wallet address is ${wallet.address().toString(userFriendly = true)}")
 

@@ -4,7 +4,6 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
-import money.tegro.market.blockchain.client.ResilientLiteClient
 import money.tegro.market.blockchain.nft.NFTCollection
 import money.tegro.market.core.dto.CollectionDTO
 import money.tegro.market.core.dto.RoyaltyDTO
@@ -31,7 +30,6 @@ class QueryCollectionCommand : Runnable {
 
     override fun run() {
         runBlocking {
-            (liteApi as ResilientLiteClient).connect()
             for (addressStr in addresses) {
                 val address = AddrStd(addressStr)
                 println("Querying an NFT collection ${address.toString(userFriendly = true)}")
@@ -48,8 +46,8 @@ class QueryCollectionCommand : Runnable {
     }
 
     fun queryBlockchain(address: AddrStd) = mono {
-        val collection = runBlocking { NFTCollection.of(address, liteApi) }
-        val royalty = runBlocking { collection.royalty(liteApi) }
+        val collection = NFTCollection.of(address, liteApi)
+        val royalty = collection.royalty(liteApi)
         val metadata = collection.metadata()
 
         CollectionDTO(

@@ -7,7 +7,7 @@ reactor = { prefer = "3.4.18" }
 reactor-extra = { prefer = "3.4.8" }
 reactor-kotlin = { prefer = "1.1.6" }
 reflect = { prefer = "1.7.0" }
-ton = { strictly = "ab41e6b3fb" }
+ton = { strictly = "13004f960b" }
 ktor = { prefer = "2.0.2" }
 logging = { prefer = "2.1.23" }
 slf4j = { prefer = "1.7.36" }

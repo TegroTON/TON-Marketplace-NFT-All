@@ -20,7 +20,8 @@ abstract class NFTMetadata : Addressable {
     abstract val imageData: ByteArray?
 
     companion object : KLogging() {
-        private val snakeDataCodec by lazy { SnakeData.tlbCodec() }
+        // TODO: Full snakedata
+        private val snakeDataCodec by lazy { SnakeDataTail.tlbCodec() }
 
         @JvmStatic
         suspend fun parseContent(

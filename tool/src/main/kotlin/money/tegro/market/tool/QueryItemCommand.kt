@@ -4,7 +4,6 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
-import money.tegro.market.blockchain.client.ResilientLiteClient
 import money.tegro.market.blockchain.nft.NFTItem
 import money.tegro.market.core.dto.ItemDTO
 import money.tegro.market.core.model.AttributeModel
@@ -29,7 +28,6 @@ class QueryItemCommand : Runnable {
 
     override fun run() {
         runBlocking {
-            (liteApi as ResilientLiteClient).connect()
             for (addressStr in addresses) {
                 val address = AddrStd(addressStr)
                 println("Querying an NFT item ${address.toString(userFriendly = true)}")
