@@ -42,7 +42,6 @@ abstract class NFTMetadata : Addressable {
                     val rawData = cs.loadTlb(snakeDataCodec)
                     cs.endParse()
 
-
                     val url = String(rawData.toByteArray())
                     logger.debug { "off-chain content layout, url is: $url" }
 
