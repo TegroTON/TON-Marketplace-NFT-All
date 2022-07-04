@@ -1,6 +1,7 @@
 package money.tegro.market.nightcrawler.job
 
 import io.micronaut.context.ApplicationContext
+import io.micronaut.scheduling.annotation.Scheduled
 import jakarta.inject.Singleton
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
@@ -38,7 +39,7 @@ class LiveJob(
     private val royaltyProcess: RoyaltyProcess,
     private val saleProcess: SaleProcess,
 ) {
-    //    @Scheduled(initialDelay = "0s")
+    @Scheduled(initialDelay = "0s")
     fun run() {
         runBlocking {
             logger.info { "Remember, use your zoom, steady hands." }
@@ -114,19 +115,21 @@ class LiveJob(
             affectedAccounts
                 .publishOn(Schedulers.boundedElastic())
                 .flatMap { itemRepository.findById(it) }
-                .doOnNext { logger.info { "Updating Iitem ${it.address.toSafeBounceable()}" } }
+                .doOnNext { logger.info { "Updating item ${it.address.toSafeBounceable()}" } }
                 .concatMap(itemProcess()) // Data and metadata
-                .doOnNext { itemRepository.upsert(it) }
+                .doOnNext { itemRepository.upsert(it).subscribe() }
                 .doOnNext { // Royalty
                     if (it.collection != null)
                         it.address.toMono()
                             .flatMap(royaltyProcess())
-                            .subscribe { royaltyRepository.upsert(it) }
+                            .onErrorStop()
+                            .subscribe { royaltyRepository.upsert(it).subscribe() }
                 }
                 .doOnNext { // Sale
                     it.address.toMono()
                         .flatMap(saleProcess())
-                        .subscribe { saleRepository.upsert(it) }
+                        .onErrorStop()
+                        .subscribe { saleRepository.upsert(it).subscribe() }
                 }
                 .then()
                 .subscribe {}
@@ -137,14 +140,15 @@ class LiveJob(
                 .flatMap { collectionRepository.findById(it) }
                 .doOnNext { logger.info { "Updating collection ${it.address.toSafeBounceable()}" } }
                 .concatMap(collectionProcess()) // Data and metadata
-                .doOnNext { collectionRepository.upsert(it) }
+                .doOnNext { collectionRepository.upsert(it).subscribe() }
                 .doOnNext { // Royalty
                     it.address.toMono()
                         .flatMap(royaltyProcess())
-                        .subscribe { royaltyRepository.upsert(it) }
+                        .onErrorStop()
+                        .subscribe { royaltyRepository.upsert(it).subscribe() }
                 }
                 .concatMap(missingItemsProcess())
-                .doOnNext { itemRepository.save(it) }
+                .doOnNext { itemRepository.save(it).subscribe() }
                 .then()
                 .subscribe {}
 

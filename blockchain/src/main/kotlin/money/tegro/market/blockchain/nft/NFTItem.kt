@@ -2,6 +2,7 @@ package money.tegro.market.blockchain.nft
 
 import io.ktor.client.*
 import io.ktor.client.plugins.*
+import io.ktor.http.*
 import money.tegro.market.blockchain.referenceBlock
 import mu.KLogging
 import org.ton.api.tonnode.TonNodeBlockIdExt
@@ -57,6 +58,14 @@ abstract class NFTItem : Addressable {
         httpClient: HttpClient = HttpClient {
             install(HttpTimeout) {
                 requestTimeoutMillis = HttpTimeout.INFINITE_TIMEOUT_MS
+            }
+            install(HttpRequestRetry) {
+                exponentialDelay()
+                retryIf(maxRetries = 100) { _, response ->
+                    !response.status.isSuccess() ||
+                            response.contentType() != ContentType.parse("application/json") ||
+                            response.contentLength() == 0L
+                }
             }
         }
     ) = NFTItemMetadata.of(address, content(liteApi, referenceBlock), httpClient)

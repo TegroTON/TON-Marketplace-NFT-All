@@ -1,6 +1,7 @@
 package money.tegro.market.blockchain.client
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.delay
 import mu.KLogging
 import org.ton.adnl.AdnlPublicKey
@@ -22,6 +23,10 @@ open class ResilientLiteClient(
             try {
                 return super.sendRawQuery(byteArray)
             } catch (e: Exception) {
+                if (e is ClosedReceiveChannelException) { // Connection dropped?
+                    this.connect()
+                }
+
                 if (attempt >= 1000) {
                     logger.info { "too many attempts, giving up" }
                     throw e

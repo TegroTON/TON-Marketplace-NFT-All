@@ -21,6 +21,7 @@ import mu.KLogging
 import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.block.AddrStd
 import org.ton.lite.api.LiteApi
+import reactor.core.scheduler.Schedulers
 import reactor.kotlin.core.publisher.toFlux
 import reactor.kotlin.core.publisher.toMono
 import reactor.kotlin.extra.bool.not
@@ -31,7 +32,7 @@ import java.time.Instant
 class CatchUpJob(
     private val context: ApplicationContext,
 ) {
-    @Scheduled(initialDelay = "0s")//, fixedDelay = "\${money.tegro.market.nightcrawler.catchup-period:60m}")
+    @Scheduled(initialDelay = "0s", fixedDelay = "\${money.tegro.market.nightcrawler.catchup-period:60m}")
     fun run() {
         runBlocking {
             logger.info { "Starting catching up" }
@@ -56,8 +57,14 @@ class CatchUpJob(
         suspend fun run(referenceBlock: suspend () -> TonNodeBlockIdExt) {
             logger.info { "Loading initial collections" }
 
-            resourceLoader.classLoader.getResource("init_collections.csv")?.readText()?.let {
-                it.lineSequence()
+            val resource = resourceLoader.classLoader.getResource("init_collections.csv")
+
+            if (resource == null) {
+                logger.warn { "No file with initial collections was found in the classpath" }
+                return
+            } else {
+                resource.readText()
+                    .lineSequence()
                     .toFlux()
                     .filter { it.isNotBlank() }
                     .map { AddrStd(it) }
@@ -68,11 +75,11 @@ class CatchUpJob(
                             CollectionModel.of(collection, collection.metadata())
                         }
                     }
-                    .doOnNext { collectionRepository.save(it) }
+                    .doOnNext { collectionRepository.save(it).subscribe() }
                     .then()
                     .awaitSingleOrNull()
-            } ?: apply {
-                logger.info { "No file with initial collections found in the classpath" }
+
+                logger.info { "Alles gute!" }
             }
         }
 
@@ -95,13 +102,14 @@ class CatchUpJob(
             logger.info { "Updating collections up to block no. $seqno" }
             collectionRepository
                 .findAll(Sort.of(Sort.Order.asc("updated")))
-//                .publishOn(Schedulers.boundedElastic())
+                .publishOn(Schedulers.boundedElastic())
                 .concatMap(collectionProcess(referenceBlock)) // Data and metadata
-                .doOnNext { collectionRepository.upsert(it) }
+                .doOnNext { collectionRepository.upsert(it).subscribe() }
                 .doOnNext { // Royalty
                     it.address.toMono()
                         .flatMap(royaltyProcess(referenceBlock))
-                        .subscribe { royaltyRepository.upsert(it) }
+                        .onErrorStop() // If it doesn't implement royalty extension
+                        .subscribe { royaltyRepository.upsert(it).subscribe() }
                 }
                 .then()
                 .awaitSingleOrNull()
@@ -109,9 +117,9 @@ class CatchUpJob(
             logger.info { "Discovering missing items" }
             collectionRepository
                 .findAll(Sort.of(Sort.Order.asc("updated")))
-//                .publishOn(Schedulers.boundedElastic())
+                .publishOn(Schedulers.boundedElastic())
                 .concatMap(missingItemsProcess(referenceBlock))
-                .doOnNext { itemRepository.save(it) }
+                .doOnNext { itemRepository.save(it).subscribe() }
                 .then()
                 .awaitSingleOrNull()
 
@@ -137,19 +145,21 @@ class CatchUpJob(
             logger.info { "Updating items up to block no. $seqno" }
             itemRepository
                 .findAll(Sort.of(Sort.Order.asc("updated")))
-//                .publishOn(Schedulers.boundedElastic())
+                .publishOn(Schedulers.boundedElastic())
                 .concatMap(itemProcess(referenceBlock)) // Data and metadata
-                .doOnNext { itemRepository.upsert(it) }
+                .doOnNext { itemRepository.upsert(it).subscribe() }
                 .doOnNext { // Royalty
                     if (it.collection != null)
                         it.address.toMono()
                             .flatMap(royaltyProcess(referenceBlock))
-                            .subscribe { royaltyRepository.upsert(it) }
+                            .onErrorStop() // If it doesn't implement royalty extension
+                            .subscribe { royaltyRepository.upsert(it).subscribe() }
                 }
                 .doOnNext { // Sale
                     it.address.toMono()
                         .flatMap(saleProcess(referenceBlock))
-                        .subscribe { saleRepository.upsert(it) }
+                        .onErrorStop() // If not a sale contract
+                        .subscribe { saleRepository.upsert(it).subscribe() }
                 }
                 .then()
                 .awaitSingleOrNull()

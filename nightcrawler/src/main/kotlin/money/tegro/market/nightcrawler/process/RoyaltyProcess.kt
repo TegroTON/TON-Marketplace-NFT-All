@@ -9,6 +9,7 @@ import money.tegro.market.core.model.RoyaltyModel
 import mu.KLogging
 import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.lite.api.LiteApi
+import reactor.core.Exceptions
 
 @Prototype
 class RoyaltyProcess(
@@ -16,7 +17,14 @@ class RoyaltyProcess(
 ) {
     operator fun invoke(referenceBlock: suspend () -> TonNodeBlockIdExt = liteApi.referenceBlock()) =
         { it: AddressKey ->
-            mono { RoyaltyModel.of(NFTRoyalty.of(it.to(), liteApi, referenceBlock)) }
+            mono {
+                try {
+                    RoyaltyModel.of(NFTRoyalty.of(it.to(), liteApi, referenceBlock))
+                } catch (e: Exception) {
+                    Exceptions.propagate(e)
+                    null
+                }
+            }
         }
 
     companion object : KLogging()

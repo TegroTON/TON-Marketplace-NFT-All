@@ -2,7 +2,6 @@ package money.tegro.market.blockchain.nft
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import io.ktor.client.*
-import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import mu.KLogging
@@ -26,11 +25,7 @@ abstract class NFTMetadata : Addressable {
         @JvmStatic
         suspend fun parseContent(
             content: Cell,
-            httpClient: HttpClient = HttpClient {
-                install(HttpTimeout) {
-                    requestTimeoutMillis = HttpTimeout.INFINITE_TIMEOUT_MS
-                }
-            }
+            httpClient: HttpClient
         ): String {
             val cs = content.beginParse()
             return when (val contentLayout = cs.loadUInt(8).toInt()) {
@@ -45,7 +40,9 @@ abstract class NFTMetadata : Addressable {
                     val url = String(rawData.toByteArray())
                     logger.debug { "off-chain content layout, url is: $url" }
 
-                    httpClient.get(url).bodyAsText()
+                    val a = httpClient.get(url)
+                    logger.debug { a }
+                    a.bodyAsText()
                 }
                 else -> {
                     throw Error("unknown content layout $contentLayout, can't proceed")

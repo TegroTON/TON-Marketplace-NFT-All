@@ -9,6 +9,7 @@ import money.tegro.market.core.model.SaleModel
 import mu.KLogging
 import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.lite.api.LiteApi
+import reactor.core.Exceptions
 
 @Prototype
 class SaleProcess(
@@ -16,7 +17,14 @@ class SaleProcess(
 ) {
     operator fun invoke(referenceBlock: suspend () -> TonNodeBlockIdExt = liteApi.referenceBlock()) =
         { it: AddressKey ->
-            mono { SaleModel.of(NFTSale.of(it.to(), liteApi, referenceBlock)) }
+            mono {
+                try {
+                    SaleModel.of(NFTSale.of(it.to(), liteApi, referenceBlock))
+                } catch (e: Exception) {
+                    Exceptions.propagate(e)
+                    null
+                }
+            }
         }
 
     companion object : KLogging()

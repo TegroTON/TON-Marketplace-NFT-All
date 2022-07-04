@@ -2,6 +2,7 @@ package money.tegro.market.blockchain.nft
 
 import io.ktor.client.*
 import io.ktor.client.plugins.*
+import io.ktor.http.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.map
@@ -55,6 +56,14 @@ abstract class NFTCollection : Addressable {
         httpClient: HttpClient = HttpClient {
             install(HttpTimeout) {
                 requestTimeoutMillis = HttpTimeout.INFINITE_TIMEOUT_MS
+            }
+            install(HttpRequestRetry) {
+                exponentialDelay()
+                retryIf(maxRetries = 100) { _, response ->
+                    !response.status.isSuccess() ||
+                            response.contentType() != ContentType.parse("application/json") ||
+                            response.contentLength() == 0L
+                }
             }
         }
     ) = NFTCollectionMetadata.of(address, content, httpClient)
