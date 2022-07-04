@@ -21,6 +21,7 @@ import mu.KLogging
 import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.block.AddrStd
 import org.ton.lite.api.LiteApi
+import reactor.core.Exceptions
 import reactor.core.scheduler.Schedulers
 import reactor.kotlin.core.publisher.toFlux
 import reactor.kotlin.core.publisher.toMono
@@ -160,6 +161,21 @@ class CatchUpJob(
                         .flatMap(saleProcess(referenceBlock))
                         .onErrorStop() // If not a sale contract
                         .subscribe { saleRepository.upsert(it).subscribe() }
+                }
+                .then()
+                .awaitSingleOrNull()
+
+            logger.info { "Updating sales up to block no $seqno" }
+            saleRepository
+                .findAll(Sort.of(Sort.Order.asc("updated")))
+                .publishOn(Schedulers.boundedElastic())
+                .map { it.address }
+                .flatMap(saleProcess(referenceBlock))
+                .doOnError {// Failed to get info for this address, remove it from the db
+                    saleRepository.deleteById((Exceptions.unwrap(it) as ProcessException).id).subscribe()
+                }
+                .doOnNext {
+                    saleRepository.upsert(it).subscribe()
                 }
                 .then()
                 .awaitSingleOrNull()

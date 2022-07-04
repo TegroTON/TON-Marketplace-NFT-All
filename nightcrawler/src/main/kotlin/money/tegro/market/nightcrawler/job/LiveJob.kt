@@ -17,6 +17,7 @@ import org.ton.bigint.BigInt
 import org.ton.bitstring.BitString
 import org.ton.block.*
 import org.ton.lite.api.LiteApi
+import reactor.core.Exceptions
 import reactor.core.publisher.Flux
 import reactor.core.scheduler.Schedulers
 import reactor.kotlin.core.publisher.toFlux
@@ -50,8 +51,13 @@ class LiveJob(
                     .distinctUntilChanged()
                     .flatMap {
                         mono {
-                            liteApi.getBlock(it).dataBagOfCells().roots.first().parse {
-                                Block.TlbCombinator.loadTlb(this)
+                            try {
+                                liteApi.getBlock(it).dataBagOfCells().roots.first().parse {
+                                    Block.TlbCombinator.loadTlb(this)
+                                }
+                            } catch (e: Exception) {
+                                logger.warn { e }
+                                null
                             }
                         }
                     }
@@ -112,6 +118,7 @@ class LiveJob(
                     }
                     .replay()
 
+            // Items
             affectedAccounts
                 .publishOn(Schedulers.boundedElastic())
                 .flatMap { itemRepository.findById(it) }
@@ -132,9 +139,9 @@ class LiveJob(
                         .subscribe { saleRepository.upsert(it).subscribe() }
                 }
                 .then()
-                .subscribe {}
+                .subscribe()
 
-
+            // Collections
             affectedAccounts
                 .publishOn(Schedulers.boundedElastic())
                 .flatMap { collectionRepository.findById(it) }
@@ -150,7 +157,22 @@ class LiveJob(
                 .concatMap(missingItemsProcess())
                 .doOnNext { itemRepository.save(it).subscribe() }
                 .then()
-                .subscribe {}
+                .subscribe()
+
+            // Sales
+            affectedAccounts
+                .publishOn(Schedulers.boundedElastic())
+                .flatMap { saleRepository.findById(it) }
+                .map { it.address }
+                .flatMap(saleProcess())
+                .doOnError {// Failed to get info for this address, remove it from the db
+                    saleRepository.deleteById((Exceptions.unwrap(it) as ProcessException).id).subscribe()
+                }
+                .doOnNext {
+                    saleRepository.upsert(it).subscribe()
+                }
+                .then()
+                .subscribe()
 
             affectedAccounts.connect()
         }

@@ -21,7 +21,7 @@ class SaleProcess(
                 try {
                     SaleModel.of(NFTSale.of(it.to(), liteApi, referenceBlock))
                 } catch (e: Exception) {
-                    Exceptions.propagate(e)
+                    Exceptions.propagate(ProcessException(it, null, e))
                     null
                 }
             }
