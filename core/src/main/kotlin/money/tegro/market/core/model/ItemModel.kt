@@ -11,7 +11,7 @@ import money.tegro.market.core.key.AddressKey
 import org.ton.block.AddrStd
 import java.time.Instant
 
-@MappedEntity("ITEMS")
+@MappedEntity("items")
 @Schema(hidden = true)
 data class ItemModel(
     @EmbeddedId
@@ -23,7 +23,7 @@ data class ItemModel(
     val index: Long,
 
     @Relation(Relation.Kind.EMBEDDED)
-    val collection: AddressKey?, // Items may be stand-alone and not bellong to any collection
+    val collection: AddressKey?, // Items may be stand-alone and not belong to any collection
 
     @Relation(Relation.Kind.EMBEDDED)
     val owner: AddressKey,
@@ -36,7 +36,7 @@ data class ItemModel(
 
     val image: String? = null,
 
-    val imageData: ByteArray? = null,
+    val imageData: ByteArray = byteArrayOf(),
 
 
     val discovered: Instant = Instant.now(),
@@ -61,7 +61,7 @@ data class ItemModel(
             name = metadata.name.orEmpty(),
             description = metadata.description.orEmpty(),
             image = metadata.image,
-            imageData = metadata.imageData,
+            imageData = metadata.imageData ?: byteArrayOf(),
             updated = Instant.now()
         )
     }
@@ -80,7 +80,7 @@ data class ItemModel(
                         name = metadata.name.orEmpty(),
                         description = metadata.description.orEmpty(),
                         image = metadata.image,
-                        imageData = metadata.imageData,
+                        imageData = metadata.imageData ?: byteArrayOf(),
                     )
                 }
             }

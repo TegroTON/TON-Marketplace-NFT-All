@@ -24,6 +24,7 @@ dependencies {
     implementation(libs.micronaut.http.client)
     implementation(libs.micronaut.jackson.databind)
     implementation(libs.micronaut.data.r2dbc)
+    implementation(libs.micronaut.flyway)
     implementation(libs.micronaut.kotlin.extensions)
     implementation(libs.micronaut.kotlin.runtime)
     implementation(libs.micronaut.picocli)
@@ -31,12 +32,14 @@ dependencies {
     implementation(libs.micronaut.reactor.http.client)
     implementation(libs.jakarta.annotation)
     implementation(libs.reflect)
+    implementation(libs.picocli)
     implementation(libs.logging)
     implementation(libs.bundles.coroutines)
     implementation(libs.bundles.reactor)
 
-    runtimeOnly(libs.r2dbc.h2)
+    runtimeOnly(libs.r2dbc.postgresql)
     runtimeOnly(libs.slf4j.simple)
+    runtimeOnly(libs.postgresql)
 
     implementation(libs.micronaut.validation)
     implementation(libs.ton)

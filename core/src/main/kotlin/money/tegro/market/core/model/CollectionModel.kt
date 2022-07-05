@@ -11,7 +11,7 @@ import money.tegro.market.core.key.AddressKey
 import org.ton.block.AddrStd
 import java.time.Instant
 
-@MappedEntity("COLLECTIONS")
+@MappedEntity("collections")
 @Schema(hidden = true)
 data class CollectionModel(
     @EmbeddedId
@@ -30,11 +30,11 @@ data class CollectionModel(
 
     val image: String? = null,
 
-    val imageData: ByteArray? = null,
+    val imageData: ByteArray = byteArrayOf(),
 
     val coverImage: String? = null,
 
-    val coverImageData: ByteArray? = null,
+    val coverImageData: ByteArray = byteArrayOf(),
 
 
     val discovered: Instant = Instant.now(),
@@ -57,9 +57,9 @@ data class CollectionModel(
             name = metadata.name.orEmpty(),
             description = metadata.description.orEmpty(),
             image = metadata.image,
-            imageData = metadata.imageData,
+            imageData = metadata.imageData ?: byteArrayOf(),
             coverImage = metadata.coverImage,
-            coverImageData = metadata.coverImageData,
+            coverImageData = metadata.coverImageData ?: byteArrayOf(),
             updated = Instant.now()
         )
     }
@@ -76,9 +76,9 @@ data class CollectionModel(
                         name = metadata.name.orEmpty(),
                         description = metadata.description.orEmpty(),
                         image = metadata.image,
-                        imageData = metadata.imageData,
+                        imageData = metadata.imageData ?: byteArrayOf(),
                         coverImage = metadata.coverImage,
-                        coverImageData = metadata.coverImageData,
+                        coverImageData = metadata.coverImageData ?: byteArrayOf(),
                     )
                 }
             }

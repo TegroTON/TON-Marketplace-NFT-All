@@ -10,7 +10,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import javax.transaction.Transactional
 
-@R2dbcRepository(dialect = Dialect.H2)
+@R2dbcRepository(dialect = Dialect.POSTGRES)
 abstract class CollectionRepository : ReactorPageableRepository<CollectionModel, AddressKey> {
     abstract fun findByIdForUpdate(id: AddressKey): Mono<CollectionModel>
     fun findById(address: AddrStd) = findById(AddressKey.of(address))

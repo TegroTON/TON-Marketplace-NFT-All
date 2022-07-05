@@ -16,12 +16,14 @@ h2 = { prefer = "2.1.212" }
 r2dbc = { prefer = "0.8.5.RELEASE" }
 micronaut = { prefer = "3.5.1" }
 micronaut-data = { prefer = "3.4.2" }
+micronaut-flyway = { prefer = "5.3.0" }
 micronaut-kotlin = { prefer = "3.2.2" }
 micronaut-picocli = { prefer = "4.2.1" }
 micronaut-reactor = { prefer = "2.2.2" }
 micronaut-openapi = { prefer = "4.3.0" }
 micronaut-security = { prefer = "3.6.1" }
 swagger = { prefer = "2.2.1" }
+postgresql = { prefer = "42.4.0" }
 kotlin = "1.7.0"
 shadow = "7.1.2"
 micronaut-plugins = "3.4.1"
@@ -47,11 +49,14 @@ slf4j-simple = { group = "org.slf4j", name = "slf4j-simple", version.ref = "slf4
 jakarta-annotation = { group = "jakarta.annotation", name = "jakarta.annotation-api", version.ref = "jakarta" }
 h2 = { group = "com.h2database", name = "h2", version.ref = "h2" }
 r2dbc-h2 = { group = "io.r2dbc", name = "r2dbc-h2", version.ref = "r2dbc" }
+r2dbc-postgresql = { group = "io.r2dbc", name = "r2dbc-postgresql", version.ref = "r2dbc" }
+postgresql = { group = "org.postgresql", name = "postgresql", version.ref = "postgresql" }
 
 micronaut-reactor = { group = "io.micronaut.reactor", name = "micronaut-reactor", version.ref = "micronaut-reactor" }
 micronaut-reactor-http-client = { group = "io.micronaut.reactor", name = "micronaut-reactor-http-client", version.ref = "micronaut-reactor" }
 micronaut-data-processor = { group = "io.micronaut.data", name = "micronaut-data-processor", version.ref = "micronaut-data" }
 micronaut-data-r2dbc = { group = "io.micronaut.data", name = "micronaut-data-r2dbc", version.ref = "micronaut-data" }
+micronaut-flyway = { group = "io.micronaut.flyway", name = "micronaut-flyway", version.ref = "micronaut.flyway" }
 
 micronaut-inject = { group = "io.micronaut", name = "micronaut-inject-java", version.ref = "micronaut" }
 micronaut-http-client = { group = "io.micronaut", name = "micronaut-http-client", version.ref = "micronaut" }

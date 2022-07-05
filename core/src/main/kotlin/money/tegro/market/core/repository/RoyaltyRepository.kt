@@ -11,7 +11,7 @@ import org.ton.block.AddrStd
 import reactor.core.publisher.Mono
 import javax.transaction.Transactional
 
-@R2dbcRepository(dialect = Dialect.H2)
+@R2dbcRepository(dialect = Dialect.POSTGRES)
 abstract class RoyaltyRepository : ReactorPageableRepository<RoyaltyModel, AddressKey> {
     fun findById(address: AddrStd) = findById(AddressKey.of(address))
     abstract fun existsByAddress(address: AddressKey): Mono<Boolean>

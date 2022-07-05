@@ -9,7 +9,7 @@ import money.tegro.market.core.dto.toKey
 import money.tegro.market.core.key.AddressKey
 import java.time.Instant
 
-@MappedEntity("SALES")
+@MappedEntity("sales")
 @Schema(hidden = true)
 data class SaleModel(
     @EmbeddedId

@@ -6,7 +6,6 @@ import io.micronaut.core.io.scan.ClassPathResourceLoader
 import io.micronaut.data.model.Sort
 import io.micronaut.kotlin.context.getBean
 import io.micronaut.scheduling.annotation.Scheduled
-import jakarta.inject.Singleton
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
@@ -29,11 +28,11 @@ import reactor.kotlin.extra.bool.not
 import java.time.Duration
 import java.time.Instant
 
-@Singleton
+@Prototype
 class CatchUpJob(
     private val context: ApplicationContext,
 ) {
-    @Scheduled(initialDelay = "0s", fixedDelay = "\${money.tegro.market.nightcrawler.catchup-period:60m}")
+    @Scheduled(initialDelay = "1s", fixedDelay = "\${money.tegro.market.nightcrawler.catchup-period:60m}")
     fun run() {
         runBlocking {
             logger.info { "Starting catching up" }

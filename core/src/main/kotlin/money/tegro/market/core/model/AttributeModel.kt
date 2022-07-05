@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import money.tegro.market.blockchain.nft.NFTItemMetadataAttribute
 import money.tegro.market.core.key.AddressKey
 
-@MappedEntity("ATTRIBUTES")
+@MappedEntity("attributes")
 @Schema(hidden = true)
 data class AttributeModel(
     /** Item that this attribute applies to */

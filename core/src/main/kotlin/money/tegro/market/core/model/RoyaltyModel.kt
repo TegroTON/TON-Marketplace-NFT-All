@@ -9,7 +9,7 @@ import money.tegro.market.core.dto.toKey
 import money.tegro.market.core.key.AddressKey
 import java.time.Instant
 
-@MappedEntity("ROYALTIES")
+@MappedEntity("royalties")
 @Schema(hidden = true)
 data class RoyaltyModel(
     @EmbeddedId
@@ -22,9 +22,9 @@ data class RoyaltyModel(
     @Relation(Relation.Kind.EMBEDDED)
     val destination: AddressKey,
 
-    
+
     val discovered: Instant = Instant.now(),
-    val updated: Instant = Instant.MIN
+    val updated: Instant = Instant.now()
 ) {
     companion object {
         @JvmStatic

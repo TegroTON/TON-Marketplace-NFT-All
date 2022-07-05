@@ -11,7 +11,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import javax.transaction.Transactional
 
-@R2dbcRepository(dialect = Dialect.H2)
+@R2dbcRepository(dialect = Dialect.POSTGRES)
 abstract class AttributeRepository : ReactorPageableRepository<AttributeModel, Long> {
     abstract fun findByItem(item: AddressKey): Flux<AttributeModel>
     abstract fun findByItemAndTraitForUpdate(item: AddressKey, trait: String): Mono<AttributeModel>
