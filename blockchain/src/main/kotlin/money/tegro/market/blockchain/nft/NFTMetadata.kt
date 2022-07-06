@@ -40,12 +40,10 @@ abstract class NFTMetadata : Addressable {
                     val url = String(rawData.toByteArray())
                     logger.debug { "off-chain content layout, url is: $url" }
 
-                    val a = httpClient.get(url)
-                    logger.debug { a }
-                    a.bodyAsText()
+                    httpClient.get(url).bodyAsText()
                 }
                 else -> {
-                    throw Error("unknown content layout $contentLayout, can't proceed")
+                    throw NFTException("unknown content layout $contentLayout, can't proceed")
                 }
             }
         }

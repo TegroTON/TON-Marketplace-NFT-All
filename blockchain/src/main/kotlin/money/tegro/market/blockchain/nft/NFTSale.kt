@@ -2,6 +2,7 @@ package money.tegro.market.blockchain.nft
 
 import money.tegro.market.blockchain.referenceBlock
 import mu.KLogging
+import mu.withLoggingContext
 import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.block.AddrStd
 import org.ton.block.MsgAddress
@@ -28,19 +29,26 @@ interface NFTSale : Addressable {
             liteApi: LiteApi,
             referenceBlock: suspend () -> TonNodeBlockIdExt = liteApi.referenceBlock(),
         ): NFTSale =
-            liteApi.runSmcMethod(0b100, referenceBlock(), LiteServerAccountId(address), "get_sale_data").let {
-                require(it.exitCode == 0) { "Failed to run the method, exit code is ${it.exitCode}" }
+            withLoggingContext(
+                "address" to address.toString(userFriendly = true, bounceable = true)
+            ) {
+                liteApi.runSmcMethod(0b100, referenceBlock(), LiteServerAccountId(address), "get_sale_data").let {
+                    if (it.exitCode != 0) {
+                        logger.warn { "failed to run method" }
+                        throw NFTException("failed to run method, exit code is ${it.exitCode}")
+                    }
 
-                NFTSaleImpl(
-                    address,
-                    (it[0] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec),
-                    (it[1] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec),
-                    (it[2] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec),
-                    (it[3] as VmStackValue.TinyInt).value,
-                    (it[4] as VmStackValue.TinyInt).value,
-                    (it[5] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec),
-                    (it[6] as VmStackValue.TinyInt).value,
-                )
+                    NFTSaleImpl(
+                        address,
+                        (it[0] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec),
+                        (it[1] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec),
+                        (it[2] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec),
+                        (it[3] as VmStackValue.TinyInt).value,
+                        (it[4] as VmStackValue.TinyInt).value,
+                        (it[5] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec),
+                        (it[6] as VmStackValue.TinyInt).value,
+                    )
+                }
             }
     }
 }

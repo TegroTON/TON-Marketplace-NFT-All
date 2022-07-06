@@ -2,6 +2,7 @@ package money.tegro.market.nightcrawler.process
 
 import io.micronaut.context.annotation.Prototype
 import kotlinx.coroutines.reactor.mono
+import money.tegro.market.blockchain.nft.NFTException
 import money.tegro.market.blockchain.nft.NFTSale
 import money.tegro.market.blockchain.referenceBlock
 import money.tegro.market.core.key.AddressKey
@@ -20,8 +21,9 @@ class SaleProcess(
             mono {
                 try {
                     SaleModel.of(NFTSale.of(it.to(), liteApi, referenceBlock))
-                } catch (e: Exception) {
-                    Exceptions.propagate(ProcessException(it, null, e))
+                } catch (e: NFTException) {
+                    logger.warn(e) { "failed to get sale, most likely address isn't a sale contract" }
+                    Exceptions.propagate(e)
                     null
                 }
             }
