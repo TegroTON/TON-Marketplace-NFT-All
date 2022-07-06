@@ -12,7 +12,8 @@ import money.tegro.market.core.repository.RoyaltyRepository
 import money.tegro.market.core.repository.SaleRepository
 import money.tegro.market.nightcrawler.process.*
 import mu.KLogging
-import mu.withLoggingContext
+import net.logstash.logback.argument.StructuredArguments.keyValue
+import net.logstash.logback.argument.StructuredArguments.value
 import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.bigint.BigInt
 import org.ton.bitstring.BitString
@@ -52,16 +53,16 @@ class LiveJob(
                     .distinctUntilChanged()
                     .flatMap {
                         mono {
-                            withLoggingContext("block" to it.toString()) {
-                                try {
-                                    logger.debug { "getting masterchain block" }
-                                    liteApi.getBlock(it).dataBagOfCells().roots.first().parse {
-                                        Block.TlbCombinator.loadTlb(this)
-                                    }
-                                } catch (e: Exception) {
-                                    logger.warn(e) { "failed to get masterchain block" }
-                                    null
+                            try {
+                                logger.debug(
+                                    "getting masterchain block no. {}", value("seqno", it.seqno)
+                                )
+                                liteApi.getBlock(it).dataBagOfCells().roots.first().parse {
+                                    Block.TlbCombinator.loadTlb(this)
                                 }
+                            } catch (e: Exception) {
+                                logger.warn("failed to get masterchain block no. {}", value("seqno", it.seqno), e)
+                                null
                             }
                         }
                     }
@@ -80,22 +81,21 @@ class LiveJob(
                             .flatMap {
                                 mono {
                                     val (workchain, descr) = it
-                                    withLoggingContext(
-                                        "workchain" to workchain.toString(),
-                                        "shardDescr" to descr.toString()
-                                    ) {
-                                        logger.debug { "getting shard block" }
-                                        liteApi.getBlock(
-                                            TonNodeBlockIdExt(
-                                                workchain = workchain,
-                                                shard = descr.next_validator_shard,
-                                                seqno = descr.seq_no.toInt(),
-                                                rootHash = descr.root_hash.toByteArray(),
-                                                fileHash = descr.file_hash.toByteArray()
-                                            )
-                                        ).dataBagOfCells().roots.first().parse { Block.TlbCombinator.loadTlb(this) }
-                                            .let { workchain to it }
-                                    }
+                                    logger.debug(
+                                        "getting shard {} block no. {}",
+                                        keyValue("workchain", workchain),
+                                        value("seqno", descr.seq_no)
+                                    )
+                                    liteApi.getBlock(
+                                        TonNodeBlockIdExt(
+                                            workchain = workchain,
+                                            shard = descr.next_validator_shard,
+                                            seqno = descr.seq_no.toInt(),
+                                            rootHash = descr.root_hash.toByteArray(),
+                                            fileHash = descr.file_hash.toByteArray()
+                                        )
+                                    ).dataBagOfCells().roots.first().parse { Block.TlbCombinator.loadTlb(this) }
+                                        .let { workchain to it }
                                 }
                             }
                             .mergeWith(mono { -1 to it })
@@ -117,9 +117,7 @@ class LiveJob(
                                 it.address != BitString.of("0000000000000000000000000000000000000000000000000000000000000000")
                     }
                     .doOnNext {
-                        withLoggingContext("address" to it.toSafeBounceable()) {
-                            logger.debug { "affected account" }
-                        }
+                        logger.debug("affected account {}", value("address", it.toSafeBounceable()))
                     }
                     .replay()
 
@@ -128,9 +126,7 @@ class LiveJob(
                 .flatMap { itemRepository.findById(it) } // Returns empty mono if not found, also acts as a filter
                 .publishOn(Schedulers.boundedElastic())
                 .doOnNext {
-                    withLoggingContext("address" to it.address.toSafeBounceable()) {
-                        logger.info { "address matched a database item" }
-                    }
+                    logger.info("address {} matched a database item", value("address", it.address.toSafeBounceable()))
                 }
                 .concatMap(itemProcess()) // Data and metadata
                 .doOnNext { itemRepository.upsert(it).subscribe() }
@@ -157,9 +153,10 @@ class LiveJob(
                 .publishOn(Schedulers.boundedElastic())
                 .flatMap { collectionRepository.findById(it) } // Returns empty mono if not found, also acts as a filter
                 .doOnNext {
-                    withLoggingContext("address" to it.address.toSafeBounceable()) {
-                        logger.info { "address matched a database collection" }
-                    }
+                    logger.info(
+                        "address {} matched a database collection",
+                        value("address", it.address.toSafeBounceable())
+                    )
                 }
                 .concatMap(collectionProcess()) // Data and metadata
                 .doOnNext { collectionRepository.upsert(it).subscribeOn(Schedulers.single()).subscribe() }
@@ -180,19 +177,18 @@ class LiveJob(
                 .publishOn(Schedulers.boundedElastic())
                 .flatMap { saleRepository.findById(it) } // Returns empty mono if not found, also acts as a filter
                 .doOnNext {
-                    withLoggingContext("address" to it.address.toSafeBounceable()) {
-                        logger.info { "address matched a database sale" }
-                    }
+                    logger.info("address {} matched a database sale", value("address", it.address.toSafeBounceable()))
                 }
                 .map { it.address }
                 .flatMap(saleProcess())
                 .doOnError {// Failed to get info for this address, remove it from the db
                     (Exceptions.unwrap(it) as? ProcessException)?.let {
-                        withLoggingContext("address" to it.id.toSafeBounceable(), "exception" to it.toString()) {
-                            logger.info { "couldn't get sale information, contract was probably destroyed. Removing from the db" }
-                            saleRepository.deleteById((Exceptions.unwrap(it) as ProcessException).id)
-                                .subscribeOn(Schedulers.single()).subscribe()
-                        }
+                        logger.warn(
+                            "couldn't get {} sale information, contract was probably destroyed. Removing from the db",
+                            value("address", it.id.toSafeBounceable())
+                        )
+                        saleRepository.deleteById((Exceptions.unwrap(it) as ProcessException).id)
+                            .subscribeOn(Schedulers.single()).subscribe()
                     }
                 }
                 .doOnNext {

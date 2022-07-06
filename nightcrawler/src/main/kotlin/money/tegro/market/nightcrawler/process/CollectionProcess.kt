@@ -7,7 +7,7 @@ import money.tegro.market.blockchain.referenceBlock
 import money.tegro.market.core.dto.toSafeBounceable
 import money.tegro.market.core.model.CollectionModel
 import mu.KLogging
-import mu.withLoggingContext
+import net.logstash.logback.argument.StructuredArguments.value
 import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.lite.api.LiteApi
 
@@ -22,9 +22,10 @@ class CollectionProcess(
 
                 it.copy(collection)?.copy(collection.metadata())
                     ?: it.apply {
-                        withLoggingContext("address" to it.address.toSafeBounceable()) {
-                            logger.warn { "could not update collection ${it.address.toSafeBounceable()}, something went wrong" }
-                        }
+                        logger.warn(
+                            "couldn't update collection {}, something went wrong",
+                            value("address", address.toSafeBounceable())
+                        )
                     }
             }
         }

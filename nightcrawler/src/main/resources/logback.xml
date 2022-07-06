@@ -1,4 +1,16 @@
 <configuration>
+    <appender name="stash" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>debug</level>
+        </filter>
+        <file>${java.io.tmpdir}/nightcrawler.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${java.io.tmpdir}/nightcrawler.log.%d{yyyy-MM-dd}</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+    </appender>
+
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
             <Pattern>
@@ -9,10 +21,10 @@
 
     <logger name="money.tegro" level="debug" additivity="false">
         <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="stash"/>
     </logger>
 
     <root level="error">
-        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="stash"/>
     </root>
-
 </configuration>

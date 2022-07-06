@@ -41,6 +41,7 @@ dependencies {
     runtimeOnly(libs.postgresql)
     runtimeOnly(libs.logback.core)
     runtimeOnly(libs.logback.classic)
+    implementation(libs.logstash.logback.encoder)
 
     implementation(libs.micronaut.validation)
     implementation(libs.ton)

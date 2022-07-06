@@ -78,24 +78,20 @@ abstract class NFTCollection : Addressable {
             liteApi: LiteApi,
             referenceBlock: suspend () -> TonNodeBlockIdExt = { liteApi.getMasterchainInfo().last },
         ): NFTCollection =
-            withLoggingContext(
-                "address" to address.toString(userFriendly = true, bounceable = true)
-            ) {
-                liteApi.runSmcMethod(0b100, referenceBlock(), LiteServerAccountId(address), "get_collection_data")
-                    .let {
-                        if (it.exitCode != 0) {
-                            logger.warn { "failed to run method" }
-                            throw NFTException("failed to run method, exit code is ${it.exitCode}")
-                        }
-
-                        NFTCollectionImpl(
-                            address,
-                            (it[0] as VmStackValue.TinyInt).value,
-                            (it[1] as VmStackValue.Cell).cell,
-                            (it[2] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec)
-                        )
+            liteApi.runSmcMethod(0b100, referenceBlock(), LiteServerAccountId(address), "get_collection_data")
+                .let {
+                    if (it.exitCode != 0) {
+                        logger.warn { "failed to run method" }
+                        throw NFTException("failed to run method, exit code is ${it.exitCode}")
                     }
-            }
+
+                    NFTCollectionImpl(
+                        address,
+                        (it[0] as VmStackValue.TinyInt).value,
+                        (it[1] as VmStackValue.Cell).cell,
+                        (it[2] as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec)
+                    )
+                }
 
         @JvmStatic
         suspend fun itemAddressOf(
@@ -104,26 +100,21 @@ abstract class NFTCollection : Addressable {
             liteApi: LiteApi,
             referenceBlock: suspend () -> TonNodeBlockIdExt = { liteApi.getMasterchainInfo().last },
         ): MsgAddress =
-            withLoggingContext(
-                "collection" to collection.toString(userFriendly = true, bounceable = true),
-                "index" to index.toString(),
-            ) {
-                liteApi.runSmcMethod(
-                    0b100,
-                    referenceBlock(),
-                    LiteServerAccountId(collection),
-                    "get_nft_address_by_index",
-                    VmStackValue.TinyInt(index)
-                ).let {
-                    if (it.exitCode != 0) {
-                        logger.warn { "failed to run method" }
-                        throw NFTException("failed to run method, exit code is ${it.exitCode}")
-                    }
+            liteApi.runSmcMethod(
+                0b100,
+                referenceBlock(),
+                LiteServerAccountId(collection),
+                "get_nft_address_by_index",
+                VmStackValue.TinyInt(index)
+            ).let {
+                if (it.exitCode != 0) {
+                    logger.warn { "failed to run method" }
+                    throw NFTException("failed to run method, exit code is ${it.exitCode}")
+                }
 
-                    (it.first() as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec).apply {
-                        withLoggingContext("item" to this.toString()) {
-                            logger.trace { "item address successfully fetched" }
-                        }
+                (it.first() as VmStackValue.Slice).toCellSlice().loadTlb(msgAddressCodec).apply {
+                    withLoggingContext("item" to this.toString(), restorePrevious = false) {
+                        logger.trace { "item address successfully fetched" }
                     }
                 }
             }
@@ -136,29 +127,23 @@ abstract class NFTCollection : Addressable {
             liteApi: LiteApi,
             referenceBlock: suspend () -> TonNodeBlockIdExt = { liteApi.getMasterchainInfo().last },
         ): Cell =
-            withLoggingContext(
-                "collection" to collection.toString(userFriendly = true, bounceable = true),
-                "index" to index.toString(),
-                "individualContent" to individualContent.toString()
-            ) {
-                liteApi.runSmcMethod(
-                    0b100,
-                    referenceBlock(),
-                    LiteServerAccountId(collection),
-                    "get_nft_content",
-                    VmStackValue.TinyInt(index),
-                    VmStackValue.Cell(individualContent)
-                ).let {
-                    withLoggingContext("result" to it.toString()) {
-                        if (it.exitCode != 0) {
-                            logger.warn { "failed to run method" }
-                            throw NFTException("failed to run method, exit code is ${it.exitCode}")
-                        }
+            liteApi.runSmcMethod(
+                0b100,
+                referenceBlock(),
+                LiteServerAccountId(collection),
+                "get_nft_content",
+                VmStackValue.TinyInt(index),
+                VmStackValue.Cell(individualContent)
+            ).let {
+                withLoggingContext("result" to it.toString()) {
+                    if (it.exitCode != 0) {
+                        logger.warn { "failed to run method" }
+                        throw NFTException("failed to run method, exit code is ${it.exitCode}")
+                    }
 
-                        (it.first() as VmStackValue.Cell).cell.apply {
-                            withLoggingContext("content" to this.toString()) {
-                                logger.trace { "item content successfully fetched" }
-                            }
+                    (it.first() as VmStackValue.Cell).cell.apply {
+                        withLoggingContext("content" to this.toString()) {
+                            logger.trace { "item content successfully fetched" }
                         }
                     }
                 }

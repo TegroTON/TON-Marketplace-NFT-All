@@ -18,7 +18,7 @@ import money.tegro.market.core.repository.RoyaltyRepository
 import money.tegro.market.core.repository.SaleRepository
 import money.tegro.market.nightcrawler.process.*
 import mu.KLogging
-import mu.withLoggingContext
+import net.logstash.logback.argument.StructuredArguments.value
 import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.block.AddrStd
 import org.ton.lite.api.LiteApi
@@ -41,14 +41,12 @@ class CatchUpJob(
             logger.info { "catch-up job started" }
 
             val referenceBlock = context.getBean<LiteApi>().getMasterchainInfo().last
-            withLoggingContext("referenceBlock" to referenceBlock.toString()) {
-                context.getBean<LoadInitialCollections>().run { referenceBlock }
-                context.getBean<CatchUpOnCollections>().run { referenceBlock }
-                context.getBean<CatchUpOnItems>().run { referenceBlock }
-            }
+            context.getBean<LoadInitialCollections>().run { referenceBlock }
+            context.getBean<CatchUpOnCollections>().run { referenceBlock }
+            context.getBean<CatchUpOnItems>().run { referenceBlock }
 
 
-            logger.info { "caught up in ${Duration.between(started, Instant.now())}" }
+            logger.info("caught up in {}", value("catchUpTime", Duration.between(started, Instant.now())))
         }
     }
 
@@ -75,11 +73,9 @@ class CatchUpJob(
                     .filterWhen { collectionRepository.existsByAddress(it).not() }
                     .concatMap {
                         mono {
-                            withLoggingContext("address" to it.toSafeBounceable()) {
-                                logger.debug { "processing collection" }
-                                val collection = NFTCollection.of(it, liteApi, referenceBlock)
-                                CollectionModel.of(collection, collection.metadata())
-                            }
+                            logger.debug("processing collection {}", value("address", it.toSafeBounceable()))
+                            val collection = NFTCollection.of(it, liteApi, referenceBlock)
+                            CollectionModel.of(collection, collection.metadata())
                         }
                     }
                     .doOnNext {
@@ -106,7 +102,7 @@ class CatchUpJob(
         private val missingItemsProcess: MissingItemsProcess,
     ) {
         suspend fun run(referenceBlock: suspend () -> TonNodeBlockIdExt) {
-            logger.info { "updating collections up to the reference block" }
+            logger.info("updating collections up to the reference block no. {}", value("seqno", referenceBlock().seqno))
             collectionRepository
                 .findAll(Sort.of(Sort.Order.asc("updated")))
                 .publishOn(Schedulers.boundedElastic())
@@ -131,7 +127,7 @@ class CatchUpJob(
                 .then()
                 .awaitSingleOrNull()
 
-            logger.info { "collections up-to-date" }
+            logger.info("collections up-to-date at block no. {}", value("seqno", referenceBlock().seqno))
         }
 
         companion object : KLogging()
@@ -148,7 +144,7 @@ class CatchUpJob(
         private val saleProcess: SaleProcess,
     ) {
         suspend fun run(referenceBlock: suspend () -> TonNodeBlockIdExt) {
-            logger.info { "updating items up to the reference block" }
+            logger.info("updating items up to the reference block no. {}", value("seqno", referenceBlock().seqno))
             itemRepository
                 .findAll(Sort.of(Sort.Order.asc("updated")))
                 .publishOn(Schedulers.boundedElastic())
@@ -188,7 +184,7 @@ class CatchUpJob(
                 .then()
                 .awaitSingleOrNull()
 
-            logger.info { "items up-to-date" }
+            logger.info("items up-to-date at block no. {}", value("seqno", referenceBlock().seqno))
         }
 
         companion object : KLogging()
