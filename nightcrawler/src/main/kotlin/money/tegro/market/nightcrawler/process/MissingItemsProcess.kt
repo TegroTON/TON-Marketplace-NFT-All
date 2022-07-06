@@ -6,9 +6,12 @@ import money.tegro.market.blockchain.nft.NFTCollection
 import money.tegro.market.blockchain.nft.NFTItem
 import money.tegro.market.blockchain.referenceBlock
 import money.tegro.market.core.dto.toKey
+import money.tegro.market.core.dto.toSafeBounceable
 import money.tegro.market.core.model.CollectionModel
 import money.tegro.market.core.model.ItemModel
 import money.tegro.market.core.repository.ItemRepository
+import mu.KLogging
+import mu.withLoggingContext
 import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.block.AddrStd
 import org.ton.lite.api.LiteApi
@@ -32,20 +35,31 @@ class MissingItemsProcess(
                 }
                 .concatMap { index ->
                     mono {
-                        NFTCollection.itemAddressOf(
-                            collection.address.to(),
-                            index,
-                            liteApi,
-                            referenceBlock
-                        ) as? AddrStd // If not addrstd, this is null and we just skip it
+                        withLoggingContext(
+                            "address" to collection.address.toSafeBounceable(),
+                            "index" to index.toString()
+                        ) {
+                            logger.debug { "fetching missing item address" }
+                            NFTCollection.itemAddressOf(
+                                collection.address.to(),
+                                index,
+                                liteApi,
+                                referenceBlock
+                            ) as? AddrStd // If not addrstd, this is null and we just skip it
+                        }
                     }
                 }
                 .filterWhen { itemRepository.existsById(it.toKey()).not() } // Isn't in the repository?
                 .concatMap {
                     mono {
-                        val item = NFTItem.of(it, liteApi, referenceBlock)
-                        ItemModel.of(item, item.metadata(liteApi, referenceBlock))
+                        withLoggingContext("address" to it.toSafeBounceable()) {
+                            logger.debug { "getting missing item's information" }
+                            val item = NFTItem.of(it, liteApi, referenceBlock)
+                            ItemModel.of(item, item.metadata(liteApi, referenceBlock))
+                        }
                     }
                 }
         }
+
+    companion object : KLogging()
 }

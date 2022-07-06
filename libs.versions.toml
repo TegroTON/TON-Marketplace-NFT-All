@@ -11,6 +11,7 @@ ton = { strictly = "13004f960b" }
 ktor = { prefer = "2.0.2" }
 logging = { prefer = "2.1.23" }
 slf4j = { prefer = "1.7.36" }
+logback = { prefer = "1.2.11" }
 jakarta = { prefer = "2.1.1" }
 h2 = { prefer = "2.1.212" }
 r2dbc = { prefer = "0.8.5.RELEASE" }
@@ -45,7 +46,8 @@ reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref
 ton = { group = "com.github.andreypfau.ton-kotlin", name = "ton-kotlin", version.ref = "ton" }
 logging = { group = "io.github.microutils", name = "kotlin-logging", version.ref = "logging" }
 slf4j = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
-slf4j-simple = { group = "org.slf4j", name = "slf4j-simple", version.ref = "slf4j" }
+logback-core = { group = "ch.qos.logback", name = "logback-core", version.ref = "logback" }
+logback-classic = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
 jakarta-annotation = { group = "jakarta.annotation", name = "jakarta.annotation-api", version.ref = "jakarta" }
 h2 = { group = "com.h2database", name = "h2", version.ref = "h2" }
 r2dbc-h2 = { group = "io.r2dbc", name = "r2dbc-h2", version.ref = "r2dbc" }

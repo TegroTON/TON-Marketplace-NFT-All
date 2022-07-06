@@ -40,7 +40,9 @@ dependencies {
     implementation(libs.bundles.reactor)
 
     runtimeOnly(libs.r2dbc.h2)
-    runtimeOnly(libs.slf4j.simple)
+    runtimeOnly(libs.slf4j)
+    runtimeOnly(libs.logback.core)
+    runtimeOnly(libs.logback.classic)
 
     implementation(libs.micronaut.validation)
     implementation(libs.ton)

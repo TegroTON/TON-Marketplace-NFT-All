@@ -34,7 +34,9 @@ dependencies {
     implementation(libs.bundles.coroutines)
     implementation(libs.bundles.reactor)
 
-    runtimeOnly(libs.slf4j.simple)
+    runtimeOnly(libs.slf4j)
+    runtimeOnly(libs.logback.core)
+    runtimeOnly(libs.logback.classic)
 
     implementation(libs.micronaut.validation)
     implementation(libs.ton)

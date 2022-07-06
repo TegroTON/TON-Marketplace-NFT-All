@@ -38,8 +38,9 @@ dependencies {
     implementation(libs.bundles.reactor)
 
     runtimeOnly(libs.r2dbc.postgresql)
-    runtimeOnly(libs.slf4j.simple)
     runtimeOnly(libs.postgresql)
+    runtimeOnly(libs.logback.core)
+    runtimeOnly(libs.logback.classic)
 
     implementation(libs.micronaut.validation)
     implementation(libs.ton)

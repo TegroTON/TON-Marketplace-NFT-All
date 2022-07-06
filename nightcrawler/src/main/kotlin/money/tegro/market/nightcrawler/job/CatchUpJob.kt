@@ -10,6 +10,7 @@ import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
 import money.tegro.market.blockchain.nft.NFTCollection
+import money.tegro.market.core.dto.toSafeBounceable
 import money.tegro.market.core.model.CollectionModel
 import money.tegro.market.core.repository.CollectionRepository
 import money.tegro.market.core.repository.ItemRepository
@@ -17,6 +18,7 @@ import money.tegro.market.core.repository.RoyaltyRepository
 import money.tegro.market.core.repository.SaleRepository
 import money.tegro.market.nightcrawler.process.*
 import mu.KLogging
+import mu.withLoggingContext
 import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.block.AddrStd
 import org.ton.lite.api.LiteApi
@@ -35,16 +37,18 @@ class CatchUpJob(
     @Scheduled(initialDelay = "1s", fixedDelay = "\${money.tegro.market.nightcrawler.catchup-period:60m}")
     fun run() {
         runBlocking {
-            logger.info { "Starting catching up" }
             val started = Instant.now()
+            logger.info { "catch-up job started" }
 
             val referenceBlock = context.getBean<LiteApi>().getMasterchainInfo().last
+            withLoggingContext("referenceBlock" to referenceBlock.toString()) {
+                context.getBean<LoadInitialCollections>().run { referenceBlock }
+                context.getBean<CatchUpOnCollections>().run { referenceBlock }
+                context.getBean<CatchUpOnItems>().run { referenceBlock }
+            }
 
-            context.getBean<LoadInitialCollections>().run { referenceBlock }
-            context.getBean<CatchUpOnCollections>().run { referenceBlock }
-            context.getBean<CatchUpOnItems>().run { referenceBlock }
 
-            logger.info { "Caught up in ${Duration.between(started, Instant.now())}" }
+            logger.info { "caught up in ${Duration.between(started, Instant.now())}" }
         }
     }
 
@@ -55,12 +59,12 @@ class CatchUpJob(
         private val collectionRepository: CollectionRepository,
     ) {
         suspend fun run(referenceBlock: suspend () -> TonNodeBlockIdExt) {
-            logger.info { "Loading initial collections" }
+            logger.info { "loading initial collections" }
 
             val resource = resourceLoader.classLoader.getResource("init_collections.csv")
 
             if (resource == null) {
-                logger.warn { "No file with initial collections was found in the classpath" }
+                logger.warn { "no file with initial collections was found in the classpath" }
                 return
             } else {
                 resource.readText()
@@ -71,15 +75,20 @@ class CatchUpJob(
                     .filterWhen { collectionRepository.existsByAddress(it).not() }
                     .concatMap {
                         mono {
-                            val collection = NFTCollection.of(it, liteApi, referenceBlock)
-                            CollectionModel.of(collection, collection.metadata())
+                            withLoggingContext("address" to it.toSafeBounceable()) {
+                                logger.debug { "processing collection" }
+                                val collection = NFTCollection.of(it, liteApi, referenceBlock)
+                                CollectionModel.of(collection, collection.metadata())
+                            }
                         }
                     }
-                    .doOnNext { collectionRepository.save(it).subscribe() }
+                    .doOnNext {
+                        collectionRepository.save(it).subscribe {}
+                    }
                     .then()
                     .awaitSingleOrNull()
 
-                logger.info { "Alles gute!" }
+                logger.info { "alles gute!" }
             }
         }
 
@@ -97,9 +106,7 @@ class CatchUpJob(
         private val missingItemsProcess: MissingItemsProcess,
     ) {
         suspend fun run(referenceBlock: suspend () -> TonNodeBlockIdExt) {
-            val seqno = referenceBlock.invoke().seqno
-
-            logger.info { "Updating collections up to block no. $seqno" }
+            logger.info { "updating collections up to the reference block" }
             collectionRepository
                 .findAll(Sort.of(Sort.Order.asc("updated")))
                 .publishOn(Schedulers.boundedElastic())
@@ -114,7 +121,7 @@ class CatchUpJob(
                 .then()
                 .awaitSingleOrNull()
 
-            logger.info { "Discovering missing items" }
+            logger.info { "discovering missing items" }
             collectionRepository
                 .findAll(Sort.of(Sort.Order.asc("updated")))
                 .publishOn(Schedulers.boundedElastic())
@@ -123,7 +130,7 @@ class CatchUpJob(
                 .then()
                 .awaitSingleOrNull()
 
-            logger.info { "Collections up-to-date at block height $seqno" }
+            logger.info { "collections up-to-date" }
         }
 
         companion object : KLogging()
@@ -140,9 +147,7 @@ class CatchUpJob(
         private val saleProcess: SaleProcess,
     ) {
         suspend fun run(referenceBlock: suspend () -> TonNodeBlockIdExt) {
-            val seqno = referenceBlock.invoke().seqno
-
-            logger.info { "Updating items up to block no. $seqno" }
+            logger.info { "updating items up to the reference block" }
             itemRepository
                 .findAll(Sort.of(Sort.Order.asc("updated")))
                 .publishOn(Schedulers.boundedElastic())
@@ -164,7 +169,7 @@ class CatchUpJob(
                 .then()
                 .awaitSingleOrNull()
 
-            logger.info { "Updating sales up to block no $seqno" }
+            logger.info { "updating sales up to reference block" }
             saleRepository
                 .findAll(Sort.of(Sort.Order.asc("updated")))
                 .publishOn(Schedulers.boundedElastic())
@@ -179,7 +184,7 @@ class CatchUpJob(
                 .then()
                 .awaitSingleOrNull()
 
-            logger.info { "Items up-to-date at block height $seqno" }
+            logger.info { "items up-to-date" }
         }
 
         companion object : KLogging()

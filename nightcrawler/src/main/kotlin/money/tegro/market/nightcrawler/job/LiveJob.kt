@@ -12,6 +12,7 @@ import money.tegro.market.core.repository.RoyaltyRepository
 import money.tegro.market.core.repository.SaleRepository
 import money.tegro.market.nightcrawler.process.*
 import mu.KLogging
+import mu.withLoggingContext
 import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.bigint.BigInt
 import org.ton.bitstring.BitString
@@ -51,13 +52,16 @@ class LiveJob(
                     .distinctUntilChanged()
                     .flatMap {
                         mono {
-                            try {
-                                liteApi.getBlock(it).dataBagOfCells().roots.first().parse {
-                                    Block.TlbCombinator.loadTlb(this)
+                            withLoggingContext("block" to it.toString()) {
+                                try {
+                                    logger.debug { "getting masterchain block" }
+                                    liteApi.getBlock(it).dataBagOfCells().roots.first().parse {
+                                        Block.TlbCombinator.loadTlb(this)
+                                    }
+                                } catch (e: Exception) {
+                                    logger.warn(e) { "failed to get masterchain block" }
+                                    null
                                 }
-                            } catch (e: Exception) {
-                                logger.warn { e }
-                                null
                             }
                         }
                     }
@@ -76,16 +80,22 @@ class LiveJob(
                             .flatMap {
                                 mono {
                                     val (workchain, descr) = it
-                                    liteApi.getBlock(
-                                        TonNodeBlockIdExt(
-                                            workchain = workchain,
-                                            shard = descr.next_validator_shard,
-                                            seqno = descr.seq_no.toInt(),
-                                            rootHash = descr.root_hash.toByteArray(),
-                                            fileHash = descr.file_hash.toByteArray()
-                                        )
-                                    ).dataBagOfCells().roots.first().parse { Block.TlbCombinator.loadTlb(this) }
-                                        .let { workchain to it }
+                                    withLoggingContext(
+                                        "workchain" to workchain.toString(),
+                                        "shardDescr" to descr.toString()
+                                    ) {
+                                        logger.debug { "getting shard block" }
+                                        liteApi.getBlock(
+                                            TonNodeBlockIdExt(
+                                                workchain = workchain,
+                                                shard = descr.next_validator_shard,
+                                                seqno = descr.seq_no.toInt(),
+                                                rootHash = descr.root_hash.toByteArray(),
+                                                fileHash = descr.file_hash.toByteArray()
+                                            )
+                                        ).dataBagOfCells().roots.first().parse { Block.TlbCombinator.loadTlb(this) }
+                                            .let { workchain to it }
+                                    }
                                 }
                             }
                             .mergeWith(mono { -1 to it })
@@ -107,13 +117,8 @@ class LiveJob(
                                 it.address != BitString.of("0000000000000000000000000000000000000000000000000000000000000000")
                     }
                     .doOnNext {
-                        logger.info {
-                            it.toString(
-                                userFriendly = true,
-                                urlSafe = true,
-                                testOnly = true,
-                                bounceable = true
-                            )
+                        withLoggingContext("address" to it.toSafeBounceable()) {
+                            logger.debug { "affected account" }
                         }
                     }
                     .replay()
@@ -121,8 +126,12 @@ class LiveJob(
             // Items
             affectedAccounts
                 .publishOn(Schedulers.boundedElastic())
-                .flatMap { itemRepository.findById(it) }
-                .doOnNext { logger.info { "Updating item ${it.address.toSafeBounceable()}" } }
+                .flatMap { itemRepository.findById(it) } // Returns empty mono if not found, also acts as a filter
+                .doOnNext {
+                    withLoggingContext("address" to it.address.toSafeBounceable()) {
+                        logger.info { "address matched a database item" }
+                    }
+                }
                 .concatMap(itemProcess()) // Data and metadata
                 .doOnNext { itemRepository.upsert(it).subscribe() }
                 .doOnNext { // Royalty
@@ -144,8 +153,12 @@ class LiveJob(
             // Collections
             affectedAccounts
                 .publishOn(Schedulers.boundedElastic())
-                .flatMap { collectionRepository.findById(it) }
-                .doOnNext { logger.info { "Updating collection ${it.address.toSafeBounceable()}" } }
+                .flatMap { collectionRepository.findById(it) } // Returns empty mono if not found, also acts as a filter
+                .doOnNext {
+                    withLoggingContext("address" to it.address.toSafeBounceable()) {
+                        logger.info { "address matched a database collection" }
+                    }
+                }
                 .concatMap(collectionProcess()) // Data and metadata
                 .doOnNext { collectionRepository.upsert(it).subscribe() }
                 .doOnNext { // Royalty
@@ -162,11 +175,21 @@ class LiveJob(
             // Sales
             affectedAccounts
                 .publishOn(Schedulers.boundedElastic())
-                .flatMap { saleRepository.findById(it) }
+                .flatMap { saleRepository.findById(it) } // Returns empty mono if not found, also acts as a filter
+                .doOnNext {
+                    withLoggingContext("address" to it.address.toSafeBounceable()) {
+                        logger.info { "address matched a database sale" }
+                    }
+                }
                 .map { it.address }
                 .flatMap(saleProcess())
                 .doOnError {// Failed to get info for this address, remove it from the db
-                    saleRepository.deleteById((Exceptions.unwrap(it) as ProcessException).id).subscribe()
+                    (Exceptions.unwrap(it) as? ProcessException)?.let {
+                        withLoggingContext("address" to it.id.toSafeBounceable(), "exception" to it.toString()) {
+                            logger.info { "couldn't get sale information, contract was probably destroyed. Removing from the db" }
+                            saleRepository.deleteById((Exceptions.unwrap(it) as ProcessException).id).subscribe()
+                        }
+                    }
                 }
                 .doOnNext {
                     saleRepository.upsert(it).subscribe()

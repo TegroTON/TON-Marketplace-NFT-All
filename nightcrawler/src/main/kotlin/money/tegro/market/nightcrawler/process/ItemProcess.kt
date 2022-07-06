@@ -9,6 +9,7 @@ import money.tegro.market.core.model.AttributeModel
 import money.tegro.market.core.model.ItemModel
 import money.tegro.market.core.repository.AttributeRepository
 import mu.KLogging
+import mu.withLoggingContext
 import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.lite.api.LiteApi
 import reactor.kotlin.core.publisher.toFlux
@@ -32,7 +33,9 @@ class ItemProcess(
 
                 it.copy(item)?.copy(metadata)
                     ?: it.apply {
-                        logger.warn { "Could not update item ${it.address.toSafeBounceable()}, something went wrong" }
+                        withLoggingContext("address" to it.address.toSafeBounceable()) {
+                            logger.warn { "could not update item ${it.address.toSafeBounceable()}, something went wrong. Ignoring" }
+                        }
                     }
             }
         }
