@@ -37,6 +37,7 @@ dependencies {
     implementation(libs.bundles.coroutines)
     implementation(libs.bundles.reactor)
 
+    runtimeOnly(libs.r2dbc.pool)
     runtimeOnly(libs.r2dbc.postgresql)
     runtimeOnly(libs.postgresql)
     runtimeOnly(libs.logback.core)

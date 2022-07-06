@@ -5,6 +5,7 @@ jackson = { prefer = "2.13.2" }
 picocli = { prefer = "4.6.3" }
 reactor = { prefer = "3.4.18" }
 reactor-extra = { prefer = "3.4.8" }
+reactor-pool = { prefer = "0.2.9" }
 reactor-kotlin = { prefer = "1.1.6" }
 reflect = { prefer = "1.7.0" }
 ton = { strictly = "13004f960b" }
@@ -41,6 +42,7 @@ picocli = { group = "info.picocli", name = "picocli", version.ref = "picocli" }
 picocli-codegen = { group = "info.picocli", name = "picocli-codegen", version.ref = "picocli" }
 reactor-core = { group = "io.projectreactor", name = "reactor-core", version.ref = "reactor" }
 reactor-extra = { group = "io.projectreactor.addons", name = "reactor-extra", version.ref = "reactor-extra" }
+reactor-pool = { group = "io.projectreactor.addons", name = "reactor-pool", version.ref = "reactor-pool" }
 reactor-kotlin = { group = "io.projectreactor.kotlin", name = "reactor-kotlin-extensions", version.ref = "reactor-kotlin" }
 reactor-test = { group = "io.projectreactor", name = "reactor-test", version.ref = "reactor" }
 reflect = { group = "org.jetbrains.kotlin", name = "kotlin-reflect", version.ref = "reflect" }
@@ -53,6 +55,7 @@ logstash-logback-encoder = { group = "net.logstash.logback", name = "logstash-lo
 jakarta-annotation = { group = "jakarta.annotation", name = "jakarta.annotation-api", version.ref = "jakarta" }
 h2 = { group = "com.h2database", name = "h2", version.ref = "h2" }
 r2dbc-h2 = { group = "io.r2dbc", name = "r2dbc-h2", version.ref = "r2dbc" }
+r2dbc-pool = { group = "io.r2dbc", name = "r2dbc-pool", version.ref = "r2dbc" }
 r2dbc-postgresql = { group = "io.r2dbc", name = "r2dbc-postgresql", version.ref = "r2dbc" }
 postgresql = { group = "org.postgresql", name = "postgresql", version.ref = "postgresql" }
 
@@ -78,7 +81,7 @@ micronaut-security = { group = "io.micronaut.security", name = "micronaut-securi
 
 [bundles]
 coroutines = ["coroutines-core", "coroutines-reactive", "coroutines-reactor"]
-reactor = ["reactor-core", "reactor-extra", "reactor-kotlin"]
+reactor = ["reactor-core", "reactor-extra", "reactor-pool", "reactor-kotlin"]
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
