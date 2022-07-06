@@ -34,7 +34,7 @@ data class SaleModel(
     val royaltyDestination: AddressKey?,
 
     val discovered: Instant = Instant.now(),
-    val updated: Instant = Instant.MIN,
+    val updated: Instant = Instant.now(),
 ) {
     companion object {
         // This absolutely hideous stairway to heaven is necessary in order to ensure that valid representation of contract data
