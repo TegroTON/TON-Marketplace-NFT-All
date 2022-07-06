@@ -114,9 +114,10 @@ class CatchUpJob(
                 .doOnNext { collectionRepository.upsert(it).subscribe() }
                 .doOnNext { // Royalty
                     it.address.toMono()
+                        .subscribeOn(Schedulers.boundedElastic())
                         .flatMap(royaltyProcess(referenceBlock))
                         .onErrorStop() // If it doesn't implement royalty extension
-                        .subscribe { royaltyRepository.upsert(it).subscribe() }
+                        .subscribe { royaltyRepository.upsert(it).subscribeOn(Schedulers.single()).subscribe() }
                 }
                 .then()
                 .awaitSingleOrNull()
@@ -126,7 +127,7 @@ class CatchUpJob(
                 .findAll(Sort.of(Sort.Order.asc("updated")))
                 .publishOn(Schedulers.boundedElastic())
                 .concatMap(missingItemsProcess(referenceBlock))
-                .doOnNext { itemRepository.save(it).subscribe() }
+                .doOnNext { itemRepository.save(it).subscribeOn(Schedulers.single()).subscribe() }
                 .then()
                 .awaitSingleOrNull()
 
@@ -152,19 +153,21 @@ class CatchUpJob(
                 .findAll(Sort.of(Sort.Order.asc("updated")))
                 .publishOn(Schedulers.boundedElastic())
                 .concatMap(itemProcess(referenceBlock)) // Data and metadata
-                .doOnNext { itemRepository.upsert(it).subscribe() }
+                .doOnNext { itemRepository.upsert(it).subscribeOn(Schedulers.single()).subscribe() }
                 .doOnNext { // Royalty
                     if (it.collection != null)
                         it.address.toMono()
+                            .subscribeOn(Schedulers.boundedElastic())
                             .flatMap(royaltyProcess(referenceBlock))
                             .onErrorStop() // If it doesn't implement royalty extension
-                            .subscribe { royaltyRepository.upsert(it).subscribe() }
+                            .subscribe { royaltyRepository.upsert(it).subscribeOn(Schedulers.single()).subscribe() }
                 }
                 .doOnNext { // Sale
                     it.address.toMono()
+                        .subscribeOn(Schedulers.boundedElastic())
                         .flatMap(saleProcess(referenceBlock))
                         .onErrorStop() // If not a sale contract
-                        .subscribe { saleRepository.upsert(it).subscribe() }
+                        .subscribe { saleRepository.upsert(it).subscribeOn(Schedulers.single()).subscribe() }
                 }
                 .then()
                 .awaitSingleOrNull()
@@ -176,10 +179,11 @@ class CatchUpJob(
                 .map { it.address }
                 .flatMap(saleProcess(referenceBlock))
                 .doOnError {// Failed to get info for this address, remove it from the db
-                    saleRepository.deleteById((Exceptions.unwrap(it) as ProcessException).id).subscribe()
+                    saleRepository.deleteById((Exceptions.unwrap(it) as ProcessException).id)
+                        .subscribeOn(Schedulers.single()).subscribe()
                 }
                 .doOnNext {
-                    saleRepository.upsert(it).subscribe()
+                    saleRepository.upsert(it).subscribeOn(Schedulers.single()).subscribe()
                 }
                 .then()
                 .awaitSingleOrNull()
