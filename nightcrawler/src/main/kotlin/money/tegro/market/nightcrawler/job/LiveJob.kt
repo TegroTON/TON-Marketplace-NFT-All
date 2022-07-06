@@ -49,9 +49,9 @@ class LiveJob(
 
             val affectedAccounts =
                 Flux.interval(Duration.ofSeconds(2))
-                    .flatMap { mono { liteApi.getMasterchainInfo().last } }
+                    .concatMap { mono { liteApi.getMasterchainInfo().last } }
                     .distinctUntilChanged()
-                    .flatMap {
+                    .concatMap {
                         mono {
                             try {
                                 logger.debug(
@@ -66,7 +66,7 @@ class LiveJob(
                             }
                         }
                     }
-                    .flatMap {
+                    .concatMap {
                         it.extra.custom.value
                             ?.shard_hashes
                             ?.toMap()
@@ -78,7 +78,7 @@ class LiveJob(
                                 value.nodes().map { workchain to it }
                             }
                             .toFlux()
-                            .flatMap {
+                            .concatMap {
                                 mono {
                                     val (workchain, descr) = it
                                     logger.debug(
@@ -100,7 +100,7 @@ class LiveJob(
                             }
                             .mergeWith(mono { -1 to it })
                     }
-                    .flatMap {
+                    .concatMap {
                         val (workchain, block) = it
                         block.extra.account_blocks.nodes()
                             .flatMap {
@@ -123,7 +123,7 @@ class LiveJob(
 
             // Items
             affectedAccounts
-                .flatMap { itemRepository.findById(it) } // Returns empty mono if not found, also acts as a filter
+                .concatMap { itemRepository.findById(it) } // Returns empty mono if not found, also acts as a filter
                 .publishOn(Schedulers.boundedElastic())
                 .doOnNext {
                     logger.info("address {} matched a database item", value("address", it.address.toSafeBounceable()))
@@ -136,14 +136,14 @@ class LiveJob(
                             .subscribeOn(Schedulers.boundedElastic())
                             .flatMap(royaltyProcess())
                             .onErrorStop()
-                            .subscribe { royaltyRepository.upsert(it).subscribeOn(Schedulers.single()).subscribe() }
+                            .subscribe { royaltyRepository.upsert(it).subscribe() }
                 }
                 .doOnNext { // Sale
                     it.owner.toMono()
                         .subscribeOn(Schedulers.boundedElastic())
                         .flatMap(saleProcess())
                         .onErrorStop()
-                        .subscribe { saleRepository.upsert(it).subscribeOn(Schedulers.single()).subscribe() }
+                        .subscribe { saleRepository.upsert(it).subscribe() }
                 }
                 .then()
                 .subscribe()
@@ -151,7 +151,7 @@ class LiveJob(
             // Collections
             affectedAccounts
                 .publishOn(Schedulers.boundedElastic())
-                .flatMap { collectionRepository.findById(it) } // Returns empty mono if not found, also acts as a filter
+                .concatMap { collectionRepository.findById(it) } // Returns empty mono if not found, also acts as a filter
                 .doOnNext {
                     logger.info(
                         "address {} matched a database collection",
@@ -159,28 +159,28 @@ class LiveJob(
                     )
                 }
                 .concatMap(collectionProcess()) // Data and metadata
-                .doOnNext { collectionRepository.upsert(it).subscribeOn(Schedulers.single()).subscribe() }
+                .doOnNext { collectionRepository.upsert(it).subscribe() }
                 .doOnNext { // Royalty
                     it.address.toMono()
                         .subscribeOn(Schedulers.boundedElastic())
                         .flatMap(royaltyProcess())
                         .onErrorStop()
-                        .subscribe { royaltyRepository.upsert(it).subscribeOn(Schedulers.single()).subscribe() }
+                        .subscribe { royaltyRepository.upsert(it).subscribe() }
                 }
                 .concatMap(missingItemsProcess())
-                .doOnNext { itemRepository.save(it).subscribeOn(Schedulers.single()).subscribe() }
+                .doOnNext { itemRepository.save(it).subscribe() }
                 .then()
                 .subscribe()
 
             // Sales
             affectedAccounts
                 .publishOn(Schedulers.boundedElastic())
-                .flatMap { saleRepository.findById(it) } // Returns empty mono if not found, also acts as a filter
+                .concatMap { saleRepository.findById(it) } // Returns empty mono if not found, also acts as a filter
                 .doOnNext {
                     logger.info("address {} matched a database sale", value("address", it.address.toSafeBounceable()))
                 }
                 .map { it.address }
-                .flatMap(saleProcess())
+                .concatMap(saleProcess())
                 .doOnError {// Failed to get info for this address, remove it from the db
                     (Exceptions.unwrap(it) as? ProcessException)?.let {
                         logger.warn(
@@ -188,11 +188,11 @@ class LiveJob(
                             value("address", it.id.toSafeBounceable())
                         )
                         saleRepository.deleteById((Exceptions.unwrap(it) as ProcessException).id)
-                            .subscribeOn(Schedulers.single()).subscribe()
+                            .subscribe()
                     }
                 }
                 .doOnNext {
-                    saleRepository.upsert(it).subscribeOn(Schedulers.single()).subscribe()
+                    saleRepository.upsert(it).subscribe()
                 }
                 .then()
                 .subscribe()
