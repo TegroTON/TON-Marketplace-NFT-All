@@ -139,7 +139,7 @@ class LiveJob(
                             .subscribe { royaltyRepository.upsert(it).subscribeOn(Schedulers.single()).subscribe() }
                 }
                 .doOnNext { // Sale
-                    it.address.toMono()
+                    it.owner.toMono()
                         .subscribeOn(Schedulers.boundedElastic())
                         .flatMap(saleProcess())
                         .onErrorStop()
