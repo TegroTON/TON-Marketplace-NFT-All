@@ -1,27 +1,28 @@
 package money.tegro.market.core.model
 
-import io.micronaut.data.annotation.EmbeddedId
+import io.micronaut.data.annotation.Id
 import io.micronaut.data.annotation.MappedEntity
-import io.micronaut.data.annotation.Relation
+import io.micronaut.data.annotation.TypeDef
+import io.micronaut.data.model.DataType
 import io.swagger.v3.oas.annotations.media.Schema
-import money.tegro.market.blockchain.nft.NFTCollection
-import money.tegro.market.blockchain.nft.NFTCollectionMetadata
-import money.tegro.market.core.dto.toKey
-import money.tegro.market.core.key.AddressKey
+import money.tegro.market.core.converter.AddrStdAttributeConverter
+import money.tegro.market.core.converter.MsgAddressAttributeConverter
 import org.ton.block.AddrStd
+import org.ton.block.MsgAddress
 import java.time.Instant
 
 @MappedEntity("collections")
 @Schema(hidden = true)
 data class CollectionModel(
-    @EmbeddedId
-    val address: AddressKey,
+    @field:Id
+    @field:TypeDef(type = DataType.BYTE_ARRAY, converter = AddrStdAttributeConverter::class)
+    val address: AddrStd,
 
     // Basic info
     val nextItemIndex: Long,
 
-    @Relation(Relation.Kind.EMBEDDED)
-    val owner: AddressKey,
+    @field:TypeDef(type = DataType.BYTE_ARRAY, converter = MsgAddressAttributeConverter::class)
+    val owner: MsgAddress,
 
     // Metadata information
     val name: String = "",
@@ -40,49 +41,4 @@ data class CollectionModel(
     val discovered: Instant = Instant.now(),
     val updated: Instant = Instant.now(),
     val metadataUpdated: Instant = Instant.now(),
-) {
-    fun copy(collection: NFTCollection): CollectionModel? {
-        require((collection.address as? AddrStd) == this.address.to())
-        return collection.owner.toKey()?.let { owner ->
-            copy(
-                nextItemIndex = collection.nextItemIndex,
-                owner = owner,
-                updated = Instant.now()
-            )
-        }
-    }
-
-    fun copy(metadata: NFTCollectionMetadata): CollectionModel {
-        require((metadata.address as? AddrStd) == this.address.to())
-        return copy(
-            name = metadata.name.orEmpty(),
-            description = metadata.description.orEmpty(),
-            image = metadata.image,
-            imageData = metadata.imageData ?: byteArrayOf(),
-            coverImage = metadata.coverImage,
-            coverImageData = metadata.coverImageData ?: byteArrayOf(),
-            metadataUpdated = Instant.now()
-        )
-    }
-
-    companion object {
-        @JvmStatic
-        fun of(collection: NFTCollection, metadata: NFTCollectionMetadata): CollectionModel? =
-            collection.address.toKey()?.let { address ->
-                collection.owner.toKey()?.let { owner ->
-                    CollectionModel(
-                        address = address,
-                        nextItemIndex = collection.nextItemIndex,
-                        owner = owner,
-                        name = metadata.name.orEmpty(),
-                        description = metadata.description.orEmpty(),
-                        image = metadata.image,
-                        imageData = metadata.imageData ?: byteArrayOf(),
-                        coverImage = metadata.coverImage,
-                        coverImageData = metadata.coverImageData ?: byteArrayOf(),
-                    )
-                }
-            }
-    }
-}
-
+)

@@ -31,12 +31,12 @@ data class SaleDTO(
 ) {
     constructor(it: SaleModel) : this(
         address = it.address.toSafeBounceable(),
-        marketplace = it.marketplace.toSafeBounceable(),
-        item = it.item.toSafeBounceable(),
-        owner = it.owner.toSafeBounceable(),
+        marketplace = it.marketplace.toSafeBounceable().orEmpty(),
+        item = it.item.toSafeBounceable().orEmpty(),
+        owner = it.owner.toSafeBounceable().orEmpty(),
         fullPrice = it.fullPrice,
         marketplaceFee = it.marketplaceFee,
         royalty = it.royalty,
-        royaltyDestination = it.royaltyDestination?.toSafeBounceable()
+        royaltyDestination = it.royaltyDestination.toSafeBounceable()
     )
 }

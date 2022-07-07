@@ -111,7 +111,7 @@ class ItemController(
             storeTlb(Coins.tlbCodec(), Coins.ofNano(fullPrice)) // full_price
             storeRef { // fees_cell
                 storeTlb(Coins.tlbCodec(), Coins.ofNano(marketplaceFee))
-                storeTlb(MsgAddress.tlbCodec(), royalty?.destination?.to() ?: AddrNone)
+                storeTlb(MsgAddress.tlbCodec(), royalty?.destination?.asStd() ?: AddrNone)
                 storeTlb(Coins.tlbCodec(), Coins.ofNano(royaltyValue))
             }
         }

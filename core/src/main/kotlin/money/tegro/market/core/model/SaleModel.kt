@@ -1,28 +1,31 @@
 package money.tegro.market.core.model
 
-import io.micronaut.data.annotation.EmbeddedId
+import io.micronaut.data.annotation.Id
 import io.micronaut.data.annotation.MappedEntity
-import io.micronaut.data.annotation.Relation
+import io.micronaut.data.annotation.TypeDef
+import io.micronaut.data.model.DataType
 import io.swagger.v3.oas.annotations.media.Schema
-import money.tegro.market.blockchain.nft.NFTSale
-import money.tegro.market.core.dto.toKey
-import money.tegro.market.core.key.AddressKey
+import money.tegro.market.core.converter.AddrStdAttributeConverter
+import money.tegro.market.core.converter.MsgAddressAttributeConverter
+import org.ton.block.AddrStd
+import org.ton.block.MsgAddress
 import java.time.Instant
 
 @MappedEntity("sales")
 @Schema(hidden = true)
 data class SaleModel(
-    @EmbeddedId
-    val address: AddressKey,
+    @field:Id
+    @field:TypeDef(type = DataType.BYTE_ARRAY, converter = AddrStdAttributeConverter::class)
+    val address: AddrStd,
 
-    @Relation(Relation.Kind.EMBEDDED)
-    val marketplace: AddressKey,
+    @field:TypeDef(type = DataType.BYTE_ARRAY, converter = MsgAddressAttributeConverter::class)
+    val marketplace: MsgAddress,
 
-    @Relation(Relation.Kind.EMBEDDED)
-    val item: AddressKey,
+    @field:TypeDef(type = DataType.BYTE_ARRAY, converter = MsgAddressAttributeConverter::class)
+    val item: MsgAddress,
 
-    @Relation(Relation.Kind.EMBEDDED)
-    val owner: AddressKey,
+    @field:TypeDef(type = DataType.BYTE_ARRAY, converter = MsgAddressAttributeConverter::class)
+    val owner: MsgAddress,
 
     val fullPrice: Long,
 
@@ -30,34 +33,9 @@ data class SaleModel(
 
     val royalty: Long,
 
-    @Relation(Relation.Kind.EMBEDDED)
-    val royaltyDestination: AddressKey?,
+    @field:TypeDef(type = DataType.BYTE_ARRAY, converter = MsgAddressAttributeConverter::class)
+    val royaltyDestination: MsgAddress,
 
     val discovered: Instant = Instant.now(),
     val updated: Instant = Instant.now(),
-) {
-    companion object {
-        // This absolutely hideous stairway to heaven is necessary in order to ensure that valid representation of contract data
-        // is precisely mapped to a valid model used by the market. If not for this, messy null-check spaghetti would leak into
-        // the business logic
-        @JvmStatic
-        fun of(sale: NFTSale): SaleModel? = sale.address.toKey()?.let { address ->
-            sale.marketplace.toKey()?.let { marketplace ->
-                sale.item.toKey()?.let { item ->
-                    sale.owner.toKey()?.let { owner ->
-                        SaleModel(
-                            address,
-                            marketplace,
-                            item,
-                            owner,
-                            sale.fullPrice,
-                            sale.marketplaceFee,
-                            sale.royalty,
-                            sale.royaltyDestination.toKey() // It's okay if this one is null
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
+)

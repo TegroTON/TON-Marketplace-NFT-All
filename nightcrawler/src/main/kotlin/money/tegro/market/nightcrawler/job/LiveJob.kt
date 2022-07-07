@@ -1,16 +1,11 @@
 package money.tegro.market.nightcrawler.job
 
-import io.micronaut.context.ApplicationContext
 import io.micronaut.scheduling.annotation.Scheduled
 import jakarta.inject.Singleton
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
-import money.tegro.market.core.dto.toSafeBounceable
-import money.tegro.market.core.repository.CollectionRepository
-import money.tegro.market.core.repository.ItemRepository
-import money.tegro.market.core.repository.RoyaltyRepository
-import money.tegro.market.core.repository.SaleRepository
-import money.tegro.market.nightcrawler.process.*
+import money.tegro.market.core.repository.*
+import money.tegro.market.nightcrawler.Workers
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.value
@@ -19,38 +14,34 @@ import org.ton.bigint.BigInt
 import org.ton.bitstring.BitString
 import org.ton.block.*
 import org.ton.lite.api.LiteApi
-import reactor.core.Exceptions
 import reactor.core.publisher.Flux
-import reactor.core.scheduler.Schedulers
 import reactor.kotlin.core.publisher.toFlux
-import reactor.kotlin.core.publisher.toMono
 import java.time.Duration
 
 @Singleton
 class LiveJob(
-    private val context: ApplicationContext,
     private val liteApi: LiteApi,
 
-    private val itemRepository: ItemRepository,
+    private val accountRepository: AccountRepository,
     private val collectionRepository: CollectionRepository,
-    private val saleRepository: SaleRepository,
+    private val itemRepository: ItemRepository,
     private val royaltyRepository: RoyaltyRepository,
+    private val saleRepository: SaleRepository,
 
-    private val collectionProcess: CollectionProcess,
-    private val itemProcess: ItemProcess,
-    private val missingItemsProcess: MissingItemsProcess,
-    private val royaltyProcess: RoyaltyProcess,
-    private val saleProcess: SaleProcess,
+    private val workers: Workers
 ) {
     @Scheduled(initialDelay = "0s")
     fun run() {
         runBlocking {
             logger.info { "Remember, use your zoom, steady hands." }
 
+            workers.run()
+
             val affectedAccounts =
                 Flux.interval(Duration.ofSeconds(2))
                     .concatMap { mono { liteApi.getMasterchainInfo().last } }
                     .distinctUntilChanged()
+                    .doOnNext { workers.referenceBlock = { it } }
                     .concatMap {
                         mono {
                             try {
@@ -117,87 +108,49 @@ class LiveJob(
                                 it.address != BitString.of("0000000000000000000000000000000000000000000000000000000000000000")
                     }
                     .doOnNext {
-                        logger.debug("affected account {}", value("address", it.toSafeBounceable()))
+                        logger.debug("affected account {}", value("address", it))
                     }
-                    .replay()
-
-            // Items
-            affectedAccounts
-                .concatMap { itemRepository.findById(it) } // Returns empty mono if not found, also acts as a filter
-                .publishOn(Schedulers.boundedElastic())
-                .doOnNext {
-                    logger.info("address {} matched a database item", value("address", it.address.toSafeBounceable()))
-                }
-                .concatMap(itemProcess()) // Data and metadata
-                .doOnNext { itemRepository.upsert(it).subscribe() }
-                .doOnNext { // Royalty
-                    if (it.collection != null)
-                        it.address.toMono()
-                            .subscribeOn(Schedulers.boundedElastic())
-                            .flatMap(royaltyProcess())
-                            .onErrorStop()
-                            .subscribe { royaltyRepository.upsert(it).subscribe() }
-                }
-                .doOnNext { // Sale
-                    it.owner.toMono()
-                        .subscribeOn(Schedulers.boundedElastic())
-                        .flatMap(saleProcess())
-                        .onErrorStop()
-                        .subscribe { saleRepository.upsert(it).subscribe() }
-                }
-                .then()
-                .subscribe()
-
-            // Collections
-            affectedAccounts
-                .publishOn(Schedulers.boundedElastic())
-                .concatMap { collectionRepository.findById(it) } // Returns empty mono if not found, also acts as a filter
-                .doOnNext {
-                    logger.info(
-                        "address {} matched a database collection",
-                        value("address", it.address.toSafeBounceable())
-                    )
-                }
-                .concatMap(collectionProcess()) // Data and metadata
-                .doOnNext { collectionRepository.upsert(it).subscribe() }
-                .doOnNext { // Royalty
-                    it.address.toMono()
-                        .subscribeOn(Schedulers.boundedElastic())
-                        .flatMap(royaltyProcess())
-                        .onErrorStop()
-                        .subscribe { royaltyRepository.upsert(it).subscribe() }
-                }
-                .concatMap(missingItemsProcess())
-                .doOnNext { itemRepository.save(it).subscribe() }
-                .then()
-                .subscribe()
-
-            // Sales
-            affectedAccounts
-                .publishOn(Schedulers.boundedElastic())
-                .concatMap { saleRepository.findById(it) } // Returns empty mono if not found, also acts as a filter
-                .doOnNext {
-                    logger.info("address {} matched a database sale", value("address", it.address.toSafeBounceable()))
-                }
-                .map { it.address }
-                .concatMap(saleProcess())
-                .doOnError {// Failed to get info for this address, remove it from the db
-                    (Exceptions.unwrap(it) as? ProcessException)?.let {
-                        logger.warn(
-                            "couldn't get {} sale information, contract was probably destroyed. Removing from the db",
-                            value("address", it.id.toSafeBounceable())
-                        )
-                        saleRepository.deleteById((Exceptions.unwrap(it) as ProcessException).id)
-                            .subscribe()
+                    .doOnNext {
+                        accountRepository.existsById(it)
+                            .filter { it }
+                            .subscribe { _ ->
+                                logger.info("address {} matched database account entity", value("address", it))
+                                workers.accounts.tryEmitNext(it)
+                            }
                     }
-                }
-                .doOnNext {
-                    saleRepository.upsert(it).subscribe()
-                }
-                .then()
-                .subscribe()
-
-            affectedAccounts.connect()
+                    .doOnNext {
+                        collectionRepository.existsById(it)
+                            .filter { it }
+                            .subscribe { _ ->
+                                logger.info("address {} matched database collection entity", value("address", it))
+                                workers.collections.tryEmitNext(it)
+                            }
+                    }
+                    .doOnNext {
+                        itemRepository.existsById(it)
+                            .filter { it }
+                            .subscribe { _ ->
+                                logger.info("address {} matched database item entity", value("address", it))
+                                workers.items.tryEmitNext(it)
+                            }
+                    }
+                    .doOnNext {
+                        royaltyRepository.existsById(it)
+                            .filter { it }
+                            .subscribe { _ ->
+                                logger.info("address {} matched database royalty entity", value("address", it))
+                                workers.royalties.tryEmitNext(it)
+                            }
+                    }
+                    .doOnNext {
+                        saleRepository.existsById(it)
+                            .filter { it }
+                            .subscribe { _ ->
+                                logger.info("address {} matched database sale entity", value("address", it))
+                                workers.sales.tryEmitNext(it)
+                            }
+                    }
+                    .subscribe()
         }
     }
 

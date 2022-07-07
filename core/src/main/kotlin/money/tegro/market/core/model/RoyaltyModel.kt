@@ -1,42 +1,31 @@
 package money.tegro.market.core.model
 
-import io.micronaut.data.annotation.EmbeddedId
+import io.micronaut.data.annotation.Id
 import io.micronaut.data.annotation.MappedEntity
-import io.micronaut.data.annotation.Relation
+import io.micronaut.data.annotation.TypeDef
+import io.micronaut.data.model.DataType
 import io.swagger.v3.oas.annotations.media.Schema
-import money.tegro.market.blockchain.nft.NFTRoyalty
-import money.tegro.market.core.dto.toKey
-import money.tegro.market.core.key.AddressKey
+import money.tegro.market.core.converter.AddrStdAttributeConverter
+import money.tegro.market.core.converter.MsgAddressAttributeConverter
+import org.ton.block.AddrStd
+import org.ton.block.MsgAddress
 import java.time.Instant
 
 @MappedEntity("royalties")
 @Schema(hidden = true)
 data class RoyaltyModel(
-    @EmbeddedId
-    val address: AddressKey,
+    @field:Id
+    @field:TypeDef(type = DataType.BYTE_ARRAY, converter = AddrStdAttributeConverter::class)
+    val address: AddrStd,
 
     val numerator: Int,
 
     val denominator: Int,
 
-    @Relation(Relation.Kind.EMBEDDED)
-    val destination: AddressKey,
+    @field:TypeDef(type = DataType.BYTE_ARRAY, converter = MsgAddressAttributeConverter::class)
+    val destination: MsgAddress,
 
 
     val discovered: Instant = Instant.now(),
     val updated: Instant = Instant.now()
-) {
-    companion object {
-        @JvmStatic
-        fun of(royalty: NFTRoyalty): RoyaltyModel? = royalty.destination.toKey()?.let { destination ->
-            royalty.address.toKey()?.let { address ->
-                RoyaltyModel(
-                    address = address,
-                    numerator = royalty.numerator,
-                    denominator = royalty.denominator,
-                    destination = destination
-                )
-            }
-        }
-    }
-}
+)
