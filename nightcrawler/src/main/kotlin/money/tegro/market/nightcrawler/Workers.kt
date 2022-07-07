@@ -1,7 +1,6 @@
 package money.tegro.market.nightcrawler
 
 import io.micronaut.context.annotation.Prototype
-import kotlinx.coroutines.reactive.awaitLast
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.reactor.mono
 import money.tegro.market.blockchain.nft.*
@@ -65,7 +64,7 @@ class Workers(
     }
 
     fun processAccount(address: AddrStd) = mono {
-        accountRepository.findByIdForUpdate(address).awaitSingleOrNull()?.let { dbAccount ->
+        accountRepository.findById(address).awaitSingleOrNull()?.let { dbAccount ->
             if (Duration.between(dbAccount.updated, Instant.now()) > configuration.accountUpdatePeriod) {
                 logger.debug("updating existing account {} blockchain data", value("address", dbAccount.address))
 
@@ -78,7 +77,7 @@ class Workers(
                     value("address", dbAccount.address),
                     value("updated", dbAccount.updated)
                 )
-                null
+                dbAccount
             }
         } ?: run {
             logger.debug("saving new account {}", value("address", address))
@@ -92,7 +91,7 @@ class Workers(
     }
 
     fun processCollection(address: AddrStd) = mono {
-        collectionRepository.findByIdForUpdate(address).awaitSingleOrNull()?.let { dbCollection ->
+        collectionRepository.findById(address).awaitSingleOrNull()?.let { dbCollection ->
             if (Duration.between(dbCollection.updated, Instant.now()) > configuration.collectionUpdatePeriod) {
                 logger.debug("updating existing collection {} blockchain data", value("address", dbCollection.address))
 
@@ -195,11 +194,11 @@ class Workers(
                 items.tryEmitNext(it)
             }
             .then()
-            .awaitLast()
+            .awaitSingleOrNull()
     }
 
     fun processItem(address: AddrStd) = mono {
-        itemRepository.findByIdForUpdate(address).awaitSingleOrNull()?.let { dbItem ->
+        itemRepository.findById(address).awaitSingleOrNull()?.let { dbItem ->
             if (Duration.between(dbItem.updated, Instant.now()) > configuration.itemUpdatePeriod) {
                 logger.debug("updating existing item {} blockchain data", value("address", dbItem.address))
 
@@ -237,7 +236,7 @@ class Workers(
                 if (dbItem.owner != new.owner) // In case owner was changed, update both
                     (new.owner as? AddrStd)?.let { accounts.tryEmitNext(it); sales.tryEmitNext(it) }
 
-                (new.collection as? AddrStd)?.let { collections.tryEmitNext(it); royalties.tryEmitNext(it) }
+                (new.collection as? AddrStd)?.let { collections.tryEmitNext(it) }
                 if (new.collection is AddrNone)
                     royalties.tryEmitNext(new.address)
 
@@ -280,7 +279,7 @@ class Workers(
     }
 
     fun processRoyalty(address: AddrStd) = mono {
-        royaltyRepository.findByIdForUpdate(address).awaitSingleOrNull()?.let { dbRoyalty ->
+        royaltyRepository.findById(address).awaitSingleOrNull()?.let { dbRoyalty ->
             if (Duration.between(dbRoyalty.updated, Instant.now()) > configuration.royaltyUpdatePeriod) {
                 logger.debug("updating existing royalty {} blockchain data", value("address", dbRoyalty.address))
 
@@ -338,7 +337,7 @@ class Workers(
     }
 
     fun processSale(address: AddrStd) = mono {
-        saleRepository.findByIdForUpdate(address).awaitSingleOrNull()?.let { dbSale ->
+        saleRepository.findById(address).awaitSingleOrNull()?.let { dbSale ->
             if (Duration.between(dbSale.updated, Instant.now()) > configuration.saleUpdatePeriod) {
                 logger.debug("updating existing sale {} blockchain data", value("address", dbSale.address))
 

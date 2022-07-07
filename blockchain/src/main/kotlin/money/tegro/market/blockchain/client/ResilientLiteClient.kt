@@ -42,11 +42,16 @@ open class ResilientLiteClient(
         }
     }
 
-    override suspend fun <Q : Any, A : Any> query(query: Q, queryCodec: TlCodec<Q>, answerCodec: TlCodec<A>): A {
+    override suspend fun <Q : Any, A : Any> query(
+        query: Q,
+        queryCodec: TlCodec<Q>,
+        answerCodec: TlCodec<A>,
+        seqno: Int
+    ): A {
         var attempt = 1
         while (true) {
             try {
-                return super.query(query, queryCodec, answerCodec)
+                return super.query(query, queryCodec, answerCodec, seqno)
             } catch (e: Exception) {
                 if (attempt >= maxAttempts) {
                     Companion.logger.info { "too many attempts, giving up" }

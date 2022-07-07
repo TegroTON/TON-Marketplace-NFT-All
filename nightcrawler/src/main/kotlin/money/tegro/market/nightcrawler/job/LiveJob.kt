@@ -12,7 +12,10 @@ import net.logstash.logback.argument.StructuredArguments.value
 import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.bigint.BigInt
 import org.ton.bitstring.BitString
-import org.ton.block.*
+import org.ton.block.AddrStd
+import org.ton.block.BinTree
+import org.ton.block.BinTreeFork
+import org.ton.block.BinTreeLeaf
 import org.ton.lite.api.LiteApi
 import reactor.core.publisher.Flux
 import reactor.kotlin.core.publisher.toFlux
@@ -48,9 +51,7 @@ class LiveJob(
                                 logger.debug(
                                     "getting masterchain block no. {}", value("seqno", it.seqno)
                                 )
-                                liteApi.getBlock(it).dataBagOfCells().roots.first().parse {
-                                    Block.TlbCombinator.loadTlb(this)
-                                }
+                                liteApi.getBlock(it).toBlock()
                             } catch (e: Exception) {
                                 logger.warn("failed to get masterchain block no. {}", value("seqno", it.seqno), e)
                                 null
@@ -82,10 +83,10 @@ class LiveJob(
                                             workchain = workchain,
                                             shard = descr.next_validator_shard,
                                             seqno = descr.seq_no.toInt(),
-                                            rootHash = descr.root_hash.toByteArray(),
-                                            fileHash = descr.file_hash.toByteArray()
+                                            root_hash = descr.root_hash,
+                                            file_hash = descr.file_hash
                                         )
-                                    ).dataBagOfCells().roots.first().parse { Block.TlbCombinator.loadTlb(this) }
+                                    ).toBlock()
                                         .let { workchain to it }
                                 }
                             }

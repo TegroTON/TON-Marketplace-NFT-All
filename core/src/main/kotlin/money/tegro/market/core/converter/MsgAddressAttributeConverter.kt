@@ -16,7 +16,7 @@ class MsgAddressAttributeConverter : AttributeConverter<MsgAddress, ByteArray> {
         entityValue?.let { CellBuilder.createCell { storeTlb(msgAddressCodec, it) }.bits.toByteArray() }
 
     override fun convertToEntityValue(persistedValue: ByteArray?, context: ConversionContext): MsgAddress? =
-        persistedValue?.let { Cell(BitString(it)).parse { loadTlb(msgAddressCodec) } }
+        persistedValue?.let { Cell(BitString(it)).beginParse().loadTlb(msgAddressCodec) }  // TODO: proper parsing
 
     companion object {
         val msgAddressCodec = MsgAddress.tlbCodec()
