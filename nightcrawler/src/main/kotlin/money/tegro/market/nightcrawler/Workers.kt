@@ -28,6 +28,7 @@ class Workers(
     private val configuration: NightcrawlerConfiguration,
     private val liteApi: LiteApi,
     private val accountRepository: AccountRepository,
+    private val attributeRepository: AttributeRepository,
     private val collectionRepository: CollectionRepository,
     private val itemRepository: ItemRepository,
     private val royaltyRepository: RoyaltyRepository,
@@ -223,6 +224,8 @@ class Workers(
                         imageData = metadata.imageData ?: byteArrayOf(),
                         metadataUpdated = Instant.now()
                     )
+
+                    processItemAttributes(dbItem.address, metadata.attributes.orEmpty())
                 } else {
                     logger.debug(
                         "item {} metadata is up-to-date, last updated {}",
@@ -267,6 +270,8 @@ class Workers(
                 imageData = metadata.imageData ?: byteArrayOf(),
             )
 
+            processItemAttributes(address, metadata.attributes.orEmpty())
+
             // Trigger other jobs
             (new.owner as? AddrStd)?.let { accounts.tryEmitNext(it); sales.tryEmitNext(it) }
 
@@ -275,6 +280,25 @@ class Workers(
                 royalties.tryEmitNext(new.address)
 
             itemRepository.save(new).awaitSingleOrNull()
+        }
+    }
+
+    fun processItemAttributes(address: AddrStd, attributes: Iterable<NFTItemMetadataAttribute>) {
+        attributes.forEach { attribute ->
+            mono {
+                attributeRepository.findByItemAndTrait(address, attribute.trait)
+                    .awaitSingleOrNull()?.let {
+                        attributeRepository.update(it.copy(value = attribute.value)).subscribe()
+                    } ?: run {
+                    attributeRepository.save(
+                        AttributeModel(
+                            address,
+                            attribute.trait,
+                            attribute.value
+                        )
+                    ).subscribe()
+                }
+            }.subscribe()
         }
     }
 
