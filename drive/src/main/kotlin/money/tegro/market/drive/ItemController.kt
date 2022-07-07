@@ -45,7 +45,7 @@ class ItemController(
                         ItemDTO(
                             it,
                             saleRepository.findByItem(it.address).awaitSingleOrNull(),
-                            it.collection?.let { royaltyRepository.findById(it).awaitSingleOrNull() }
+                            (it.collection as? AddrStd)?.let { royaltyRepository.findById(it).awaitSingleOrNull() }
                                 ?: royaltyRepository.findById(it.address).awaitSingleOrNull(),
                             attributeRepository.findByItem(it.address).collectList().awaitSingle(),
                         )
@@ -60,7 +60,7 @@ class ItemController(
                     ItemDTO(
                         it,
                         saleRepository.findByItem(it.address).awaitSingleOrNull(),
-                        it.collection?.let { royaltyRepository.findById(it).awaitSingleOrNull() }
+                        (it.collection as? AddrStd)?.let { royaltyRepository.findById(it).awaitSingleOrNull() }
                             ?: royaltyRepository.findById(it.address).awaitSingleOrNull(),
                         attributeRepository.findByItem(it.address).collectList().awaitSingle(),
                     )
@@ -97,7 +97,7 @@ class ItemController(
         price: Long,
     ): Mono<TransactionRequestDTO> = mono {
         val it = itemRepository.findById(AddrStd(item)).awaitSingle()
-        val royalty = it.collection?.let { royaltyRepository.findById(it).awaitSingleOrNull() }
+        val royalty = (it.collection as? AddrStd)?.let { royaltyRepository.findById(it).awaitSingleOrNull() }
             ?: royaltyRepository.findById(it.address).awaitSingleOrNull()
 
         val marketplaceFee = price * configuration.feeNumerator / configuration.feeDenominator
@@ -111,7 +111,7 @@ class ItemController(
             storeTlb(Coins.tlbCodec(), Coins.ofNano(fullPrice)) // full_price
             storeRef { // fees_cell
                 storeTlb(Coins.tlbCodec(), Coins.ofNano(marketplaceFee))
-                storeTlb(MsgAddress.tlbCodec(), royalty?.destination?.asStd() ?: AddrNone)
+                storeTlb(MsgAddress.tlbCodec(), royalty?.destination ?: AddrNone)
                 storeTlb(Coins.tlbCodec(), Coins.ofNano(royaltyValue))
             }
         }

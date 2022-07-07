@@ -58,7 +58,9 @@ class CollectionController(
                                     ItemDTO(
                                         it,
                                         saleRepository.findByItem(it.address).awaitSingleOrNull(),
-                                        it.collection?.let { royaltyRepository.findById(it).awaitSingleOrNull() }
+                                        (it.collection as? AddrStd)?.let {
+                                            royaltyRepository.findById(it).awaitSingleOrNull()
+                                        }
                                             ?: royaltyRepository.findById(it.address).awaitSingleOrNull(),
                                         attributeRepository.findByItem(it.address).collectList().awaitSingle(),
                                     )
