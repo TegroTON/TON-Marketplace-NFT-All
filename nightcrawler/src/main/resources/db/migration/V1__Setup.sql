@@ -1,3 +1,12 @@
+CREATE TABLE "accounts"
+(
+    "address_workchain" INTEGER   NOT NULL,
+    "address_hash"      BYTEA     NOT NULL,
+    "discovered"        TIMESTAMP NOT NULL,
+    "updated"           TIMESTAMP NOT NULL,
+    PRIMARY KEY ("address_workchain", "address_hash")
+);
+
 CREATE TABLE "attributes"
 (
     "id"             BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -22,6 +31,7 @@ CREATE TABLE "collections"
     "cover_image_data"  BYTEA        NOT NULL,
     "discovered"        TIMESTAMP    NOT NULL,
     "updated"           TIMESTAMP    NOT NULL,
+    "metadata_updated"  TIMESTAMP    NOT NULL,
     PRIMARY KEY ("address_workchain", "address_hash")
 );
 
@@ -41,6 +51,7 @@ CREATE TABLE "items"
     "image_data"           BYTEA        NOT NULL,
     "discovered"           TIMESTAMP    NOT NULL,
     "updated"              TIMESTAMP    NOT NULL,
+    "metadata_updated"     TIMESTAMP    NOT NULL,
     PRIMARY KEY ("address_workchain", "address_hash")
 );
 
@@ -56,7 +67,6 @@ CREATE TABLE "royalties"
     "updated"               TIMESTAMP NOT NULL,
     PRIMARY KEY ("address_workchain", "address_hash")
 );
-
 
 CREATE TABLE "sales"
 (

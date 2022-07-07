@@ -41,6 +41,7 @@ data class ItemModel(
 
     val discovered: Instant = Instant.now(),
     val updated: Instant = Instant.now(),
+    val metadataUpdated: Instant = Instant.now(),
 ) {
     fun copy(item: NFTItem): ItemModel? {
         require((item.address as? AddrStd) == this.address.to())
@@ -62,7 +63,7 @@ data class ItemModel(
             description = metadata.description.orEmpty(),
             image = metadata.image,
             imageData = metadata.imageData ?: byteArrayOf(),
-            updated = Instant.now()
+            metadataUpdated = Instant.now()
         )
     }
 

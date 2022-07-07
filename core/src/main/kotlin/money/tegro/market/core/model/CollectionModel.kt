@@ -39,6 +39,7 @@ data class CollectionModel(
 
     val discovered: Instant = Instant.now(),
     val updated: Instant = Instant.now(),
+    val metadataUpdated: Instant = Instant.now(),
 ) {
     fun copy(collection: NFTCollection): CollectionModel? {
         require((collection.address as? AddrStd) == this.address.to())
@@ -60,7 +61,7 @@ data class CollectionModel(
             imageData = metadata.imageData ?: byteArrayOf(),
             coverImage = metadata.coverImage,
             coverImageData = metadata.coverImageData ?: byteArrayOf(),
-            updated = Instant.now()
+            metadataUpdated = Instant.now()
         )
     }
 
