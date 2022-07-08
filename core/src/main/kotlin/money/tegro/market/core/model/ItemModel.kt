@@ -31,9 +31,9 @@ data class ItemModel(
 
 
     // Metadata information
-    val name: String = "",
+    val name: String? = null,
 
-    val description: String = "",
+    val description: String? = null,
 
     val image: String? = null,
 

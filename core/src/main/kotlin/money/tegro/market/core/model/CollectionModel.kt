@@ -25,9 +25,9 @@ data class CollectionModel(
     val owner: MsgAddress,
 
     // Metadata information
-    val name: String = "",
+    val name: String? = null,
 
-    val description: String = "",
+    val description: String? = null,
 
     val image: String? = null,
 

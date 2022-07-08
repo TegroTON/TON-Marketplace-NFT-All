@@ -67,8 +67,8 @@ class ItemWorker(
                     val metadata = item.metadata(liteApi)
 
                     new = new.copy(
-                        name = metadata.name.orEmpty(),
-                        description = metadata.description.orEmpty(),
+                        name = metadata.name,
+                        description = metadata.description,
                         image = metadata.image,
                         imageData = metadata.imageData ?: byteArrayOf(),
                         metadataUpdated = Instant.now()
@@ -115,8 +115,8 @@ class ItemWorker(
                 index = item.index,
                 collection = item.collection,
                 owner = item.owner,
-                name = metadata.name.orEmpty(),
-                description = metadata.description.orEmpty(),
+                name = metadata.name,
+                description = metadata.description,
                 image = metadata.image,
                 imageData = metadata.imageData ?: byteArrayOf(),
             )

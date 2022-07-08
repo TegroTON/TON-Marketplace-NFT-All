@@ -68,8 +68,8 @@ class CollectionWorker(
                     val metadata = collection.metadata()
 
                     new = new.copy(
-                        name = metadata.name.orEmpty(),
-                        description = metadata.description.orEmpty(),
+                        name = metadata.name,
+                        description = metadata.description,
                         image = metadata.image,
                         imageData = metadata.imageData ?: byteArrayOf(),
                         coverImage = metadata.coverImage,
@@ -112,8 +112,8 @@ class CollectionWorker(
                 address = collection.address as AddrStd,
                 nextItemIndex = collection.nextItemIndex,
                 owner = collection.owner,
-                name = metadata.name.orEmpty(),
-                description = metadata.description.orEmpty(),
+                name = metadata.name,
+                description = metadata.description,
                 image = metadata.image,
                 imageData = metadata.imageData ?: byteArrayOf(),
                 coverImage = metadata.coverImage,
