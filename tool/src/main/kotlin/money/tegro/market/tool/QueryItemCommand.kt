@@ -4,12 +4,14 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
+import money.tegro.market.blockchain.nft.NFTException
 import money.tegro.market.blockchain.nft.NFTItem
+import money.tegro.market.blockchain.nft.NFTRoyalty
 import money.tegro.market.core.dto.ItemDTO
-import money.tegro.market.core.model.AttributeModel
-import money.tegro.market.core.model.ItemModel
-import money.tegro.market.core.model.RoyaltyModel
-import money.tegro.market.core.model.SaleModel
+import money.tegro.market.core.dto.RoyaltyDTO
+import money.tegro.market.core.dto.SaleDTO
+import money.tegro.market.core.dto.toSafeBounceable
+import org.ton.block.AddrNone
 import org.ton.block.AddrStd
 import org.ton.lite.api.LiteApi
 import picocli.CommandLine
@@ -45,17 +47,48 @@ class QueryItemCommand : Runnable {
 
     fun queryBlockchain(address: AddrStd) = mono {
         val item = NFTItem.of(address, liteApi)
-        val royalty = item.royalty(liteApi)
         val metadata = item.metadata(liteApi)
-        val sale = item.sale(liteApi)
-
-        ItemModel.of(item, metadata)?.let { model ->
-            ItemDTO(
-                model,
-                sale?.let { SaleModel.of(it) },
-                RoyaltyModel.of(royalty),
-                metadata.attributes?.asSequence()?.map { AttributeModel(model.address, it) }?.asIterable()
-            )
+        val royalty = try {
+            if (item.collection is AddrNone) {
+                item.royalty(liteApi)
+            } else {
+                NFTRoyalty.of(item.collection as AddrStd, liteApi)
+            }
+        } catch (e: NFTException) {
+            null
         }
+        val sale = try {
+            item.sale(liteApi)
+        } catch (e: NFTException) {
+            null
+        }
+
+        ItemDTO(
+            address = (item.address as AddrStd).toSafeBounceable(),
+            index = item.index,
+            collection = (item.collection as? AddrStd)?.toSafeBounceable(),
+            owner = (item.owner as? AddrStd)?.toSafeBounceable(),
+            name = metadata.name,
+            description = metadata.description,
+            sale = sale?.let {
+                SaleDTO(
+                    address = (it.address as AddrStd).toSafeBounceable(),
+                    marketplace = it.marketplace.toSafeBounceable().orEmpty(),
+                    item = it.item.toSafeBounceable().orEmpty(),
+                    owner = it.owner.toSafeBounceable().orEmpty(),
+                    fullPrice = it.fullPrice,
+                    marketplaceFee = it.marketplaceFee,
+                    royalty = it.royalty,
+                    royaltyDestination = it.royaltyDestination.toSafeBounceable()
+                )
+            },
+            royalty = royalty?.let {
+                RoyaltyDTO(
+                    it.value(),
+                    (it.destination as? AddrStd)?.toSafeBounceable()
+                )
+            },
+            attributes = metadata.attributes?.associate { it.trait to it.value } ?: mapOf(),
+        )
     }
 }

@@ -5,10 +5,10 @@ import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
 import money.tegro.market.blockchain.nft.NFTCollection
+import money.tegro.market.blockchain.nft.NFTException
 import money.tegro.market.core.dto.CollectionDTO
 import money.tegro.market.core.dto.RoyaltyDTO
 import money.tegro.market.core.dto.toSafeBounceable
-import money.tegro.market.core.model.RoyaltyModel
 import org.ton.block.AddrStd
 import org.ton.lite.api.LiteApi
 import picocli.CommandLine
@@ -47,7 +47,11 @@ class QueryCollectionCommand : Runnable {
 
     fun queryBlockchain(address: AddrStd) = mono {
         val collection = NFTCollection.of(address, liteApi)
-        val royalty = collection.royalty(liteApi)
+        val royalty = try {
+            collection.royalty(liteApi)
+        } catch (e: NFTException) {
+            null
+        }
         val metadata = collection.metadata()
 
         CollectionDTO(
@@ -56,7 +60,12 @@ class QueryCollectionCommand : Runnable {
             owner = collection.owner.toSafeBounceable(),
             name = metadata.name,
             description = metadata.description,
-            royalty = RoyaltyModel.of(royalty)?.let { RoyaltyDTO(it) }
+            royalty = royalty?.let {
+                RoyaltyDTO(
+                    it.value(),
+                    (it.destination as? AddrStd)?.toSafeBounceable()
+                )
+            }
         )
     }
 }
