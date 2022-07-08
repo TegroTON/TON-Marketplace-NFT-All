@@ -10,7 +10,8 @@ import money.tegro.market.core.model.SaleModel
 import money.tegro.market.core.repository.SaleRepository
 import money.tegro.market.nightcrawler.NightcrawlerConfiguration
 import money.tegro.market.nightcrawler.WorkSinks.accounts
-import money.tegro.market.nightcrawler.WorkSinks.items
+import money.tegro.market.nightcrawler.WorkSinks.emitNextAccount
+import money.tegro.market.nightcrawler.WorkSinks.emitNextItem
 import money.tegro.market.nightcrawler.WorkSinks.sales
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments.value
@@ -55,13 +56,13 @@ class SaleWorker(
                     )
 
                     // Trigger other jobs
-                    (dbSale.item as? AddrStd)?.let { items.tryEmitNext(it) }
-                    (dbSale.owner as? AddrStd)?.let { accounts.tryEmitNext(it) }
+                    (dbSale.item as? AddrStd)?.let { emitNextItem(it) }
+                    (dbSale.owner as? AddrStd)?.let { emitNextAccount(it) }
                     if (dbSale.owner != new.owner) // In case owner was changed, update both
-                        (new.owner as? AddrStd)?.let { accounts.tryEmitNext(it) }
-                    (dbSale.royaltyDestination as? AddrStd)?.let { accounts.tryEmitNext(it) }
+                        (new.owner as? AddrStd)?.let { emitNextAccount(it) }
+                    (dbSale.royaltyDestination as? AddrStd)?.let { emitNextAccount(it) }
                     if (dbSale.royaltyDestination != new.royaltyDestination) // In case destination was changed, update both
-                        (new.royaltyDestination as? AddrStd)?.let { accounts.tryEmitNext(it) }
+                        (new.royaltyDestination as? AddrStd)?.let { emitNextAccount(it) }
 
                     saleRepository.update(new).awaitSingleOrNull()
                 } catch (e: NFTException) {
@@ -97,6 +98,11 @@ class SaleWorker(
                     royalty = sale.royalty,
                     royaltyDestination = sale.royaltyDestination,
                 )
+
+                (new.item as? AddrStd)?.let { emitNextItem(it) }
+                (new.owner as? AddrStd)?.let { emitNextAccount(it) }
+                (new.royaltyDestination as? AddrStd)?.let { emitNextAccount(it) }
+
                 saleRepository.save(new).awaitSingleOrNull()
             } catch (e: NFTException) {
                 logger.info(

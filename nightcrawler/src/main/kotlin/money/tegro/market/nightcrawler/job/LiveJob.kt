@@ -5,11 +5,11 @@ import jakarta.inject.Singleton
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
 import money.tegro.market.core.repository.*
-import money.tegro.market.nightcrawler.WorkSinks.accounts
-import money.tegro.market.nightcrawler.WorkSinks.collections
-import money.tegro.market.nightcrawler.WorkSinks.items
-import money.tegro.market.nightcrawler.WorkSinks.royalties
-import money.tegro.market.nightcrawler.WorkSinks.sales
+import money.tegro.market.nightcrawler.WorkSinks.emitNextAccount
+import money.tegro.market.nightcrawler.WorkSinks.emitNextCollection
+import money.tegro.market.nightcrawler.WorkSinks.emitNextItem
+import money.tegro.market.nightcrawler.WorkSinks.emitNextRoyalty
+import money.tegro.market.nightcrawler.WorkSinks.emitNextSale
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.value
@@ -99,7 +99,7 @@ class LiveJob(
                         .filter { it }
                         .subscribe { _ ->
                             logger.info("address {} matched database account entity", value("address", it))
-                            accounts.tryEmitNext(it)
+                            emitNextAccount(it)
                         }
                 }
                 .doOnNext {
@@ -107,7 +107,7 @@ class LiveJob(
                         .filter { it }
                         .subscribe { _ ->
                             logger.info("address {} matched database collection entity", value("address", it))
-                            collections.tryEmitNext(it)
+                            emitNextCollection(it)
                         }
                 }
                 .doOnNext {
@@ -115,7 +115,7 @@ class LiveJob(
                         .filter { it }
                         .subscribe { _ ->
                             logger.info("address {} matched database item entity", value("address", it))
-                            items.tryEmitNext(it)
+                            emitNextItem(it)
                         }
                 }
                 .doOnNext {
@@ -123,7 +123,7 @@ class LiveJob(
                         .filter { it }
                         .subscribe { _ ->
                             logger.info("address {} matched database royalty entity", value("address", it))
-                            royalties.tryEmitNext(it)
+                            emitNextRoyalty(it)
                         }
                 }
                 .doOnNext {
@@ -131,7 +131,7 @@ class LiveJob(
                         .filter { it }
                         .subscribe { _ ->
                             logger.info("address {} matched database sale entity", value("address", it))
-                            sales.tryEmitNext(it)
+                            emitNextSale(it)
                         }
                 }
                 .subscribe()

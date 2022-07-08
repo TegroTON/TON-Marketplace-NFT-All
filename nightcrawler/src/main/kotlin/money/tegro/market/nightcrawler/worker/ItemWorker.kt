@@ -11,11 +11,11 @@ import money.tegro.market.core.model.ItemModel
 import money.tegro.market.core.repository.AttributeRepository
 import money.tegro.market.core.repository.ItemRepository
 import money.tegro.market.nightcrawler.NightcrawlerConfiguration
-import money.tegro.market.nightcrawler.WorkSinks.accounts
-import money.tegro.market.nightcrawler.WorkSinks.collections
+import money.tegro.market.nightcrawler.WorkSinks.emitNextAccount
+import money.tegro.market.nightcrawler.WorkSinks.emitNextCollection
+import money.tegro.market.nightcrawler.WorkSinks.emitNextRoyalty
+import money.tegro.market.nightcrawler.WorkSinks.emitNextSale
 import money.tegro.market.nightcrawler.WorkSinks.items
-import money.tegro.market.nightcrawler.WorkSinks.royalties
-import money.tegro.market.nightcrawler.WorkSinks.sales
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments
 import org.ton.block.AddrNone
@@ -84,13 +84,15 @@ class ItemWorker(
                 }
 
                 // Trigger other jobs
-                (dbItem.owner as? AddrStd)?.let { accounts.tryEmitNext(it); sales.tryEmitNext(it) }
+                (dbItem.owner as? AddrStd)?.let { emitNextAccount(it); emitNextSale(it) }
                 if (dbItem.owner != new.owner) // In case owner was changed, update both
-                    (new.owner as? AddrStd)?.let { accounts.tryEmitNext(it); sales.tryEmitNext(it) }
+                    (new.owner as? AddrStd)?.let { emitNextAccount(it); emitNextSale(it) }
 
-                (new.collection as? AddrStd)?.let { collections.tryEmitNext(it) }
+                (new.collection as? AddrStd)?.let {
+                    emitNextCollection(it)
+                }
                 if (new.collection is AddrNone)
-                    royalties.tryEmitNext(new.address)
+                    emitNextRoyalty(new.address)
 
                 itemRepository.update(new).awaitSingleOrNull()
             } else {
@@ -122,17 +124,17 @@ class ItemWorker(
             processItemAttributes(address, metadata.attributes.orEmpty())
 
             // Trigger other jobs
-            (new.owner as? AddrStd)?.let { accounts.tryEmitNext(it); sales.tryEmitNext(it) }
+            (new.owner as? AddrStd)?.let { emitNextAccount(it); emitNextSale(it) }
 
-            (new.collection as? AddrStd)?.let { collections.tryEmitNext(it); royalties.tryEmitNext(it) }
+            (new.collection as? AddrStd)?.let { emitNextCollection(it) }
             if (new.collection is AddrNone)
-                royalties.tryEmitNext(new.address)
+                emitNextRoyalty(new.address)
 
             itemRepository.save(new).awaitSingleOrNull()
         }
     }
 
-    fun processItemAttributes(address: AddrStd, attributes: Iterable<NFTItemMetadataAttribute>) {
+    private fun processItemAttributes(address: AddrStd, attributes: Iterable<NFTItemMetadataAttribute>) {
         attributes.forEach { attribute ->
             mono {
                 attributeRepository.findByItemAndTrait(address, attribute.trait)

@@ -9,7 +9,7 @@ import money.tegro.market.blockchain.nft.NFTRoyalty
 import money.tegro.market.core.model.RoyaltyModel
 import money.tegro.market.core.repository.RoyaltyRepository
 import money.tegro.market.nightcrawler.NightcrawlerConfiguration
-import money.tegro.market.nightcrawler.WorkSinks.accounts
+import money.tegro.market.nightcrawler.WorkSinks.emitNextAccount
 import money.tegro.market.nightcrawler.WorkSinks.royalties
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments
@@ -53,9 +53,9 @@ class RoyaltyWorker(
                     )
 
                     // Trigger other jobs
-                    (dbRoyalty.destination as? AddrStd)?.let { accounts.tryEmitNext(it) }
+                    (dbRoyalty.destination as? AddrStd)?.let { emitNextAccount(it) }
                     if (dbRoyalty.destination != new.destination) // In case destination was changed, update both
-                        (new.destination as? AddrStd)?.let { accounts.tryEmitNext(it) }
+                        (new.destination as? AddrStd)?.let { emitNextAccount(it) }
 
                     royaltyRepository.update(new).awaitSingleOrNull()
                 } catch (e: NFTException) {
@@ -87,6 +87,9 @@ class RoyaltyWorker(
                     denominator = royalty.denominator,
                     destination = royalty.destination,
                 )
+
+                (new.destination as? AddrStd)?.let { emitNextAccount(it) }
+
                 royaltyRepository.save(new).awaitSingleOrNull()
             } catch (e: NFTException) {
                 logger.info(

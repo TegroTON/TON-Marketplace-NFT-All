@@ -9,10 +9,10 @@ import money.tegro.market.core.model.CollectionModel
 import money.tegro.market.core.repository.CollectionRepository
 import money.tegro.market.core.repository.ItemRepository
 import money.tegro.market.nightcrawler.NightcrawlerConfiguration
-import money.tegro.market.nightcrawler.WorkSinks.accounts
 import money.tegro.market.nightcrawler.WorkSinks.collections
-import money.tegro.market.nightcrawler.WorkSinks.items
-import money.tegro.market.nightcrawler.WorkSinks.royalties
+import money.tegro.market.nightcrawler.WorkSinks.emitNextAccount
+import money.tegro.market.nightcrawler.WorkSinks.emitNextItem
+import money.tegro.market.nightcrawler.WorkSinks.emitNextRoyalty
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments
 import org.ton.block.AddrStd
@@ -85,11 +85,13 @@ class CollectionWorker(
                 }
 
                 // Trigger other jobs
-                (dbCollection.owner as? AddrStd)?.let { accounts.tryEmitNext(it) }
+                (dbCollection.owner as? AddrStd)?.let { emitNextAccount(it) }
                 if (dbCollection.owner != new.owner) // In case owner was changed, update both
-                    (new.owner as? AddrStd)?.let { accounts.tryEmitNext(it) }
+                    (new.owner as? AddrStd)?.let {
+                        emitNextAccount(it)
+                    }
 
-                royalties.tryEmitNext(new.address)
+                emitNextRoyalty(new.address)
 
                 collectionRepository.update(new).awaitSingleOrNull()
             } else {
@@ -119,9 +121,9 @@ class CollectionWorker(
             )
 
             // Trigger other jobs
-            (new.owner as? AddrStd)?.let { accounts.tryEmitNext(it) }
+            (new.owner as? AddrStd)?.let { emitNextAccount(it) }
 
-            royalties.tryEmitNext(new.address)
+            emitNextRoyalty(new.address)
 
             collectionRepository.save(new).awaitSingleOrNull()
         }
@@ -147,7 +149,7 @@ class CollectionWorker(
             }
             .filterWhen { itemRepository.existsById(it).not() } // Isn't in the repository?
             .doOnNext {
-                items.tryEmitNext(it)
+                emitNextItem(it)
             }
             .then()
             .awaitSingleOrNull()
