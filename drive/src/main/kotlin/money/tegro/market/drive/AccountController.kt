@@ -30,7 +30,7 @@ class AccountController(
 
     override fun getAccountItems(account: String): Flux<ItemDTO> =
         saleRepository.findByOwner(AddrStd(account))
-            .flatMapMany {
+            .concatMap {
                 itemRepository.findByOwner(it.address).take(1)
             } // Items owned by the seller contract owned by the account. We only expect 1 item = 1 sale
             .concatWith(itemRepository.findByOwner(AddrStd(account))) // Items not on sale            .
