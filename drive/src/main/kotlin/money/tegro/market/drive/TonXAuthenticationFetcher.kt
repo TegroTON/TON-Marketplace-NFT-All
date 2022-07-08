@@ -8,7 +8,7 @@ import jakarta.inject.Singleton
 import kotlinx.coroutines.reactor.mono
 import money.tegro.market.core.crypto.safeSignVerify
 import money.tegro.market.core.dto.WalletConfigDTO
-import money.tegro.market.core.dto.toSafeBounceable
+import money.tegro.market.core.toSafeBounceable
 import org.reactivestreams.Publisher
 import org.ton.block.AddrStd
 import org.ton.block.Coins
@@ -73,6 +73,6 @@ class TonXAuthenticationFetcher : AuthenticationFetcher {
     }
 
     companion object {
-        val TONX_AUTH_HEADER = "TONX_AUTH"
+        const val TONX_AUTH_HEADER = "TONX_AUTH"
     }
 }

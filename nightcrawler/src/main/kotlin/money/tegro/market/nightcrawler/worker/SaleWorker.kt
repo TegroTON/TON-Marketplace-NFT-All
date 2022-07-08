@@ -44,7 +44,7 @@ class SaleWorker(
 
                 try {
                     val sale = NFTSale.of(dbSale.address, liteApi)
-                    var new = dbSale.copy(
+                    val new = dbSale.copy(
                         marketplace = sale.marketplace,
                         item = sale.item,
                         owner = sale.owner,

@@ -5,6 +5,7 @@ import money.tegro.market.core.model.AttributeModel
 import money.tegro.market.core.model.ItemModel
 import money.tegro.market.core.model.RoyaltyModel
 import money.tegro.market.core.model.SaleModel
+import money.tegro.market.core.toSafeBounceable
 
 @Schema(name = "Item", description = "Information about an NFT item")
 data class ItemDTO(
@@ -43,8 +44,8 @@ data class ItemDTO(
     ) : this(
         address = it.address.toSafeBounceable(),
         index = it.index,
-        collection = it.collection?.toSafeBounceable(),
-        owner = it.owner?.toSafeBounceable(),
+        collection = it.collection.toSafeBounceable(),
+        owner = it.owner.toSafeBounceable(),
         name = it.name,
         description = it.description,
         sale = sale?.let { SaleDTO(it) },

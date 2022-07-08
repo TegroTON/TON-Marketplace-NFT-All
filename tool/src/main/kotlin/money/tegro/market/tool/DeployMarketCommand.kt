@@ -3,7 +3,7 @@ package money.tegro.market.tool
 import jakarta.inject.Inject
 import kotlinx.coroutines.runBlocking
 import money.tegro.market.core.configuration.MarketplaceConfiguration
-import money.tegro.market.core.dto.toSafeBounceable
+import money.tegro.market.core.toSafeBounceable
 import org.ton.api.pk.PrivateKeyEd25519
 import org.ton.block.*
 import org.ton.boc.BagOfCells
@@ -46,8 +46,8 @@ class DeployMarketCommand : Runnable {
                     storeBytes(Ed25519.publicKey(configuration.marketplaceAuthorizationPrivateKey)) // authorization public key
                     storeRef(BagOfCells(hex("B5EE9C7241020A010001B2000114FF00F4A413F4BCF2C80B01020120020302014804050004F2300202CD0607002FA03859DA89A1F481F481F481F401A861A1F401F481F4006101F7D00E8698180B8D8492F82707D201876A2687D207D207D207D006A1829A2E382C92F84F03813E380491BB9472203E98F90E000471A698390E0314708C100580019E98780C0BABCDD09F97A39016F00E031C709C100580019699398410C30B731B2B65D797A39C898714B1C03E99F9803F171106000C92F857010600140801F5D41081DCD650029285029185F7970E101E87D007D207D0018384008646582A804E78B28B9D090D0A85AD08A500AFD010AE5B564B8FD80384008646582AC678B2803FD010B65B564B8FD80384008646582A802E78B00FD0109E5B564B8FD80381041082FE61E8A10C00C646582A802E78B117D010A65B509E58F8A40900C49A3010471036552212F004E0395B06C0038E4882103B9ACA0015BEF2E1C95314C70559C705B1F2E1CA702082105FCC3D14218010C8CB055006CF1622FA0215CB6A14CB1F12CB3F23CF165003CF16CA0021FA02CA00C98100A0FB00E05F06840FF2F0002ACB3F22CF1658CF16CA0021FA02CA00C98100A0FB009FE63422")).roots.first())
                     storeRef { // amounts_cell
-                        storeTlb(Coins.tlbCodec(), Coins.ofNano(50_000_000)); // deploy_amount
-                        storeTlb(Coins.tlbCodec(), Coins.ofNano(50_000_000)); // transfer_amount
+                        storeTlb(Coins.tlbCodec(), Coins.ofNano(50_000_000)) // deploy_amount
+                        storeTlb(Coins.tlbCodec(), Coins.ofNano(50_000_000)) // transfer_amount
                     }
                 }
             )

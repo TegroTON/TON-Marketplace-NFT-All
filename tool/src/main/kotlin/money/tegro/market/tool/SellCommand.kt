@@ -4,7 +4,7 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.runBlocking
 import money.tegro.market.blockchain.nft.NFTItem
-import money.tegro.market.core.dto.toSafeBounceable
+import money.tegro.market.core.toSafeBounceable
 import org.ton.api.pk.PrivateKeyEd25519
 import org.ton.block.AddrStd
 import org.ton.crypto.base64
@@ -41,10 +41,7 @@ class SellCommand : Runnable {
             println("Your wallet address is ${wallet.address().toString(userFriendly = true)}")
 
             println("Querying item ${AddrStd(itemAddress).toString(userFriendly = true)} information")
-            val item = NFTItem.of(AddrStd(itemAddress), liteApi) ?: run {
-                println("No such item, quitting")
-                exitProcess(-1)
-            }
+            val item = NFTItem.of(AddrStd(itemAddress), liteApi)
 
             if (item.owner != wallet.address()) {
                 println("Item owner address (${(item.owner as AddrStd).toString(userFriendly = true)}) differs from provided address")

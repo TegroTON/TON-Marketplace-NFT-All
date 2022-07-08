@@ -22,31 +22,22 @@ class ContentController(
     override fun getCollectionImage(collection: String): Mono<StreamedFile> =
         collectionRepository
             .findById(AddrStd(collection))
-            .flatMap {
-                mono {
-                    it.imageData?.let { StreamedFile(ByteArrayInputStream(it), MediaType.ALL_TYPE) }
-                        ?: it.image?.let { StreamedFile(URL(it)) }
-                }
-            }
+            .flatMap { mono { getFromDataOrUrl(it.imageData, it.image) } }
 
     override fun getCollectionCoverImage(collection: String): Mono<StreamedFile> =
         collectionRepository
             .findById(AddrStd(collection))
-            .flatMap {
-                mono {
-                    it.coverImageData?.let { StreamedFile(ByteArrayInputStream(it), MediaType.ALL_TYPE) }
-                        ?: it.coverImage?.let { StreamedFile(URL(it)) }
-                }
-            }
+            .flatMap { mono { getFromDataOrUrl(it.coverImageData, it.coverImage) } }
 
     override fun getItemImage(item: String): Mono<StreamedFile> =
         itemRepository
             .findById(AddrStd(item))
-            .flatMap {
-                mono {
-                    it.imageData?.let { StreamedFile(ByteArrayInputStream(it), MediaType.ALL_TYPE) }
-                        ?: it.image?.let { StreamedFile(URL(it)) }
-                }
-            }
+            .flatMap { mono { getFromDataOrUrl(it.imageData, it.image) } }
 
+    private fun getFromDataOrUrl(data: ByteArray, url: String?) =
+        if (data.isNotEmpty()) {
+            StreamedFile(ByteArrayInputStream(data), MediaType.ALL_TYPE)
+        } else {
+            url?.let { StreamedFile(URL(url)) }
+        }
 }

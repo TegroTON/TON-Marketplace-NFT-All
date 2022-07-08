@@ -21,8 +21,6 @@ abstract class NFTItem : Addressable {
     abstract val owner: MsgAddress
     abstract val individualContent: Cell
 
-    fun isInCollection() = collection is AddrStd
-
     suspend fun collection(
         liteApi: LiteApi,
         referenceBlock: suspend () -> TonNodeBlockIdExt = { liteApi.getMasterchainInfo().last }
@@ -105,6 +103,4 @@ private data class NFTItemImpl(
     override val collection: MsgAddress,
     override val owner: MsgAddress,
     override val individualContent: Cell
-) : NFTItem() {
-
-}
+) : NFTItem()

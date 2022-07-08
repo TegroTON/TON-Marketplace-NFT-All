@@ -8,7 +8,7 @@ import money.tegro.market.blockchain.nft.NFTCollection
 import money.tegro.market.blockchain.nft.NFTException
 import money.tegro.market.core.dto.CollectionDTO
 import money.tegro.market.core.dto.RoyaltyDTO
-import money.tegro.market.core.dto.toSafeBounceable
+import money.tegro.market.core.toSafeBounceable
 import org.ton.block.AddrStd
 import org.ton.lite.api.LiteApi
 import picocli.CommandLine

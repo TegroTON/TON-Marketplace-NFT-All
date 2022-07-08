@@ -2,6 +2,7 @@ package money.tegro.market.core.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
 import money.tegro.market.core.model.SaleModel
+import money.tegro.market.core.toSafeBounceable
 
 @Schema(name = "Sale", description = "Sale information of a specific item")
 data class SaleDTO(

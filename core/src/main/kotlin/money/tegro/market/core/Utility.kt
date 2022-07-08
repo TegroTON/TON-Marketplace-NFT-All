@@ -1,4 +1,4 @@
-package money.tegro.market.core.dto
+package money.tegro.market.core
 
 import org.ton.block.AddrStd
 import org.ton.block.MsgAddress

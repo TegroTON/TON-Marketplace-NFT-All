@@ -10,7 +10,7 @@ import money.tegro.market.blockchain.nft.NFTRoyalty
 import money.tegro.market.core.dto.ItemDTO
 import money.tegro.market.core.dto.RoyaltyDTO
 import money.tegro.market.core.dto.SaleDTO
-import money.tegro.market.core.dto.toSafeBounceable
+import money.tegro.market.core.toSafeBounceable
 import org.ton.block.AddrNone
 import org.ton.block.AddrStd
 import org.ton.lite.api.LiteApi

@@ -156,5 +156,4 @@ private data class NFTCollectionImpl(
     override val nextItemIndex: Long,
     override val content: Cell,
     override val owner: MsgAddress
-) : NFTCollection() {
-}
+) : NFTCollection()

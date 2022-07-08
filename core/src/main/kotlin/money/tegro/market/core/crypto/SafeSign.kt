@@ -4,8 +4,8 @@ import org.ton.cell.Cell
 import org.ton.crypto.Ed25519
 import org.ton.crypto.sha256
 
-private val MIN_SEED_LENGTH = 8
-private val MAX_SEED_LENGTH = 64
+private const val MIN_SEED_LENGTH = 8
+private const val MAX_SEED_LENGTH = 64
 
 private fun createSafeSignHash(cell: Cell, seed: String): ByteArray {
     val seedData = seed.toByteArray()

@@ -45,7 +45,7 @@ class RoyaltyWorker(
 
                 try {
                     val royalty = NFTRoyalty.of(dbRoyalty.address, liteApi)
-                    var new = dbRoyalty.copy(
+                    val new = dbRoyalty.copy(
                         numerator = royalty.numerator,
                         denominator = royalty.denominator,
                         destination = royalty.destination,

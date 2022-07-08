@@ -41,4 +41,38 @@ data class CollectionModel(
     val discovered: Instant = Instant.now(),
     val updated: Instant = Instant.now(),
     val metadataUpdated: Instant = Instant.now(),
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as CollectionModel
+
+        if (address != other.address) return false
+        if (nextItemIndex != other.nextItemIndex) return false
+        if (owner != other.owner) return false
+        if (name != other.name) return false
+        if (description != other.description) return false
+        if (image != other.image) return false
+        if (!imageData.contentEquals(other.imageData)) return false
+        if (coverImage != other.coverImage) return false
+        if (!coverImageData.contentEquals(other.coverImageData)) return false
+        if (discovered != other.discovered) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = address.hashCode()
+        result = 31 * result + nextItemIndex.hashCode()
+        result = 31 * result + owner.hashCode()
+        result = 31 * result + name.hashCode()
+        result = 31 * result + description.hashCode()
+        result = 31 * result + (image?.hashCode() ?: 0)
+        result = 31 * result + imageData.contentHashCode()
+        result = 31 * result + (coverImage?.hashCode() ?: 0)
+        result = 31 * result + coverImageData.contentHashCode()
+        result = 31 * result + discovered.hashCode()
+        return result
+    }
+}
