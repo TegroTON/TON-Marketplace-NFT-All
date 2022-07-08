@@ -1,15 +1,14 @@
 package money.tegro.market.drive
 
 import io.micronaut.http.annotation.Controller
-import kotlinx.coroutines.reactor.awaitSingle
-import kotlinx.coroutines.reactor.awaitSingleOrNull
-import kotlinx.coroutines.reactor.mono
 import money.tegro.market.core.dto.AccountDTO
 import money.tegro.market.core.dto.CollectionDTO
 import money.tegro.market.core.dto.ItemDTO
+import money.tegro.market.core.mapper.AccountMapper
+import money.tegro.market.core.mapper.CollectionMapper
+import money.tegro.market.core.mapper.ItemMapper
 import money.tegro.market.core.operations.AccountOperations
 import money.tegro.market.core.repository.*
-import money.tegro.market.core.toSafeBounceable
 import org.ton.block.AddrStd
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -18,42 +17,43 @@ import javax.annotation.security.PermitAll
 @PermitAll
 @Controller("/accounts")
 class AccountController(
+    private val accountRepository: AccountRepository,
     private val collectionRepository: CollectionRepository,
     private val itemRepository: ItemRepository,
     private val saleRepository: SaleRepository,
     private val attributeRepository: AttributeRepository,
     private val royaltyRepository: RoyaltyRepository,
+
+    private val accountMapper: AccountMapper,
+    private val collectionMapper: CollectionMapper,
+    private val itemMapper: ItemMapper,
 ) : AccountOperations {
-    override fun getAccount(account: String): Mono<AccountDTO> = mono {
-        AccountDTO(AddrStd(account).toSafeBounceable())
-    }
+    override fun getAccount(account: String): Mono<AccountDTO> =
+        accountRepository.findById(AddrStd(account)).flatMap(accountMapper::map)
 
     override fun getAccountItems(account: String): Flux<ItemDTO> =
         saleRepository.findByOwner(AddrStd(account))
-            .concatMap {
-                itemRepository.findByOwner(it.address).take(1)
-            } // Items owned by the seller contract owned by the account. We only expect 1 item = 1 sale
-            .concatWith(itemRepository.findByOwner(AddrStd(account))) // Items not on sale            .
+            .flatMap { (it.item as? AddrStd)?.let { itemRepository.findById(it) } } // Items on sale (account -> sale -> item)
+            .concatWith { itemRepository.findByOwner(AddrStd(account)) } // Items not on sale
             .flatMap {
-                mono {
-                    ItemDTO(
-                        it,
-                        saleRepository.findByItem(it.address).awaitSingleOrNull(),
-                        (it.collection as? AddrStd)?.let { royaltyRepository.findById(it).awaitSingleOrNull() }
-                            ?: royaltyRepository.findById(it.address).awaitSingleOrNull(),
-                        attributeRepository.findByItem(it.address).collectList().awaitSingle(),
-                    )
-                }
+                itemMapper.map(
+                    item = it,
+                    attributes = attributeRepository.findByItem(it.address),
+                    royalty = if (it.collection is AddrStd) royaltyRepository.findById(it.collection as AddrStd) else royaltyRepository.findById(
+                        it.address
+                    ),
+                    sale = (it.owner as? AddrStd)?.let { saleRepository.findById(it) } ?: Mono.empty(),
+                )
             }
 
     override fun getAccountCollections(account: String): Flux<CollectionDTO> =
         collectionRepository.findByOwner(AddrStd(account))
             .flatMap {
-                mono {
-                    CollectionDTO(
-                        it,
-                        royaltyRepository.findById(it.address).awaitSingleOrNull(),
-                    )
-                }
+                collectionMapper.map(
+                    collection = it,
+                    itemNumber = itemRepository.countByCollection(it.address),
+                    royalty = royaltyRepository.findById(it.address)
+                )
             }
+
 }

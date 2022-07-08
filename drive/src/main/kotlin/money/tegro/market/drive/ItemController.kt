@@ -8,6 +8,7 @@ import kotlinx.coroutines.reactor.mono
 import money.tegro.market.core.configuration.MarketplaceConfiguration
 import money.tegro.market.core.dto.ItemDTO
 import money.tegro.market.core.dto.TransactionRequestDTO
+import money.tegro.market.core.mapper.ItemMapper
 import money.tegro.market.core.operations.ItemOperations
 import money.tegro.market.core.repository.*
 import money.tegro.market.core.toSafeBounceable
@@ -36,35 +37,34 @@ class ItemController(
     private val attributeRepository: AttributeRepository,
     private val saleRepository: SaleRepository,
     private val royaltyRepository: RoyaltyRepository,
+
+    private val itemMapper: ItemMapper,
 ) : ItemOperations {
     override fun getAll(pageable: Pageable): Flux<ItemDTO> =
         itemRepository.findAll(pageable)
-            .flatMapMany {
-                it.toFlux().flatMap {
-                    mono {
-                        ItemDTO(
-                            it,
-                            saleRepository.findByItem(it.address).awaitSingleOrNull(),
-                            (it.collection as? AddrStd)?.let { royaltyRepository.findById(it).awaitSingleOrNull() }
-                                ?: royaltyRepository.findById(it.address).awaitSingleOrNull(),
-                            attributeRepository.findByItem(it.address).collectList().awaitSingle(),
-                        )
-                    }
-                }
+            .flatMapMany { it.toFlux() }
+            .flatMap {
+                itemMapper.map(
+                    item = it,
+                    attributes = attributeRepository.findByItem(it.address),
+                    royalty = if (it.collection is AddrStd) royaltyRepository.findById(it.collection as AddrStd) else royaltyRepository.findById(
+                        it.address
+                    ),
+                    sale = (it.owner as? AddrStd)?.let { saleRepository.findById(it) } ?: Mono.empty(),
+                )
             }
 
     override fun getItem(item: String): Mono<ItemDTO> =
         itemRepository.findById(AddrStd(item))
             .flatMap {
-                mono {
-                    ItemDTO(
-                        it,
-                        saleRepository.findByItem(it.address).awaitSingleOrNull(),
-                        (it.collection as? AddrStd)?.let { royaltyRepository.findById(it).awaitSingleOrNull() }
-                            ?: royaltyRepository.findById(it.address).awaitSingleOrNull(),
-                        attributeRepository.findByItem(it.address).collectList().awaitSingle(),
-                    )
-                }
+                itemMapper.map(
+                    item = it,
+                    attributes = attributeRepository.findByItem(it.address),
+                    royalty = if (it.collection is AddrStd) royaltyRepository.findById(it.collection as AddrStd) else royaltyRepository.findById(
+                        it.address
+                    ),
+                    sale = (it.owner as? AddrStd)?.let { saleRepository.findById(it) } ?: Mono.empty(),
+                )
             }
 
     override fun transferItem(
