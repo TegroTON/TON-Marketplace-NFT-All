@@ -3,9 +3,9 @@
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>debug</level>
         </filter>
-        <file>${java.io.tmpdir}/nightcrawler.log</file>
+        <file>${java.io.tmpdir}/market.nightcrawler.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${java.io.tmpdir}/nightcrawler.log.%d{yyyy-MM-dd}</fileNamePattern>
+            <fileNamePattern>${java.io.tmpdir}/market.nightcrawler.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
