@@ -17,9 +17,3 @@ dependencyResolutionManagement {
         }
     }
 }
-
-include(":blockchain")
-include(":core")
-include(":drive")
-include(":nightcrawler")
-include(":tool")

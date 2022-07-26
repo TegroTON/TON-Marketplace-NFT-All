@@ -2,25 +2,71 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.shadow)
+    alias(libs.plugins.micronaut.application)
 }
 
-allprojects {
-    group = "money.tegro"
-    version = "0.0.1"
+application {
+    mainClass.set("money.tegro.market.Application")
+}
 
-    apply(plugin = "org.jetbrains.kotlin.jvm")
-
-    if (project != rootProject)
-        project.buildDir = File(rootProject.buildDir, project.name)
-
-    repositories {
-        mavenCentral()
-        maven("https://jitpack.io")
+micronaut {
+    version("3.5.1")
+    processing {
+        incremental(true)
+        annotations("money.tegro.market.*")
     }
+}
 
-    tasks.withType<KotlinCompile>().configureEach {
-        kotlinOptions {
-            jvmTarget = "11"
-        }
+dependencies {
+    implementation(libs.reflect)
+    implementation(libs.ton)
+
+    implementation(libs.bundles.coroutines)
+    implementation(libs.bundles.reactor)
+
+    implementation(libs.jackson)
+    runtimeOnly(libs.bundles.data.runtime)
+
+    implementation(libs.bundles.logging)
+    runtimeOnly(libs.bundles.logging.runtime)
+
+    implementation(libs.bundles.annotations)
+
+
+    implementation(libs.micronaut.jackson.databind)
+    implementation(libs.micronaut.kotlin.extensions)
+    implementation(libs.micronaut.kotlin.runtime)
+    implementation(libs.micronaut.validation)
+
+    implementation(libs.micronaut.reactor)
+    implementation(libs.micronaut.reactor.http.client)
+
+    kapt(libs.micronaut.data.processor)
+    kapt(libs.micronaut.http.validation)
+    kapt(libs.micronaut.openapi)
+
+    implementation(libs.micronaut.http.client)
+    implementation(libs.micronaut.http.server.netty)
+
+    implementation(libs.micronaut.data.r2dbc)
+    implementation(libs.micronaut.flyway)
+
+    implementation(libs.micronaut.micrometer.core)
+    implementation(libs.micronaut.micrometer.annotations)
+}
+
+group = "money.tegro"
+version = "0.0.1"
+
+repositories {
+    mavenCentral()
+    maven("https://jitpack.io")
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+    kotlinOptions {
+        jvmTarget = "11"
     }
 }
