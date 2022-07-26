@@ -24,5 +24,6 @@ abstract class ItemRepository : ReactorPageableRepository<ItemModel, AddrStd> {
     abstract fun findByCollection(collection: MsgAddress, pageable: Pageable): Mono<Page<ItemModel>>
 
     abstract fun findByOwner(owner: MsgAddress): Flux<ItemModel>
+    abstract fun existsByOwner(owner: MsgAddress): Mono<Boolean>
 }
 

@@ -25,11 +25,11 @@ data class SaleContract(
             val referenceBlock = liteApi.getMasterchainInfo().last
             logger.trace("reference block {}", kv("seqno", referenceBlock.seqno))
 
-            return liteApi.runSmcMethod(0b100, referenceBlock, LiteServerAccountId(address), "get_nft_content").let {
+            return liteApi.runSmcMethod(0b100, referenceBlock, LiteServerAccountId(address), "get_sale_data").let {
                 logger.trace(append("result", it), "smc method complete {}", kv("exitCode", it.exitCode))
                 if (it.exitCode != 0)
                     throw ContractException("failed to run method, exit code is ${it.exitCode}")
-                
+
                 SaleContract(
                     (it[0] as VmStackValue.Slice).toCellSlice().loadTlb(MsgAddress),
                     (it[1] as VmStackValue.Slice).toCellSlice().loadTlb(MsgAddress),
