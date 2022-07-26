@@ -11,6 +11,7 @@ import money.tegro.market.contract.ItemContract
 import money.tegro.market.core.toSafeBounceable
 import money.tegro.market.metadata.ItemMetadata
 import money.tegro.market.nightcrawler.ServiceConfig
+import money.tegro.market.repository.AttributeRepository
 import money.tegro.market.repository.ItemRepository
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments.kv
@@ -29,6 +30,7 @@ open class ItemService(
     private val liteApi: LiteApi,
     private val liveAccounts: Flux<AddrStd>,
 
+    private val attributeRepository: AttributeRepository,
     private val itemRepository: ItemRepository,
 ) {
     @Async
@@ -56,6 +58,11 @@ open class ItemService(
                             ?.let { CollectionContract.itemContent(it, data.index, data.individualContent, liteApi) }
                             ?: data.individualContent
                     )
+
+                    metadata.attributes.orEmpty()
+                        .forEach { attribute ->
+                            attributeRepository.upsert(it.address, attribute.trait, attribute.value).subscribe()
+                        }
 
                     it.copy(
                         initialized = data.initialized,

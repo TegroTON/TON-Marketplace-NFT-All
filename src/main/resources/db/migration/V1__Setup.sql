@@ -10,7 +10,8 @@ CREATE TABLE attributes
     id    BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     item  BYTEA NOT NULL,
     trait TEXT  NOT NULL,
-    value TEXT  NOT NULL
+    value TEXT  NOT NULL,
+    UNIQUE (item, trait) -- Unique pairs
 );
 
 CREATE TABLE collections

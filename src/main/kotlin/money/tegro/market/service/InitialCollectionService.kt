@@ -10,7 +10,6 @@ import kotlinx.coroutines.runBlocking
 import money.tegro.market.contract.CollectionContract
 import money.tegro.market.core.toSafeBounceable
 import money.tegro.market.model.CollectionModel
-import money.tegro.market.nightcrawler.ServiceConfig
 import money.tegro.market.repository.CollectionRepository
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments.kv
@@ -21,8 +20,6 @@ import reactor.kotlin.extra.bool.not
 
 @Singleton
 open class InitialCollectionService(
-    private val config: ServiceConfig,
-
     private val liteApi: LiteApi,
 
     private val resourceLoader: ClassPathResourceLoader,
@@ -38,7 +35,7 @@ open class InitialCollectionService(
                 ?.readLines()
                 .orEmpty()
                 .toFlux()
-                .filter { it.trim().length == 0 }
+                .filter { it.isNotBlank() }
                 .map { AddrStd(it) }
                 .filterWhen { collectionRepository.existsById(it).not() }
                 .concatMap {
