@@ -27,8 +27,9 @@ data class SaleContract(
 
             return liteApi.runSmcMethod(0b100, referenceBlock, LiteServerAccountId(address), "get_nft_content").let {
                 logger.trace(append("result", it), "smc method complete {}", kv("exitCode", it.exitCode))
-                require(it.exitCode == 0) { "failed to run method, exit code is ${it.exitCode}" }
-
+                if (it.exitCode != 0)
+                    throw ContractException("failed to run method, exit code is ${it.exitCode}")
+                
                 SaleContract(
                     (it[0] as VmStackValue.Slice).toCellSlice().loadTlb(MsgAddress),
                     (it[1] as VmStackValue.Slice).toCellSlice().loadTlb(MsgAddress),

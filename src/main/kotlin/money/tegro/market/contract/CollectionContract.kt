@@ -25,7 +25,8 @@ data class CollectionContract(
             return liteApi.runSmcMethod(0b100, referenceBlock, LiteServerAccountId(address), "get_collection_data")
                 .let {
                     logger.trace(append("result", it), "smc method complete {}", kv("exitCode", it.exitCode))
-                    require(it.exitCode == 0) { "failed to run method, exit code is ${it.exitCode}" }
+                    if (it.exitCode != 0)
+                        throw ContractException("failed to run method, exit code is ${it.exitCode}")
 
                     CollectionContract(
                         (it[0] as VmStackValue.TinyInt).value,
@@ -49,7 +50,8 @@ data class CollectionContract(
             )
                 .let {
                     logger.trace(append("result", it), "smc method complete {}", kv("exitCode", it.exitCode))
-                    require(it.exitCode == 0) { "failed to run method, exit code is ${it.exitCode}" }
+                    if (it.exitCode != 0)
+                        throw ContractException("failed to run method, exit code is ${it.exitCode}")
 
                     (it.first() as VmStackValue.Slice).toCellSlice().loadTlb(MsgAddress)
                 }
@@ -69,8 +71,9 @@ data class CollectionContract(
                 VmStackValue(individualContent)
             ).let {
                 logger.trace(append("result", it), "smc method complete {}", kv("exitCode", it.exitCode))
-                require(it.exitCode == 0) { "failed to run method, exit code is ${it.exitCode}" }
-
+                if (it.exitCode != 0)
+                    throw ContractException("failed to run method, exit code is ${it.exitCode}")
+                
                 (it.first() as VmStackValue.Cell).cell
             }
         }

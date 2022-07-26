@@ -25,8 +25,9 @@ data class RoyaltyContract(
 
             return liteApi.runSmcMethod(0b100, referenceBlock, LiteServerAccountId(address), "get_nft_content").let {
                 logger.trace(append("result", it), "smc method complete {}", kv("exitCode", it.exitCode))
-                require(it.exitCode == 0) { "failed to run method, exit code is ${it.exitCode}" }
-
+                if (it.exitCode != 0)
+                    throw ContractException("failed to run method, exit code is ${it.exitCode}")
+                
                 RoyaltyContract(
                     (it[0] as VmStackValue.TinyInt).value.toInt(),
                     (it[1] as VmStackValue.TinyInt).value.toInt(),
