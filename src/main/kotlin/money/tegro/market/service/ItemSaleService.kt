@@ -9,6 +9,7 @@ import money.tegro.market.contract.ContractException
 import money.tegro.market.contract.SaleContract
 import money.tegro.market.core.model.SaleModel
 import money.tegro.market.core.toSafeBounceable
+import money.tegro.market.model.AccountModel
 import money.tegro.market.nightcrawler.ServiceConfig
 import money.tegro.market.repository.AccountRepository
 import money.tegro.market.repository.ItemRepository
@@ -70,6 +71,7 @@ open class ItemSaleService(
                         )
                     } catch (e: ContractException) {
                         logger.trace("{} doesn't implement sales", kv("address", it.toSafeBounceable()), e)
+                        accountRepository.save(AccountModel(it)).subscribe() // Save it as a user account
                         null // Just skip on error
                     }
                 }
