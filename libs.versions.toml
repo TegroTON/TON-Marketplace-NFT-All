@@ -21,6 +21,7 @@ micronaut-reactor = { prefer = "2.2.2" }
 micronaut-openapi = { prefer = "4.3.0" }
 micronaut-micrometer = { prefer = "4.3.0" }
 swagger = { prefer = "2.2.1" }
+spotbugs = { prefer = "4.7.1" }
 postgresql = { prefer = "42.4.0" }
 kotlin = "1.7.0"
 shadow = "7.1.2"
@@ -57,6 +58,7 @@ logstash-logback-encoder = { group = "net.logstash.logback", name = "logstash-lo
 # Annotations
 jakarta-annotations = { group = "jakarta.annotation", name = "jakarta.annotation-api", version.ref = "jakarta" }
 swagger-annotations = { group = "io.swagger.core.v3", name = "swagger-annotations", version.ref = "swagger" }
+spotbugs-annotations = { group = "com.github.spotbugs", name = "spotbugs-annotations", version.ref = "spotbugs" }
 
 ###
 # Micronaut
@@ -90,7 +92,7 @@ micronaut-micrometer-core = { group = "io.micronaut.micrometer", name = "microna
 micronaut-micrometer-annotations = { group = "io.micronaut.micrometer", name = "micronaut-micrometer-annotation", version.ref = "micronaut-micrometer" }
 
 [bundles]
-annotations = ["jakarta-annotations", "swagger-annotations"]
+annotations = ["jakarta-annotations", "swagger-annotations", "spotbugs-annotations"]
 coroutines = ["coroutines-core", "coroutines-reactive", "coroutines-reactor"]
 data-runtime = ["r2dbc-pool", "r2dbc-postgresql", "postgresql"]
 logging = ["logging", "logstash-logback-encoder"]
