@@ -23,11 +23,11 @@ data class RoyaltyContract(
             val referenceBlock = liteApi.getMasterchainInfo().last
             logger.trace("reference block {}", kv("seqno", referenceBlock.seqno))
 
-            return liteApi.runSmcMethod(0b100, referenceBlock, LiteServerAccountId(address), "get_nft_content").let {
+            return liteApi.runSmcMethod(0b100, referenceBlock, LiteServerAccountId(address), "royalty_params").let {
                 logger.trace(append("result", it), "smc method complete {}", kv("exitCode", it.exitCode))
                 if (it.exitCode != 0)
                     throw ContractException("failed to run method, exit code is ${it.exitCode}")
-                
+
                 RoyaltyContract(
                     (it[0] as VmStackValue.TinyInt).value.toInt(),
                     (it[1] as VmStackValue.TinyInt).value.toInt(),
