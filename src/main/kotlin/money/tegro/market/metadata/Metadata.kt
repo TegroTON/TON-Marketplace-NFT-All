@@ -7,7 +7,6 @@ import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import mu.KLogging
-import net.logstash.logback.argument.StructuredArguments
 import org.ton.bitstring.BitString
 import org.ton.cell.Cell
 import org.ton.crypto.sha256
@@ -35,7 +34,6 @@ sealed interface Metadata {
         suspend fun of(content: Cell, httpClient: HttpClient): JsonNode {
             return when (val full = content.parse { loadTlb(FullContent) }) {
                 is FullContent.OnChain -> {
-                    logger.debug { "on-chain content layout, frick" }
                     val entries = full.data.toMap()
 
                     mapper.createObjectNode()
@@ -47,10 +45,7 @@ sealed interface Metadata {
                         .put("image_data", entries.get(ONCHAIN_IMAGE_DATA_KEY)?.flatten())
                 }
                 is FullContent.OffChain -> {
-                    logger.debug { "off-chain content layout, thanks god" }
-
                     val url = String(full.uri.data.flatten())
-                    logger.debug("content url is {}", StructuredArguments.v("url", url))
 
                     mapper.readTree(httpClient.get(url).bodyAsText())
                 }

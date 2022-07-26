@@ -46,10 +46,10 @@ open class ItemService(
                 .subscribeOn(Schedulers.boundedElastic())
                 .doOnNext { logger.debug("running scheduled update of all database entities") }
                 .concatMap { itemRepository.findAll(Sort.of(Sort.Order.asc("updated"))) },
-
-            )
+        )
             .concatMap {
                 mono {
+                    logger.debug("updating item {}", kv("address", it.address.toSafeBounceable()))
                     val data = ItemContract.of(it.address, liteApi)
                     val metadata = ItemMetadata.of(
                         (data.collection as? AddrStd)

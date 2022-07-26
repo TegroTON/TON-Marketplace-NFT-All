@@ -7,6 +7,7 @@ import io.micronaut.scheduling.annotation.Async
 import jakarta.inject.Singleton
 import kotlinx.coroutines.reactor.mono
 import money.tegro.market.contract.CollectionContract
+import money.tegro.market.contract.ContractException
 import money.tegro.market.contract.ItemContract
 import money.tegro.market.core.model.ItemModel
 import money.tegro.market.core.toSafeBounceable
@@ -56,17 +57,31 @@ open class MissingItemService(
             }
             // Filter out existing items
             .filterWhen { itemRepository.existsByCollectionAndIndex(it.first, it.second).not() }
+            // Get item address, if not AddrStd just skip it
             .concatMap {
                 mono {
-                    logger.debug(
-                        "trying to discover item {} of {}",
-                        kv("index", it.second),
-                        kv("collection", it.first.toSafeBounceable())
-                    )
-                    (CollectionContract.itemAddressOf(it.first, it.second, liteApi) as? AddrStd)?.let { address ->
-                        val data = ItemContract.of(address, liteApi)
+                    try {
+                        CollectionContract.itemAddressOf(it.first, it.second, liteApi) as? AddrStd
+                    } catch (e: ContractException) {
+                        logger.warn(
+                            "could not query item {} of collection {}",
+                            kv("index", it.second),
+                            kv("address", it.first.toSafeBounceable()),
+                            e,
+                        )
+                        null // Just skip on error
+                    }
+                }
+            }
+            .filterWhen { itemRepository.existsById(it).not() }
+            .concatMap {
+                mono {
+                    logger.debug("querying missing collection item {}", kv("address", it.toSafeBounceable()))
+
+                    try {
+                        val data = ItemContract.of(it, liteApi)
                         ItemModel(
-                            address = address,
+                            address = it,
                             initialized = data.initialized,
                             index = data.index,
                             collection = data.collection,
@@ -75,6 +90,9 @@ open class MissingItemService(
                             // This enables us to hide specific items while leaving rest of the collection open
                             approved = (data.collection !is AddrNone),
                         )
+                    } catch (e: ContractException) {
+                        logger.warn("could not get item {}", kv("address", it), e)
+                        null // Skip it as well
                     }
                 }
             }

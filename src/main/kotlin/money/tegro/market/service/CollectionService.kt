@@ -48,6 +48,7 @@ open class CollectionService(
         )
             .concatMap {
                 mono {
+                    logger.debug("updating collection {}", kv("address", it.address.toSafeBounceable()))
                     val data = CollectionContract.of(it.address, liteApi)
                     val metadata = CollectionMetadata.of(data.content)
 
