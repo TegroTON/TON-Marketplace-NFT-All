@@ -6,7 +6,7 @@ import java.time.Duration
 
 @ConfigurationProperties("market.service")
 interface ServiceConfig {
-    @get:Bindable(defaultValue = "PT1H")
+    @get:Bindable(defaultValue = "PT10M")
     val accountPeriod: Duration
 
     @get:Bindable(defaultValue = "PT1H")
@@ -20,7 +20,4 @@ interface ServiceConfig {
 
     @get:Bindable(defaultValue = "PT10M")
     val royaltyPeriod: Duration
-
-    @get:Bindable(defaultValue = "PT10M")
-    val salePeriod: Duration
 }

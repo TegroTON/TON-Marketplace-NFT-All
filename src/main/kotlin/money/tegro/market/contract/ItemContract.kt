@@ -5,10 +5,9 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import net.logstash.logback.marker.Markers.append
 import org.ton.block.AddrStd
 import org.ton.block.MsgAddress
-import org.ton.block.VmStackValue
 import org.ton.cell.Cell
-import org.ton.lite.api.LiteApi
 import org.ton.lite.api.liteserver.LiteServerAccountId
+import org.ton.lite.client.LiteClient
 import org.ton.tlb.loadTlb
 
 data class ItemContract(
@@ -20,23 +19,24 @@ data class ItemContract(
 ) {
     companion object : KLogging() {
         @JvmStatic
-        suspend fun of(address: AddrStd, liteApi: LiteApi): ItemContract {
-            val referenceBlock = liteApi.getMasterchainInfo().last
-            logger.trace("reference block {}", kv("seqno", referenceBlock.seqno))
+        suspend fun of(address: AddrStd, liteClient: LiteClient): ItemContract =
+            liteClient.runSmcMethod(LiteServerAccountId(address), "get_nft_data").let {
+                val exitCode = it.first
+                val stack = it.second?.toMutableVmStack()
+                logger.trace(append("result", stack), "smc method complete {}", kv("exitCode", exitCode))
+                if (exitCode != 0)
+                    throw ContractException("failed to run method, exit code is ${exitCode}")
 
-            return liteApi.runSmcMethod(0b100, referenceBlock, LiteServerAccountId(address), "get_nft_data").let {
-                logger.trace(append("result", it), "smc method complete {}", kv("exitCode", it.exitCode))
-                if (it.exitCode != 0)
-                    throw ContractException("failed to run method, exit code is ${it.exitCode}")
-                
+                if (stack == null)
+                    throw ContractException("failed to run method, empty response")
+
                 ItemContract(
-                    (it[0] as VmStackValue.TinyInt).value == -1L,
-                    (it[1] as VmStackValue.TinyInt).value,
-                    (it[2] as VmStackValue.Slice).toCellSlice().loadTlb(MsgAddress),
-                    (it[3] as VmStackValue.Slice).toCellSlice().loadTlb(MsgAddress),
-                    (it[4] as VmStackValue.Cell).cell,
+                    individualContent = stack.popCell(),
+                    owner = stack.popSlice().loadTlb(MsgAddress),
+                    collection = stack.popSlice().loadTlb(MsgAddress),
+                    index = stack.popTinyInt(),
+                    initialized = stack.popTinyInt() == -1L,
                 )
             }
-        }
     }
 }

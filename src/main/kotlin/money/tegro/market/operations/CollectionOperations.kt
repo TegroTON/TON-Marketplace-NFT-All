@@ -11,10 +11,9 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
+import kotlinx.coroutines.flow.Flow
 import money.tegro.market.dto.CollectionDTO
 import money.tegro.market.dto.ItemDTO
-import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
 
 @Tag(name = "Collection", description = "Set of methods to interact with NFT collections")
 interface CollectionOperations {
@@ -33,12 +32,12 @@ interface CollectionOperations {
         ]
     )
     @Get("/{?pageable*}")
-    fun getAll(
+    suspend fun getAll(
         @Parameter(
             description = "Pageable properties"
         )
         pageable: Pageable
-    ): Flux<CollectionDTO>
+    ): Flow<CollectionDTO>
 
     @Operation(summary = "Get collection information")
     @ApiResponses(
@@ -52,13 +51,13 @@ interface CollectionOperations {
         ]
     )
     @Get("/{collection}")
-    fun getCollection(
+    suspend fun getCollection(
         @Parameter(
             description = "Collection address, can be base64(url) or raw",
             required = true
         )
         @PathVariable collection: String
-    ): Mono<CollectionDTO>
+    ): CollectionDTO
 
     @Operation(summary = "Get collection items")
     @ApiResponses(
@@ -75,7 +74,7 @@ interface CollectionOperations {
         ]
     )
     @Get("/{collection}/items{?pageable*}")
-    fun getCollectionItems(
+    suspend fun getCollectionItems(
         @Parameter(
             description = "Collection address, can be base64(url) or raw",
             required = true
@@ -86,5 +85,5 @@ interface CollectionOperations {
             description = "Pageable properties"
         )
         pageable: Pageable
-    ): Flux<ItemDTO>
+    ): Flow<ItemDTO>
 }

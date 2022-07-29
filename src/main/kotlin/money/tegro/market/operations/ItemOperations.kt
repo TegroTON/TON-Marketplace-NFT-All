@@ -12,10 +12,9 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
+import kotlinx.coroutines.flow.Flow
 import money.tegro.market.dto.ItemDTO
 import money.tegro.market.dto.TransactionRequestDTO
-import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
 
 @Tag(name = "Item", description = "The API to get and interact with NFT items")
 interface ItemOperations {
@@ -34,12 +33,12 @@ interface ItemOperations {
         ]
     )
     @Get("/{?pageable*}")
-    fun getAll(
+    suspend fun getAll(
         @Parameter(
             description = "Pageable properties"
         )
         pageable: Pageable
-    ): Flux<ItemDTO>
+    ): Flow<ItemDTO>
 
     @Operation(summary = "Get item information")
     @ApiResponses(
@@ -56,13 +55,13 @@ interface ItemOperations {
         ]
     )
     @Get("/{item}")
-    fun getItem(
+    suspend fun getItem(
         @Parameter(
             description = "Item address, can be base64(url) or raw",
             required = true
         )
         @PathVariable item: String
-    ): Mono<ItemDTO>
+    ): ItemDTO
 
     @Operation(summary = "Build a message to transfer an item")
     @ApiResponses(
@@ -79,7 +78,7 @@ interface ItemOperations {
         ]
     )
     @Get("/{item}/transfer")
-    fun transferItem(
+    suspend fun transferItem(
         @Parameter(
             description = "Item address, can be base64(url) or raw",
             required = true
@@ -96,7 +95,7 @@ interface ItemOperations {
             description = "Address were rest of the coins is sent, can be base64(url) or raw or null",
         )
         @QueryValue response: String?,
-    ): Mono<TransactionRequestDTO>
+    ): TransactionRequestDTO
 
     @Operation(summary = "Build a message to put an item up for sale")
     @ApiResponses(
@@ -113,7 +112,7 @@ interface ItemOperations {
         ]
     )
     @Get("/{item}/sell")
-    fun sellItem(
+    suspend fun sellItem(
         @Parameter(
             description = "Item address, can be base64(url) or raw",
             required = true
@@ -134,5 +133,5 @@ interface ItemOperations {
         )
         @QueryValue
         price: Long,
-    ): Mono<TransactionRequestDTO>
+    ): TransactionRequestDTO
 }

@@ -3,43 +3,45 @@ package money.tegro.market.contract
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments.kv
 import net.logstash.logback.marker.Markers.append
+import org.ton.bigint.BigInt
 import org.ton.block.AddrStd
 import org.ton.block.MsgAddress
-import org.ton.block.VmStackValue
-import org.ton.lite.api.LiteApi
+import org.ton.block.VmStackNumber
 import org.ton.lite.api.liteserver.LiteServerAccountId
+import org.ton.lite.client.LiteClient
 import org.ton.tlb.loadTlb
 
 data class SaleContract(
     val marketplace: MsgAddress,
     val item: MsgAddress,
     val owner: MsgAddress,
-    val fullPrice: Long,
-    val marketplaceFee: Long,
+    val fullPrice: BigInt,
+    val marketplaceFee: BigInt,
     val royaltyDestination: MsgAddress,
-    val royalty: Long,
+    val royalty: BigInt,
 ) {
     companion object : KLogging() {
         @JvmStatic
-        suspend fun of(address: AddrStd, liteApi: LiteApi): SaleContract {
-            val referenceBlock = liteApi.getMasterchainInfo().last
-            logger.trace("reference block {}", kv("seqno", referenceBlock.seqno))
+        suspend fun of(address: AddrStd, liteClient: LiteClient): SaleContract =
+            liteClient.runSmcMethod(LiteServerAccountId(address), "get_sale_data").let {
+                val exitCode = it.first
+                val stack = it.second?.toMutableVmStack()
+                logger.trace(append("result", stack), "smc method complete {}", kv("exitCode", exitCode))
+                if (exitCode != 0)
+                    throw ContractException("failed to run method, exit code is ${exitCode}")
 
-            return liteApi.runSmcMethod(0b100, referenceBlock, LiteServerAccountId(address), "get_sale_data").let {
-                logger.trace(append("result", it), "smc method complete {}", kv("exitCode", it.exitCode))
-                if (it.exitCode != 0)
-                    throw ContractException("failed to run method, exit code is ${it.exitCode}")
+                if (stack == null)
+                    throw ContractException("failed to run method, empty response")
 
                 SaleContract(
-                    (it[0] as VmStackValue.Slice).toCellSlice().loadTlb(MsgAddress),
-                    (it[1] as VmStackValue.Slice).toCellSlice().loadTlb(MsgAddress),
-                    (it[2] as VmStackValue.Slice).toCellSlice().loadTlb(MsgAddress),
-                    (it[3] as VmStackValue.TinyInt).value,
-                    (it[4] as VmStackValue.TinyInt).value,
-                    (it[5] as VmStackValue.Slice).toCellSlice().loadTlb(MsgAddress),
-                    (it[6] as VmStackValue.TinyInt).value,
+                    royalty = (stack.pop() as VmStackNumber).toBigInt(),
+                    royaltyDestination = stack.popSlice().loadTlb(MsgAddress),
+                    marketplaceFee = (stack.pop() as VmStackNumber).toBigInt(),
+                    fullPrice = (stack.pop() as VmStackNumber).toBigInt(),
+                    owner = stack.popSlice().loadTlb(MsgAddress),
+                    item = stack.popSlice().loadTlb(MsgAddress),
+                    marketplace = stack.popSlice().loadTlb(MsgAddress),
                 )
             }
-        }
     }
 }

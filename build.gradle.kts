@@ -24,7 +24,6 @@ dependencies {
     implementation(libs.ton)
 
     implementation(libs.bundles.coroutines)
-    implementation(libs.bundles.reactor)
 
     implementation(libs.jackson)
     runtimeOnly(libs.bundles.data.runtime)
@@ -40,9 +39,6 @@ dependencies {
     implementation(libs.micronaut.kotlin.runtime)
     implementation(libs.micronaut.validation)
 
-    implementation(libs.micronaut.reactor)
-    implementation(libs.micronaut.reactor.http.client)
-
     kapt(libs.micronaut.data.processor)
     kapt(libs.micronaut.http.validation)
     kapt(libs.micronaut.openapi)
@@ -50,8 +46,9 @@ dependencies {
     implementation(libs.micronaut.http.client)
     implementation(libs.micronaut.http.server.netty)
 
-    implementation(libs.micronaut.data.r2dbc)
+    implementation(libs.micronaut.data.jdbc)
     implementation(libs.micronaut.flyway)
+    implementation(libs.micronaut.jdbc.hikari)
 
     implementation(libs.micronaut.micrometer.core)
     implementation(libs.micronaut.micrometer.annotations)

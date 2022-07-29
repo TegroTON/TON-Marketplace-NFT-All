@@ -7,8 +7,8 @@ import org.ton.block.AddrStd
 import org.ton.block.MsgAddress
 import org.ton.block.VmStackValue
 import org.ton.cell.Cell
-import org.ton.lite.api.LiteApi
 import org.ton.lite.api.liteserver.LiteServerAccountId
+import org.ton.lite.client.LiteClient
 import org.ton.tlb.loadTlb
 
 data class CollectionContract(
@@ -18,64 +18,64 @@ data class CollectionContract(
 ) {
     companion object : KLogging() {
         @JvmStatic
-        suspend fun of(address: AddrStd, liteApi: LiteApi): CollectionContract {
-            val referenceBlock = liteApi.getMasterchainInfo().last
-            logger.trace("reference block {}", kv("seqno", referenceBlock.seqno))
-
-            return liteApi.runSmcMethod(0b100, referenceBlock, LiteServerAccountId(address), "get_collection_data")
+        suspend fun of(address: AddrStd, liteClient: LiteClient): CollectionContract =
+            liteClient.runSmcMethod(LiteServerAccountId(address), "get_collection_data")
                 .let {
-                    logger.trace(append("result", it), "smc method complete {}", kv("exitCode", it.exitCode))
-                    if (it.exitCode != 0)
-                        throw ContractException("failed to run method, exit code is ${it.exitCode}")
+                    val exitCode = it.first
+                    val stack = it.second?.toMutableVmStack()
+                    logger.trace(append("result", stack), "smc method complete {}", kv("exitCode", exitCode))
+                    if (exitCode != 0)
+                        throw ContractException("failed to run method, exit code is ${exitCode}")
+
+                    if (stack == null)
+                        throw ContractException("failed to run method, empty response")
 
                     CollectionContract(
-                        (it[0] as VmStackValue.TinyInt).value,
-                        (it[1] as VmStackValue.Cell).cell,
-                        (it[2] as VmStackValue.Slice).toCellSlice().loadTlb(MsgAddress)
+                        owner = stack.popSlice().loadTlb(MsgAddress),
+                        content = stack.popCell(),
+                        nextItemIndex = stack.popTinyInt(),
                     )
                 }
-        }
 
         @JvmStatic
-        suspend fun itemAddressOf(collection: AddrStd, index: Long, liteApi: LiteApi): MsgAddress {
-            val referenceBlock = liteApi.getMasterchainInfo().last
-            logger.trace("reference block {}", kv("seqno", referenceBlock.seqno))
-
-            return liteApi.runSmcMethod(
-                0b100,
-                referenceBlock,
-                LiteServerAccountId(collection),
-                "get_nft_address_by_index",
-                VmStackValue(index)
-            )
+        suspend fun itemAddressOf(collection: AddrStd, index: Long, liteClient: LiteClient): MsgAddress =
+            liteClient.runSmcMethod(LiteServerAccountId(collection), "get_nft_address_by_index", VmStackValue(index))
                 .let {
-                    logger.trace(append("result", it), "smc method complete {}", kv("exitCode", it.exitCode))
-                    if (it.exitCode != 0)
-                        throw ContractException("failed to run method, exit code is ${it.exitCode}")
+                    val exitCode = it.first
+                    val stack = it.second?.toMutableVmStack()
+                    logger.trace(append("result", stack), "smc method complete {}", kv("exitCode", exitCode))
+                    if (exitCode != 0)
+                        throw ContractException("failed to run method, exit code is ${exitCode}")
 
-                    (it.first() as VmStackValue.Slice).toCellSlice().loadTlb(MsgAddress)
+                    if (stack == null)
+                        throw ContractException("failed to run method, empty response")
+
+                    stack.popSlice().loadTlb(MsgAddress)
                 }
-        }
 
         @JvmStatic
-        suspend fun itemContent(collection: AddrStd, index: Long, individualContent: Cell, liteApi: LiteApi): Cell {
-            val referenceBlock = liteApi.getMasterchainInfo().last
-            logger.trace("reference block {}", kv("seqno", referenceBlock.seqno))
-
-            return liteApi.runSmcMethod(
-                0b100,
-                referenceBlock,
+        suspend fun itemContent(
+            collection: AddrStd,
+            index: Long,
+            individualContent: Cell,
+            liteClient: LiteClient
+        ): Cell =
+            liteClient.runSmcMethod(
                 LiteServerAccountId(collection),
                 "get_nft_content",
                 VmStackValue(index),
                 VmStackValue(individualContent)
             ).let {
-                logger.trace(append("result", it), "smc method complete {}", kv("exitCode", it.exitCode))
-                if (it.exitCode != 0)
-                    throw ContractException("failed to run method, exit code is ${it.exitCode}")
-                
-                (it.first() as VmStackValue.Cell).cell
+                val exitCode = it.first
+                val stack = it.second?.toMutableVmStack()
+                logger.trace(append("result", stack), "smc method complete {}", kv("exitCode", exitCode))
+                if (exitCode != 0)
+                    throw ContractException("failed to run method, exit code is ${exitCode}")
+
+                if (stack == null)
+                    throw ContractException("failed to run method, empty response")
+
+                stack.popCell()
             }
-        }
     }
 }

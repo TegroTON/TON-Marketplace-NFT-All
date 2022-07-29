@@ -1,11 +1,13 @@
 package money.tegro.market.service
 
-import io.micronaut.context.event.StartupEvent
 import io.micronaut.data.model.Sort
-import io.micronaut.runtime.event.annotation.EventListener
-import io.micronaut.scheduling.annotation.Async
+import io.micronaut.scheduling.annotation.Scheduled
 import jakarta.inject.Singleton
-import kotlinx.coroutines.reactor.mono
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.time.delay
 import money.tegro.market.contract.CollectionContract
 import money.tegro.market.core.toSafeBounceable
 import money.tegro.market.metadata.CollectionMetadata
@@ -15,57 +17,55 @@ import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments.kv
 import org.ton.block.AddrStd
 import org.ton.crypto.base64
-import org.ton.lite.api.LiteApi
-import reactor.core.publisher.Flux
-import reactor.core.scheduler.Schedulers
-import java.time.Duration
+import org.ton.lite.client.LiteClient
 import java.time.Instant
 
 @Singleton
-open class CollectionService(
+class CollectionService(
     private val config: ServiceConfig,
 
-    private val liteApi: LiteApi,
-    private val liveAccounts: Flux<AddrStd>,
+    private val liteClient: LiteClient,
+    private val liveAccounts: Flow<AddrStd>,
 
     private val collectionRepository: CollectionRepository,
 ) {
-    @Async
-    @EventListener
-    open fun setup(event: StartupEvent) {
-        Flux.merge(
+    @Scheduled(initialDelay = "0s")
+    suspend fun setup() {
+        merge(
             // Watch live
             liveAccounts
-                .concatMap { collectionRepository.findById(it) }
-                .doOnNext {
+                .mapNotNull { collectionRepository.findById(it) }
+                .onEach {
                     logger.info("{} matched database entity", kv("address", it.address.toSafeBounceable()))
                 },
             // Apart from watching live interactions, update them periodically
-            Flux.interval(Duration.ZERO, config.collectionPeriod)
-                .subscribeOn(Schedulers.boundedElastic())
-                .doOnNext { logger.debug("running scheduled update of all database entities") }
-                .concatMap { collectionRepository.findAll(Sort.of(Sort.Order.asc("updated"))) }
-        )
-            .concatMap {
-                mono {
-                    logger.debug("updating collection {}", kv("address", it.address.toSafeBounceable()))
-                    val data = CollectionContract.of(it.address, liteApi)
-                    val metadata = CollectionMetadata.of(data.content)
-
-                    it.copy(
-                        nextItemIndex = data.nextItemIndex,
-                        owner = data.owner,
-                        name = metadata.name,
-                        description = metadata.description,
-                        image = metadata.image
-                            ?: metadata.imageData?.let { "data:image;base64," + base64(it) },
-                        coverImage = metadata.coverImage
-                            ?: metadata.coverImageData?.let { "data:image;base64," + base64(it) },
-                        updated = Instant.now(),
-                    )
+            flow {
+                while (currentCoroutineContext().isActive) {
+                    logger.debug("running scheduled update of all database entities")
+                    emitAll(collectionRepository.findAll(Sort.of(Sort.Order.asc("updated"))))
+                    delay(config.collectionPeriod)
                 }
             }
-            .subscribe { collectionRepository.update(it).subscribe() }
+        )
+            .map {
+                logger.debug("updating collection {}", kv("address", it.address.toSafeBounceable()))
+                val data = CollectionContract.of(it.address, liteClient)
+                val metadata = CollectionMetadata.of(data.content)
+
+                it.copy(
+                    nextItemIndex = data.nextItemIndex,
+                    owner = data.owner,
+                    name = metadata.name,
+                    description = metadata.description,
+                    image = metadata.image
+                        ?: metadata.imageData?.let { "data:image;base64," + base64(it) },
+                    coverImage = metadata.coverImage
+                        ?: metadata.coverImageData?.let { "data:image;base64," + base64(it) },
+                    updated = Instant.now(),
+                )
+            }
+            .flowOn(Dispatchers.Default)
+            .collect { collectionRepository.update(it) }
     }
 
     companion object : KLogging()

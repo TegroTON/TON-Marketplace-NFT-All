@@ -1,11 +1,12 @@
 package money.tegro.market.service
 
-import io.micronaut.context.event.StartupEvent
 import io.micronaut.data.model.Sort
-import io.micronaut.runtime.event.annotation.EventListener
-import io.micronaut.scheduling.annotation.Async
+import io.micronaut.scheduling.annotation.Scheduled
 import jakarta.inject.Singleton
-import kotlinx.coroutines.reactor.mono
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.time.delay
 import money.tegro.market.contract.CollectionContract
 import money.tegro.market.contract.ItemContract
 import money.tegro.market.core.toSafeBounceable
@@ -17,67 +18,64 @@ import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments.kv
 import org.ton.block.AddrStd
 import org.ton.crypto.base64
-import org.ton.lite.api.LiteApi
-import reactor.core.publisher.Flux
-import reactor.core.scheduler.Schedulers
-import java.time.Duration
+import org.ton.lite.client.LiteClient
 import java.time.Instant
 
 @Singleton
-open class ItemService(
+class ItemService(
     private val config: ServiceConfig,
 
-    private val liteApi: LiteApi,
-    private val liveAccounts: Flux<AddrStd>,
+    private val liteClient: LiteClient,
+    private val liveAccounts: Flow<AddrStd>,
 
     private val attributeRepository: AttributeRepository,
     private val itemRepository: ItemRepository,
 ) {
-    @Async
-    @EventListener
-    open fun setup(event: StartupEvent) {
-        Flux.merge(
+    @Scheduled(initialDelay = "0s")
+    suspend fun setup() {
+        merge(
             // Watch live
             liveAccounts
-                .concatMap { itemRepository.findById(it) }
-                .doOnNext {
+                .mapNotNull { itemRepository.findById(it) }
+                .onEach {
                     logger.info("{} matched database entity", kv("address", it.address.toSafeBounceable()))
                 },
             // Apart from watching live interactions, update them periodically
-            Flux.interval(Duration.ZERO, config.itemPeriod)
-                .subscribeOn(Schedulers.boundedElastic())
-                .doOnNext { logger.debug("running scheduled update of all database entities") }
-                .concatMap { itemRepository.findAll(Sort.of(Sort.Order.asc("updated"))) },
-        )
-            .concatMap {
-                mono {
-                    logger.debug("updating item {}", kv("address", it.address.toSafeBounceable()))
-                    val data = ItemContract.of(it.address, liteApi)
-                    val metadata = ItemMetadata.of(
-                        (data.collection as? AddrStd)
-                            ?.let { CollectionContract.itemContent(it, data.index, data.individualContent, liteApi) }
-                            ?: data.individualContent
-                    )
-
-                    metadata.attributes.orEmpty()
-                        .forEach { attribute ->
-                            attributeRepository.upsert(it.address, attribute.trait, attribute.value).subscribe()
-                        }
-
-                    it.copy(
-                        initialized = data.initialized,
-                        index = data.index,
-                        collection = data.collection,
-                        owner = data.owner,
-                        name = metadata.name,
-                        description = metadata.description,
-                        image = metadata.image
-                            ?: metadata.imageData?.let { "data:image;base64," + base64(it) },
-                        updated = Instant.now(),
-                    )
+            flow {
+                while (currentCoroutineContext().isActive) {
+                    logger.debug("running scheduled update of all database entities")
+                    emitAll(itemRepository.findAll(Sort.of(Sort.Order.asc("updated"))))
+                    delay(config.itemPeriod)
                 }
             }
-            .subscribe { itemRepository.update(it).subscribe() }
+        )
+            .map {
+                logger.debug("updating item {}", kv("address", it.address.toSafeBounceable()))
+                val data = ItemContract.of(it.address, liteClient)
+                val metadata = ItemMetadata.of(
+                    (data.collection as? AddrStd)
+                        ?.let { CollectionContract.itemContent(it, data.index, data.individualContent, liteClient) }
+                        ?: data.individualContent
+                )
+
+                metadata.attributes.orEmpty()
+                    .forEach { attribute ->
+                        attributeRepository.upsert(it.address, attribute.trait, attribute.value)
+                    }
+
+                it.copy(
+                    initialized = data.initialized,
+                    index = data.index,
+                    collection = data.collection,
+                    owner = data.owner,
+                    name = metadata.name,
+                    description = metadata.description,
+                    image = metadata.image
+                        ?: metadata.imageData?.let { "data:image;base64," + base64(it) },
+                    updated = Instant.now(),
+                )
+            }
+            .collect { itemRepository.update(it) }
     }
 
     companion object : KLogging()

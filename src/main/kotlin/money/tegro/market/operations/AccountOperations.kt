@@ -10,11 +10,10 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
+import kotlinx.coroutines.flow.Flow
 import money.tegro.market.dto.AccountDTO
 import money.tegro.market.dto.CollectionDTO
 import money.tegro.market.dto.ItemDTO
-import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
 
 @Tag(name = "Account", description = "Set of methods to interact with user accounts")
 interface AccountOperations {
@@ -33,14 +32,14 @@ interface AccountOperations {
         ]
     )
     @Get("/{account}")
-    fun getAccount(
+    suspend fun getAccount(
         @Parameter(
             description = "Account address, can be base64(url) or raw",
             required = true
         )
         @PathVariable
         account: String
-    ): Mono<AccountDTO>
+    ): AccountDTO
 
     @Operation(summary = "Get all items owned by the account")
     @ApiResponses(
@@ -57,14 +56,14 @@ interface AccountOperations {
         ]
     )
     @Get("/{account}/items")
-    fun getAccountItems(
+    suspend fun getAccountItems(
         @Parameter(
             description = "Account address, can be base64(url) or raw",
             required = true
         )
         @PathVariable
         account: String
-    ): Flux<ItemDTO>
+    ): Flow<ItemDTO>
 
     @Operation(summary = "Get all collections owned by the account")
     @ApiResponses(
@@ -81,12 +80,12 @@ interface AccountOperations {
         ]
     )
     @Get("/{account}/collections")
-    fun getAccountCollections(
+    suspend fun getAccountCollections(
         @Parameter(
             description = "Account address, can be base64(url) or raw",
             required = true
         )
         @PathVariable
         account: String
-    ): Flux<CollectionDTO>
+    ): Flow<CollectionDTO>
 }
