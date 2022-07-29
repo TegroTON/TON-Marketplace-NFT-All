@@ -31,11 +31,11 @@ data class ItemContract(
                     throw ContractException("failed to run method, empty response")
 
                 ItemContract(
-                    individualContent = stack.popCell(),
-                    owner = stack.popSlice().loadTlb(MsgAddress),
-                    collection = stack.popSlice().loadTlb(MsgAddress),
-                    index = stack.popTinyInt(),
                     initialized = stack.popTinyInt() == -1L,
+                    index = stack.popTinyInt(),
+                    collection = stack.popSlice().loadTlb(MsgAddress),
+                    owner = stack.popSlice().loadTlb(MsgAddress),
+                    individualContent = stack.popCell(),
                 )
             }
     }

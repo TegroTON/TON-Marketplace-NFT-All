@@ -30,9 +30,9 @@ data class RoyaltyContract(
                     throw ContractException("failed to run method, empty response")
 
                 RoyaltyContract(
-                    destination = stack.popSlice().loadTlb(MsgAddress),
-                    denominator = stack.popTinyInt().toInt(),
                     numerator = stack.popTinyInt().toInt(),
+                    denominator = stack.popTinyInt().toInt(),
+                    destination = stack.popSlice().loadTlb(MsgAddress),
                 )
             }
     }

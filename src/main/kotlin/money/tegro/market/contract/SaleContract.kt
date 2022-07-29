@@ -6,7 +6,6 @@ import net.logstash.logback.marker.Markers.append
 import org.ton.bigint.BigInt
 import org.ton.block.AddrStd
 import org.ton.block.MsgAddress
-import org.ton.block.VmStackNumber
 import org.ton.lite.api.liteserver.LiteServerAccountId
 import org.ton.lite.client.LiteClient
 import org.ton.tlb.loadTlb
@@ -34,13 +33,13 @@ data class SaleContract(
                     throw ContractException("failed to run method, empty response")
 
                 SaleContract(
-                    royalty = (stack.pop() as VmStackNumber).toBigInt(),
-                    royaltyDestination = stack.popSlice().loadTlb(MsgAddress),
-                    marketplaceFee = (stack.pop() as VmStackNumber).toBigInt(),
-                    fullPrice = (stack.pop() as VmStackNumber).toBigInt(),
-                    owner = stack.popSlice().loadTlb(MsgAddress),
-                    item = stack.popSlice().loadTlb(MsgAddress),
                     marketplace = stack.popSlice().loadTlb(MsgAddress),
+                    item = stack.popSlice().loadTlb(MsgAddress),
+                    owner = stack.popSlice().loadTlb(MsgAddress),
+                    fullPrice = stack.popNumber().toBigInt(),
+                    marketplaceFee = stack.popNumber().toBigInt(),
+                    royaltyDestination = stack.popSlice().loadTlb(MsgAddress),
+                    royalty = stack.popNumber().toBigInt(),
                 )
             }
     }

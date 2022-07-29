@@ -31,9 +31,9 @@ data class CollectionContract(
                         throw ContractException("failed to run method, empty response")
 
                     CollectionContract(
-                        owner = stack.popSlice().loadTlb(MsgAddress),
-                        content = stack.popCell(),
                         nextItemIndex = stack.popTinyInt(),
+                        content = stack.popCell(),
+                        owner = stack.popSlice().loadTlb(MsgAddress),
                     )
                 }
 

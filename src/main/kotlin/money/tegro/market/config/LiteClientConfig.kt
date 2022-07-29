@@ -5,13 +5,13 @@ import io.micronaut.core.bind.annotation.Bindable
 
 @ConfigurationProperties("market.liteclient")
 interface LiteClientConfig {
-    @get:Bindable(defaultValue = "\${LITECLIENT_IPV4:1091947910}")
+    @get:Bindable(defaultValue = "\${LITECLIENT_IPV4:1959448750}")
     val ipv4: Int
 
-    @get:Bindable(defaultValue = "\${LITECLIENT_PORT:7496}")
+    @get:Bindable(defaultValue = "\${LITECLIENT_PORT:51281}")
     val port: Int
 
-    @get:Bindable(defaultValue = "\${LITECLIENT_KEY:`EI32HF4Lr9mKSnw/dqiXQabpydo/FsyAPSwoeav4lbI=`}")
+    @get:Bindable(defaultValue = "\${LITECLIENT_KEY:`hyXd2d6yyiD/wirjoraSrKek1jYhOyzbQoIzV85CB98=`}")
     val key: String
 }
 
