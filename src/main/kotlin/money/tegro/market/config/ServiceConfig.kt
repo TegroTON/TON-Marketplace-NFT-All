@@ -1,4 +1,4 @@
-package money.tegro.market.nightcrawler
+package money.tegro.market.config
 
 import io.micronaut.context.annotation.ConfigurationProperties
 import io.micronaut.core.bind.annotation.Bindable
@@ -6,7 +6,7 @@ import java.time.Duration
 
 @ConfigurationProperties("market.service")
 interface ServiceConfig {
-    @get:Bindable(defaultValue = "PT10M")
+    @get:Bindable(defaultValue = "PT1H")
     val accountPeriod: Duration
 
     @get:Bindable(defaultValue = "PT1H")
@@ -20,4 +20,7 @@ interface ServiceConfig {
 
     @get:Bindable(defaultValue = "PT10M")
     val royaltyPeriod: Duration
+
+    @get:Bindable(defaultValue = "PT10M")
+    val salePeriod: Duration
 }

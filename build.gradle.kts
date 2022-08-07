@@ -33,7 +33,6 @@ dependencies {
 
     implementation(libs.bundles.annotations)
 
-
     implementation(libs.micronaut.jackson.databind)
     implementation(libs.micronaut.kotlin.extensions)
     implementation(libs.micronaut.kotlin.runtime)
@@ -46,9 +45,8 @@ dependencies {
     implementation(libs.micronaut.http.client)
     implementation(libs.micronaut.http.server.netty)
 
-    implementation(libs.micronaut.data.jdbc)
+    implementation(libs.micronaut.data.r2dbc)
     implementation(libs.micronaut.flyway)
-    implementation(libs.micronaut.jdbc.hikari)
 
     implementation(libs.micronaut.micrometer.core)
     implementation(libs.micronaut.micrometer.annotations)

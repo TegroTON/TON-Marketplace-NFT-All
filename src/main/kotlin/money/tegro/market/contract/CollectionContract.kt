@@ -1,8 +1,6 @@
 package money.tegro.market.contract
 
 import mu.KLogging
-import net.logstash.logback.argument.StructuredArguments.kv
-import net.logstash.logback.marker.Markers.append
 import org.ton.block.AddrStd
 import org.ton.block.MsgAddress
 import org.ton.block.VmStackValue
@@ -19,39 +17,20 @@ data class CollectionContract(
     companion object : KLogging() {
         @JvmStatic
         suspend fun of(address: AddrStd, liteClient: LiteClient): CollectionContract =
-            liteClient.runSmcMethod(LiteServerAccountId(address), "get_collection_data")
+            liteClient.runSmcMethod(LiteServerAccountId(address), "get_collection_data").toMutableVmStack()
                 .let {
-                    val exitCode = it.first
-                    val stack = it.second?.toMutableVmStack()
-                    logger.trace(append("result", stack), "smc method complete {}", kv("exitCode", exitCode))
-                    if (exitCode != 0)
-                        throw ContractException("failed to run method, exit code is ${exitCode}")
-
-                    if (stack == null)
-                        throw ContractException("failed to run method, empty response")
-
                     CollectionContract(
-                        nextItemIndex = stack.popTinyInt(),
-                        content = stack.popCell(),
-                        owner = stack.popSlice().loadTlb(MsgAddress),
+                        nextItemIndex = it.popTinyInt(),
+                        content = it.popCell(),
+                        owner = it.popSlice().loadTlb(MsgAddress),
                     )
                 }
 
         @JvmStatic
         suspend fun itemAddressOf(collection: AddrStd, index: Long, liteClient: LiteClient): MsgAddress =
             liteClient.runSmcMethod(LiteServerAccountId(collection), "get_nft_address_by_index", VmStackValue(index))
-                .let {
-                    val exitCode = it.first
-                    val stack = it.second?.toMutableVmStack()
-                    logger.trace(append("result", stack), "smc method complete {}", kv("exitCode", exitCode))
-                    if (exitCode != 0)
-                        throw ContractException("failed to run method, exit code is ${exitCode}")
-
-                    if (stack == null)
-                        throw ContractException("failed to run method, empty response")
-
-                    stack.popSlice().loadTlb(MsgAddress)
-                }
+                .toMutableVmStack()
+                .popSlice().loadTlb(MsgAddress)
 
         @JvmStatic
         suspend fun itemContent(
@@ -65,17 +44,6 @@ data class CollectionContract(
                 "get_nft_content",
                 VmStackValue(index),
                 VmStackValue(individualContent)
-            ).let {
-                val exitCode = it.first
-                val stack = it.second?.toMutableVmStack()
-                logger.trace(append("result", stack), "smc method complete {}", kv("exitCode", exitCode))
-                if (exitCode != 0)
-                    throw ContractException("failed to run method, exit code is ${exitCode}")
-
-                if (stack == null)
-                    throw ContractException("failed to run method, empty response")
-
-                stack.popCell()
-            }
+            ).toMutableVmStack().popCell()
     }
 }

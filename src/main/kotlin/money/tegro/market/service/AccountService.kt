@@ -1,85 +1,69 @@
 package money.tegro.market.service
 
-import io.micronaut.context.event.ApplicationEventListener
 import io.micronaut.context.event.StartupEvent
-import io.micronaut.data.model.Sort
-import io.micronaut.scheduling.annotation.Async
+import io.micronaut.runtime.event.annotation.EventListener
+import jakarta.annotation.PostConstruct
+import jakarta.annotation.PreDestroy
 import jakarta.inject.Singleton
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.time.delay
-import money.tegro.market.contract.ContractException
-import money.tegro.market.contract.SaleContract
-import money.tegro.market.core.toSafeBounceable
-import money.tegro.market.model.AccountKind
-import money.tegro.market.nightcrawler.ServiceConfig
+import money.tegro.market.config.ServiceConfig
+import money.tegro.market.core.toRaw
 import money.tegro.market.repository.AccountRepository
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments.kv
 import org.ton.block.AddrStd
 import org.ton.lite.client.LiteClient
 import java.time.Instant
+import kotlin.coroutines.CoroutineContext
 
 @Singleton
 open class AccountService(
+    private val liteClient: LiteClient,
     private val config: ServiceConfig,
 
-    private val liteClient: LiteClient,
     private val liveAccounts: Flow<AddrStd>,
 
     private val accountRepository: AccountRepository,
-) : ApplicationEventListener<StartupEvent> {
-    @Async
-    open override fun onApplicationEvent(event: StartupEvent?) {
-        runBlocking(Dispatchers.Default) {
-            merge(
-                // Watch live
-                liveAccounts
-                    .mapNotNull { accountRepository.findById(it) }
-                    .onEach {
-                        logger.info("{} matched database entity", kv("address", it.address.toSafeBounceable()))
-                    },
-                // Apart from watching live interactions, update them periodically
-                flow {
-                    while (currentCoroutineContext().isActive) {
-                        logger.debug("running scheduled update of all database entities")
-                        emitAll(accountRepository.findAll(Sort.of(Sort.Order.asc("updated"))))
-                        delay(config.accountPeriod)
-                    }
+) : CoroutineScope {
+    override val coroutineContext: CoroutineContext = Dispatchers.Default
+
+    @EventListener
+    open fun onStartup(event: StartupEvent) {
+    }
+
+    @PostConstruct
+    open fun onInit() {
+        job.start()
+    }
+
+    @PreDestroy
+    open fun onShutdown() {
+        job.cancel()
+    }
+
+    private val job = launch {
+        merge(
+            // Watch live
+            liveAccounts
+                .mapNotNull { accountRepository.findById(it) }
+                .onEach {
+                    logger.info("{} matched database entity", kv("address", it.address.toRaw()))
+                },
+            // Apart from watching live interactions, update them periodically
+            channelFlow {
+                while (currentCoroutineContext().isActive) {
+                    logger.debug("running scheduled update of all database entities")
+                    accountRepository.findAll().collect { send(it) }
+                    delay(config.accountPeriod)
                 }
-            )
-                .mapNotNull {
-                    when (it.kind) {
-                        AccountKind.USER -> {
-                            it.copy(updated = Instant.now())
-                        }
-                        AccountKind.SALE -> {
-                            logger.debug("updating sale {}", kv("address", it.address.toSafeBounceable()))
-                            try {
-                                val data = SaleContract.of(it.address, liteClient)
-                                it.copy(
-                                    marketplace = data.marketplace,
-                                    item = data.item,
-                                    owner = data.owner,
-                                    fullPrice = data.fullPrice,
-                                    marketplaceFee = data.marketplaceFee,
-                                    royalty = data.royalty,
-                                    royaltyDestination = data.royaltyDestination,
-                                    updated = Instant.now(),
-                                )
-                            } catch (e: ContractException) {
-                                logger.info("could not get sale {} info, removing entry", kv("address", it), e)
-                                accountRepository.delete(it)
-                                null
-                            }
-                        }
-                    }
-                }
-                .collect { accountRepository.update(it) }
-        }
+            }
+        )
+            .collect {
+                // Nothing to do here as of yet, just update the date ig
+                accountRepository.update(it.copy(updated = Instant.now()))
+            }
     }
 
     companion object : KLogging()

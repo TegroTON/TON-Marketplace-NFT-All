@@ -12,12 +12,8 @@ import org.ton.tlb.storeTlb
 @Singleton
 class MsgAddressAttributeConverter : AttributeConverter<MsgAddress, ByteArray> {
     override fun convertToPersistedValue(entityValue: MsgAddress?, context: ConversionContext): ByteArray? =
-        entityValue?.let { BagOfCells(CellBuilder.createCell { storeTlb(msgAddressCodec, it) }).toByteArray() }
+        entityValue?.let { BagOfCells(CellBuilder.createCell { storeTlb(MsgAddress, it) }).toByteArray() }
 
     override fun convertToEntityValue(persistedValue: ByteArray?, context: ConversionContext): MsgAddress? =
-        persistedValue?.let { BagOfCells(it).roots.first().parse { loadTlb(msgAddressCodec) } }
-
-    companion object {
-        val msgAddressCodec = MsgAddress.tlbCodec()
-    }
+        persistedValue?.let { BagOfCells(it).roots.first().parse { loadTlb(MsgAddress) } }
 }

@@ -5,18 +5,18 @@ import io.micronaut.data.annotation.MappedEntity
 import io.micronaut.data.annotation.TypeDef
 import io.micronaut.data.model.DataType
 import io.swagger.v3.oas.annotations.media.Schema
-import money.tegro.market.core.converter.AddrStdAttributeConverter
 import money.tegro.market.core.converter.MsgAddressAttributeConverter
-import org.ton.block.AddrStd
+import money.tegro.market.core.converter.MsgAddressIntAttributeConverter
 import org.ton.block.MsgAddress
+import org.ton.block.MsgAddressInt
 import java.time.Instant
 
 @MappedEntity("items")
 @Schema(hidden = true)
 data class ItemModel(
     @field:Id
-    @field:TypeDef(type = DataType.BYTE_ARRAY, converter = AddrStdAttributeConverter::class)
-    val address: AddrStd,
+    @field:TypeDef(type = DataType.BYTE_ARRAY, converter = MsgAddressIntAttributeConverter::class)
+    val address: MsgAddressInt,
 
     // Basic info
     val initialized: Boolean,
@@ -35,6 +35,9 @@ data class ItemModel(
     val description: String? = null,
 
     val image: String? = null,
+
+    @field:TypeDef(type = DataType.JSON)
+    val attributes: Map<String, String> = mapOf(),
 
     val approved: Boolean = false,
 

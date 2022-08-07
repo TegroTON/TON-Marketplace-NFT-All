@@ -3,14 +3,14 @@ package money.tegro.market.factory
 import io.micronaut.context.annotation.Factory
 import jakarta.inject.Singleton
 import kotlinx.coroutines.runBlocking
-import money.tegro.market.core.configuration.LiteClientConfig
+import money.tegro.market.core.configuration.LiteApiConfig
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments.kv
 import org.ton.crypto.base64
 import org.ton.lite.client.LiteClient
 
 @Factory
-class LiteClientFactory(private val config: LiteClientConfig) {
+class LiteClientFactory(private val config: LiteApiConfig) {
     @Singleton
     fun liteClient() = runBlocking {
         logger.debug(

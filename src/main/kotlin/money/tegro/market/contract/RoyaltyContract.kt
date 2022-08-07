@@ -1,8 +1,6 @@
 package money.tegro.market.contract
 
 import mu.KLogging
-import net.logstash.logback.argument.StructuredArguments.kv
-import net.logstash.logback.marker.Markers.append
 import org.ton.block.AddrStd
 import org.ton.block.MsgAddress
 import org.ton.lite.api.liteserver.LiteServerAccountId
@@ -19,20 +17,11 @@ data class RoyaltyContract(
     companion object : KLogging() {
         @JvmStatic
         suspend fun of(address: AddrStd, liteClient: LiteClient): RoyaltyContract =
-            liteClient.runSmcMethod(LiteServerAccountId(address), "royalty_params").let {
-                val exitCode = it.first
-                val stack = it.second?.toMutableVmStack()
-                logger.trace(append("result", stack), "smc method complete {}", kv("exitCode", exitCode))
-                if (exitCode != 0)
-                    throw ContractException("failed to run method, exit code is ${exitCode}")
-
-                if (stack == null)
-                    throw ContractException("failed to run method, empty response")
-
+            liteClient.runSmcMethod(LiteServerAccountId(address), "royalty_params").toMutableVmStack().let {
                 RoyaltyContract(
-                    numerator = stack.popTinyInt().toInt(),
-                    denominator = stack.popTinyInt().toInt(),
-                    destination = stack.popSlice().loadTlb(MsgAddress),
+                    numerator = it.popTinyInt().toInt(),
+                    denominator = it.popTinyInt().toInt(),
+                    destination = it.popSlice().loadTlb(MsgAddress),
                 )
             }
     }

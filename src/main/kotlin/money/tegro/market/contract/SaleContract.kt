@@ -1,8 +1,6 @@
 package money.tegro.market.contract
 
 import mu.KLogging
-import net.logstash.logback.argument.StructuredArguments.kv
-import net.logstash.logback.marker.Markers.append
 import org.ton.bigint.BigInt
 import org.ton.block.AddrStd
 import org.ton.block.MsgAddress
@@ -22,24 +20,15 @@ data class SaleContract(
     companion object : KLogging() {
         @JvmStatic
         suspend fun of(address: AddrStd, liteClient: LiteClient): SaleContract =
-            liteClient.runSmcMethod(LiteServerAccountId(address), "get_sale_data").let {
-                val exitCode = it.first
-                val stack = it.second?.toMutableVmStack()
-                logger.trace(append("result", stack), "smc method complete {}", kv("exitCode", exitCode))
-                if (exitCode != 0)
-                    throw ContractException("failed to run method, exit code is ${exitCode}")
-
-                if (stack == null)
-                    throw ContractException("failed to run method, empty response")
-
+            liteClient.runSmcMethod(LiteServerAccountId(address), "get_sale_data").toMutableVmStack().let {
                 SaleContract(
-                    marketplace = stack.popSlice().loadTlb(MsgAddress),
-                    item = stack.popSlice().loadTlb(MsgAddress),
-                    owner = stack.popSlice().loadTlb(MsgAddress),
-                    fullPrice = stack.popNumber().toBigInt(),
-                    marketplaceFee = stack.popNumber().toBigInt(),
-                    royaltyDestination = stack.popSlice().loadTlb(MsgAddress),
-                    royalty = stack.popNumber().toBigInt(),
+                    marketplace = it.popSlice().loadTlb(MsgAddress),
+                    item = it.popSlice().loadTlb(MsgAddress),
+                    owner = it.popSlice().loadTlb(MsgAddress),
+                    fullPrice = it.popNumber().toBigInt(),
+                    marketplaceFee = it.popNumber().toBigInt(),
+                    royaltyDestination = it.popSlice().loadTlb(MsgAddress),
+                    royalty = it.popNumber().toBigInt(),
                 )
             }
     }

@@ -5,18 +5,18 @@ import io.micronaut.data.annotation.MappedEntity
 import io.micronaut.data.annotation.TypeDef
 import io.micronaut.data.model.DataType
 import io.swagger.v3.oas.annotations.media.Schema
-import money.tegro.market.core.converter.AddrStdAttributeConverter
 import money.tegro.market.core.converter.MsgAddressAttributeConverter
-import org.ton.block.AddrStd
+import money.tegro.market.core.converter.MsgAddressIntAttributeConverter
 import org.ton.block.MsgAddress
+import org.ton.block.MsgAddressInt
 import java.time.Instant
 
 @MappedEntity("collections")
 @Schema(hidden = true)
 data class CollectionModel(
     @field:Id
-    @field:TypeDef(type = DataType.BYTE_ARRAY, converter = AddrStdAttributeConverter::class)
-    val address: AddrStd,
+    @field:TypeDef(type = DataType.BYTE_ARRAY, converter = MsgAddressIntAttributeConverter::class)
+    val address: MsgAddressInt,
 
     // Basic info
     val nextItemIndex: Long,
