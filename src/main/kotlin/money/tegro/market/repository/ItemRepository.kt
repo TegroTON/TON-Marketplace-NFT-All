@@ -1,11 +1,11 @@
 package money.tegro.market.repository
 
 import io.micronaut.data.annotation.Id
+import io.micronaut.data.annotation.Query
 import io.micronaut.data.model.query.builder.sql.Dialect
 import io.micronaut.data.r2dbc.annotation.R2dbcRepository
 import io.micronaut.data.repository.kotlin.CoroutinePageableCrudRepository
 import money.tegro.market.core.model.ItemModel
-import money.tegro.market.model.CollectionModel
 import org.ton.block.MsgAddress
 import org.ton.block.MsgAddressInt
 import java.time.Instant
@@ -14,7 +14,25 @@ import java.time.Instant
 interface ItemRepository : CoroutinePageableCrudRepository<ItemModel, MsgAddressInt> {
     suspend fun existsByCollectionAndIndex(collection: MsgAddress, index: Long): Boolean
     suspend fun existsByOwner(owner: MsgAddress): Boolean
-    suspend fun update(
+
+    @Query(
+        """
+        INSERT INTO items(address, initialized, index, collection, owner, name, description, image, attributes, updated)
+        VALUES (:address, :initialized, :index, :collection, :owner, :name, :description, :image, :attributes, :updated)
+        ON CONFLICT(address) DO UPDATE SET
+            initialized = EXCLUDED.initialized,
+            index = EXCLUDED.index,
+            collection = EXCLUDED.collection,
+            owner = EXCLUDED.owner,
+            name = EXCLUDED.name,
+            description = EXCLUDED.description,
+            image = EXCLUDED.image,
+            attributes = EXCLUDED.attributes,
+            updated = EXCLUDED.updated,
+        RETURNING *
+        """
+    )
+    suspend fun upsert(
         @Id address: MsgAddressInt,
         initialized: Boolean,
         index: Long,
@@ -25,6 +43,6 @@ interface ItemRepository : CoroutinePageableCrudRepository<ItemModel, MsgAddress
         image: String?,
         attributes: Map<String, String> = mapOf(),
         updated: Instant = Instant.now()
-    ): CollectionModel
+    ): ItemModel
 }
 

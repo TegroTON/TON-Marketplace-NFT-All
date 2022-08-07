@@ -68,15 +68,17 @@ open class CollectionService(
                 val metadata = CollectionMetadata.of(data.content)
 
                 collectionRepository.update(
-                    address = it.address,
-                    nextItemIndex = data.nextItemIndex,
-                    owner = data.owner,
-                    name = metadata.name,
-                    description = metadata.description,
-                    image = metadata.image
-                        ?: metadata.imageData?.let { "data:image;base64," + base64(it) },
-                    coverImage = metadata.coverImage
-                        ?: metadata.coverImageData?.let { "data:image;base64," + base64(it) },
+                    it.copy(
+                        address = it.address,
+                        nextItemIndex = data.nextItemIndex,
+                        owner = data.owner,
+                        name = metadata.name,
+                        description = metadata.description,
+                        image = metadata.image
+                            ?: metadata.imageData?.let { "data:image;base64," + base64(it) },
+                        coverImage = metadata.coverImage
+                            ?: metadata.coverImageData?.let { "data:image;base64," + base64(it) },
+                    )
                 )
             }
     }

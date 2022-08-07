@@ -13,11 +13,16 @@ import java.time.Instant
 @R2dbcRepository(dialect = Dialect.POSTGRES)
 interface RoyaltyRepository : CoroutinePageableCrudRepository<RoyaltyModel, MsgAddressInt> {
     @Query(
-        "INSERT INTO attributes(address, numerator, denominator, destination, updated) " +
-                " VALUES (:address, :numerator, :denominator, :destination, :updated)" +
-                " ON CONFLICT(address) DO UPDATE SET numerator = EXCLUDED.numerator, " +
-                "denominator = EXCLUDED.denominator, destination = EXCLUDED.destination, " +
-                "updated = EXCLUDED.updated RETURNING *"
+        """
+        INSERT INTO attributes(address, numerator, denominator, destination, updated)
+        VALUES (:address, :numerator, :denominator, :destination, :updated)
+        ON CONFLICT(address) DO UPDATE SET
+           numerator = EXCLUDED.numerator,
+           denominator = EXCLUDED.denominator,
+           destination = EXCLUDED.destination,
+           updated = EXCLUDED.updated
+        RETURNING *
+        """
     )
     suspend fun upsert(
         @Id address: MsgAddressInt,
