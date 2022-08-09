@@ -55,7 +55,7 @@ open class AccountService(
             channelFlow {
                 while (currentCoroutineContext().isActive) {
                     logger.debug("running scheduled update of all database entities")
-                    accountRepository.findAll().collect { send(it) }
+//                    accountRepository.findAll().collect { send(it) }
                     delay(config.accountPeriod)
                 }
             }

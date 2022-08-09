@@ -28,7 +28,7 @@ interface ItemRepository : CoroutinePageableCrudRepository<ItemModel, MsgAddress
             description = EXCLUDED.description,
             image = EXCLUDED.image,
             attributes = EXCLUDED.attributes,
-            updated = EXCLUDED.updated,
+            updated = EXCLUDED.updated
         RETURNING *
         """
     )

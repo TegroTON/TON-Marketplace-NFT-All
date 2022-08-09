@@ -16,6 +16,5 @@ data class AccountModel(
     @field:TypeDef(type = DataType.BYTE_ARRAY, converter = MsgAddressIntAttributeConverter::class)
     val address: MsgAddressInt,
 
-    val discovered: Instant = Instant.now(),
     val updated: Instant = Instant.now(),
 )

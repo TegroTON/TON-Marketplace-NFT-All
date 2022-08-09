@@ -33,8 +33,6 @@ data class CollectionModel(
 
     val coverImage: String? = null,
 
-    val approved: Boolean = false,
-
-    val discovered: Instant = Instant.now(),
+    val enabled: Boolean = false,
     val updated: Instant = Instant.now(),
 )

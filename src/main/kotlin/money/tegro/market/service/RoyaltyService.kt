@@ -2,7 +2,6 @@ package money.tegro.market.service
 
 import io.micronaut.context.event.StartupEvent
 import io.micronaut.data.model.Sort
-import io.micronaut.runtime.event.annotation.EventListener
 import jakarta.annotation.PostConstruct
 import jakarta.annotation.PreDestroy
 import jakarta.inject.Singleton
@@ -34,9 +33,9 @@ open class RoyaltyService(
 ) : CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Default
 
-    suspend fun get(address: MsgAddressInt): RoyaltyModel? = royaltyRepository.findById(address) ?: upsert(address)
+    suspend fun get(address: MsgAddressInt): RoyaltyModel? = royaltyRepository.findById(address) ?: update(address)
 
-    suspend fun upsert(address: MsgAddressInt): RoyaltyModel? = try {
+    suspend fun update(address: MsgAddressInt): RoyaltyModel? = try {
         logger.debug("updating royalty {}", kv("address", address.toRaw()))
         RoyaltyContract.of(address as AddrStd, liteClient).let {
             royaltyRepository.upsert(
@@ -52,20 +51,30 @@ open class RoyaltyService(
         null
     }
 
-    @EventListener
+    //    @EventListener
     open fun onStartup(event: StartupEvent) {
     }
 
     @PostConstruct
     open fun onInit() {
-        watchLiveJob.start()
         scheduledJob.start()
+        watchLiveJob.start()
     }
 
     @PreDestroy
     open fun onShutdown() {
-        watchLiveJob.cancel()
         scheduledJob.cancel()
+        watchLiveJob.cancel()
+    }
+
+    private val scheduledJob = launch {
+        while (currentCoroutineContext().isActive) {
+            logger.debug("running scheduled update of all database entities")
+            royaltyRepository.findAll(Sort.of(Sort.Order.asc("updated")))
+                .collect { update(it.address) }
+
+            kotlinx.coroutines.time.delay(config.royaltyPeriod)
+        }
     }
 
     private val watchLiveJob = launch {
@@ -74,17 +83,7 @@ open class RoyaltyService(
             .onEach {
                 logger.info("{} matched database entity", kv("address", it.toRaw()))
             }
-            .collect { upsert(it) }
-    }
-
-    private val scheduledJob = launch {
-        while (currentCoroutineContext().isActive) {
-            logger.debug("running scheduled update of all database entities")
-            royaltyRepository.findAll(Sort.of(Sort.Order.asc("updated")))
-                .collect { upsert(it.address) }
-
-            kotlinx.coroutines.time.delay(config.royaltyPeriod)
-        }
+            .collect { update(it) }
     }
 
     companion object : KLogging()

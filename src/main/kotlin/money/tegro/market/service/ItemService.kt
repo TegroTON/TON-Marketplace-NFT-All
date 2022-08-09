@@ -1,16 +1,14 @@
 package money.tegro.market.service
 
 import io.micronaut.context.event.StartupEvent
-import io.micronaut.runtime.event.annotation.EventListener
+import io.micronaut.data.model.Sort
 import jakarta.annotation.PostConstruct
 import jakarta.annotation.PreDestroy
 import jakarta.inject.Singleton
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import money.tegro.market.config.ServiceConfig
 import money.tegro.market.contract.CollectionContract
 import money.tegro.market.contract.ItemContract
@@ -38,9 +36,9 @@ open class ItemService(
 ) : CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Default
 
-    suspend fun get(address: MsgAddressInt): ItemModel? = itemRepository.findById(address) ?: upsert(address)
+    suspend fun get(address: MsgAddressInt): ItemModel? = itemRepository.findById(address) ?: update(address)
 
-    suspend fun upsert(address: MsgAddressInt): ItemModel? = try {
+    suspend fun update(address: MsgAddressInt): ItemModel? = try {
         logger.debug("updating item {}", kv("address", address.toRaw()))
         val data = ItemContract.of(address as AddrStd, liteClient)
         val metadata = ItemMetadata.of(
@@ -66,18 +64,30 @@ open class ItemService(
         null
     }
 
-    @EventListener
+    //    @EventListener
     open fun onStartup(event: StartupEvent) {
     }
 
     @PostConstruct
     open fun onInit() {
+        scheduledJob.start()
         watchLiveJob.start()
     }
 
     @PreDestroy
     open fun onShutdown() {
+        scheduledJob.cancel()
         watchLiveJob.cancel()
+    }
+
+    private val scheduledJob = launch {
+        while (currentCoroutineContext().isActive) {
+            logger.debug("running scheduled update of all database entities")
+            itemRepository.findAll(Sort.of(Sort.Order.asc("updated")))
+                .collect { update(it.address) }
+
+            kotlinx.coroutines.time.delay(config.itemPeriod)
+        }
     }
 
     private val watchLiveJob = launch {
@@ -86,7 +96,7 @@ open class ItemService(
             .onEach {
                 logger.info("{} matched database entity", kv("address", it.toRaw()))
             }
-            .collect { upsert(it) }
+            .collect { update(it) }
     }
 
     companion object : KLogging()

@@ -37,6 +37,5 @@ data class SaleModel(
     @field:TypeDef(type = DataType.BYTE_ARRAY, converter = MsgAddressAttributeConverter::class)
     val royaltyDestination: MsgAddress,
 
-    val discovered: Instant = Instant.now(),
     val updated: Instant = Instant.now(),
 )

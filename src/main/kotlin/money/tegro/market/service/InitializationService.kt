@@ -12,9 +12,7 @@ import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import money.tegro.market.contract.CollectionContract
-import money.tegro.market.core.toSafeBounceable
-import money.tegro.market.model.CollectionModel
+import money.tegro.market.core.toRaw
 import money.tegro.market.repository.CollectionRepository
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments.kv
@@ -28,6 +26,7 @@ open class InitializationService(
     private val resourceLoader: ClassPathResourceLoader,
 
     private val collectionRepository: CollectionRepository,
+    private val collectionService: CollectionService,
 ) : CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Default
 
@@ -55,20 +54,9 @@ open class InitializationService(
             .filter { it.isNotBlank() }
             .map { AddrStd(it) }
             .filter { !collectionRepository.existsById(it) }
-            .map {
-                logger.debug("loading {}", kv("address", it.toSafeBounceable()))
-
-                it to CollectionContract.of(it, liteClient)
-            }
             .collect {
-                collectionRepository.save(
-                    CollectionModel(
-                        address = it.first,
-                        nextItemIndex = it.second.nextItemIndex,
-                        owner = it.second.owner,
-                        approved = true, // Those are assumed to be already manually checked
-                    )
-                )
+                logger.debug("loading {}", kv("address", it.toRaw()))
+                collectionService.update(it)
             }
     }
 

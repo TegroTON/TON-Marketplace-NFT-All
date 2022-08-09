@@ -18,6 +18,7 @@ micronaut-flyway = { prefer = "5.3.0" }
 micronaut-kotlin = { prefer = "3.2.2" }
 micronaut-micrometer = { prefer = "4.3.0" }
 micronaut-openapi = { prefer = "4.3.0" }
+micronaut-reactor = { prefer = "2.3.1" }
 micronaut-sql = { prefer = "4.6.1" }
 kotlin = "1.7.0"
 shadow = "7.1.2"
@@ -57,6 +58,7 @@ micronaut-jackson-databind = { group = "io.micronaut", name = "micronaut-jackson
 micronaut-kotlin-runtime = { group = "io.micronaut.kotlin", name = "micronaut-kotlin-runtime", version.ref = "micronaut-kotlin" }
 micronaut-kotlin-extensions = { group = "io.micronaut.kotlin", name = "micronaut-kotlin-extension-functions", version.ref = "micronaut-kotlin" }
 micronaut-validation = { group = "io.micronaut", name = "micronaut-validation", version.ref = "micronaut" }
+micronaut-reactor = { group = "io.micronaut.reactor", name = "micronaut-reactor", version.ref = "micronaut-reactor" }
 
 # Micronaut kapt-related
 micronaut-data-processor = { group = "io.micronaut.data", name = "micronaut-data-processor", version.ref = "micronaut-data" }

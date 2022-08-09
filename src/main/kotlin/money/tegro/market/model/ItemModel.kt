@@ -37,10 +37,8 @@ data class ItemModel(
     val image: String? = null,
 
     @field:TypeDef(type = DataType.JSON)
-    val attributes: Map<String, String> = mapOf(),
+    val attributes: Map<String, String>?,
 
-    val approved: Boolean = false,
-
-    val discovered: Instant = Instant.now(),
+    val enabled: Boolean = false,
     val updated: Instant = Instant.now(),
 )

@@ -6,8 +6,9 @@ import jakarta.annotation.PostConstruct
 import jakarta.annotation.PreDestroy
 import jakarta.inject.Singleton
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.time.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.toList
 import money.tegro.market.config.ServiceConfig
 import money.tegro.market.contract.CollectionContract
 import money.tegro.market.core.toRaw
@@ -15,7 +16,9 @@ import money.tegro.market.metadata.CollectionMetadata
 import money.tegro.market.repository.CollectionRepository
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments.kv
+import org.ton.api.exception.TvmException
 import org.ton.block.AddrStd
+import org.ton.block.MsgAddressInt
 import org.ton.crypto.base64
 import org.ton.lite.client.LiteClient
 import kotlin.coroutines.CoroutineContext
@@ -37,49 +40,52 @@ open class CollectionService(
 
     @PostConstruct
     open fun onInit() {
-        job.start()
+        watchLiveJob.start()
     }
 
     @PreDestroy
     open fun onShutdown() {
-        job.cancel()
+        watchLiveJob.cancel()
     }
 
-    private val job = launch {
-        merge(
-            // Watch live
-            liveAccounts
-                .mapNotNull { collectionRepository.findById(it) }
-                .onEach {
-                    logger.info("{} matched database entity", kv("address", it.address.toRaw()))
-                },
-            // Apart from watching live interactions, update them periodically
-            channelFlow {
-                while (currentCoroutineContext().isActive) {
-                    AccountService.logger.debug("running scheduled update of all database entities")
-                    collectionRepository.findAll().collect { send(it) }
-                    delay(config.collectionPeriod)
-                }
-            }
-        )
-            .collect {
-                logger.debug("updating collection {}", kv("address", it.address.toRaw()))
-                val data = CollectionContract.of(it.address as AddrStd, liteClient)
-                val metadata = CollectionMetadata.of(data.content)
+    suspend fun update(address: MsgAddressInt) {
+        try {
+            logger.debug("updating collection {}", kv("address", address.toRaw()))
+            val data = CollectionContract.of(address as AddrStd, liteClient)
+            val metadata = CollectionMetadata.of(data.content)
 
-                collectionRepository.update(
-                    it.copy(
-                        address = it.address,
-                        nextItemIndex = data.nextItemIndex,
-                        owner = data.owner,
-                        name = metadata.name,
-                        description = metadata.description,
-                        image = metadata.image
-                            ?: metadata.imageData?.let { "data:image;base64," + base64(it) },
-                        coverImage = metadata.coverImage
-                            ?: metadata.coverImageData?.let { "data:image;base64," + base64(it) },
-                    )
-                )
+            collectionRepository.upsert(
+                address = address,
+                nextItemIndex = data.nextItemIndex,
+                owner = data.owner,
+                name = metadata.name,
+                description = metadata.description,
+                image = metadata.image
+                    ?: metadata.imageData?.let { "data:image;base64," + base64(it) },
+                coverImage = metadata.coverImage
+                    ?: metadata.coverImageData?.let { "data:image;base64," + base64(it) },
+            )
+        } catch (e: TvmException) {
+            logger.warn("could not get collection information for {}", kv("address", address.toRaw()), e)
+        }
+    }
+
+    private val scheduledJob = launch {
+        while (currentCoroutineContext().isActive) {
+            logger.debug("running scheduled update of all database entities")
+            collectionRepository.findAll().toList()
+                .forEach { update(it.address) }
+
+            kotlinx.coroutines.time.delay(config.collectionPeriod)
+        }
+    }
+
+    private val watchLiveJob = launch {
+        liveAccounts
+            .filter { collectionRepository.existsById(it) }
+            .collect {
+                logger.info("{} matched database entity", kv("address", it.toRaw()))
+                update(it)
             }
     }
 

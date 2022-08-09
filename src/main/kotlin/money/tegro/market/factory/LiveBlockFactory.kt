@@ -7,7 +7,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments.kv
-import org.ton.api.tonnode.Shard
 import org.ton.api.tonnode.TonNodeBlockId
 import org.ton.bigint.BigInt
 import org.ton.block.Block
@@ -47,7 +46,13 @@ open class LiveBlockFactory(
                     .associate { BigInt(it.first.toByteArray()).toInt() to it.second.nodes().maxBy { it.seq_no } }
                     .flatMap { curr ->
                         (lastMcShards.getOrDefault(curr.key, curr.value).seq_no + 1..curr.value.seq_no)
-                            .map { TonNodeBlockId(curr.key, Shard.ID_ALL, it.toInt()) }
+                            .map {
+                                TonNodeBlockId(
+                                    curr.key,
+                                    curr.value.next_validator_shard /* Shard.ID_ALL */,
+                                    it.toInt()
+                                )
+                            } // TODO
                     }
                     .mapNotNull {
                         try {

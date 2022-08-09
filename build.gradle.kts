@@ -37,6 +37,7 @@ dependencies {
     implementation(libs.micronaut.kotlin.extensions)
     implementation(libs.micronaut.kotlin.runtime)
     implementation(libs.micronaut.validation)
+    runtimeOnly(libs.micronaut.reactor)
 
     kapt(libs.micronaut.data.processor)
     kapt(libs.micronaut.http.validation)
