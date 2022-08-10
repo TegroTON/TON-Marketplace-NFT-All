@@ -1,44 +1,43 @@
 package money.tegro.market.core.model
 
-import io.micronaut.data.annotation.Id
-import io.micronaut.data.annotation.MappedEntity
-import io.micronaut.data.annotation.TypeDef
-import io.micronaut.data.model.DataType
-import io.swagger.v3.oas.annotations.media.Schema
-import money.tegro.market.core.converter.MsgAddressAttributeConverter
-import money.tegro.market.core.converter.MsgAddressIntAttributeConverter
+import money.tegro.market.model.msgAddress
+import money.tegro.market.model.msgAddressInt
+import org.ktorm.database.Database
+import org.ktorm.entity.Entity
+import org.ktorm.entity.sequenceOf
+import org.ktorm.jackson.json
+import org.ktorm.schema.*
 import org.ton.block.MsgAddress
 import org.ton.block.MsgAddressInt
 import java.time.Instant
 
-@MappedEntity("items")
-@Schema(hidden = true)
-data class ItemModel(
-    @field:Id
-    @field:TypeDef(type = DataType.BYTE_ARRAY, converter = MsgAddressIntAttributeConverter::class)
-    val address: MsgAddressInt,
 
-    // Basic info
-    val initialized: Boolean,
+interface ItemModel : Entity<ItemModel> {
+    var address: MsgAddressInt
+    var initialized: Boolean
+    var index: Long
+    var collection: MsgAddress
+    var owner: MsgAddress
+    var name: String?
+    var description: String?
+    var image: String?
+    var attributes: Map<String, String>?
+    var updated: Instant
 
-    val index: Long,
+    companion object : Entity.Factory<ItemModel>()
+}
 
-    @field:TypeDef(type = DataType.BYTE_ARRAY, converter = MsgAddressAttributeConverter::class)
-    val collection: MsgAddress,
+object ItemTable : Table<ItemModel>("items") {
+    val address = msgAddressInt("address").primaryKey().bindTo { it.address }
+    val initialized = boolean("initialized").bindTo { it.initialized }
+    val index = long("index").bindTo { it.index }
+    val collection = msgAddress("collection").bindTo { it.collection }
+    val owner = msgAddress("owner").bindTo { it.owner }
+    val name = text("name").bindTo { it.name }
+    val description = text("description").bindTo { it.description }
+    val image = text("image").bindTo { it.image }
+    val attributes = json<Map<String, String>>("attributes").bindTo { it.attributes }
+    val updated = timestamp("updated").bindTo { it.updated }
+}
 
-    @field:TypeDef(type = DataType.BYTE_ARRAY, converter = MsgAddressAttributeConverter::class)
-    val owner: MsgAddress,
-
-    // Metadata information
-    val name: String? = null,
-
-    val description: String? = null,
-
-    val image: String? = null,
-
-    @field:TypeDef(type = DataType.JSON)
-    val attributes: Map<String, String>?,
-
-    val enabled: Boolean = false,
-    val updated: Instant = Instant.now(),
-)
+val Database.items get() = this.sequenceOf(ItemTable)

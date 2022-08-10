@@ -1,26 +1,25 @@
 package money.tegro.market.config
 
-import io.micronaut.context.annotation.ConfigurationProperties
-import io.micronaut.core.bind.annotation.Bindable
+import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.boot.context.properties.ConstructorBinding
+import org.springframework.boot.context.properties.bind.DefaultValue
 import java.time.Duration
 
+@ConstructorBinding
 @ConfigurationProperties("market.service")
-interface ServiceConfig {
-    @get:Bindable(defaultValue = "PT1H")
-    val accountPeriod: Duration
+class ServiceConfig(
+    @DefaultValue("PT1H")
+    val accountPeriod: Duration,
 
-    @get:Bindable(defaultValue = "PT1H")
-    val collectionPeriod: Duration
+    @DefaultValue("PT1H")
+    val collectionPeriod: Duration,
 
-    @get:Bindable(defaultValue = "PT1H")
-    val itemPeriod: Duration
+    @DefaultValue("PT1H")
+    val itemPeriod: Duration,
 
-    @get:Bindable(defaultValue = "PT1H")
-    val missingItemPeriod: Duration
+    @DefaultValue("PT10M")
+    val royaltyPeriod: Duration,
 
-    @get:Bindable(defaultValue = "PT10M")
-    val royaltyPeriod: Duration
-
-    @get:Bindable(defaultValue = "PT10M")
-    val salePeriod: Duration
-}
+    @DefaultValue("PT10M")
+    val salePeriod: Duration,
+)

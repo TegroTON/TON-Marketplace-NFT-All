@@ -1,38 +1,38 @@
 package money.tegro.market.model
 
-import io.micronaut.data.annotation.Id
-import io.micronaut.data.annotation.MappedEntity
-import io.micronaut.data.annotation.TypeDef
-import io.micronaut.data.model.DataType
-import io.swagger.v3.oas.annotations.media.Schema
-import money.tegro.market.core.converter.MsgAddressAttributeConverter
-import money.tegro.market.core.converter.MsgAddressIntAttributeConverter
+import org.ktorm.database.Database
+import org.ktorm.entity.Entity
+import org.ktorm.entity.sequenceOf
+import org.ktorm.schema.Table
+import org.ktorm.schema.long
+import org.ktorm.schema.text
+import org.ktorm.schema.timestamp
 import org.ton.block.MsgAddress
 import org.ton.block.MsgAddressInt
 import java.time.Instant
 
-@MappedEntity("collections")
-@Schema(hidden = true)
-data class CollectionModel(
-    @field:Id
-    @field:TypeDef(type = DataType.BYTE_ARRAY, converter = MsgAddressIntAttributeConverter::class)
-    val address: MsgAddressInt,
+interface CollectionModel : Entity<CollectionModel> {
+    var address: MsgAddressInt
+    var nextItemIndex: Long
+    var owner: MsgAddress
+    var name: String?
+    var description: String?
+    var image: String?
+    var coverImage: String?
+    var updated: Instant
 
-    // Basic info
-    val nextItemIndex: Long,
+    companion object : Entity.Factory<CollectionModel>()
+}
 
-    @field:TypeDef(type = DataType.BYTE_ARRAY, converter = MsgAddressAttributeConverter::class)
-    val owner: MsgAddress,
+object CollectionTable : Table<CollectionModel>("collections") {
+    val address = msgAddressInt("address").primaryKey().bindTo { it.address }
+    val nextItemIndex = long("next_item_index").bindTo { it.nextItemIndex }
+    val owner = msgAddress("owner").bindTo { it.owner }
+    val name = text("name").bindTo { it.name }
+    val description = text("description").bindTo { it.description }
+    val image = text("image").bindTo { it.image }
+    val coverImage = text("cover_image").bindTo { it.coverImage }
+    val updated = timestamp("updated").bindTo { it.updated }
+}
 
-    // Metadata information
-    val name: String? = null,
-
-    val description: String? = null,
-
-    val image: String? = null,
-
-    val coverImage: String? = null,
-
-    val enabled: Boolean = false,
-    val updated: Instant = Instant.now(),
-)
+val Database.collections get() = this.sequenceOf(CollectionTable)

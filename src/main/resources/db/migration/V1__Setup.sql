@@ -13,7 +13,6 @@ CREATE TABLE collections
     description     TEXT,
     image           TEXT,
     cover_image     TEXT,
-    enabled         BOOLEAN     NOT NULL DEFAULT (FALSE),
     updated         TIMESTAMPTZ NOT NULL
 );
 
@@ -28,7 +27,6 @@ CREATE TABLE items
     description TEXT,
     image       TEXT,
     attributes  JSONB,
-    enabled     BOOLEAN     NOT NULL DEFAULT (FALSE),
     updated     TIMESTAMPTZ NOT NULL
 );
 

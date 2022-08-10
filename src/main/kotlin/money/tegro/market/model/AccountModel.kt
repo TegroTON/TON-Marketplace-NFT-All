@@ -1,20 +1,24 @@
 package money.tegro.market.model
 
-import io.micronaut.data.annotation.Id
-import io.micronaut.data.annotation.MappedEntity
-import io.micronaut.data.annotation.TypeDef
-import io.micronaut.data.model.DataType
-import io.swagger.v3.oas.annotations.media.Schema
-import money.tegro.market.core.converter.MsgAddressIntAttributeConverter
+import org.ktorm.database.Database
+import org.ktorm.entity.Entity
+import org.ktorm.entity.sequenceOf
+import org.ktorm.schema.Table
+import org.ktorm.schema.timestamp
 import org.ton.block.MsgAddressInt
 import java.time.Instant
 
-@MappedEntity("accounts")
-@Schema(hidden = true)
-data class AccountModel(
-    @field:Id
-    @field:TypeDef(type = DataType.BYTE_ARRAY, converter = MsgAddressIntAttributeConverter::class)
-    val address: MsgAddressInt,
+interface AccountModel : Entity<AccountModel> {
+    var address: MsgAddressInt
 
-    val updated: Instant = Instant.now(),
-)
+    var updated: Instant
+
+    companion object : Entity.Factory<AccountModel>()
+}
+
+object AccountTable : Table<AccountModel>("accounts") {
+    val address = msgAddressInt("address").primaryKey().bindTo { it.address }
+    val updated = timestamp("updated").bindTo { it.updated }
+}
+
+val Database.accounts get() = this.sequenceOf(AccountTable)

@@ -1,29 +1,33 @@
 package money.tegro.market.core.model
 
-import io.micronaut.data.annotation.Id
-import io.micronaut.data.annotation.MappedEntity
-import io.micronaut.data.annotation.TypeDef
-import io.micronaut.data.model.DataType
-import io.swagger.v3.oas.annotations.media.Schema
-import money.tegro.market.core.converter.MsgAddressAttributeConverter
-import money.tegro.market.core.converter.MsgAddressIntAttributeConverter
+import money.tegro.market.model.msgAddress
+import money.tegro.market.model.msgAddressInt
+import org.ktorm.database.Database
+import org.ktorm.entity.Entity
+import org.ktorm.entity.sequenceOf
+import org.ktorm.schema.Table
+import org.ktorm.schema.int
+import org.ktorm.schema.timestamp
 import org.ton.block.MsgAddress
 import org.ton.block.MsgAddressInt
 import java.time.Instant
 
-@MappedEntity("royalties")
-@Schema(hidden = true)
-data class RoyaltyModel(
-    @field:Id
-    @field:TypeDef(type = DataType.BYTE_ARRAY, converter = MsgAddressIntAttributeConverter::class)
-    val address: MsgAddressInt,
+interface RoyaltyModel : Entity<RoyaltyModel> {
+    var address: MsgAddressInt
+    var numerator: Int
+    var denominator: Int
+    var destination: MsgAddress
+    var updated: Instant
 
-    val numerator: Int,
+    companion object : Entity.Factory<RoyaltyModel>()
+}
 
-    val denominator: Int,
+object RoyaltyTable : Table<RoyaltyModel>("royalties") {
+    val address = msgAddressInt("address").primaryKey().bindTo { it.address }
+    val numerator = int("numerator").bindTo { it.numerator }
+    val denominator = int("denominator").bindTo { it.denominator }
+    var destination = msgAddress("destination").bindTo { it.destination }
+    val updated = timestamp("updated").bindTo { it.updated }
+}
 
-    @field:TypeDef(type = DataType.BYTE_ARRAY, converter = MsgAddressAttributeConverter::class)
-    val destination: MsgAddress,
-
-    val updated: Instant = Instant.now()
-)
+val Database.royalties get() = this.sequenceOf(RoyaltyTable)

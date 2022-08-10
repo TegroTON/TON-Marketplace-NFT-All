@@ -1,17 +1,19 @@
-package money.tegro.market.core.configuration
+package money.tegro.market.config
 
-import io.micronaut.context.annotation.ConfigurationProperties
-import io.micronaut.core.bind.annotation.Bindable
+import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.boot.context.properties.ConstructorBinding
+import org.springframework.boot.context.properties.bind.DefaultValue
 
+@ConstructorBinding
 @ConfigurationProperties("market.liteapi")
-interface LiteApiConfig {
-    @get:Bindable(defaultValue = "\${LITEAPI_IPV4:822901272}")
-    val ipv4: Int
+class LiteApiConfig(
+    @DefaultValue("822901272")
+    val ipv4: Int,
 
-    @get:Bindable(defaultValue = "\${LITEAPI_PORT:7811}")
-    val port: Int
+    @DefaultValue("7811")
+    val port: Int,
 
-    @get:Bindable(defaultValue = "\${LITEAPI_KEY:`eF2itktelj5g7nnJIaMW/RwAaE2Bzr1EMMrPAHDy3zA=`}")
+    @DefaultValue("eF2itktelj5g7nnJIaMW/RwAaE2Bzr1EMMrPAHDy3zA=")
     val key: String
-}
+)
 

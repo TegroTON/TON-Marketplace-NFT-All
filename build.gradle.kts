@@ -1,68 +1,67 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.kotlin.kapt)
-    alias(libs.plugins.shadow)
-    alias(libs.plugins.micronaut.application)
-}
-
-application {
-    mainClass.set("money.tegro.market.Application")
-}
-
-micronaut {
-    version("3.5.1")
-    processing {
-        incremental(true)
-        annotations("money.tegro.market.*")
-    }
-}
-
-dependencies {
-    implementation(libs.reflect)
-    implementation(libs.ton)
-
-    implementation(libs.bundles.coroutines)
-
-    implementation(libs.jackson)
-    runtimeOnly(libs.bundles.data.runtime)
-
-    implementation(libs.bundles.logging)
-    runtimeOnly(libs.bundles.logging.runtime)
-
-    implementation(libs.bundles.annotations)
-
-    implementation(libs.micronaut.jackson.databind)
-    implementation(libs.micronaut.kotlin.extensions)
-    implementation(libs.micronaut.kotlin.runtime)
-    implementation(libs.micronaut.validation)
-    runtimeOnly(libs.micronaut.reactor)
-
-    kapt(libs.micronaut.data.processor)
-    kapt(libs.micronaut.http.validation)
-    kapt(libs.micronaut.openapi)
-
-    implementation(libs.micronaut.http.client)
-    implementation(libs.micronaut.http.server.netty)
-
-    implementation(libs.micronaut.data.r2dbc)
-    implementation(libs.micronaut.flyway)
-
-    implementation(libs.micronaut.micrometer.core)
-    implementation(libs.micronaut.micrometer.annotations)
+    id("org.springframework.boot") version "2.7.2"
+    id("io.spring.dependency-management") version "1.0.12.RELEASE"
+    kotlin("jvm") version "1.7.0"
+    kotlin("plugin.spring") version "1.7.0"
+    kotlin("plugin.jpa") version "1.7.0"
 }
 
 group = "money.tegro"
 version = "0.0.1"
+java.sourceCompatibility = JavaVersion.VERSION_17
+
+configurations {
+    compileOnly {
+        extendsFrom(configurations.annotationProcessor.get())
+    }
+}
 
 repositories {
     mavenCentral()
     maven("https://jitpack.io")
 }
 
-tasks.withType<KotlinCompile>().configureEach {
+dependencies {
+    implementation("io.github.microutils:kotlin-logging:2.1.23")
+    implementation("net.logstash.logback:logstash-logback-encoder:7.2")
+    implementation("com.github.andreypfau.ton-kotlin:ton-kotlin:caa92dbaa1")
+    implementation("org.ktorm:ktorm-core:3.5.0")
+    implementation("org.ktorm:ktorm-jackson:3.5.0")
+    implementation("org.ktorm:ktorm-support-postgresql:3.5.0")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+    implementation("org.springframework.boot:spring-boot-starter-data-rest")
+    implementation("org.springframework.boot:spring-boot-starter-graphql")
+    implementation("org.springframework.boot:spring-boot-starter-hateoas")
+    implementation("org.springframework.boot:spring-boot-starter-quartz")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("org.flywaydb:flyway-core")
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation("org.springframework.data:spring-data-rest-hal-explorer")
+    implementation("org.springframework.session:spring-session-core")
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
+    runtimeOnly("io.micrometer:micrometer-registry-prometheus")
+    runtimeOnly("org.postgresql:postgresql")
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework:spring-webflux")
+    testImplementation("org.springframework.graphql:spring-graphql-test")
+    testImplementation("org.springframework.security:spring-security-test")
+}
+
+tasks.withType<KotlinCompile> {
     kotlinOptions {
-        jvmTarget = "11"
+        freeCompilerArgs = listOf("-Xjsr305=strict")
+        jvmTarget = "17"
     }
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }

@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: market
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_URL:localhost:5432/market}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgrespw}
+  flyway:
+    enabled: true
+  main:
+    banner-mode: off
+

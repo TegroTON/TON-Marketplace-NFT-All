@@ -1,17 +1,17 @@
 package money.tegro.market.factory
 
-import io.micronaut.context.annotation.Factory
-import jakarta.inject.Singleton
 import kotlinx.coroutines.runBlocking
-import money.tegro.market.core.configuration.LiteApiConfig
+import money.tegro.market.config.LiteApiConfig
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments.kv
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 import org.ton.crypto.base64
 import org.ton.lite.client.LiteClient
 
-@Factory
+@Configuration
 class LiteClientFactory(private val config: LiteApiConfig) {
-    @Singleton
+    @Bean
     fun liteClient() = runBlocking {
         logger.debug(
             "attempting to connect to {} {} ({})",

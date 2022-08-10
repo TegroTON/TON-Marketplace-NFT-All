@@ -1,85 +1,83 @@
 package money.tegro.market.service
 
-import io.micronaut.context.event.StartupEvent
-import io.micronaut.data.model.Sort
-import jakarta.annotation.PostConstruct
-import jakarta.annotation.PreDestroy
-import jakarta.inject.Singleton
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import money.tegro.market.config.ServiceConfig
 import money.tegro.market.contract.RoyaltyContract
 import money.tegro.market.core.model.RoyaltyModel
+import money.tegro.market.core.model.royalties
 import money.tegro.market.core.toRaw
-import money.tegro.market.repository.RoyaltyRepository
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments.kv
+import org.ktorm.database.Database
+import org.ktorm.dsl.eq
+import org.ktorm.entity.*
+import org.springframework.beans.factory.DisposableBean
+import org.springframework.beans.factory.InitializingBean
+import org.springframework.boot.context.event.ApplicationStartedEvent
+import org.springframework.context.ApplicationListener
+import org.springframework.stereotype.Service
 import org.ton.api.exception.TvmException
 import org.ton.block.AddrStd
 import org.ton.block.MsgAddressInt
 import org.ton.lite.client.LiteClient
+import java.time.Instant
 import kotlin.coroutines.CoroutineContext
 
-@Singleton
-open class RoyaltyService(
+@Service
+class RoyaltyService(
     private val liteClient: LiteClient,
     private val config: ServiceConfig,
 
     private val liveAccounts: Flow<AddrStd>,
 
-    private val royaltyRepository: RoyaltyRepository,
-) : CoroutineScope {
+    private val database: Database,
+) : CoroutineScope, ApplicationListener<ApplicationStartedEvent>, InitializingBean, DisposableBean {
     override val coroutineContext: CoroutineContext = Dispatchers.Default
-
-    suspend fun get(address: MsgAddressInt): RoyaltyModel? = royaltyRepository.findById(address) ?: update(address)
 
     suspend fun update(address: MsgAddressInt): RoyaltyModel? = try {
         logger.debug("updating royalty {}", kv("address", address.toRaw()))
-        RoyaltyContract.of(address as AddrStd, liteClient).let {
-            royaltyRepository.upsert(
-                address,
-                it.numerator,
-                it.denominator,
-                it.destination
-            )
+        RoyaltyContract.of(address as AddrStd, liteClient).let { royalty ->
+            (database.royalties.find { it.address eq address } ?: RoyaltyModel {
+                this.address = address
+            }).apply {
+                numerator = royalty.numerator
+                denominator = royalty.denominator
+                destination = royalty.destination
+                updated = Instant.now()
+
+                // TODO: transactional
+                if (database.royalties.any { it.address eq address }) {
+                    database.royalties.add(this)
+                } else {
+                    database.royalties.update(this)
+                }
+            }
         }
     } catch (e: TvmException) {
         logger.warn("could not get royalty for {}, removing entry", kv("address", address.toRaw()), e)
-        royaltyRepository.deleteById(address)
+        database.royalties.removeIf { it.address eq address }
         null
     }
 
-    //    @EventListener
-    open fun onStartup(event: StartupEvent) {
+    override fun onApplicationEvent(event: ApplicationStartedEvent) {
     }
 
-    @PostConstruct
-    open fun onInit() {
-        scheduledJob.start()
-        watchLiveJob.start()
+    override fun afterPropertiesSet() {
+        liveJob.start()
     }
 
-    @PreDestroy
-    open fun onShutdown() {
-        scheduledJob.cancel()
-        watchLiveJob.cancel()
+    override fun destroy() {
+        liveJob.cancel()
     }
 
-    private val scheduledJob = launch {
-        while (currentCoroutineContext().isActive) {
-            logger.debug("running scheduled update of all database entities")
-            royaltyRepository.findAll(Sort.of(Sort.Order.asc("updated")))
-                .collect { update(it.address) }
-
-            kotlinx.coroutines.time.delay(config.royaltyPeriod)
-        }
-    }
-
-    private val watchLiveJob = launch {
+    private val liveJob = launch {
         liveAccounts
-            .filter { royaltyRepository.existsById(it) }
+            .filter { database.royalties.any { a -> a.address eq it } }
             .onEach {
                 logger.info("{} matched database entity", kv("address", it.toRaw()))
             }

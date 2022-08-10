@@ -1,53 +1,54 @@
 package money.tegro.market.service
 
-import io.micronaut.context.event.StartupEvent
-import io.micronaut.runtime.event.annotation.EventListener
-import jakarta.annotation.PostConstruct
-import jakarta.annotation.PreDestroy
-import jakarta.inject.Singleton
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.time.delay
 import money.tegro.market.config.ServiceConfig
 import money.tegro.market.core.toRaw
-import money.tegro.market.repository.AccountRepository
+import money.tegro.market.model.accounts
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments.kv
+import org.ktorm.database.Database
+import org.ktorm.dsl.eq
+import org.ktorm.entity.find
+import org.ktorm.entity.forEach
+import org.ktorm.entity.sortedBy
+import org.ktorm.entity.update
+import org.springframework.beans.factory.DisposableBean
+import org.springframework.beans.factory.InitializingBean
+import org.springframework.boot.context.event.ApplicationStartedEvent
+import org.springframework.context.ApplicationListener
+import org.springframework.stereotype.Service
 import org.ton.block.AddrStd
-import org.ton.lite.client.LiteClient
 import java.time.Instant
 import kotlin.coroutines.CoroutineContext
 
-@Singleton
-open class AccountService(
-    private val liteClient: LiteClient,
+@Service
+class AccountService(
     private val config: ServiceConfig,
 
     private val liveAccounts: Flow<AddrStd>,
 
-    private val accountRepository: AccountRepository,
-) : CoroutineScope {
+    private val database: Database,
+) : CoroutineScope, ApplicationListener<ApplicationStartedEvent>, InitializingBean, DisposableBean {
     override val coroutineContext: CoroutineContext = Dispatchers.Default
 
-    @EventListener
-    open fun onStartup(event: StartupEvent) {
+    override fun onApplicationEvent(event: ApplicationStartedEvent) {
     }
 
-    @PostConstruct
-    open fun onInit() {
-        job.start()
+    override fun afterPropertiesSet() {
+        liveJob.start()
     }
 
-    @PreDestroy
-    open fun onShutdown() {
-        job.cancel()
+    override fun destroy() {
+        liveJob.cancel()
     }
 
-    private val job = launch {
+    private val liveJob = launch {
         merge(
             // Watch live
             liveAccounts
-                .mapNotNull { accountRepository.findById(it) }
+                .mapNotNull { address -> database.accounts.find { it.address eq address } }
                 .onEach {
                     logger.info("{} matched database entity", kv("address", it.address.toRaw()))
                 },
@@ -55,17 +56,16 @@ open class AccountService(
             channelFlow {
                 while (currentCoroutineContext().isActive) {
                     logger.debug("running scheduled update of all database entities")
-//                    accountRepository.findAll().collect { send(it) }
+                    database.accounts.sortedBy { it.updated }.forEach { send(it) }
                     delay(config.accountPeriod)
                 }
             }
         )
             .collect {
                 // Nothing to do here as of yet, just update the date ig
-                accountRepository.update(it.copy(updated = Instant.now()))
+                database.accounts.update(it.apply { updated = Instant.now() })
             }
     }
 
     companion object : KLogging()
-
 }
