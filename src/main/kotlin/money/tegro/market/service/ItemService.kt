@@ -20,7 +20,6 @@ import org.ktorm.dsl.eq
 import org.ktorm.entity.add
 import org.ktorm.entity.any
 import org.ktorm.entity.find
-import org.ktorm.entity.update
 import org.springframework.beans.factory.DisposableBean
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.boot.context.event.ApplicationStartedEvent
@@ -69,11 +68,10 @@ class ItemService(
             updated = Instant.now()
 
             // TODO: transactional
-            if (database.items.any { it.address eq address }) {
+            if (!database.items.any { it.address eq address }) {
                 database.items.add(this)
-            } else {
-                database.items.update(this)
             }
+            flushChanges()
         }
     } catch (e: TvmException) {
         logger.warn("could not get item information for {}", kv("address", address.toRaw()), e)
@@ -90,7 +88,6 @@ class ItemService(
     override fun destroy() {
         liveJob.cancel()
     }
-
 
     private val liveJob = launch {
         liveAccounts

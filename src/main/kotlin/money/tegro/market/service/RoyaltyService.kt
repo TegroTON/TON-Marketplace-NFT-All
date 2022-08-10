@@ -15,7 +15,10 @@ import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments.kv
 import org.ktorm.database.Database
 import org.ktorm.dsl.eq
-import org.ktorm.entity.*
+import org.ktorm.entity.add
+import org.ktorm.entity.any
+import org.ktorm.entity.find
+import org.ktorm.entity.removeIf
 import org.springframework.beans.factory.DisposableBean
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.boot.context.event.ApplicationStartedEvent
@@ -51,11 +54,10 @@ class RoyaltyService(
                 updated = Instant.now()
 
                 // TODO: transactional
-                if (database.royalties.any { it.address eq address }) {
+                if (!database.royalties.any { it.address eq address }) {
                     database.royalties.add(this)
-                } else {
-                    database.royalties.update(this)
                 }
+                flushChanges()
             }
         }
     } catch (e: TvmException) {

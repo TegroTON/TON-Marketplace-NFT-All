@@ -90,6 +90,7 @@ class CollectionService(
                 logger.info("{} matched database entity", kv("address", it.toRaw()))
                 update(it)
             }
+    }
 
     companion object : KLogging()
 }
