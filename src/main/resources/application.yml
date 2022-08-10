@@ -1,16 +1,14 @@
 spring:
   application:
     name: market
-  datasource:
-    url: jdbc:postgresql://${POSTGRES_URL:localhost:5432/market}
-    username: ${POSTGRES_USER:postgres}
-    password: ${POSTGRES_PASSWORD:postgrespw}
   r2dbc:
     url: r2dbc:pool:postgresql://${POSTGRES_URL:localhost:5432/market}
     username: ${POSTGRES_USER:postgres}
     password: ${POSTGRES_PASSWORD:postgrespw}
   flyway:
+    url: jdbc:postgresql://${POSTGRES_URL:localhost:5432/market}
+    user: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgrespw}
     enabled: true
   main:
     banner-mode: off
-

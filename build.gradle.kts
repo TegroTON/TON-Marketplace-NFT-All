@@ -29,6 +29,7 @@ dependencies {
     implementation("com.github.andreypfau.ton-kotlin:ton-kotlin:caa92dbaa1")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-amqp")
+    runtimeOnly("org.springframework.boot:spring-boot-starter-data-jdbc") // Needed for flyway
     implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
     implementation("org.springframework.boot:spring-boot-starter-data-rest")
     implementation("org.springframework.boot:spring-boot-starter-graphql")
