@@ -1,7 +1,7 @@
 package money.tegro.market.factory
 
 import kotlinx.coroutines.runBlocking
-import money.tegro.market.config.LiteApiConfig
+import money.tegro.market.properties.LiteClientProperties
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments.kv
 import org.springframework.context.annotation.Bean
@@ -10,7 +10,7 @@ import org.ton.crypto.base64
 import org.ton.lite.client.LiteClient
 
 @Configuration
-class LiteClientFactory(private val config: LiteApiConfig) {
+class LiteClientFactory(private val config: LiteClientProperties) {
     @Bean
     fun liteClient() = runBlocking {
         logger.debug(

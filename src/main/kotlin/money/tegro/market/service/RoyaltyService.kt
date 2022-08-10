@@ -6,19 +6,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import money.tegro.market.config.ServiceConfig
 import money.tegro.market.contract.RoyaltyContract
 import money.tegro.market.core.model.RoyaltyModel
-import money.tegro.market.core.model.royalties
 import money.tegro.market.core.toRaw
+import money.tegro.market.repository.RoyaltyRepository
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments.kv
-import org.ktorm.database.Database
-import org.ktorm.dsl.eq
-import org.ktorm.entity.add
-import org.ktorm.entity.any
-import org.ktorm.entity.find
-import org.ktorm.entity.removeIf
 import org.springframework.beans.factory.DisposableBean
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.boot.context.event.ApplicationStartedEvent
@@ -34,35 +27,30 @@ import kotlin.coroutines.CoroutineContext
 @Service
 class RoyaltyService(
     private val liteClient: LiteClient,
-    private val config: ServiceConfig,
 
     private val liveAccounts: Flow<AddrStd>,
 
-    private val database: Database,
+    private val royaltyRepository: RoyaltyRepository,
 ) : CoroutineScope, ApplicationListener<ApplicationStartedEvent>, InitializingBean, DisposableBean {
     override val coroutineContext: CoroutineContext = Dispatchers.Default
 
     suspend fun update(address: MsgAddressInt): RoyaltyModel? = try {
         logger.debug("updating royalty {}", kv("address", address.toRaw()))
         RoyaltyContract.of(address as AddrStd, liteClient).let { royalty ->
-            (database.royalties.find { it.address eq address } ?: RoyaltyModel {
-                this.address = address
-            }).apply {
-                numerator = royalty.numerator
-                denominator = royalty.denominator
-                destination = royalty.destination
-                updated = Instant.now()
-
-                // TODO: transactional
-                if (!database.royalties.any { it.address eq address }) {
-                    database.royalties.add(this)
-                }
-                flushChanges()
+            (royaltyRepository.findById(address) ?: RoyaltyModel(address)).run {
+                royaltyRepository.save(
+                    copy(
+                        numerator = royalty.numerator,
+                        denominator = royalty.denominator,
+                        destination = royalty.destination,
+                        updated = Instant.now()
+                    )
+                )
             }
         }
     } catch (e: TvmException) {
         logger.warn("could not get royalty for {}, removing entry", kv("address", address.toRaw()), e)
-        database.royalties.removeIf { it.address eq address }
+        royaltyRepository.deleteById(address)
         null
     }
 
@@ -79,7 +67,7 @@ class RoyaltyService(
 
     private val liveJob = launch {
         liveAccounts
-            .filter { database.royalties.any { a -> a.address eq it } }
+            .filter { royaltyRepository.existsById(it) }
             .onEach {
                 logger.info("{} matched database entity", kv("address", it.toRaw()))
             }

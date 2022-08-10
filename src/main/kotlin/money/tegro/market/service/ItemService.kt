@@ -6,20 +6,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import money.tegro.market.config.ServiceConfig
 import money.tegro.market.contract.CollectionContract
 import money.tegro.market.contract.ItemContract
-import money.tegro.market.core.model.ItemModel
-import money.tegro.market.core.model.items
 import money.tegro.market.core.toRaw
 import money.tegro.market.metadata.ItemMetadata
+import money.tegro.market.model.ItemModel
+import money.tegro.market.repository.ItemRepository
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments.kv
-import org.ktorm.database.Database
-import org.ktorm.dsl.eq
-import org.ktorm.entity.add
-import org.ktorm.entity.any
-import org.ktorm.entity.find
 import org.springframework.beans.factory.DisposableBean
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.boot.context.event.ApplicationStartedEvent
@@ -36,11 +30,10 @@ import kotlin.coroutines.CoroutineContext
 @Service
 class ItemService(
     private val liteClient: LiteClient,
-    private val config: ServiceConfig,
 
     private val liveAccounts: Flow<AddrStd>,
 
-    private val database: Database,
+    private val itemRepository: ItemRepository,
 ) : CoroutineScope, ApplicationListener<ApplicationStartedEvent>, InitializingBean, DisposableBean {
     override val coroutineContext: CoroutineContext = Dispatchers.Default
 
@@ -53,25 +46,21 @@ class ItemService(
                 ?: data.individualContent
         )
 
-        (database.items.find { it.address eq address } ?: ItemModel {
-            this.address = address
-        }).apply {
-            initialized = data.initialized
-            index = data.index
-            collection = data.collection
-            owner = data.owner
-            name = metadata.name
-            description = metadata.description
-            image = metadata.image
-                ?: metadata.imageData?.let { "data:image;base64," + base64(it) }
-            attributes = metadata.attributes.orEmpty().associate { it.trait to it.value }
-            updated = Instant.now()
-
-            // TODO: transactional
-            if (!database.items.any { it.address eq address }) {
-                database.items.add(this)
-            }
-            flushChanges()
+        (itemRepository.findById(address) ?: ItemModel(address)).run {
+            itemRepository.save(
+                copy(
+                    initialized = data.initialized,
+                    index = data.index,
+                    collection = data.collection,
+                    owner = data.owner,
+                    name = metadata.name,
+                    description = metadata.description,
+                    image = metadata.image
+                        ?: metadata.imageData?.let { "data:image;base64," + base64(it) },
+                    attributes = metadata.attributes.orEmpty().associate { it.trait to it.value },
+                    updated = Instant.now(),
+                )
+            )
         }
     } catch (e: TvmException) {
         logger.warn("could not get item information for {}", kv("address", address.toRaw()), e)
@@ -91,7 +80,7 @@ class ItemService(
 
     private val liveJob = launch {
         liveAccounts
-            .filter { database.items.any { a -> a.address eq it } }
+            .filter { itemRepository.existsById(it) }
             .onEach {
                 logger.info("{} matched database entity", kv("address", it.toRaw()))
             }

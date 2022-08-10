@@ -5,19 +5,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
-import money.tegro.market.config.ServiceConfig
 import money.tegro.market.contract.CollectionContract
 import money.tegro.market.core.toRaw
 import money.tegro.market.metadata.CollectionMetadata
 import money.tegro.market.model.CollectionModel
-import money.tegro.market.model.collections
+import money.tegro.market.repository.CollectionRepository
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments.kv
-import org.ktorm.database.Database
-import org.ktorm.dsl.eq
-import org.ktorm.entity.add
-import org.ktorm.entity.any
-import org.ktorm.entity.find
 import org.springframework.beans.factory.DisposableBean
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.boot.context.event.ApplicationStartedEvent
@@ -34,11 +28,10 @@ import kotlin.coroutines.CoroutineContext
 @Service
 class CollectionService(
     private val liteClient: LiteClient,
-    private val config: ServiceConfig,
 
     private val liveAccounts: Flow<AddrStd>,
 
-    private val database: Database,
+    private val collectionRepository: CollectionRepository,
 ) : CoroutineScope, ApplicationListener<ApplicationStartedEvent>, InitializingBean, DisposableBean {
     override val coroutineContext: CoroutineContext = Dispatchers.Default
 
@@ -48,24 +41,20 @@ class CollectionService(
             val data = CollectionContract.of(address as AddrStd, liteClient)
             val metadata = CollectionMetadata.of(data.content)
 
-            (database.collections.find { it.address eq address } ?: CollectionModel {
-                this.address = address
-            }).apply {
-                nextItemIndex = data.nextItemIndex
-                owner = data.owner
-                name = metadata.name
-                description = metadata.description
-                image = metadata.image
-                    ?: metadata.imageData?.let { "data:image;base64," + base64(it) }
-                coverImage = metadata.coverImage
-                    ?: metadata.coverImageData?.let { "data:image;base64," + base64(it) }
-                updated = Instant.now()
-
-                // TODO: transactional
-                if (!database.collections.any { it.address eq address }) {
-                    database.collections.add(this)
-                }
-                flushChanges()
+            (collectionRepository.findById(address) ?: CollectionModel(address)).run {
+                collectionRepository.save(
+                    copy(
+                        nextItemIndex = data.nextItemIndex,
+                        owner = data.owner,
+                        name = metadata.name,
+                        description = metadata.description,
+                        image = metadata.image
+                            ?: metadata.imageData?.let { "data:image;base64," + base64(it) },
+                        coverImage = metadata.coverImage
+                            ?: metadata.coverImageData?.let { "data:image;base64," + base64(it) },
+                        updated = Instant.now(),
+                    )
+                )
             }
         } catch (e: TvmException) {
             logger.warn("could not get collection information for {}", kv("address", address.toRaw()), e)
@@ -85,7 +74,7 @@ class CollectionService(
 
     private val liveJob = launch {
         liveAccounts
-            .filter { database.collections.any { a -> a.address eq it } }
+            .filter { collectionRepository.existsById(it) }
             .collect {
                 logger.info("{} matched database entity", kv("address", it.toRaw()))
                 update(it)

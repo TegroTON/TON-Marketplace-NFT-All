@@ -1,12 +1,12 @@
-package money.tegro.market.config
+package money.tegro.market.properties
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
 import org.springframework.boot.context.properties.bind.DefaultValue
 
 @ConstructorBinding
-@ConfigurationProperties("market.liteapi")
-class LiteApiConfig(
+@ConfigurationProperties("market.liteclient")
+class LiteClientProperties(
     @DefaultValue("822901272")
     val ipv4: Int,
 

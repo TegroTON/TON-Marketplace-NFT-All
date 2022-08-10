@@ -8,12 +8,9 @@ import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import money.tegro.market.core.toRaw
-import money.tegro.market.model.collections
+import money.tegro.market.repository.CollectionRepository
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments.kv
-import org.ktorm.database.Database
-import org.ktorm.dsl.eq
-import org.ktorm.entity.any
 import org.springframework.beans.factory.DisposableBean
 import org.springframework.boot.context.event.ApplicationStartedEvent
 import org.springframework.context.ApplicationListener
@@ -26,7 +23,7 @@ import kotlin.coroutines.CoroutineContext
 class InitializationService(
     private val resourceLoader: ResourceLoader,
 
-    private val database: Database,
+    private val collectionRepository: CollectionRepository,
     private val collectionService: CollectionService,
 ) : CoroutineScope, ApplicationListener<ApplicationStartedEvent>, DisposableBean {
     override val coroutineContext: CoroutineContext = Dispatchers.Default
@@ -49,7 +46,7 @@ class InitializationService(
             .asFlow()
             .filter { it.isNotBlank() }
             .map { AddrStd(it) }
-            .filterNot { database.collections.any { a -> a.address eq it } }
+            .filterNot { collectionRepository.existsById(it) }
             .collect {
                 logger.debug("loading {}", kv("address", it.toRaw()))
                 collectionService.update(it)
