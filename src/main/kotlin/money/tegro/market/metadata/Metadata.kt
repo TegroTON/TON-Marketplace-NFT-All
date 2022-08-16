@@ -9,8 +9,8 @@ import io.ktor.client.statement.*
 import mu.KLogging
 import org.ton.bitstring.BitString
 import org.ton.cell.Cell
+import org.ton.contract.*
 import org.ton.crypto.sha256
-import org.ton.smartcontract.*
 import org.ton.tlb.loadTlb
 
 @JsonIgnoreProperties(ignoreUnknown = true)

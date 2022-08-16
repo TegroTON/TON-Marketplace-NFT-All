@@ -1,53 +1,18 @@
-CREATE TABLE accounts
-(
-    address BYTEA PRIMARY KEY,
-    updated TIMESTAMPTZ NOT NULL
-);
-
 CREATE TABLE collections
 (
-    address         BYTEA PRIMARY KEY,
-    next_item_index BIGINT      NOT NULL,
-    owner           BYTEA       NOT NULL,
-    name            TEXT,
-    description     TEXT,
-    image           TEXT,
-    cover_image     TEXT,
-    updated         TIMESTAMPTZ NOT NULL
+    address   BYTEA PRIMARY KEY,
+    approved  BOOLEAN     NOT NULL DEFAULT (FALSE),
+    timestamp TIMESTAMPTZ NOT NULL DEFAULT (now())
 );
+
+INSERT INTO collections
+VALUES ('\xb5ee9c720101010100240000438007b8f9af6fca53ffcf481eeaebac66028fa5cfb11ab32c1355fc12bb4547325330', TRUE),
+       ('\xb5ee9c720101010100240000438006eaf9f465fee73f51141424ce8f955699fe29a16256604f70fdc2f12c0e8669f0', TRUE),
+       ('\xb5ee9c720101010100240000438001f7287b637e26b232cc595eb659cf325d160f51701815d695f57ded4b28bfa930', TRUE);
 
 CREATE TABLE items
 (
-    address     BYTEA PRIMARY KEY,
-    initialized BOOLEAN     NOT NULL,
-    index       BIGINT      NOT NULL,
-    collection  BYTEA       NOT NULL,
-    owner       BYTEA       NOT NULL,
-    name        TEXT,
-    description TEXT,
-    image       TEXT,
-    attributes  JSONB,
-    updated     TIMESTAMPTZ NOT NULL
-);
-
-CREATE TABLE royalties
-(
-    address     BYTEA PRIMARY KEY,
-    numerator   INTEGER     NOT NULL,
-    denominator INTEGER     NOT NULL,
-    destination BYTEA       NOT NULL,
-    updated     TIMESTAMPTZ NOT NULL
-);
-
-CREATE TABLE sales
-(
-    address             BYTEA PRIMARY KEY,
-    marketplace         BYTEA       NOT NULL,
-    item                BYTEA       NOT NULL,
-    owner               BYTEA       NOT NULL,
-    full_price          NUMERIC(80) NOT NULL,
-    marketplace_fee     NUMERIC(80) NOT NULL,
-    royalty             NUMERIC(80) NOT NULL,
-    royalty_destination BYTEA       NOT NULL,
-    updated             TIMESTAMPTZ NOT NULL
+    address   BYTEA PRIMARY KEY,
+    approved  BOOLEAN     NOT NULL DEFAULT (FALSE),
+    timestamp TIMESTAMPTZ NOT NULL DEFAULT (now())
 );

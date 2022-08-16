@@ -48,11 +48,11 @@ class LiveBlockchainFactory(
                     .orEmpty()
                     .associate { BigInt(it.first.toByteArray()).toInt() to it.second.nodes().maxBy { it.seq_no } }
                     .flatMap { curr ->
-                        (lastMcShards.getOrDefault(curr.key, curr.value).seq_no + 1..curr.value.seq_no)
+                        (lastMcShards.getOrDefault(curr.key, curr.value).seq_no + 1u..curr.value.seq_no)
                             .map {
                                 TonNodeBlockId(
                                     curr.key,
-                                    curr.value.next_validator_shard /* Shard.ID_ALL */,
+                                    curr.value.next_validator_shard.toLong() /* Shard.ID_ALL */,
                                     it.toInt()
                                 )
                             } // TODO
