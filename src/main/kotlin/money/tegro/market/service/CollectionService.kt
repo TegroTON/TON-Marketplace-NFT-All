@@ -35,7 +35,7 @@ class CollectionService(
     suspend fun getMetadata(address: MsgAddressInt): CollectionMetadata? =
         getContract(address)?.let { CollectionMetadata.of(it.content) }
 
-    suspend fun getItemAddress(address: MsgAddressInt, index: Long): MsgAddress =
+    suspend fun getItemAddress(address: MsgAddressInt, index: ULong): MsgAddress =
         CollectionContract.itemAddressOf(address as AddrStd, index, liteClient)
 
     companion object : KLogging()

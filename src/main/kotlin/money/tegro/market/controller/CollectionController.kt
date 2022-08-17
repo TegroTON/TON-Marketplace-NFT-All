@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import org.ton.block.MsgAddress
 import org.ton.block.MsgAddressInt
 
 @RestController
@@ -38,7 +37,7 @@ class CollectionController(
         )
 
     @GetMapping("/{address}/{index}")
-    suspend fun getItem(@PathVariable address: MsgAddressInt, @PathVariable index: Long): MsgAddress =
-        collectionService.getItemAddress(address, index)
+    suspend fun getItem(@PathVariable address: MsgAddressInt, @PathVariable index: Long) =
+        collectionService.getItemAddress(address, index.toULong())
 }
 

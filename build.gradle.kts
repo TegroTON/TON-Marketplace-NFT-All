@@ -12,6 +12,10 @@ group = "money.tegro"
 version = "0.0.1"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
+springBoot {
+    mainClass.set("money.tegro.market.ApplicationKt")
+}
+
 configurations {
     compileOnly {
         extendsFrom(configurations.annotationProcessor.get())
@@ -26,8 +30,9 @@ repositories {
 dependencies {
     implementation("io.github.microutils:kotlin-logging:2.1.23")
     implementation("net.logstash.logback:logstash-logback-encoder:7.2")
-    implementation("com.github.andreypfau.ton-kotlin:ton-kotlin:4da958631a")
+    implementation("com.github.andreypfau.ton-kotlin:ton-kotlin:aa222bb6ca")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0-RC")
+    implementation(kotlin("script-runtime"))
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-amqp")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")

@@ -9,7 +9,7 @@ import org.ton.block.MsgAddressInt
 data class CollectionDTO(
     val address: String,
 
-    val size: Long,
+    val size: ULong,
 
     val owner: String?,
 
