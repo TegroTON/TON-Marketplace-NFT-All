@@ -3,7 +3,7 @@ package money.tegro.market.factory
 import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import money.tegro.market.core.toRaw
+import money.tegro.market.toRaw
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments.kv
 import org.springframework.context.annotation.Bean

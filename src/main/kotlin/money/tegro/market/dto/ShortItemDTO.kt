@@ -1,6 +1,6 @@
 package money.tegro.market.dto
 
-import money.tegro.market.core.toRaw
+import money.tegro.market.toRaw
 import org.ton.block.MsgAddressInt
 
 data class ShortItemDTO(

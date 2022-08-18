@@ -2,8 +2,8 @@ package money.tegro.market.dto
 
 import money.tegro.market.contract.CollectionContract
 import money.tegro.market.contract.RoyaltyContract
-import money.tegro.market.core.toRaw
 import money.tegro.market.metadata.CollectionMetadata
+import money.tegro.market.toRaw
 import org.ton.block.MsgAddressInt
 
 data class CollectionDTO(

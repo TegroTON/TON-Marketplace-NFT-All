@@ -1,4 +1,4 @@
-package money.tegro.market.core
+package money.tegro.market
 
 import org.ton.block.AddrStd
 import org.ton.block.AddrVar
