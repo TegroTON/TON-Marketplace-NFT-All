@@ -21,6 +21,8 @@ data class ItemDTO(
 
     val description: String?,
 
+    val image: String?,
+
     val royalty: Float?,
 
     val royaltyDestination: String?
@@ -38,6 +40,7 @@ data class ItemDTO(
         owner = contract.owner.toRaw(),
         name = metadata.name,
         description = metadata.description,
+        image = metadata.image,
         royalty = royalty?.value(),
         royaltyDestination = royalty?.destination?.toRaw()
     )

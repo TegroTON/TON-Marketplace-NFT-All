@@ -8,7 +8,7 @@ import org.ton.block.MsgAddressInt
 fun MsgAddressInt.toRaw() = when (this) {
     is AddrStd -> "$workchain_id:$address"
     is AddrVar -> "$workchain_id:$address"
-}
+}.lowercase()
 
 fun MsgAddress.toRaw() = when (this) {
     is MsgAddressInt -> this.toRaw()

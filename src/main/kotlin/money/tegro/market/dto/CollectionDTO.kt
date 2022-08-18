@@ -17,6 +17,10 @@ data class CollectionDTO(
 
     val description: String?,
 
+    val image: String?,
+
+    val coverImage: String?,
+
     val royalty: Float?,
 
     val royaltyDestination: String?
@@ -32,6 +36,8 @@ data class CollectionDTO(
         owner = contract.owner.toRaw(),
         name = metadata.name,
         description = metadata.description,
+        image = metadata.image,
+        coverImage = metadata.coverImage,
         royalty = royalty?.value(),
         royaltyDestination = royalty?.destination?.toRaw()
     )
