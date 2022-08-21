@@ -1,17 +1,31 @@
 import {defineStore} from "pinia";
 import {TonhubConnector, TonhubCreatedSession, TonhubWalletConfig} from "ton-x";
+import {useLocalStorage} from "@vueuse/core";
 
 export const useTonhubSessionStore = defineStore('tonhub_session', {
     state: () => ({
         isSessionReady: false,
-        session: null as TonhubCreatedSession | null,
-        walletConfig: null as TonhubWalletConfig | null,
+        session: useLocalStorage<TonhubCreatedSession | null>('tonhub-session', null, {
+            serializer: {
+                read: (v) => v ? JSON.parse(v) : null,
+                write: (v) => JSON.stringify(v),
+            },
+        }),
+        walletConfig: useLocalStorage<TonhubWalletConfig | null>('tonhub-wallet', null, {
+            serializer: {
+                read: (v) => v ? JSON.parse(v) : null,
+                write: (v) => JSON.stringify(v),
+            },
+        }),
         connector: new TonhubConnector({network: "sandbox"}),
     }),
     actions: {
         async createSession() {
             if (this.session === null) {
                 this.session = await this.connector.createNewSession({name: "Libermall", url: "https://vk.com"})
+            }
+            if (this.walletConfig === null) {
+
             }
         },
 
