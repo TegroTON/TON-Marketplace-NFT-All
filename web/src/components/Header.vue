@@ -111,9 +111,15 @@
               <a class="nav-link" href="#">Create</a>
             </li>
           </ul>
-          <router-link to="/connect" class="btn btn-secondary btn-mobile-fixed order-3 order-lg-4">
+          <router-link to="/connect" v-if="this.tonhubSessionStore.isSessionReady"
+                       class="btn btn-secondary btn-mobile-fixed order-3 order-lg-4">
             <i class="fa-regular fa-arrow-right-to-arc me-2"></i>
             Connect
+          </router-link>
+          <router-link to="/" v-else
+                       class="btn btn-secondary btn-mobile-fixed order-3 order-lg-4">
+            <i class="fa-regular fa-wallet"></i>
+            Signed as {{ this.tonhubSessionStore.walletConfig?.address }}
           </router-link>
         </div>
       </nav>
@@ -123,8 +129,17 @@
 
 <script lang="ts">
 import {defineComponent} from "vue";
+import {useTonhubSessionStore} from "../stores/TonhubSessionStore";
 
 export default defineComponent({
   name: 'Header',
+
+  setup() {
+    const tonhubSessionStore = useTonhubSessionStore()
+
+    return {
+      tonhubSessionStore
+    }
+  }
 })
 </script>
