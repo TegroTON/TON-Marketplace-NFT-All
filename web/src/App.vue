@@ -4,72 +4,69 @@
     <!-- Start of Hero section
        ============================================= -->
     <section class="hero section" id="hero">
-      <Splide :options="{}">
-        <SplideSlide>
-          <div class="row alight-items-center">
-            <div class="col-md-12 col-lg-9 col-xl-5">
-              <h1 class="hero__title">
-                Discover the Exclusive <span class="d-block">NFT Collection</span>
-              </h1>
-              <div class="hero__desc">
-                Click My Collections and set up your collection.
-                Add social links, a description, profile & banner images, and set a secondary sales fee.
+      <div class="hero__container container-fluid carousel slide p-0" id="carouselHeroIndicators"
+           data-bs-ride="carousel" data-bs-interval="false">
+        <div class="carousel-indicators d-none d-lg-flex">
+          <button type="button" data-bs-target="#carouselHeroIndicators" data-bs-slide-to="0" class="active"
+                  aria-current="true" aria-label="Slide 1"></button>
+          <button type="button" data-bs-target="#carouselHeroIndicators" data-bs-slide-to="1"
+                  aria-label="Slide 2"></button>
+        </div>
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <div class="row alight-items-center">
+              <div class="col-md-12 col-lg-9 col-xl-5">
+                <h1 class="hero__title">
+                  Discover the Exclusive <span class="d-block">NFT Collection</span>
+                </h1>
+                <div class="hero__desc">
+                  Click My Collections and set up your collection.
+                  Add social links, a description, profile & banner images, and set a secondary sales fee.
+                </div>
+                <a href="#!" class="btn btn-outline-primary">
+                  <span>Learn more</span>
+                </a>
               </div>
-              <a href="#!" class="btn btn-outline-primary">
-                <span>Learn more</span>
-              </a>
             </div>
+            <picture>
+              <source srcset="/img/hero-image-2.webp" type="image/webp">
+              <source srcset="/img/hero-image-2.jpg" type="image/jpeg">
+              <img src="/img/hero-image-2.jpg" alt="Libermall NFT Marketplace" class="hero__image">
+            </picture>
           </div>
-
-          <picture>
-            <source srcset="/img/hero-image-2.webp" type="image/webp">
-            <source srcset="/img/hero-image-2.jpg" type="image/jpeg">
-            <img src="/img/hero-image-2.jpg" alt="Libermall NFT Marketplace" class="hero__image">
-          </picture>
-        </SplideSlide>
-        <SplideSlide>
-          <div class="row alight-items-center">
-            <div class="col-md-12 col-lg-9 col-xl-5">
-              <h1 class="hero__title">
-                Discover the Exclusive <span class="d-block">NFT Collection</span>
-              </h1>
-              <div class="hero__desc">
-                Click My Collections and set up your collection.
-                Add social links, a description, profile & banner images, and set a secondary sales fee.
+          <div class="carousel-item">
+            <div class="row alight-items-center">
+              <div class="col-md-12 col-lg-9 col-xl-5">
+                <h1 class="hero__title">
+                  Discover the Exclusive <span class="d-block">NFT Collection</span>
+                </h1>
+                <div class="hero__desc">
+                  Click My Collections and set up your collection.
+                  Add social links, a description, profile & banner images, and set a secondary sales fee.
+                </div>
+                <a href="#!" class="btn btn-outline-primary">
+                  <span>Learn more</span>
+                </a>
               </div>
-              <a href="#!" class="btn btn-outline-primary">
-                <span>Learn more</span>
-              </a>
             </div>
+            <picture>
+              <source srcset="/img/hero-image.webp" type="image/webp">
+              <source srcset="/img/hero-image.jpg" type="image/jpeg">
+              <img src="/img/hero-image.jpg" alt="Libermall NFT Marketplace" loading="lazy" class="hero__image">
+            </picture>
           </div>
-          <picture>
-            <source srcset="/img/hero-image.webp" type="image/webp">
-            <source srcset="/img/hero-image.jpg" type="image/jpeg">
-            <img src="/img/hero-image.jpg" alt="Libermall NFT Marketplace" loading="lazy" class="hero__image">
-          </picture>
-        </SplideSlide>
-      </Splide>
-      <!--      <div class="hero__container container-fluid carousel slide p-0" id="carouselHeroIndicators"-->
-      <!--           data-bs-ride="carousel" data-bs-interval="false">-->
-      <!--        <div class="carousel-indicators d-none d-lg-flex">-->
-      <!--          <button type="button" data-bs-target="#carouselHeroIndicators" data-bs-slide-to="0" class="active"-->
-      <!--                  aria-current="true" aria-label="Slide 1"></button>-->
-      <!--          <button type="button" data-bs-target="#carouselHeroIndicators" data-bs-slide-to="1"-->
-      <!--                  aria-label="Slide 2"></button>-->
-      <!--        </div>-->
-      <!--        <div class="carousel-inner">-->
-
-      <!--        </div>-->
-      <!--        <button class="carousel-control-prev" type="button" data-bs-target="#carouselHeroIndicators"-->
-      <!--                data-bs-slide="prev">-->
-      <!--          <i class="fa-solid fa-arrow-left"></i>-->
-      <!--        </button>-->
-      <!--        <button class="carousel-control-next" type="button" data-bs-target="#carouselHeroIndicators"-->
-      <!--                data-bs-slide="next">-->
-      <!--          <i class="fa-solid fa-arrow-right"></i>-->
-      <!--        </button>-->
-      <!--      </div>-->
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselHeroIndicators"
+                data-bs-slide="prev">
+          <font-awesome-icon icon="fa-solid fa-arrow-left"></font-awesome-icon>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselHeroIndicators"
+                data-bs-slide="next">
+          <font-awesome-icon icon="fa-solid fa-arrow-right"></font-awesome-icon>
+        </button>
+      </div>
     </section>
+
     <!-- End of Hero section
        ============================================= -->
     <!-- Start of Discover section

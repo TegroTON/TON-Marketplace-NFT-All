@@ -1,53 +1,5 @@
 // Required
 @import "~bootstrap/scss/functions";
-//
-//// General definitions
-//$yellow: #ffd12e;
-//$yellow-hover: #ffb82e;
-//$yellow-gradient: linear-gradient(90deg, #ffda55 0%, #ffd747 100%);
-//$dark-900: #050b1c;
-//$dark-700: #111826;
-//$gray-900: #1c2533;
-//$gray-700: #464a59;
-//$gray-500: #848a9c;
-//$gray: $gray-500;
-//$border: #111927;
-//$green: #24bd5e;
-//$red: #f2344b;
-//
-//$font-Roboto: 'Roboto', sans-serif;
-//$font-Raleway: 'Raleway', sans-serif;
-//
-//// Bootstrap theme definitions
-//$primary: $yellow;
-//$link-hover-color: $yellow-hover;
-//
-//$font-family-base: $font-Roboto;
-//$body-color: #fff;
-//$body-bg: $dark-900;
-//
-//$link-decoration: none;
-//$link-color: $gray-500;
-//$link-hover-color: $yellow;
-//
-//$headings-font-family: $font-Raleway;
-//
-//$border-color: $gray-900;
-//
-//$dropdown-bg: $gray-900;
-//$dropdown-border-radius: .5rem;
-//$dropdown-padding-x: 0;
-//$dropdown-padding-y: 0;
-//
-//$dropdown-item-padding-x: 24px;
-//$dropdown-item-padding-y: 10px;
-//
-//$btn-font-size: .875rem;
-//$btn-font-weight: 500;
-//$btn-padding-x: 28px;
-//$btn-padding-y: 14.5px;
-//$btn-border-width: 2px;
-//$btn-border-radius: .5rem;
 
 // Required
 @import "~bootstrap/scss/variables";
@@ -56,15 +8,38 @@
 @import "~bootstrap/scss/root";
 
 // Optional components
+@import "~bootstrap/scss/utilities";
+@import "~bootstrap/scss/utilities/api";
 @import "~bootstrap/scss/reboot";
 @import "~bootstrap/scss/type";
-@import "~bootstrap/scss/navbar";
-@import "~bootstrap/scss/nav";
+//@import "~bootstrap/scss/images";
 @import "~bootstrap/scss/containers";
 @import "~bootstrap/scss/grid";
+//@import "~bootstrap/scss/tables";
 @import "~bootstrap/scss/forms";
-@import "~bootstrap/scss/dropdown";
 @import "~bootstrap/scss/buttons";
+@import "~bootstrap/scss/transitions";
+@import "~bootstrap/scss/dropdown";
+//@import "~bootstrap/scss/button-group";
+@import "~bootstrap/scss/nav";
+@import "~bootstrap/scss/navbar";
+//@import "~bootstrap/scss/card";
+//@import "~bootstrap/scss/accordion";
+//@import "~bootstrap/scss/breadcrumb";
+//@import "~bootstrap/scss/pagination";
+//@import "~bootstrap/scss/badge";
+//@import "~bootstrap/scss/alert";
+//@import "~bootstrap/scss/progress";
+//@import "~bootstrap/scss/list-group";
+//@import "~bootstrap/scss/close";
+//@import "~bootstrap/scss/toasts";
+//@import "~bootstrap/scss/modal";
+//@import "~bootstrap/scss/tooltip";
+//@import "~bootstrap/scss/popover";
+@import "~bootstrap/scss/carousel";
+//@import "~bootstrap/scss/spinners";
+@import "~bootstrap/scss/offcanvas";
+//@import "~bootstrap/scss/placeholders";
 
 //
 // Actual definitions
