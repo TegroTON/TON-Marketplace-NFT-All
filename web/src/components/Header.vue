@@ -2,11 +2,11 @@
   <header class="header">
     <div class="container-fluid">
       <nav class="navbar navbar-expand-lg d-flex align-items-center p-0">
-        <a class="navbar-logo me-5" href="/">
+        <router-link to="/" class="navbar-logo me-5">
           <img class="navbar-logo__img" src="/img/logo/apple-icon-57x57.png"
                alt="Libermall - NFT Marketplace">
           <span class="navbar-logo__name d-none d-md-block">Libermall</span>
-        </a>
+        </router-link>
         <button class="navbar-toggler btn btn-outline-secondary order-2 order-xl-1 ms-3" type="button"
                 data-bs-toggle="collapse" data-bs-target="#navbarHeader" aria-controls="navbarSupportedContent"
                 aria-expanded="false" aria-label="Toggle navigation">

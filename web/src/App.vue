@@ -1,9 +1,7 @@
 <template>
   <Header></Header>
   <suspense>
-    <main class="main-page">
-      <router-view></router-view>
-    </main>
+    <router-view></router-view>
   </suspense>
   <Footer></Footer>
 </template>

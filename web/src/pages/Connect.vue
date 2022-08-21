@@ -1,15 +1,17 @@
 <template>
-  <div v-if="this.tonhubSessionStore.isSessionReady">
-    <p class="d-flex justify-content-center">
-      Successfully authorized as {{ this.tonhubSessionStore.walletConfig?.address }}
-    </p>
-  </div>
-  <div v-else>
-    <p class="d-flex justify-content-center">To authorize application, scan or tap the QR code below</p>
-    <a :href="tonhubConnectLink" class="d-flex justify-content-center">
-      <qrcode-vue :value="tonhubConnectLink" foreground="#FFFFFF" background="#000000" :size=256></qrcode-vue>
-    </a>
-  </div>
+  <main class="main-page">
+    <div v-if="this.tonhubSessionStore.isSessionReady">
+      <p class="d-flex justify-content-center">
+        Successfully authorized as {{ this.tonhubSessionStore.walletConfig?.address }}
+      </p>
+    </div>
+    <div v-else>
+      <p class="d-flex justify-content-center">To authorize application, scan or tap the QR code below</p>
+      <a :href="tonhubConnectLink" class="d-flex justify-content-center">
+        <qrcode-vue :value="tonhubConnectLink" foreground="#FFFFFF" background="#000000" :size=256></qrcode-vue>
+      </a>
+    </div>
+  </main>
 </template>
 
 <script lang="ts">
