@@ -23,7 +23,7 @@
 //@import "~bootstrap/scss/button-group";
 @import "~bootstrap/scss/nav";
 @import "~bootstrap/scss/navbar";
-//@import "~bootstrap/scss/card";
+@import "~bootstrap/scss/card";
 //@import "~bootstrap/scss/accordion";
 //@import "~bootstrap/scss/breadcrumb";
 //@import "~bootstrap/scss/pagination";
@@ -83,7 +83,7 @@ h1, h2, h3, h4 {
   color: var(--yellow);
 }
 
-.color-gray {
+.color-grey {
   color: var(--grey-500);
 }
 
@@ -283,7 +283,7 @@ h1, h2, h3, h4 {
   box-shadow: none !important;
 }
 
-.btn .fa-regular, .brn .fa-solid {
+.btn .fa-regular {
   font-size: 1rem;
 }
 
@@ -442,7 +442,7 @@ h1, h2, h3, h4 {
   background: transparent;
 }
 
-.navbar-collapse.show .btn-primary svg { // TODO
+.navbar-collapse.show .btn-primary i {
   font-size: 20px;
 }
 

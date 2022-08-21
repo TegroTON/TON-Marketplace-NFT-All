@@ -10,14 +10,14 @@
           </div>
           <div class="footer__text mb-5">
             <h4 class="fs-18">Stay in the loop</h4>
-            <p class="color-gray">
+            <p class="color-grey">
               Join our mailing list to stay in the loop with our newest feature releases, NFT drops, and tips and tricks
               for navigating OpenSea.
             </p>
           </div>
           <div class="input-group mb-5">
                <span class="input-group-text" id="basic-addon1">
-               <i class="fa-regular fa-envelope fs-18 color-gray"></i>
+               <i class="fa-regular fa-envelope fs-18 color-grey"></i>
                </span>
             <input type="text" class="form-control" placeholder="Enter email address">
             <div class="input-group-text p-1">
@@ -160,7 +160,7 @@
           </ul>
         </div>
       </div>
-      <div class="footer__bottom d-flex align-items-center color-gray border-top pt-5 mt-5">
+      <div class="footer__bottom d-flex align-items-center color-grey border-top pt-5 mt-5">
         <div class="row">
           <div class="col-sm-12 col-md-6 mb-3 mb-md-0">
             <span class="me-auto">©2022 Libermall, Inc</span>

@@ -58,11 +58,11 @@
         </div>
         <button class="carousel-control-prev" type="button" data-bs-target="#carouselHeroIndicators"
                 data-bs-slide="prev">
-          <font-awesome-icon icon="fa-solid fa-arrow-left"></font-awesome-icon>
+          <i class="fa-solid fa-arrow-left"></i>
         </button>
         <button class="carousel-control-next" type="button" data-bs-target="#carouselHeroIndicators"
                 data-bs-slide="next">
-          <font-awesome-icon icon="fa-solid fa-arrow-right"></font-awesome-icon>
+          <i class="fa-solid fa-arrow-right"></i>
         </button>
       </div>
     </section>
@@ -89,11 +89,11 @@
           <a href="#!" class="btn-play d-flex align-items-center text-start m-3" data-bs-toggle="modal"
              data-bs-target="#videoModal">
                <span class="btn-play__icon">
-               <i class="fa-solid fa-play"></i>
+                <i class="fa-solid fa-play"></i>
                </span>
             <div class="ms-4 fs-14 fw-bolder text-uppercase">
-              <p class="mb-1 color-gray">Watch more</p>
-              <p class="mb-0 color-gray">4:12</p>
+              <p class="mb-1 color-grey">Watch more</p>
+              <p class="mb-0 color-grey">4:12</p>
             </div>
           </a>
         </div>
@@ -145,7 +145,7 @@
               </picture>
               <div class="card-body">
                 <h3 class="fs-20 my-3">MetaPack</h3>
-                <p class="mb-0 color-gray">
+                <p class="mb-0 color-grey">
                   <i class="fa-regular fa-gem color-yellow me-2"></i>
                   floor price: 0.5
                 </p>
@@ -166,7 +166,7 @@
               </picture>
               <div class="card-body">
                 <h3 class="fs-20 my-3">Ragnarok</h3>
-                <p class="mb-0 color-gray">
+                <p class="mb-0 color-grey">
                   <i class="fa-regular fa-gem color-yellow me-2"></i>
                   floor price: 0.5
                 </p>
@@ -187,7 +187,7 @@
               </picture>
               <div class="card-body">
                 <h3 class="fs-20 my-3">Sneaker Heads</h3>
-                <p class="mb-0 color-gray">
+                <p class="mb-0 color-grey">
                   <i class="fa-regular fa-gem color-yellow me-2"></i>
                   floor price: 0.5
                 </p>
@@ -208,7 +208,7 @@
               </picture>
               <div class="card-body">
                 <h3 class="fs-20 my-3">Relationship</h3>
-                <p class="mb-0 color-gray">
+                <p class="mb-0 color-grey">
                   <i class="fa-regular fa-gem color-yellow me-2"></i>
                   floor price: 0.5
                 </p>
@@ -229,7 +229,7 @@
               </picture>
               <div class="card-body">
                 <h3 class="fs-20 my-3">The Foundation</h3>
-                <p class="mb-0 color-gray">
+                <p class="mb-0 color-grey">
                   <i class="fa-regular fa-gem color-yellow me-2"></i>
                   floor price: 0.5
                 </p>
@@ -250,7 +250,7 @@
               </picture>
               <div class="card-body">
                 <h3 class="fs-20 my-3">Sneaker Heads</h3>
-                <p class="mb-0 color-gray">
+                <p class="mb-0 color-grey">
                   <i class="fa-regular fa-gem color-yellow me-2"></i>
                   floor price: 0.5
                 </p>
@@ -296,13 +296,13 @@
                 </div>
                 <div class="collection__body mb-3 mb-lg-0">
                   <h4 class="fs-20 mb-3 text-truncate" style="max-width: 224px">Mutant Ape Yach ClubMutant</h4>
-                  <p class="mb-0 color-gray text-center text-lg-start">
+                  <p class="mb-0 color-grey text-center text-lg-start">
                     Floor: <span class="ms-1 text-uppercase">3,02 TON</span>
                   </p>
                 </div>
                 <div class="collection__info d-flex d-lg-block text-center text-lg-end ms-0 ms-lg-auto">
                   <div class="fw-medium text-uppercase text-white mb-3 me-3 me-lg-0">3.8k TON</div>
-                  <div class="fw-medium color-gray">
+                  <div class="fw-medium color-grey">
                     $2.68M <span class="color-green ms-2">+8.84%</span>
                   </div>
                 </div>
@@ -324,13 +324,13 @@
                 </div>
                 <div class="collection__body mb-3 mb-lg-0">
                   <h4 class="fs-20 mb-3 text-truncate" style="max-width: 224px">Gossamer Seed</h4>
-                  <p class="mb-0 color-gray text-center text-lg-start">
+                  <p class="mb-0 color-grey text-center text-lg-start">
                     Floor: <span class="ms-1 text-uppercase">3,02 TON</span>
                   </p>
                 </div>
                 <div class="collection__info d-flex d-lg-block text-center text-lg-end ms-0 ms-lg-auto">
                   <div class="fw-medium text-uppercase text-white mb-3 me-3 me-lg-0">3.8k TON</div>
-                  <div class="fw-medium color-gray">
+                  <div class="fw-medium color-grey">
                     $2.68M <span class="color-green ms-2">+8.84%</span>
                   </div>
                 </div>
@@ -352,13 +352,13 @@
                 </div>
                 <div class="collection__body mb-3 mb-lg-0">
                   <h4 class="fs-20 mb-3 text-truncate" style="max-width: 224px">ENS: Ethereum Name...</h4>
-                  <p class="mb-0 color-gray text-center text-lg-start">
+                  <p class="mb-0 color-grey text-center text-lg-start">
                     Floor: <span class="ms-1 text-uppercase">3,02 TON</span>
                   </p>
                 </div>
                 <div class="collection__info d-flex d-lg-block text-center text-lg-end ms-0 ms-lg-auto">
                   <div class="fw-medium text-uppercase text-white mb-3 me-3 me-lg-0">3.8k TON</div>
-                  <div class="fw-medium color-gray">
+                  <div class="fw-medium color-grey">
                     $2.68M <span class="color-green ms-2">+8.84%</span>
                   </div>
                 </div>
@@ -380,13 +380,13 @@
                 </div>
                 <div class="collection__body mb-3 mb-lg-0">
                   <h4 class="fs-20 mb-3 text-truncate" style="max-width: 224px">Bored Ape Yacht Club</h4>
-                  <p class="mb-0 color-gray text-center text-lg-start">
+                  <p class="mb-0 color-grey text-center text-lg-start">
                     Floor: <span class="ms-1 text-uppercase">3,02 TON</span>
                   </p>
                 </div>
                 <div class="collection__info d-flex d-lg-block text-center text-lg-end ms-0 ms-lg-auto">
                   <div class="fw-medium text-uppercase text-white mb-3 me-3 me-lg-0">3.8k TON</div>
-                  <div class="fw-medium color-gray">
+                  <div class="fw-medium color-grey">
                     $2.68M <span class="color-green ms-2">+8.84%</span>
                   </div>
                 </div>
@@ -408,13 +408,13 @@
                 </div>
                 <div class="collection__body mb-3 mb-lg-0">
                   <h4 class="fs-20 mb-3 text-truncate" style="max-width: 224px">Mutant Ape Yach Club</h4>
-                  <p class="mb-0 color-gray text-center text-lg-start">
+                  <p class="mb-0 color-grey text-center text-lg-start">
                     Floor: <span class="ms-1 text-uppercase">3,02 TON</span>
                   </p>
                 </div>
                 <div class="collection__info d-flex d-lg-block text-center text-lg-end ms-0 ms-lg-auto">
                   <div class="fw-medium text-uppercase text-white mb-3 me-3 me-lg-0">3.8k TON</div>
-                  <div class="fw-medium color-gray">
+                  <div class="fw-medium color-grey">
                     $2.68M <span class="color-green ms-2">+8.84%</span>
                   </div>
                 </div>
@@ -436,13 +436,13 @@
                 </div>
                 <div class="collection__body mb-3 mb-lg-0">
                   <h4 class="fs-20 mb-3 text-truncate" style="max-width: 224px">Art Blocks Curated</h4>
-                  <p class="mb-0 color-gray text-center text-lg-start">
+                  <p class="mb-0 color-grey text-center text-lg-start">
                     Floor: <span class="ms-1 text-uppercase">3,02 TON</span>
                   </p>
                 </div>
                 <div class="collection__info d-flex d-lg-block text-center text-lg-end ms-0 ms-lg-auto">
                   <div class="fw-medium text-uppercase text-white mb-3 me-3 me-lg-0">3.8k TON</div>
-                  <div class="fw-medium color-gray">
+                  <div class="fw-medium color-grey">
                     $2.68M <span class="color-green ms-2">+8.84%</span>
                   </div>
                 </div>
@@ -464,13 +464,13 @@
                 </div>
                 <div class="collection__body mb-3 mb-lg-0">
                   <h4 class="fs-20 mb-3 text-truncate" style="max-width: 224px">Moonrunners Official</h4>
-                  <p class="mb-0 color-gray text-center text-lg-start">
+                  <p class="mb-0 color-grey text-center text-lg-start">
                     Floor: <span class="ms-1 text-uppercase">3,02 TON</span>
                   </p>
                 </div>
                 <div class="collection__info d-flex d-lg-block text-center text-lg-end ms-0 ms-lg-auto">
                   <div class="fw-medium text-uppercase text-white mb-3 me-3 me-lg-0">3.8k TON</div>
-                  <div class="fw-medium color-gray">
+                  <div class="fw-medium color-grey">
                     $2.68M <span class="color-green ms-2">+8.84%</span>
                   </div>
                 </div>
@@ -492,13 +492,13 @@
                 </div>
                 <div class="collection__body mb-3 mb-lg-0">
                   <h4 class="fs-20 mb-3 text-truncate" style="max-width: 224px">Cyber Galz - Galz</h4>
-                  <p class="mb-0 color-gray text-center text-lg-start">
+                  <p class="mb-0 color-grey text-center text-lg-start">
                     Floor: <span class="ms-1 text-uppercase">3,02 TON</span>
                   </p>
                 </div>
                 <div class="collection__info d-flex d-lg-block text-center text-lg-end ms-0 ms-lg-auto">
                   <div class="fw-medium text-uppercase text-white mb-3 me-3 me-lg-0">3.8k TON</div>
-                  <div class="fw-medium color-gray">
+                  <div class="fw-medium color-grey">
                     $2.68M <span class="color-green ms-2">+8.84%</span>
                   </div>
                 </div>
@@ -520,13 +520,13 @@
                 </div>
                 <div class="collection__body mb-3 mb-lg-0">
                   <h4 class="fs-20 mb-3 text-truncate" style="max-width: 224px">Moonturtlez</h4>
-                  <p class="mb-0 color-gray text-center text-lg-start">
+                  <p class="mb-0 color-grey text-center text-lg-start">
                     Floor: <span class="ms-1 text-uppercase">3,02 TON</span>
                   </p>
                 </div>
                 <div class="collection__info d-flex d-lg-block text-center text-lg-end ms-0 ms-lg-auto">
                   <div class="fw-medium text-uppercase text-white mb-3 me-3 me-lg-0">3.8k TON</div>
-                  <div class="fw-medium color-gray">
+                  <div class="fw-medium color-grey">
                     $2.68M <span class="color-green ms-2">+8.84%</span>
                   </div>
                 </div>
@@ -555,13 +555,13 @@
                 <img src="/img/create-card-1.png" alt="" class="create-card__img" width="100px" height="100px">
               </div>
               <div class="create-card__body ms-4">
-                <div class="create-card__num color-gray mb-3">
+                <div class="create-card__num color-grey mb-3">
                   0<span class="color-yellow">1</span>
                 </div>
                 <h4 class="fs-24 mb-4">
                   Set up your wallet
                 </h4>
-                <p class="fs-18 color-gray mb-0">
+                <p class="fs-18 color-grey mb-0">
                   Once you’ve set up your wallet of choice, connect it to Libermall by clicking the wallet icon in the
                   top right corner. Learn about the wallets we support
                 </p>
@@ -574,13 +574,13 @@
                 <img src="/img/create-card-2.png" alt="" class="create-card__img" width="100px" height="100px">
               </div>
               <div class="create-card__body ms-4">
-                <div class="create-card__num color-gray mb-3">
+                <div class="create-card__num color-grey mb-3">
                   0<span class="color-yellow">2</span>
                 </div>
                 <h4 class="fs-24 mb-4">
                   Create your collection
                 </h4>
-                <p class="fs-18 color-gray mb-0">
+                <p class="fs-18 color-grey mb-0">
                   Once you’ve set up your wallet of choice, connect it to Libermall by clicking the wallet icon in the
                   top right corner. Learn about the wallets we support
                 </p>
@@ -593,13 +593,13 @@
                 <img src="/img/create-card-3.png" alt="" class="create-card__img" width="90px" height="90px">
               </div>
               <div class="create-card__body ms-4">
-                <div class="create-card__num color-gray mb-3">
+                <div class="create-card__num color-grey mb-3">
                   0<span class="color-yellow">3</span>
                 </div>
                 <h4 class="fs-24 mb-4">
                   Add your NFTs
                 </h4>
-                <p class="fs-18 color-gray mb-0">
+                <p class="fs-18 color-grey mb-0">
                   Once you’ve set up your wallet of choice, connect it to Libermall by clicking the wallet icon in the
                   top right corner. Learn about the wallets we support
                 </p>
@@ -612,13 +612,13 @@
                 <img src="/img/create-card-4.png" alt="" class="create-card__img" width="90px" height="90px">
               </div>
               <div class="create-card__body ms-4">
-                <div class="create-card__num color-gray mb-3">
+                <div class="create-card__num color-grey mb-3">
                   0<span class="color-yellow">4</span>
                 </div>
                 <h4 class="fs-24 mb-4">
                   List them for sale
                 </h4>
-                <p class="fs-18 color-gray mb-0">
+                <p class="fs-18 color-grey mb-0">
                   Once you’ve set up your wallet of choice, connect it to Libermall by clicking the wallet icon in the
                   top right corner. Learn about the wallets we support
                 </p>

@@ -10,8 +10,7 @@
         <button class="navbar-toggler btn btn-outline-secondary order-2 order-xl-1 ms-3" type="button"
                 data-bs-toggle="collapse" data-bs-target="#navbarHeader" aria-controls="navbarSupportedContent"
                 aria-expanded="false" aria-label="Toggle navigation">
-          <font-awesome-icon icon="fa-solid fa-bars" class="fs-20"></font-awesome-icon>
-          <!-- TODO: Should be fa-regular here-->
+          <i class="fa-regular fa-bars fs-20"></i>
         </button>
         <div class="collapse navbar-collapse " id="navbarHeader">
           <form
@@ -21,7 +20,7 @@
                      aria-describedby="basic-addon2">
               <div class="input-group-text p-0">
                 <button class="btn" type="submit">
-                  <font-awesome-icon icon="fa-solid fa-magnifying-glass" class="color-gray"></font-awesome-icon>
+                  <i class="fa-solid fa-magnifying-glass color-grey"></i>
                 </button>
               </div>
             </div>
@@ -29,95 +28,73 @@
           <div class="dropdown order-4 order-lg-1">
             <button class="btn btn-primary" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown"
                     aria-expanded="false">
-              <font-awesome-icon icon="fa-solid fa-border-all" class="me-2">
-                <!-- TODO: fa-regular fa-grid-2 -->
-              </font-awesome-icon>
+              <i class="fa-regular fa-grid-2 me-2"></i>
               Explore
             </button>
             <ul class="dropdown-menu animate slideIn mt-3" aria-labelledby="dropdownMenuButton1">
               <li>
                 <a class="dropdown-item" href="#">
-                  <font-awesome-icon icon="fa-regular fa-images" class="me-3">
-                    <!-- TODO: fa-regular fa-hexagon-vertical-nft-slanted -->
-                  </font-awesome-icon>
+                  <i class="fa-regular fa-hexagon-vertical-nft-slanted me-3"></i>
                   All NFTs
                 </a>
               </li>
               <li>
                 <a class="dropdown-item" href="#">
-                  <font-awesome-icon icon="fa-regular fa-square" class="me-3">
-                    <!--TODO: fa-regular fa-hexagon-image -->
-                  </font-awesome-icon>
+                  <i class="fa-regular fa-hexagon-image me-3"></i>
                   Solanas
                 </a>
               </li>
               <li>
                 <a class="dropdown-item" href="#">
-                  <font-awesome-icon icon="fa-solid fa-paintbrush" class="me-3">
-                    <!-- TODO: fa-regular fa-paintbrush-fine -->
-                  </font-awesome-icon>
+                  <i class="fa-regular fa-paintbrush-fine me-3"></i>
                   Art
                 </a>
               </li>
               <li>
                 <a class="dropdown-item" href="#">
-                  <font-awesome-icon icon="fa-solid fa-frog" class="me-3">
-                    <!-- TODO: fa-regular fa-rabbit -->
-                  </font-awesome-icon>
+                  <i class="fa-regular fa-rabbit me-3"></i>
                   Collectibles
                 </a>
               </li>
               <li>
                 <a class="dropdown-item" href="#">
-                  <font-awesome-icon icon="fa-solid fa-server" class="me-3">
-                    <!-- TODO: fa-regular fa-server -->
-                  </font-awesome-icon>
+                  <i class="fa-regular fa-server me-3"></i>
                   Domain Names
                 </a>
               </li>
               <li>
                 <a class="dropdown-item" href="#">
-                  <font-awesome-icon icon="fa-solid fa-music" class="me-3">
-                    <!-- TODO: fa-regular fa-music -->
-                  </font-awesome-icon>
+                  <i class="fa-regular fa-music me-3"></i>
                   Music
                 </a>
               </li>
               <li>
                 <a class="dropdown-item" href="#">
-                  <font-awesome-icon icon="fa-solid fa-camera" class="me-3">
-                    <!-- TODO: fa-regular fa-camera -->
-                  </font-awesome-icon>
+                  <i class="fa-regular fa-camera me-3"></i>
                   Photography
                 </a>
               </li>
               <li>
                 <a class="dropdown-item" href="#">
-                  <font-awesome-icon icon="fa-regular fa-futbol" class="me-3"></font-awesome-icon>
+                  <i class="fa-regular fa-futbol me-3"></i>
                   Sports
                 </a>
               </li>
               <li>
                 <a class="dropdown-item" href="#">
-                  <font-awesome-icon icon="fa-solid fa-heart-circle-bolt" class="me-3">
-                    <!-- TODO: fa-regular fa-heart-circle-bolt -->
-                  </font-awesome-icon>
+                  <i class="fa-regular fa-heart-circle-bolt me-3"></i>
                   Trading Cards
                 </a>
               </li>
               <li>
                 <a class="dropdown-item" href="#">
-                  <font-awesome-icon icon="fa-solid fa-money-bills" class="me-3">
-                    <!-- TODO: fa-regular fa-money-bills-simple -->
-                  </font-awesome-icon>
+                  <i class="fa-regular fa-money-bills-simple me-3"></i>
                   Utility
                 </a>
               </li>
               <li>
                 <a class="dropdown-item" href="#">
-                  <font-awesome-icon icon="fa-solid fa-vr-cardboard" class="me-3">
-                    <!-- TODO: fa-regular fa-vr-cardboard -->
-                  </font-awesome-icon>
+                  <i class="fa-regular fa-vr-cardboard me-3"></i>
                   Virtual Worlds
                 </a>
               </li>
@@ -135,9 +112,7 @@
             </li>
           </ul>
           <a href="#!" class="btn btn-secondary btn-mobile-fixed order-3 order-lg-4">
-            <font-awesome-icon icon="fa-solid fa-right-to-bracket" class="me-2">
-              <!-- TODO: fa-regular fa-arrow-right-to-arc -->
-            </font-awesome-icon>
+            <i class="fa-regular fa-arrow-right-to-arc me-2"></i>
             Connect
           </a>
         </div>
