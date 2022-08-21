@@ -35,20 +35,91 @@
               Explore
             </button>
             <ul class="dropdown-menu animate slideIn mt-3" aria-labelledby="dropdownMenuButton1">
-              <li><a class="dropdown-item" href="#"><i class="fa-regular fa-hexagon-vertical-nft-slanted me-3"></i>All
-                NFTs</a></li>
-              <li><a class="dropdown-item" href="#"><i class="fa-regular fa-hexagon-image me-3"></i>Solanas</a></li>
-              <li><a class="dropdown-item" href="#"><i class="fa-regular fa-paintbrush-fine me-3"></i>Art</a></li>
-              <li><a class="dropdown-item" href="#"><i class="fa-regular fa-rabbit me-3"></i>Collectibles</a></li>
-              <li><a class="dropdown-item" href="#"><i class="fa-regular fa-server me-3"></i>Domain Names</a></li>
-              <li><a class="dropdown-item" href="#"><i class="fa-regular fa-music me-3"></i>Music</a></li>
-              <li><a class="dropdown-item" href="#"><i class="fa-regular fa-camera me-3"></i>Photography</a></li>
-              <li><a class="dropdown-item" href="#"><i class="fa-regular fa-futbol me-3"></i>Sports</a></li>
-              <li><a class="dropdown-item" href="#"><i class="fa-regular fa-heart-circle-bolt me-3"></i>Trading
-                Cards</a></li>
-              <li><a class="dropdown-item" href="#"><i class="fa-regular fa-money-bills-simple me-3"></i>Utility</a>
+              <li>
+                <a class="dropdown-item" href="#">
+                  <font-awesome-icon icon="fa-regular fa-images" class="me-3">
+                    <!-- TODO: fa-regular fa-hexagon-vertical-nft-slanted -->
+                  </font-awesome-icon>
+                  All NFTs
+                </a>
               </li>
-              <li><a class="dropdown-item" href="#"><i class="fa-regular fa-vr-cardboard me-3"></i>Virtual Worlds</a>
+              <li>
+                <a class="dropdown-item" href="#">
+                  <font-awesome-icon icon="fa-regular fa-square" class="me-3">
+                    <!--TODO: fa-regular fa-hexagon-image -->
+                  </font-awesome-icon>
+                  Solanas
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#">
+                  <font-awesome-icon icon="fa-solid fa-paintbrush" class="me-3">
+                    <!-- TODO: fa-regular fa-paintbrush-fine -->
+                  </font-awesome-icon>
+                  Art
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#">
+                  <font-awesome-icon icon="fa-solid fa-frog" class="me-3">
+                    <!-- TODO: fa-regular fa-rabbit -->
+                  </font-awesome-icon>
+                  Collectibles
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#">
+                  <font-awesome-icon icon="fa-solid fa-server" class="me-3">
+                    <!-- TODO: fa-regular fa-server -->
+                  </font-awesome-icon>
+                  Domain Names
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#">
+                  <font-awesome-icon icon="fa-solid fa-music" class="me-3">
+                    <!-- TODO: fa-regular fa-music -->
+                  </font-awesome-icon>
+                  Music
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#">
+                  <font-awesome-icon icon="fa-solid fa-camera" class="me-3">
+                    <!-- TODO: fa-regular fa-camera -->
+                  </font-awesome-icon>
+                  Photography
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#">
+                  <font-awesome-icon icon="fa-regular fa-futbol" class="me-3"></font-awesome-icon>
+                  Sports
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#">
+                  <font-awesome-icon icon="fa-solid fa-heart-circle-bolt" class="me-3">
+                    <!-- TODO: fa-regular fa-heart-circle-bolt -->
+                  </font-awesome-icon>
+                  Trading Cards
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#">
+                  <font-awesome-icon icon="fa-solid fa-money-bills" class="me-3">
+                    <!-- TODO: fa-regular fa-money-bills-simple -->
+                  </font-awesome-icon>
+                  Utility
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#">
+                  <font-awesome-icon icon="fa-solid fa-vr-cardboard" class="me-3">
+                    <!-- TODO: fa-regular fa-vr-cardboard -->
+                  </font-awesome-icon>
+                  Virtual Worlds
+                </a>
               </li>
             </ul>
           </div>
@@ -64,8 +135,9 @@
             </li>
           </ul>
           <a href="#!" class="btn btn-secondary btn-mobile-fixed order-3 order-lg-4">
-            <font-awesome-icon icon="fa-solid fa-right-to-bracket" class=" me-2"></font-awesome-icon>
-            <!-- TODO: fa-regular fa-arrow-right-to-arc -->
+            <font-awesome-icon icon="fa-solid fa-right-to-bracket" class="me-2">
+              <!-- TODO: fa-regular fa-arrow-right-to-arc -->
+            </font-awesome-icon>
             Connect
           </a>
         </div>
