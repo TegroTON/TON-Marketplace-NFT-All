@@ -21,7 +21,7 @@
                      aria-describedby="basic-addon2">
               <div class="input-group-text p-0">
                 <button class="btn" type="submit">
-                  <font-awesome-icon icon="fa-solid fa-magnifying-glass" class="color-grey"></font-awesome-icon>
+                  <font-awesome-icon icon="fa-solid fa-magnifying-glass" class="color-gray"></font-awesome-icon>
                 </button>
               </div>
             </div>
