@@ -111,10 +111,10 @@
               <a class="nav-link" href="#">Create</a>
             </li>
           </ul>
-          <a :href="tonhubConnectLink() || '#'" class="btn btn-secondary btn-mobile-fixed order-3 order-lg-4">
+          <router-link to="/connect" class="btn btn-secondary btn-mobile-fixed order-3 order-lg-4">
             <i class="fa-regular fa-arrow-right-to-arc me-2"></i>
             Connect
-          </a>
+          </router-link>
         </div>
       </nav>
     </div>
@@ -123,19 +123,8 @@
 
 <script lang="ts">
 import {defineComponent} from "vue";
-import {useTonhubSessionStore} from "../stores/TonhubSessionStore";
 
 export default defineComponent({
   name: 'Header',
-  async setup() {
-    const tonhubSessionStore = useTonhubSessionStore()
-
-    await tonhubSessionStore.newSession()
-  },
-  data() {
-    return {
-      tonhubConnectLink: () => useTonhubSessionStore(this.$pinia).link
-    }
-  }
 })
 </script>
