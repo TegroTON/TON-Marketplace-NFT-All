@@ -1,5 +1,7 @@
 <template>
-  <Header></Header>
+  <Suspense>
+    <Header></Header>
+  </Suspense>
   <main class="main-page">
     <!-- Start of Hero section
        ============================================= -->
