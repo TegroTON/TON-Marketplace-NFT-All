@@ -21,11 +21,10 @@ export const useTonhubSessionStore = defineStore('tonhub_session', {
     }),
     actions: {
         async createSession() {
-            if (this.session === null) {
+            // No session or it has been revoked
+            if (this.session === null || (await this.connector.getSessionState(this.session.id)).state !== "ready") {
                 this.session = await this.connector.createNewSession({name: "Libermall", url: "https://vk.com"})
-            }
-            if (this.walletConfig === null) {
-
+                this.walletConfig = null
             }
         },
 
