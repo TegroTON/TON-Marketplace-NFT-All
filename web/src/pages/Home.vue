@@ -281,21 +281,21 @@
           </div>
         </div>
         <div class="row pt-3">
-          <div class="col-sm-6 col-lg-6 col-xl-4">
-            <a href="#!" class="d-block" title="Mutant Ape Yach ClubMutant">
+          <div class="col-sm-6 col-lg-6 col-xl-4" v-for="collection in collections">
+            <router-link :to="'/collection/' + collection.address" class="d-block"
+                         :title="collection.metadata.name || 'Untitled'">
               <div class="card d-flex flex-lg-row align-items-center p-3 p-xl-4 rounded-20 mb-4">
                 <div class="collection__picbox position-relative me-4 mb-4 mb-lg-0">
-                  <picture>
-                    <source srcset="/img/collections/img-1.webp" type="image/webp">
-                    <source srcset="/img/collections/img-1.jpg" type="image/jpeg">
-                    <img src="/img/collections/img-1.jpg" class="image-80x80 rounded-circle" loading="lazy"
-                         width="80" height="80" alt="Mutant Ape Yach ClubMutant">
-                  </picture>
+                  <img :src="collection.metadata.image || '/img/collections/img-1.jpg'"
+                       class="image-80x80 rounded-circle" loading="lazy"
+                       width="80" height="80" :alt="collection.metadata.name || 'Untitled'">
                   <i class="fa-solid fa-circle-check fs-22 color-yellow position-absolute bottom-0"
                      style="right: -4%;"></i>
                 </div>
                 <div class="collection__body mb-3 mb-lg-0">
-                  <h4 class="fs-20 mb-3 text-truncate" style="max-width: 224px">Mutant Ape Yach ClubMutant</h4>
+                  <h4 class="fs-20 mb-3 text-truncate" style="max-width: 224px">
+                    {{ collection.metadata.name || 'Untitled' }}
+                  </h4>
                   <p class="mb-0 color-grey text-center text-lg-start">
                     Floor: <span class="ms-1 text-uppercase">3,02 TON</span>
                   </p>
@@ -307,231 +307,7 @@
                   </div>
                 </div>
               </div>
-            </a>
-          </div>
-          <div class="col-sm-6 col-lg-6 col-xl-4">
-            <a href="#!" class="d-block" title="Gossamer Seed">
-              <div class="card d-flex flex-lg-row align-items-center p-3 p-xl-4 rounded-20 mb-4">
-                <div class="collection__picbox position-relative me-4 mb-4 mb-lg-0">
-                  <picture>
-                    <source srcset="/img/collections/img-2.webp" type="image/webp">
-                    <source srcset="/img/collections/img-2.jpg" type="image/jpeg">
-                    <img src="/img/collections/img-2.jpg" class="image-80x80 rounded-circle" loading="lazy"
-                         width="80" height="80" alt="Mutant Ape Yach ClubMutant">
-                  </picture>
-                  <i class="fa-solid fa-circle-check fs-22 color-yellow position-absolute bottom-0"
-                     style="right: -4%;"></i>
-                </div>
-                <div class="collection__body mb-3 mb-lg-0">
-                  <h4 class="fs-20 mb-3 text-truncate" style="max-width: 224px">Gossamer Seed</h4>
-                  <p class="mb-0 color-grey text-center text-lg-start">
-                    Floor: <span class="ms-1 text-uppercase">3,02 TON</span>
-                  </p>
-                </div>
-                <div class="collection__info d-flex d-lg-block text-center text-lg-end ms-0 ms-lg-auto">
-                  <div class="fw-medium text-uppercase text-white mb-3 me-3 me-lg-0">3.8k TON</div>
-                  <div class="fw-medium color-grey">
-                    $2.68M <span class="color-green ms-2">+8.84%</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-          </div>
-          <div class="col-sm-6 col-lg-6 col-xl-4">
-            <a href="#!" class="d-block" title="ENS: Ethereum Name...">
-              <div class="card d-flex flex-lg-row align-items-center p-3 p-xl-4 rounded-20 mb-4">
-                <div class="collection__picbox position-relative me-4 mb-4 mb-lg-0">
-                  <picture>
-                    <source srcset="/img/collections/img-3.webp" type="image/webp">
-                    <source srcset="/img/collections/img-3.jpg" type="image/jpeg">
-                    <img src="/img/collections/img-3.jpg" class="image-80x80 rounded-circle" loading="lazy"
-                         width="80" height="80" alt="Mutant Ape Yach ClubMutant">
-                  </picture>
-                  <i class="fa-solid fa-circle-check fs-22 color-yellow position-absolute bottom-0"
-                     style="right: -4%;"></i>
-                </div>
-                <div class="collection__body mb-3 mb-lg-0">
-                  <h4 class="fs-20 mb-3 text-truncate" style="max-width: 224px">ENS: Ethereum Name...</h4>
-                  <p class="mb-0 color-grey text-center text-lg-start">
-                    Floor: <span class="ms-1 text-uppercase">3,02 TON</span>
-                  </p>
-                </div>
-                <div class="collection__info d-flex d-lg-block text-center text-lg-end ms-0 ms-lg-auto">
-                  <div class="fw-medium text-uppercase text-white mb-3 me-3 me-lg-0">3.8k TON</div>
-                  <div class="fw-medium color-grey">
-                    $2.68M <span class="color-green ms-2">+8.84%</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-          </div>
-          <div class="col-sm-6 col-lg-6 col-xl-4">
-            <a href="#!" class="d-block" title="Bored Ape Yacht Club">
-              <div class="card d-flex flex-lg-row align-items-center p-3 p-xl-4 rounded-20 mb-4">
-                <div class="collection__picbox position-relative me-4 mb-4 mb-lg-0">
-                  <picture>
-                    <source srcset="/img/collections/img-4.webp" type="image/webp">
-                    <source srcset="/img/collections/img-4.jpg" type="image/jpeg">
-                    <img src="/img/collections/img-4.jpg" class="image-80x80 rounded-circle" loading="lazy"
-                         width="80" height="80" alt="Mutant Ape Yach ClubMutant">
-                  </picture>
-                  <i class="fa-solid fa-circle-check fs-22 color-yellow position-absolute bottom-0"
-                     style="right: -4%;"></i>
-                </div>
-                <div class="collection__body mb-3 mb-lg-0">
-                  <h4 class="fs-20 mb-3 text-truncate" style="max-width: 224px">Bored Ape Yacht Club</h4>
-                  <p class="mb-0 color-grey text-center text-lg-start">
-                    Floor: <span class="ms-1 text-uppercase">3,02 TON</span>
-                  </p>
-                </div>
-                <div class="collection__info d-flex d-lg-block text-center text-lg-end ms-0 ms-lg-auto">
-                  <div class="fw-medium text-uppercase text-white mb-3 me-3 me-lg-0">3.8k TON</div>
-                  <div class="fw-medium color-grey">
-                    $2.68M <span class="color-green ms-2">+8.84%</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-          </div>
-          <div class="col-sm-6 col-lg-6 col-xl-4">
-            <a href="#!" class="d-block" title="Mutant Ape Yach Club">
-              <div class="card d-flex flex-lg-row align-items-center p-3 p-xl-4 rounded-20 mb-4">
-                <div class="collection__picbox position-relative me-4 mb-4 mb-lg-0">
-                  <picture>
-                    <source srcset="/img/collections/img-5.webp" type="image/webp">
-                    <source srcset="/img/collections/img-5.jpg" type="image/jpeg">
-                    <img src="/img/collections/img-5.jpg" class="image-80x80 rounded-circle" loading="lazy"
-                         width="80" height="80" alt="Mutant Ape Yach ClubMutant">
-                  </picture>
-                  <i class="fa-solid fa-circle-check fs-22 color-yellow position-absolute bottom-0"
-                     style="right: -4%;"></i>
-                </div>
-                <div class="collection__body mb-3 mb-lg-0">
-                  <h4 class="fs-20 mb-3 text-truncate" style="max-width: 224px">Mutant Ape Yach Club</h4>
-                  <p class="mb-0 color-grey text-center text-lg-start">
-                    Floor: <span class="ms-1 text-uppercase">3,02 TON</span>
-                  </p>
-                </div>
-                <div class="collection__info d-flex d-lg-block text-center text-lg-end ms-0 ms-lg-auto">
-                  <div class="fw-medium text-uppercase text-white mb-3 me-3 me-lg-0">3.8k TON</div>
-                  <div class="fw-medium color-grey">
-                    $2.68M <span class="color-green ms-2">+8.84%</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-          </div>
-          <div class="col-sm-6 col-lg-6 col-xl-4 d-none d-md-block">
-            <a href="#!" class="d-block" title="Art Blocks Curated">
-              <div class="card d-flex flex-lg-row align-items-center p-3 p-xl-4 rounded-20 mb-4">
-                <div class="collection__picbox position-relative me-4 mb-4 mb-lg-0">
-                  <picture>
-                    <source srcset="/img/collections/img-6.webp" type="image/webp">
-                    <source srcset="/img/collections/img-6.jpg" type="image/jpeg">
-                    <img src="/img/collections/img-6.jpg" class="image-80x80 rounded-circle" loading="lazy"
-                         width="80" height="80" alt="Mutant Ape Yach ClubMutant">
-                  </picture>
-                  <i class="fa-solid fa-circle-check fs-22 color-yellow position-absolute bottom-0"
-                     style="right: -4%;"></i>
-                </div>
-                <div class="collection__body mb-3 mb-lg-0">
-                  <h4 class="fs-20 mb-3 text-truncate" style="max-width: 224px">Art Blocks Curated</h4>
-                  <p class="mb-0 color-grey text-center text-lg-start">
-                    Floor: <span class="ms-1 text-uppercase">3,02 TON</span>
-                  </p>
-                </div>
-                <div class="collection__info d-flex d-lg-block text-center text-lg-end ms-0 ms-lg-auto">
-                  <div class="fw-medium text-uppercase text-white mb-3 me-3 me-lg-0">3.8k TON</div>
-                  <div class="fw-medium color-grey">
-                    $2.68M <span class="color-green ms-2">+8.84%</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-          </div>
-          <div class="col-sm-6 col-lg-6 col-xl-4 d-none d-md-block">
-            <a href="#!" class="d-block" title="Moonrunners Official">
-              <div class="card d-flex flex-lg-row align-items-center p-3 p-xl-4 rounded-20 mb-4">
-                <div class="collection__picbox position-relative me-4 mb-4 mb-lg-0">
-                  <picture>
-                    <source srcset="/img/collections/img-7.webp" type="image/webp">
-                    <source srcset="/img/collections/img-7.jpg" type="image/jpeg">
-                    <img src="/img/collections/img-7.jpg" class="image-80x80 rounded-circle" loading="lazy"
-                         width="80" height="80" alt="Mutant Ape Yach ClubMutant">
-                  </picture>
-                  <i class="fa-solid fa-circle-check fs-22 color-yellow position-absolute bottom-0"
-                     style="right: -4%;"></i>
-                </div>
-                <div class="collection__body mb-3 mb-lg-0">
-                  <h4 class="fs-20 mb-3 text-truncate" style="max-width: 224px">Moonrunners Official</h4>
-                  <p class="mb-0 color-grey text-center text-lg-start">
-                    Floor: <span class="ms-1 text-uppercase">3,02 TON</span>
-                  </p>
-                </div>
-                <div class="collection__info d-flex d-lg-block text-center text-lg-end ms-0 ms-lg-auto">
-                  <div class="fw-medium text-uppercase text-white mb-3 me-3 me-lg-0">3.8k TON</div>
-                  <div class="fw-medium color-grey">
-                    $2.68M <span class="color-green ms-2">+8.84%</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-          </div>
-          <div class="col-sm-6 col-lg-6 col-xl-4 d-none d-md-block">
-            <a href="#!" class="d-block" title="Cyber Galz - Galz">
-              <div class="card d-flex flex-lg-row align-items-center p-3 p-xl-4 rounded-20 mb-4">
-                <div class="collection__picbox position-relative me-4 mb-4 mb-lg-0">
-                  <picture>
-                    <source srcset="/img/collections/img-8.webp" type="image/webp">
-                    <source srcset="/img/collections/img-8.jpg" type="image/jpeg">
-                    <img src="/img/collections/img-8.jpg" class="image-80x80 rounded-circle" loading="lazy"
-                         width="80" height="80" alt="Mutant Ape Yach ClubMutant">
-                  </picture>
-                  <i class="fa-solid fa-circle-check fs-22 color-yellow position-absolute bottom-0"
-                     style="right: -4%;"></i>
-                </div>
-                <div class="collection__body mb-3 mb-lg-0">
-                  <h4 class="fs-20 mb-3 text-truncate" style="max-width: 224px">Cyber Galz - Galz</h4>
-                  <p class="mb-0 color-grey text-center text-lg-start">
-                    Floor: <span class="ms-1 text-uppercase">3,02 TON</span>
-                  </p>
-                </div>
-                <div class="collection__info d-flex d-lg-block text-center text-lg-end ms-0 ms-lg-auto">
-                  <div class="fw-medium text-uppercase text-white mb-3 me-3 me-lg-0">3.8k TON</div>
-                  <div class="fw-medium color-grey">
-                    $2.68M <span class="color-green ms-2">+8.84%</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-          </div>
-          <div class="col-sm-6 col-lg-6 col-xl-4 d-none d-lg-block">
-            <a href="#!" class="d-block" title="ENS: Ethereum Name...">
-              <div class="card d-flex flex-lg-row align-items-center p-3 p-xl-4 rounded-20 mb-4">
-                <div class="collection__picbox position-relative me-4 mb-4 mb-lg-0">
-                  <picture>
-                    <source srcset="/img/collections/img-9.webp" type="image/webp">
-                    <source srcset="/img/collections/img-9.jpg" type="image/jpeg">
-                    <img src="/img/collections/img-9.jpg" class="image-80x80 rounded-circle" loading="lazy"
-                         width="80" height="80" alt="Mutant Ape Yach ClubMutant">
-                  </picture>
-                  <i class="fa-solid fa-circle-check fs-22 color-yellow position-absolute bottom-0"
-                     style="right: -4%;"></i>
-                </div>
-                <div class="collection__body mb-3 mb-lg-0">
-                  <h4 class="fs-20 mb-3 text-truncate" style="max-width: 224px">Moonturtlez</h4>
-                  <p class="mb-0 color-grey text-center text-lg-start">
-                    Floor: <span class="ms-1 text-uppercase">3,02 TON</span>
-                  </p>
-                </div>
-                <div class="collection__info d-flex d-lg-block text-center text-lg-end ms-0 ms-lg-auto">
-                  <div class="fw-medium text-uppercase text-white mb-3 me-3 me-lg-0">3.8k TON</div>
-                  <div class="fw-medium color-grey">
-                    $2.68M <span class="color-green ms-2">+8.84%</span>
-                  </div>
-                </div>
-              </div>
-            </a>
+            </router-link>
           </div>
         </div>
         <div class="mt-5 text-center">
@@ -754,9 +530,26 @@
 </template>
 
 <script lang="ts">
+import gql from "graphql-tag";
 import {defineComponent} from "vue";
 
 export default defineComponent({
-  name: "Home"
+  name: "Home",
+  apollo: {
+    collections: gql`query {
+      collections {
+        address
+        metadata {
+          name
+          image
+        }
+      }
+    }`
+  },
+  data() {
+    return {
+      collections: [] as { address: String, metadata: { name: String | null, image: String | null } }[]
+    }
+  }
 })
 </script>
