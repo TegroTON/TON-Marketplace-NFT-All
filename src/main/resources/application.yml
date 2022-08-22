@@ -13,5 +13,5 @@ spring:
 
 graphql:
   packages:
-    - "money.tegro.market.dto"
+    - "money.tegro.market.data"
     - "money.tegro.market.graphql"

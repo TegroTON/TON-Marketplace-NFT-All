@@ -18,7 +18,7 @@ data class RoyaltyContract(
     @JsonSerialize(using = MsgAddressSerializer::class)
     val destination: MsgAddress,
 ) {
-    fun value() = numerator.toFloat() / denominator
+    fun value() = numerator.toDouble() / denominator
 
     fun createData() = CellBuilder.createCell {
         storeUInt(numerator, 16)

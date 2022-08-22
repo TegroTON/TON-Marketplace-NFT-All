@@ -42,7 +42,7 @@ data class ItemDTO(
         name = metadata.name,
         description = metadata.description,
         image = metadata.image,
-        royalty = royalty?.value(),
+        royalty = royalty?.value()?.toFloat(),
         royaltyDestination = royalty?.destination?.toRaw()
     )
 }

@@ -43,7 +43,7 @@ data class CollectionDTO(
         description = metadata.description,
         image = metadata.image,
         coverImage = metadata.coverImage,
-        royalty = royalty?.value(),
+        royalty = royalty?.value()?.toFloat(),
         royaltyDestination = royalty?.destination?.toRaw()
     )
 }
