@@ -5,13 +5,14 @@ import money.tegro.market.contract.RoyaltyContract
 import money.tegro.market.metadata.ItemMetadata
 import money.tegro.market.toRaw
 import org.ton.block.MsgAddressInt
+import java.math.BigInteger
 
 data class ItemDTO(
     val address: String,
 
     val initialized: Boolean,
 
-    val index: ULong,
+    val index: BigInteger,
 
     val collection: String?,
 
@@ -35,7 +36,7 @@ data class ItemDTO(
     ) : this(
         address = address.toRaw(),
         initialized = contract.initialized,
-        index = contract.index,
+        index = contract.index.toString().toBigInteger(), // TODO
         collection = contract.collection.toRaw(),
         owner = contract.owner.toRaw(),
         name = metadata.name,

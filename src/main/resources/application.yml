@@ -10,3 +10,8 @@ spring:
     enabled: true
   main:
     banner-mode: off
+
+graphql:
+  packages:
+    - "money.tegro.market.dto"
+    - "money.tegro.market.graphql"
