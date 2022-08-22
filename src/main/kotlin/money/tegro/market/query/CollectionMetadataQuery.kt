@@ -1,10 +1,10 @@
-package money.tegro.market.data
+package money.tegro.market.query
 
 import com.expediagroup.graphql.generator.annotations.GraphQLName
 import money.tegro.market.metadata.CollectionMetadata
 
 @GraphQLName("CollectionMetadata")
-data class CollectionMetadataData(
+data class CollectionMetadataQuery(
     val name: String?,
     val description: String?,
     val image: String?,

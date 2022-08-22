@@ -1,4 +1,4 @@
-package money.tegro.market.data
+package money.tegro.market.query
 
 import com.expediagroup.graphql.generator.annotations.GraphQLName
 import com.expediagroup.graphql.generator.annotations.GraphQLType
@@ -7,7 +7,7 @@ import org.ton.bigint.BigInt
 import org.ton.block.MsgAddress
 
 @GraphQLName("CollectionContract")
-data class CollectionContractData(
+data class CollectionContractQuery(
     @GraphQLType("String")
     val size: BigInt,
 

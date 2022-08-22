@@ -1,4 +1,4 @@
-package money.tegro.market.data
+package money.tegro.market.query
 
 import com.expediagroup.graphql.generator.annotations.GraphQLName
 import com.expediagroup.graphql.generator.annotations.GraphQLType
@@ -6,7 +6,7 @@ import money.tegro.market.contract.RoyaltyContract
 import org.ton.block.MsgAddress
 
 @GraphQLName("Royalty")
-data class RoyaltyData(
+data class RoyaltyQuery(
     val value: Double,
 
     @GraphQLType("String")

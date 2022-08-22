@@ -1,20 +1,21 @@
-package money.tegro.market.graphql
+package money.tegro.market.query
 
 import com.expediagroup.graphql.server.operations.Query
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
-import money.tegro.market.data.CollectionData
 import money.tegro.market.service.CollectionService
-import money.tegro.market.service.RoyaltyService
 import org.springframework.stereotype.Component
+import org.ton.block.MsgAddressInt
 
 @Component
-class CollectionsQuery(
+class RootQuery(
     private val collectionService: CollectionService,
-    private val royaltyService: RoyaltyService,
 ) : Query {
     suspend fun collections() =
         collectionService.all()
-            .map { CollectionData(it) }
+            .map { CollectionQuery(it) }
             .toList()
+
+    suspend fun collection(address: String) =
+        CollectionQuery(MsgAddressInt(address))
 }
