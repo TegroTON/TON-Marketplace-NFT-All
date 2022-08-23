@@ -4,6 +4,7 @@ import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.expediagroup.graphql.generator.annotations.GraphQLName
 import money.tegro.market.service.ItemService
 import money.tegro.market.service.RoyaltyService
+import money.tegro.market.service.SaleService
 import money.tegro.market.toRaw
 import org.springframework.beans.factory.annotation.Autowired
 import org.ton.block.MsgAddressInt
@@ -34,4 +35,12 @@ data class ItemQuery(
             royaltyService.get(collection)?.let { RoyaltyQuery(it) }
         }
             ?: royaltyService.get(address)?.let { RoyaltyQuery(it) }
+
+    suspend fun sale(
+        @GraphQLIgnore @Autowired itemService: ItemService,
+        @GraphQLIgnore @Autowired saleService: SaleService,
+    ) =
+        (itemService.getContract(address)?.owner as? MsgAddressInt)?.let { owner ->
+            saleService.get(owner)?.let { SaleQuery(it) }
+        }
 }
