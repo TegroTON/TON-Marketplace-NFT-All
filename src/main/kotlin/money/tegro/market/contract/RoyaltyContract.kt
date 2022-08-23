@@ -1,7 +1,5 @@
 package money.tegro.market.contract
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import money.tegro.market.serializer.MsgAddressSerializer
 import mu.KLogging
 import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.block.AddrStd
@@ -15,7 +13,6 @@ import org.ton.tlb.storeTlb
 data class RoyaltyContract(
     val numerator: Int,
     val denominator: Int,
-    @JsonSerialize(using = MsgAddressSerializer::class)
     val destination: MsgAddress,
 ) {
     fun value() = numerator.toDouble() / denominator

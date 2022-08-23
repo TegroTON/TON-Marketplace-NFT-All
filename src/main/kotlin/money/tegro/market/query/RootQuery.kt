@@ -18,4 +18,7 @@ class RootQuery(
 
     suspend fun collection(address: String) =
         CollectionQuery(MsgAddressInt(address))
+
+    suspend fun item(address: String) =
+        ItemQuery(MsgAddressInt(address))
 }

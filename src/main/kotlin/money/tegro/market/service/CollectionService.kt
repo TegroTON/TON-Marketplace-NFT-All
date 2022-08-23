@@ -13,6 +13,7 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import org.springframework.stereotype.Service
 import org.ton.api.exception.TvmException
 import org.ton.api.tonnode.TonNodeBlockIdExt
+import org.ton.block.AddrNone
 import org.ton.block.AddrStd
 import org.ton.block.MsgAddress
 import org.ton.block.MsgAddressInt
@@ -42,7 +43,16 @@ class CollectionService(
         index: ULong,
         referenceBlock: TonNodeBlockIdExt? = null
     ): MsgAddress =
-        CollectionContract.itemAddressOf(address as AddrStd, index, liteClient, referenceBlock)
+        try {
+            CollectionContract.itemAddressOf(address as AddrStd, index, liteClient, referenceBlock)
+        } catch (e: TvmException) {
+            logger.warn(
+                "could not item {} address of {}",
+                kv("index", index.toString()),
+                kv("collection", address.toRaw())
+            )
+            AddrNone
+        }
 
     suspend fun listItemAddresses(
         address: MsgAddressInt,

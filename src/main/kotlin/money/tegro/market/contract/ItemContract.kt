@@ -1,8 +1,5 @@
 package money.tegro.market.contract
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import money.tegro.market.serializer.CellSerializer
-import money.tegro.market.serializer.MsgAddressSerializer
 import mu.KLogging
 import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.block.AddrStd
@@ -20,11 +17,8 @@ import org.ton.tlb.storeTlb
 data class ItemContract(
     val initialized: Boolean,
     val index: ULong,
-    @JsonSerialize(using = MsgAddressSerializer::class)
     val collection: MsgAddress,
-    @JsonSerialize(using = MsgAddressSerializer::class)
     val owner: MsgAddress,
-    @JsonSerialize(using = CellSerializer::class)
     val individualContent: Cell,
 
     val workchain_id: Int = 0,
