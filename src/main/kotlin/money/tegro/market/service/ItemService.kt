@@ -3,6 +3,7 @@ package money.tegro.market.service
 import money.tegro.market.contract.CollectionContract
 import money.tegro.market.contract.ItemContract
 import money.tegro.market.metadata.ItemMetadata
+import money.tegro.market.repository.ApprovalRepository
 import money.tegro.market.toRaw
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments.kv
@@ -15,14 +16,20 @@ import org.ton.lite.client.LiteClient
 @Service
 class ItemService(
     private val liteClient: LiteClient,
+    private val approvalRepository: ApprovalRepository,
 ) {
     suspend fun getContract(address: MsgAddressInt): ItemContract? =
-        try {
-            logger.debug("fetching item {}", kv("address", address.toRaw()))
-            ItemContract.of(address as AddrStd, liteClient)
-        } catch (e: TvmException) {
-            logger.warn("could not get item information for {}", kv("address", address.toRaw()), e)
+        if (approvalRepository.existsByApprovedIsFalseAndAddress(address)) {
+            logger.debug("{} was disapproved", kv("address", address.toRaw()))
             null
+        } else {
+            try {
+                logger.debug("fetching item {}", kv("address", address.toRaw()))
+                ItemContract.of(address as AddrStd, liteClient)
+            } catch (e: TvmException) {
+                logger.warn("could not get item information for {}", kv("address", address.toRaw()), e)
+                null
+            }
         }
 
     suspend fun getMetadata(address: MsgAddressInt): ItemMetadata? =

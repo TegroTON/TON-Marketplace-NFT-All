@@ -3,8 +3,8 @@ package money.tegro.market.query
 import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.expediagroup.graphql.generator.annotations.GraphQLName
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
+import money.tegro.market.dropTake
 import money.tegro.market.service.CollectionService
 import money.tegro.market.service.RoyaltyService
 import money.tegro.market.toRaw
@@ -36,10 +36,11 @@ data class CollectionQuery(
 
     suspend fun items(
         @GraphQLIgnore @Autowired collectionService: CollectionService,
-        length: Int?,
+        drop: Int? = null,
+        take: Int? = null,
     ) =
         collectionService.listItemAddresses(address)
-            .take(length ?: 10)
-            .mapNotNull { info -> (info.second as? MsgAddressInt)?.let { ItemQuery(it) } }
+            .dropTake(drop, take)
+            .mapNotNull { info -> (info as? MsgAddressInt)?.let { ItemQuery(it) } }
             .toList()
 }
