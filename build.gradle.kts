@@ -31,7 +31,7 @@ dependencies {
     implementation("io.github.microutils:kotlin-logging:2.1.23")
     implementation("net.logstash.logback:logstash-logback-encoder:7.2")
     implementation("com.github.andreypfau.ton-kotlin:ton-kotlin:aa222bb6ca")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0-RC")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
     implementation("com.expediagroup:graphql-kotlin-spring-server:6.2.1")
     implementation(kotlin("script-runtime"))
     implementation("org.springframework.boot:spring-boot-starter-actuator")
