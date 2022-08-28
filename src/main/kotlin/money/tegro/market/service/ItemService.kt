@@ -35,8 +35,8 @@ class ItemService(
     suspend fun getMetadata(address: MsgAddressInt): ItemMetadata? =
         getContract(address)?.let { item ->
             ItemMetadata.of((item.collection as? AddrStd)
-                ?.let { CollectionContract.itemContent(it, item.index, item.individualContent, liteClient) }
-                ?: item.individualContent)
+                ?.let { CollectionContract.itemContent(it, item.index, item.individual_content, liteClient) }
+                ?: item.individual_content)
         }
 
     companion object : KLogging()

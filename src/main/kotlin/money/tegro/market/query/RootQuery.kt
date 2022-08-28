@@ -3,9 +3,9 @@ package money.tegro.market.query
 import com.expediagroup.graphql.server.operations.Query
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
-import money.tegro.market.contract.InternalMessageBody
-import money.tegro.market.contract.OpTransfer
 import money.tegro.market.dropTake
+import money.tegro.market.op.ItemOp
+import money.tegro.market.op.TransferItemOp
 import money.tegro.market.service.CollectionService
 import org.springframework.stereotype.Component
 import org.ton.bigint.BigInt
@@ -44,7 +44,7 @@ class RootQuery(
         stateInit = null,
         payload = CellBuilder.createCell {
             storeTlb(
-                InternalMessageBody, OpTransfer(
+                ItemOp, TransferItemOp(
                     query_id = SecureRandom.nextULong(),
                     new_owner = MsgAddressInt(destination),
                     response_destination = MsgAddressInt(response),

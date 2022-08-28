@@ -75,7 +75,7 @@ class CollectionService(
         val refBlock = referenceBlock
             ?: liteClient.getLastBlockId() // To make sure all consequent calls are against the same block
 
-        return (0uL until (getContract(address, refBlock)?.nextItemIndex ?: 0uL))
+        return (0uL until (getContract(address, refBlock)?.next_item_index ?: 0uL))
             .asFlow()
             .map { getItemAddress(address, it, refBlock) }
     }

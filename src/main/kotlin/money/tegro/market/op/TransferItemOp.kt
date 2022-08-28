@@ -1,4 +1,4 @@
-package money.tegro.market.contract
+package money.tegro.market.op
 
 import org.ton.block.Either
 import org.ton.block.Maybe
@@ -14,26 +14,26 @@ import org.ton.tlb.constructor.tlbCodec
 import org.ton.tlb.loadTlb
 import org.ton.tlb.storeTlb
 
-data class OpTransfer(
+data class TransferItemOp(
     val query_id: ULong,
     val new_owner: MsgAddress,
     val response_destination: MsgAddress,
     val custom_payload: Maybe<Cell>,
     val forward_amount: VarUInteger,
     val forward_payload: Either<Cell, Cell>,
-) : InternalMessageBody {
-    companion object : TlbCodec<OpTransfer> by OpTransferConstructor {
+) : ItemOp {
+    companion object : TlbCodec<TransferItemOp> by TransferItemOpConstructor {
         @JvmStatic
-        fun tlbCodec(): TlbConstructor<OpTransfer> = OpTransferConstructor
+        fun tlbCodec(): TlbConstructor<TransferItemOp> = TransferItemOpConstructor
     }
 }
 
-private object OpTransferConstructor : TlbConstructor<OpTransfer>(
+private object TransferItemOpConstructor : TlbConstructor<TransferItemOp>(
     schema = "transfer#5fcc3d14 query_id:uint64 new_owner:MsgAddress response_destination:MsgAddress " +
             "custom_payload:(Maybe ^Cell) forward_amount:(VarUInteger 16) forward_payload:(Either Cell ^Cell) " +
             "= InternalMsgBody;"
 ) {
-    override fun storeTlb(cellBuilder: CellBuilder, value: OpTransfer) {
+    override fun storeTlb(cellBuilder: CellBuilder, value: TransferItemOp) {
         cellBuilder.apply {
             storeUInt64(value.query_id)
             storeTlb(MsgAddress, value.new_owner)
@@ -44,8 +44,8 @@ private object OpTransferConstructor : TlbConstructor<OpTransfer>(
         }
     }
 
-    override fun loadTlb(cellSlice: CellSlice): OpTransfer = cellSlice.run {
-        OpTransfer(
+    override fun loadTlb(cellSlice: CellSlice): TransferItemOp = cellSlice.run {
+        TransferItemOp(
             query_id = loadUInt64(),
             new_owner = loadTlb(MsgAddress),
             response_destination = loadTlb(MsgAddress),

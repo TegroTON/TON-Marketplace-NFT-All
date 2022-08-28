@@ -10,7 +10,7 @@ data class CollectionContractQuery(
     val owner: String?,
 ) {
     constructor(it: CollectionContract) : this(
-        size = it.nextItemIndex.toString(),
+        size = it.next_item_index.toString(),
         owner = it.owner.toRaw(),
     )
 }

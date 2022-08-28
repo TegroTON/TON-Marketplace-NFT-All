@@ -1,14 +1,11 @@
 package money.tegro.market.contract
 
-import mu.KLogging
 import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.block.AddrStd
 import org.ton.block.MsgAddress
-import org.ton.cell.CellBuilder
 import org.ton.lite.api.liteserver.LiteServerAccountId
 import org.ton.lite.client.LiteClient
 import org.ton.tlb.loadTlb
-import org.ton.tlb.storeTlb
 
 data class RoyaltyContract(
     val numerator: Int,
@@ -17,13 +14,7 @@ data class RoyaltyContract(
 ) {
     fun value() = numerator.toDouble() / denominator
 
-    fun createData() = CellBuilder.createCell {
-        storeUInt(numerator, 16)
-        storeUInt(denominator, 16)
-        storeTlb(MsgAddress, destination)
-    }
-
-    companion object : KLogging() {
+    companion object {
         @JvmStatic
         suspend fun of(
             address: AddrStd,
@@ -36,8 +27,8 @@ data class RoyaltyContract(
                 "royalty_params"
             ).toMutableVmStack().let {
                 RoyaltyContract(
-                    numerator = it.popTinyInt().toInt(),
-                    denominator = it.popTinyInt().toInt(),
+                    numerator = it.popNumber().toInt(),
+                    denominator = it.popNumber().toInt(),
                     destination = it.popSlice().loadTlb(MsgAddress),
                 )
             }

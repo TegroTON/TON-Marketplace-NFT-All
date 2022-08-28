@@ -13,9 +13,9 @@ data class SaleContract(
     val marketplace: MsgAddress,
     val item: MsgAddress,
     val owner: MsgAddress,
-    val fullPrice: BigInt,
-    val marketplaceFee: BigInt,
-    val royaltyDestination: MsgAddress,
+    val full_price: BigInt,
+    val marketplace_fee: BigInt,
+    val royalty_destination: MsgAddress,
     val royalty: BigInt,
 ) {
     companion object : KLogging() {
@@ -34,9 +34,9 @@ data class SaleContract(
                     marketplace = it.popSlice().loadTlb(MsgAddress),
                     item = it.popSlice().loadTlb(MsgAddress),
                     owner = it.popSlice().loadTlb(MsgAddress),
-                    fullPrice = it.popNumber().toBigInt(),
-                    marketplaceFee = it.popNumber().toBigInt(),
-                    royaltyDestination = it.popSlice().loadTlb(MsgAddress),
+                    full_price = it.popNumber().toBigInt(),
+                    marketplace_fee = it.popNumber().toBigInt(),
+                    royalty_destination = it.popSlice().loadTlb(MsgAddress),
                     royalty = it.popNumber().toBigInt(),
                 )
             }

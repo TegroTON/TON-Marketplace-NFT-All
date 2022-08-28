@@ -19,9 +19,9 @@ data class SaleQuery(
         marketplace = it.marketplace.toRaw(),
         item = (it.item as? MsgAddressInt)?.let { ItemQuery(it) },
         owner = it.owner.toRaw(),
-        fullPrice = it.fullPrice.toString(),
-        marketplaceFee = it.marketplaceFee.toString(),
-        royaltyDestination = it.royaltyDestination.toRaw(),
+        fullPrice = it.full_price.toString(),
+        marketplaceFee = it.marketplace_fee.toString(),
+        royaltyDestination = it.royalty_destination.toRaw(),
         royalty = it.royalty.toString(),
     )
 }
