@@ -1,10 +1,10 @@
 <template>
   <footer class="footer">
     <div class="container-fluid">
-      <div class="row accordion modified-accordion" id="accordionFooter">
+      <div class="row accordion modified-collapse" id="accordionFooter">
         <div class="col-md-12 col-lg-3 me-auto mb-5 mb-lg-0">
           <div class="footer__logo d-flex align-items-center mb-4">
-            <img class="navbar-logo__img" src="/img/logo/apple-icon-57x57.png"
+            <img class="navbar-logo__img" src="./assets/img/logo/apple-icon-57x57.png"
                  alt="Libermall - NFT Marketplace">
             <span class="navbar-logo__name fs-24 d-none d-md-block ms-3">Libermall</span>
           </div>
@@ -160,12 +160,12 @@
           </ul>
         </div>
       </div>
-      <div class="footer__bottom d-flex align-items-center color-grey border-top pt-5 mt-5">
+      <div class="footer__bottom color-grey border-top pt-5 mt-5">
         <div class="row">
           <div class="col-sm-12 col-md-6 mb-3 mb-md-0">
             <span class="me-auto">©2022 Libermall, Inc</span>
           </div>
-          <div class="col-sm-12 col-md-6 ms-auto">
+          <div class="col-sm-12 col-md-6 ms-auto text-end">
             <a href="#!" class="me-3">Privacy Police</a>
             <a href="#!">Terms of Service</a>
           </div>
