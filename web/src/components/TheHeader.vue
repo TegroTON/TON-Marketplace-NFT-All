@@ -59,15 +59,7 @@
               <a class="nav-link" href="#">Create</a>
             </li>
           </ul>
-          <?php if($_SERVER['REQUEST_URI'] == '/') { ?>
-          <button type="button"
-                  class="btn btn-soft d-flex flex-nowrap align-items-center btn-mobile-fixed order-3 order-lg-4"
-                  data-bs-toggle="modal" data-bs-target="#ConnectModal">
-            <i class="fa-regular fa-arrow-right-to-arc me-2"></i>
-            Connect
-          </button>
-          <?php } else { ?>
-          <div class="dropdown dropstart order-3 order-lg-4">
+          <div v-if="/* Signed In */" class="dropdown dropstart order-3 order-lg-4">
             <button type="button" id="dropdownMenuProfile" data-bs-toggle="dropdown" aria-expanded="false">
               <img src="/assets/img/user-1.svg" alt="" class="rounded-circle profile-image" width="42" height="42">
             </button>
@@ -80,7 +72,12 @@
               </li>
             </ul>
           </div>
-          <?php } ?>
+          <button v-else type="button"
+                  class="btn btn-soft d-flex flex-nowrap align-items-center btn-mobile-fixed order-3 order-lg-4"
+                  data-bs-toggle="modal" data-bs-target="#ConnectModal">
+            <i class="fa-regular fa-arrow-right-to-arc me-2"></i>
+            Connect
+          </button>
         </div>
       </nav>
     </div>
@@ -91,6 +88,6 @@
 import {defineComponent} from "vue";
 
 export default defineComponent({
-  name: 'Header'
+  name: 'TheHeader'
 })
 </script>

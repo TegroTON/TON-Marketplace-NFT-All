@@ -178,14 +178,10 @@
             </div>
             <div class="tab-content py-4" id="myTabContent">
               <div class="tab-pane fade show active" id="Owned" role="tabpanel" aria-labelledby="Owned-tab">
-                <!--                <?php-->
-                <!--                        require "_collection-list.php";-->
-                <!--                        ?>-->
+                <collection-list></collection-list>
               </div>
               <div class="tab-pane fade" id="Activity" role="tabpanel" aria-labelledby="Activity-tab">
-                <!--                <?php-->
-                <!--                        require "_activity-list.php";-->
-                <!--                        ?>-->
+                <activity-list></activity-list>
               </div>
             </div>
             <!-- End Collection Tabs -->
@@ -199,9 +195,12 @@
 
 <script lang="ts">
 import {defineComponent} from "vue";
+import ActivityList from "../components/ActivityList.vue";
+import CollectionList from "../components/CollectionList.vue";
 
 export default defineComponent({
-  name: "Collection"
+  name: "Collection",
+  components: {CollectionList, ActivityList}
 })
 </script>
 
