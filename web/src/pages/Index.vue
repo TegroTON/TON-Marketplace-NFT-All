@@ -4,7 +4,7 @@
        ============================================= -->
     <section id="hero" class="hero section">
       <div id="carouselHeroIndicators" class="hero__container container-fluid carousel slide p-0"
-           data-bs-interval="false" data-bs-ride="carousel">
+           data-bs-interval="false" data-ride="carousel">
         <div class="carousel-indicators">
           <button aria-current="true" aria-label="Slide 1" class="active" data-bs-slide-to="0"
                   data-bs-target="#carouselHeroIndicators" type="button"></button>
@@ -121,7 +121,7 @@
             Notable <span class="color-yellow">drops</span>
           </h2>
         </div>
-        <div class="notable-slider pt-3">
+        <slick-carousel :options="slickOptions" class="notable-slider pt-3">
           <a class="card card-gradient top-effect" href="/collection.php" title="MetaPack">
             <div class="card__bage color-yellow text-uppercase">
               <i class="fa-solid fa-fire-flame-curved me-1"></i>
@@ -238,7 +238,7 @@
               </p>
             </div>
           </a>
-        </div>
+        </slick-carousel>
       </div>
     </section>
     <!-- End of Notable section
@@ -390,7 +390,7 @@
             Browse <span class="color-yellow">by category</span>
           </h2>
         </div>
-        <div class="category-slider pt-3">
+        <slick-carousel :options="slickOptions" class="category-slider pt-3">
           <a class="card top-effect" href="/single-collection.php">
             <picture>
               <source srcset="assets/img/category/cat-1.webp" type="image/webp">
@@ -457,7 +457,7 @@
               <h3 class="text-uppercase fs-18 mt-3 mb-0" style="letter-spacing: 1px;">Music</h3>
             </div>
           </a>
-        </div>
+        </slick-carousel>
       </div>
     </section>
     <!-- End of Category section
@@ -468,9 +468,11 @@
 <script lang="ts">
 import {defineComponent} from "vue";
 import gql from "graphql-tag";
+import SlickCarousel from "../components/SlickCarousel.vue";
 
 export default defineComponent({
   name: "Index",
+  components: {SlickCarousel},
   apollo: {
     collections: gql`query {
       collections {
@@ -484,8 +486,65 @@ export default defineComponent({
   },
   data() {
     return {
+      slickOptions: {
+        dots: true,
+        infinite: false,
+        speed: 300,
+        slidesToShow: 4.71,
+        slidesToScroll: 2,
+        responsive: [
+          {
+            breakpoint: 1500,
+            settings: {
+              slidesToShow: 4,
+              slidesToScroll: 2,
+              infinite: true,
+              dots: true
+            }
+          },
+          {
+            breakpoint: 1280,
+            settings: {
+              slidesToShow: 3,
+              slidesToScroll: 3,
+              infinite: true,
+              dots: true
+            }
+          },
+          {
+            breakpoint: 1024,
+            settings: {
+              slidesToShow: 2.4,
+              slidesToScroll: 2
+            }
+          },
+          {
+            breakpoint: 768,
+            settings: {
+              slidesToShow: 1.5,
+              slidesToScroll: 1
+            }
+          },
+          {
+            breakpoint: 500,
+            settings: {
+              slidesToShow: 1,
+              slidesToScroll: 1,
+              dots: true
+            }
+          }
+          // You can unslick at a given breakpoint now by adding:
+          // settings: "unslick"
+          // instead of a settings object
+        ]
+      },
       collections: [] as { address: String, metadata: { name: String | null, image: String | null } }[]
     }
   }
 })
 </script>
+
+<style lang="scss">
+@import "./src/scss/slick";
+@import "./src/scss/slick-theme";
+</style>
