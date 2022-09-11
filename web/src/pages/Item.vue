@@ -315,6 +315,6 @@
 import {defineComponent} from "vue";
 
 export default defineComponent({
-  name: "CollectionItem"
+  name: "Item"
 })
 </script>

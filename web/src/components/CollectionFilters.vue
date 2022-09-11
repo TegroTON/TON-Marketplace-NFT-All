@@ -2,14 +2,14 @@
   <div class="card-filters position-sticky" style="top: 140px;">
     <h4 class="card-title fs-20 fw-medium px-2 py-3 mb-0 border-bottom">Filters</h4>
     <div class="card-body px-0 border-bottom">
-      <button class="d-flex align-items-center py-3 w-100" type="button" data-bs-toggle="collapse"
-              data-bs-target="#collapseEventType" aria-expanded="false" aria-controls="collapseExample">
+      <button aria-controls="collapseExample" aria-expanded="false" class="d-flex align-items-center py-3 w-100"
+              data-bs-target="#collapseEventType" data-bs-toggle="collapse" type="button">
         <h4 class="card-filters__name fs-18">Event Type</h4>
         <i class="fa-solid fa-angle-down ms-auto"></i>
       </button>
-      <div class="collapse position-relative" id="collapseEventType">
+      <div id="collapseEventType" class="collapse position-relative">
         <div class="form-check hover d-block p-3 mb-1">
-          <input class="form-check-input m-0" type="checkbox" value="" id="flexCheckSale">
+          <input id="flexCheckSale" class="form-check-input m-0" type="checkbox" value="">
           <label class="form-check-label d-flex align-items-center" for="flexCheckSale">
             <i class="fa-regular fa-cart-shopping-fast fs-18 mx-3 color-grey"></i>
             <span>Sale</span>
@@ -17,7 +17,7 @@
           </label>
         </div>
         <div class="form-check hover d-block p-3 mb-1">
-          <input class="form-check-input m-0" type="checkbox" value="" id="flexCheckDefault">
+          <input id="flexCheckDefault" class="form-check-input m-0" type="checkbox" value="">
           <label class="form-check-label d-flex align-items-center" for="flexCheckDefault">
             <i class="fa-regular fa-circle-plus fs-18 mx-3 color-grey"></i>
             <span>Put up for sale</span>
@@ -25,7 +25,7 @@
           </label>
         </div>
         <div class="form-check hover d-block p-3 mb-1">
-          <input class="form-check-input ms-0" type="checkbox" value="" id="flexCheckCancelSale">
+          <input id="flexCheckCancelSale" class="form-check-input ms-0" type="checkbox" value="">
           <label class="form-check-label d-flex align-items-center" for="flexCheckCancelSale">
             <i class="fa-regular fa-circle-xmark fs-18 mx-3 color-grey"></i>
             <span>Cancel sale</span>
@@ -33,7 +33,7 @@
           </label>
         </div>
         <div class="form-check hover d-block p-3 mb-1">
-          <input class="form-check-input ms-0" type="checkbox" value="" id="flexCheckTransfer">
+          <input id="flexCheckTransfer" class="form-check-input ms-0" type="checkbox" value="">
           <label class="form-check-label d-flex align-items-center" for="flexCheckTransfer">
             <i class="fa-regular fa-arrow-right-arrow-left fs-18 mx-3 color-grey"></i>
             <span>Transfer</span>
@@ -41,7 +41,7 @@
           </label>
         </div>
         <div class="form-check hover d-block p-3 mb-1">
-          <input class="form-check-input ms-0" type="checkbox" value="" id="flexCheckMinting">
+          <input id="flexCheckMinting" class="form-check-input ms-0" type="checkbox" value="">
           <label class="form-check-label d-flex align-items-center" for="flexCheckMinting">
             <i class="fa-regular fa-paintbrush-fine fs-18 mx-3 color-grey"></i>
             <span>Minting</span>
@@ -49,7 +49,7 @@
           </label>
         </div>
         <div class="form-check hover d-block p-3 mb-1">
-          <input class="form-check-input ms-0" type="checkbox" value="" id="flexCheckPutOnAuction">
+          <input id="flexCheckPutOnAuction" class="form-check-input ms-0" type="checkbox" value="">
           <label class="form-check-label d-flex align-items-center" for="flexCheckPutOnAuction">
             <i class="fa-regular fa-gavel fs-18 mx-3 color-grey"></i>
             <span>Put on Auction</span>
@@ -57,7 +57,7 @@
           </label>
         </div>
         <div class="form-check hover d-block p-3 mb-1">
-          <input class="form-check-input ms-0" type="checkbox" value="" id="flexCheckEndOfAuction">
+          <input id="flexCheckEndOfAuction" class="form-check-input ms-0" type="checkbox" value="">
           <label class="form-check-label d-flex align-items-center" for="flexCheckEndOfAuction">
             <i class="fa-regular fa-gavel fs-18 mx-3 color-grey"></i>
             <span>End of Auction</span>
@@ -67,38 +67,38 @@
       </div>
     </div>
     <div class="card-body p-0 border-bottom">
-      <button class="d-flex align-items-center px-2 py-4 w-100" type="button" data-bs-toggle="collapse"
-              data-bs-target="#collapseSaleType" aria-expanded="true" aria-controls="collapseSaleType">
+      <button aria-controls="collapseSaleType" aria-expanded="true" class="d-flex align-items-center px-2 py-4 w-100"
+              data-bs-target="#collapseSaleType" data-bs-toggle="collapse" type="button">
         <h4 class="card-filters__name fs-18 mb-0">Sale Type</h4>
         <i class="fa-solid fa-angle-down ms-auto color-grey"></i>
       </button>
-      <div class="collapse show position-relative" id="collapseSaleType">
+      <div id="collapseSaleType" class="collapse show position-relative">
         <div class="form-check hover p-3 mb-1">
-          <input class="form-check-input m-0" type="radio" name="exampleRadios" value="option1" id="flexCheckMinting"
-                 checked>
+          <input id="flexCheckMinting" checked class="form-check-input m-0" name="exampleRadios" type="radio"
+                 value="option1">
           <label class="form-check-label d-flex align-items-center" for="flexCheckMinting">
             <span class="ms-3">All Types</span>
             <span class="color-grey ms-auto">7586</span>
           </label>
         </div>
         <div class="form-check hover p-3 mb-1">
-          <input class="form-check-input m-0" type="radio" name="exampleRadios" value="option2" id="flexCheckForSale">
+          <input id="flexCheckForSale" class="form-check-input m-0" name="exampleRadios" type="radio" value="option2">
           <label class="form-check-label d-flex align-items-center" for="flexCheckForSale">
             <span class="ms-3">For Sale</span>
             <span class="color-grey ms-auto">6168</span>
           </label>
         </div>
         <div class="form-check hover p-3 mb-1">
-          <input class="form-check-input m-0" type="radio" name="exampleRadios" value="option3"
-                 id="flexCheckForAuction">
+          <input id="flexCheckForAuction" class="form-check-input m-0" name="exampleRadios" type="radio"
+                 value="option3">
           <label class="form-check-label d-flex align-items-center" for="flexCheckForAuction">
             <span class="ms-3">For Auction</span>
             <span class="color-grey ms-auto">0</span>
           </label>
         </div>
         <div class="form-check hover p-3 mb-1">
-          <input class="form-check-input m-0" type="radio" name="exampleRadios" value="option4"
-                 id="flexCheckNotForSale">
+          <input id="flexCheckNotForSale" class="form-check-input m-0" name="exampleRadios" type="radio"
+                 value="option4">
           <label class="form-check-label d-flex align-items-center" for="flexCheckNotForSale">
             <span class="ms-3">Not For Sale</span>
             <span class="color-grey ms-auto">609</span>
@@ -107,43 +107,43 @@
       </div>
     </div>
     <div class="card-body p-0 border-bottom">
-      <button class="d-flex align-items-center px-2 py-4 w-100" type="button" data-bs-toggle="collapse"
-              data-bs-target="#collapsePriceRange" aria-expanded="false" aria-controls="collapsePriceRange">
+      <button aria-controls="collapsePriceRange" aria-expanded="false" class="d-flex align-items-center px-2 py-4 w-100"
+              data-bs-target="#collapsePriceRange" data-bs-toggle="collapse" type="button">
         <h4 class="card-filters__name fs-18 mb-0">Price Range</h4>
         <i class="fa-solid fa-angle-down ms-auto color-grey"></i>
       </button>
-      <div class="collapse position-relative pb-3" id="collapsePriceRange">
+      <div id="collapsePriceRange" class="collapse position-relative pb-3">
         <form action="">
-          <input type="text" class="form-control mb-3" placeholder="From">
-          <input type="text" class="form-control mb-3" placeholder="To">
-          <button type="button" class="btn btn-primary w-100">Apply</button>
+          <input class="form-control mb-3" placeholder="From" type="text">
+          <input class="form-control mb-3" placeholder="To" type="text">
+          <button class="btn btn-primary w-100" type="button">Apply</button>
         </form>
       </div>
     </div>
     <div class="card-body p-0 border-bottom">
-      <button class="d-flex align-items-center px-2 py-4 w-100" type="button" data-bs-toggle="collapse"
-              data-bs-target="#collapseAttributes" aria-expanded="true" aria-controls="collapseAttributes">
+      <button aria-controls="collapseAttributes" aria-expanded="true" class="d-flex align-items-center px-2 py-4 w-100"
+              data-bs-target="#collapseAttributes" data-bs-toggle="collapse" type="button">
         <h4 class="card-filters__name fs-18 mb-0">Attributes</h4>
         <i class="fa-solid fa-angle-down ms-auto color-grey"></i>
       </button>
-      <div class="collapse show position-relative" id="collapseAttributes">
+      <div id="collapseAttributes" class="collapse show position-relative">
         <div class="input-group mb-3">
           <span class="input-group-text"><i class="fa-regular fa-magnifying-glass"></i></span>
-          <input type="text" class="form-control" placeholder="Search by value ..." aria-label="Search by value ...">
+          <input aria-label="Search by value ..." class="form-control" placeholder="Search by value ..." type="text">
         </div>
         <!--Start Item-->
         <div class="attribute__item">
-          <button class="d-flex align-items-center py-3 w-100" type="button" data-bs-toggle="collapse"
-                  data-bs-target="#collapseAccessoriese" aria-expanded="false" aria-controls="collapseAccessories">
+          <button aria-controls="collapseAccessories" aria-expanded="false" class="d-flex align-items-center py-3 w-100"
+                  data-bs-target="#collapseAccessoriese" data-bs-toggle="collapse" type="button">
             <div class="card-filters__name fs-16 color-grey mb-0">Accessories</div>
             <div class="color-grey ms-auto">
               <span>14</span>
               <i class="fa-solid fa-angle-down ms-2"></i>
             </div>
           </button>
-          <div class="collapse position-relative overflow-auto" id="collapseAccessoriese" style="max-height: 250px;">
+          <div id="collapseAccessoriese" class="collapse position-relative overflow-auto" style="max-height: 250px;">
             <div class="form-check hover d-block p-3 mb-1">
-              <input class="form-check-input m-0" type="checkbox" value="" id="flexCheckNoAccessories">
+              <input id="flexCheckNoAccessories" class="form-check-input m-0" type="checkbox" value="">
               <label class="form-check-label d-flex align-items-center" for="flexCheckNoAccessories">
                 <div class="ms-3">
                   <p class="mb-1">No Accessories</p>
@@ -160,7 +160,7 @@
               </label>
             </div>
             <div class="form-check hover d-block p-3 mb-1">
-              <input class="form-check-input m-0" type="checkbox" value="" id="flexCheckBroom">
+              <input id="flexCheckBroom" class="form-check-input m-0" type="checkbox" value="">
               <label class="form-check-label d-flex align-items-center" for="flexCheckBroom">
                 <div class="ms-3">
                   <p class="mb-1">Broom</p>
@@ -177,7 +177,7 @@
               </label>
             </div>
             <div class="form-check hover d-block p-3 mb-1">
-              <input class="form-check-input m-0" type="checkbox" value="" id="flexCheckDroid">
+              <input id="flexCheckDroid" class="form-check-input m-0" type="checkbox" value="">
               <label class="form-check-label d-flex align-items-center" for="flexCheckDroid">
                 <div class="ms-3">
                   <p class="mb-1">Droid</p>
@@ -194,7 +194,7 @@
               </label>
             </div>
             <div class="form-check hover d-block p-3 mb-1">
-              <input class="form-check-input m-0" type="checkbox" value="" id="flexCheckShield">
+              <input id="flexCheckShield" class="form-check-input m-0" type="checkbox" value="">
               <label class="form-check-label d-flex align-items-center" for="flexCheckShield">
                 <div class="ms-3">
                   <p class="mb-1">Shield</p>
@@ -215,17 +215,17 @@
         <!--End Item-->
         <!--Start Item-->
         <div class="attribute__item">
-          <button class="d-flex align-items-center py-3 w-100" type="button" data-bs-toggle="collapse"
-                  data-bs-target="#collapseBackgrounds" aria-expanded="false" aria-controls="collapseBackgrounds">
+          <button aria-controls="collapseBackgrounds" aria-expanded="false" class="d-flex align-items-center py-3 w-100"
+                  data-bs-target="#collapseBackgrounds" data-bs-toggle="collapse" type="button">
             <div class="card-filters__name fs-16 color-grey mb-0">Backgrounds</div>
             <div class="color-grey ms-auto">
               <span>11</span>
               <i class="fa-solid fa-angle-down ms-2"></i>
             </div>
           </button>
-          <div class="collapse position-relative overflow-auto" id="collapseBackgrounds" style="max-height: 250px;">
+          <div id="collapseBackgrounds" class="collapse position-relative overflow-auto" style="max-height: 250px;">
             <div class="form-check hover d-block p-3 mb-1">
-              <input class="form-check-input m-0" type="checkbox" value="" id="flexCheckNoButterfly">
+              <input id="flexCheckNoButterfly" class="form-check-input m-0" type="checkbox" value="">
               <label class="form-check-label d-flex align-items-center" for="flexCheckNoButterfly">
                 <div class="ms-3">
                   <p class="mb-1">Butterfly</p>
@@ -242,7 +242,7 @@
               </label>
             </div>
             <div class="form-check hover d-block p-3 mb-1">
-              <input class="form-check-input m-0" type="checkbox" value="" id="flexCheckCity">
+              <input id="flexCheckCity" class="form-check-input m-0" type="checkbox" value="">
               <label class="form-check-label d-flex align-items-center" for="flexCheckCity">
                 <div class="ms-3">
                   <p class="mb-1">City</p>
@@ -259,7 +259,7 @@
               </label>
             </div>
             <div class="form-check hover d-block p-3 mb-1">
-              <input class="form-check-input m-0" type="checkbox" value="" id="flexCheckDroid">
+              <input id="flexCheckDroid" class="form-check-input m-0" type="checkbox" value="">
               <label class="form-check-label d-flex align-items-center" for="flexCheckDroid">
                 <div class="ms-3">
                   <p class="mb-1">Road</p>
@@ -276,7 +276,7 @@
               </label>
             </div>
             <div class="form-check hover d-block p-3 mb-1">
-              <input class="form-check-input m-0" type="checkbox" value="" id="flexCheckNyc">
+              <input id="flexCheckNyc" class="form-check-input m-0" type="checkbox" value="">
               <label class="form-check-label d-flex align-items-center" for="flexCheckNyc">
                 <div class="ms-3">
                   <p class="mb-1">NYC</p>
@@ -297,17 +297,17 @@
         <!--End Item-->
         <!--Start Item-->
         <div class="attribute__item">
-          <button class="d-flex align-items-center py-3 w-100" type="button" data-bs-toggle="collapse"
-                  data-bs-target="#collapseBody" aria-expanded="false" aria-controls="collapseBody">
+          <button aria-controls="collapseBody" aria-expanded="false" class="d-flex align-items-center py-3 w-100"
+                  data-bs-target="#collapseBody" data-bs-toggle="collapse" type="button">
             <div class="card-filters__name fs-16 color-grey mb-0">Body</div>
             <div class="color-grey ms-auto">
               <span>12</span>
               <i class="fa-solid fa-angle-down ms-2"></i>
             </div>
           </button>
-          <div class="collapse position-relative overflow-auto" id="collapseBody" style="max-height: 250px;">
+          <div id="collapseBody" class="collapse position-relative overflow-auto" style="max-height: 250px;">
             <div class="form-check hover d-block p-3 mb-1">
-              <input class="form-check-input m-0" type="checkbox" value="" id="flexCheckMantle">
+              <input id="flexCheckMantle" class="form-check-input m-0" type="checkbox" value="">
               <label class="form-check-label d-flex align-items-center" for="flexCheckMantle">
                 <div class="ms-3">
                   <p class="mb-1">Mantle</p>
@@ -324,7 +324,7 @@
               </label>
             </div>
             <div class="form-check hover d-block p-3 mb-1">
-              <input class="form-check-input m-0" type="checkbox" value="" id="flexCheckSuperuit">
+              <input id="flexCheckSuperuit" class="form-check-input m-0" type="checkbox" value="">
               <label class="form-check-label d-flex align-items-center" for="flexCheckSuperuit">
                 <div class="ms-3">
                   <p class="mb-1">Superuit</p>
@@ -341,7 +341,7 @@
               </label>
             </div>
             <div class="form-check hover d-block p-3 mb-1">
-              <input class="form-check-input m-0" type="checkbox" value="" id="flexCheckOveralls">
+              <input id="flexCheckOveralls" class="form-check-input m-0" type="checkbox" value="">
               <label class="form-check-label d-flex align-items-center" for="flexCheckOveralls">
                 <div class="ms-3">
                   <p class="mb-1">Overalls</p>
@@ -358,7 +358,7 @@
               </label>
             </div>
             <div class="form-check hover d-block p-3 mb-1">
-              <input class="form-check-input m-0" type="checkbox" value="" id="flexCheckNyc">
+              <input id="flexCheckNyc" class="form-check-input m-0" type="checkbox" value="">
               <label class="form-check-label d-flex align-items-center" for="flexCheckNyc">
                 <div class="ms-3">
                   <p class="mb-1">Dsrk Robe</p>
@@ -379,17 +379,17 @@
         <!--End Item-->
         <!--Start Item-->
         <div class="attribute__item">
-          <button class="d-flex align-items-center py-3 w-100" type="button" data-bs-toggle="collapse"
-                  data-bs-target="#collapseCat" aria-expanded="false" aria-controls="collapseCat">
+          <button aria-controls="collapseCat" aria-expanded="false" class="d-flex align-items-center py-3 w-100"
+                  data-bs-target="#collapseCat" data-bs-toggle="collapse" type="button">
             <div class="card-filters__name fs-16 color-grey mb-0">Cat</div>
             <div class="color-grey ms-auto">
               <span>18</span>
               <i class="fa-solid fa-angle-down ms-2"></i>
             </div>
           </button>
-          <div class="collapse position-relative overflow-auto" id="collapseCat" style="max-height: 250px;">
+          <div id="collapseCat" class="collapse position-relative overflow-auto" style="max-height: 250px;">
             <div class="form-check hover d-block p-3 mb-1">
-              <input class="form-check-input m-0" type="checkbox" value="" id="flexCheckWitcher">
+              <input id="flexCheckWitcher" class="form-check-input m-0" type="checkbox" value="">
               <label class="form-check-label d-flex align-items-center" for="flexCheckWitcher">
                 <div class="ms-3">
                   <p class="mb-1">Witcher</p>
@@ -406,7 +406,7 @@
               </label>
             </div>
             <div class="form-check hover d-block p-3 mb-1">
-              <input class="form-check-input m-0" type="checkbox" value="" id="flexCheckFrog">
+              <input id="flexCheckFrog" class="form-check-input m-0" type="checkbox" value="">
               <label class="form-check-label d-flex align-items-center" for="flexCheckFrog">
                 <div class="ms-3">
                   <p class="mb-1">Frog</p>
@@ -423,7 +423,7 @@
               </label>
             </div>
             <div class="form-check hover d-block p-3 mb-1">
-              <input class="form-check-input m-0" type="checkbox" value="" id="flexCheckYouda">
+              <input id="flexCheckYouda" class="form-check-input m-0" type="checkbox" value="">
               <label class="form-check-label d-flex align-items-center" for="flexCheckYouda">
                 <div class="ms-3">
                   <p class="mb-1">Youda</p>
@@ -440,7 +440,7 @@
               </label>
             </div>
             <div class="form-check hover d-block p-3 mb-1">
-              <input class="form-check-input m-0" type="checkbox" value="" id="flexCheckSullivan">
+              <input id="flexCheckSullivan" class="form-check-input m-0" type="checkbox" value="">
               <label class="form-check-label d-flex align-items-center" for="flexCheckSullivan">
                 <div class="ms-3">
                   <p class="mb-1">Sullivan</p>
@@ -461,17 +461,17 @@
         <!--End Item-->
         <!--Start Item-->
         <div class="attribute__item">
-          <button class="d-flex align-items-center py-3 w-100" type="button" data-bs-toggle="collapse"
-                  data-bs-target="#collapseEyes" aria-expanded="false" aria-controls="collapseEyes">
+          <button aria-controls="collapseEyes" aria-expanded="false" class="d-flex align-items-center py-3 w-100"
+                  data-bs-target="#collapseEyes" data-bs-toggle="collapse" type="button">
             <div class="card-filters__name fs-16 color-grey mb-0">Eyes</div>
             <div class="color-grey ms-auto">
               <span>12</span>
               <i class="fa-solid fa-angle-down ms-2"></i>
             </div>
           </button>
-          <div class="collapse position-relative overflow-auto" id="collapseEyes" style="max-height: 250px;">
+          <div id="collapseEyes" class="collapse position-relative overflow-auto" style="max-height: 250px;">
             <div class="form-check hover d-block p-3 mb-1">
-              <input class="form-check-input m-0" type="checkbox" value="" id="flexCheckCyborg">
+              <input id="flexCheckCyborg" class="form-check-input m-0" type="checkbox" value="">
               <label class="form-check-label d-flex align-items-center" for="flexCheckCyborg">
                 <div class="ms-3">
                   <p class="mb-1">Cyborg</p>
@@ -488,7 +488,7 @@
               </label>
             </div>
             <div class="form-check hover d-block p-3 mb-1">
-              <input class="form-check-input m-0" type="checkbox" value="" id="flexCheckYellow">
+              <input id="flexCheckYellow" class="form-check-input m-0" type="checkbox" value="">
               <label class="form-check-label d-flex align-items-center" for="flexCheckYellow">
                 <div class="ms-3">
                   <p class="mb-1">Yellow</p>
@@ -505,7 +505,7 @@
               </label>
             </div>
             <div class="form-check hover d-block p-3 mb-1">
-              <input class="form-check-input m-0" type="checkbox" value="" id="flexCheckCat">
+              <input id="flexCheckCat" class="form-check-input m-0" type="checkbox" value="">
               <label class="form-check-label d-flex align-items-center" for="flexCheckCat">
                 <div class="ms-3">
                   <p class="mb-1">Cat</p>
@@ -522,7 +522,7 @@
               </label>
             </div>
             <div class="form-check hover d-block p-3 mb-1">
-              <input class="form-check-input m-0" type="checkbox" value="" id="flexCheckToy">
+              <input id="flexCheckToy" class="form-check-input m-0" type="checkbox" value="">
               <label class="form-check-label d-flex align-items-center" for="flexCheckToy">
                 <div class="ms-3">
                   <p class="mb-1">Toy</p>
@@ -543,20 +543,20 @@
         <!--End Item-->
       </div>
     </div>
-    <?php if($_SERVER['REQUEST_URI'] == '/profile.php' || $_SERVER['REQUEST_URI'] == '/my-profile.php') { ?>
+    <!-- TODO:   <?php if($_SERVER['REQUEST_URI'] == '/profile.php' || $_SERVER['REQUEST_URI'] == '/my-profile.php') { ?>-->
     <!--Start Item-->
     <div class="attribute__item">
-      <button class="d-flex align-items-center py-3 w-100" type="button" data-bs-toggle="collapse"
-              data-bs-target="#collapseCollection" aria-expanded="false" aria-controls="collapseCollection">
+      <button aria-controls="collapseCollection" aria-expanded="false" class="d-flex align-items-center py-3 w-100"
+              data-bs-target="#collapseCollection" data-bs-toggle="collapse" type="button">
         <h4 class="card-filters__name fs-18 mb-0">Collection</h4>
         <div class="color-grey ms-auto">
           <i class="fa-solid fa-angle-down ms-2"></i>
         </div>
       </button>
-      <div class="collapse position-relative overflow-auto" id="collapseCollection">
-        <a href="/collection.php" class="card-item-details d-block border hover px-4 py-3 rounded text-white mb-3">
+      <div id="collapseCollection" class="collapse position-relative overflow-auto">
+        <a class="card-item-details d-block border hover px-4 py-3 rounded text-white mb-3" href="/collection.php">
           <div class="d-flex align-items-center">
-            <img src="assets/img/author/author-17.jpg" alt="" class="img-fluid rounded-circle" width="40">
+            <img alt="" class="img-fluid rounded-circle" src="assets/img/author/author-17.jpg" width="40">
             <div class="ms-3">
               <h4 class="collection__name fs-16 mb-1">Tegro Cat <i
                   class="fa-solid fa-circle-check color-yellow ms-2"></i></h4>
@@ -572,9 +572,9 @@
             </div>
           </div>
         </a>
-        <a href="/collection.php" class="card-item-details d-block border hover px-4 py-3 rounded text-white mb-3">
+        <a class="card-item-details d-block border hover px-4 py-3 rounded text-white mb-3" href="/collection.php">
           <div class="d-flex align-items-center">
-            <img src="assets/img/author/author-02.jpg" alt="" class="img-fluid rounded-circle" width="40">
+            <img alt="" class="img-fluid rounded-circle" src="assets/img/author/author-02.jpg" width="40">
             <div class="ms-3">
               <h4 class="collection__name fs-16 mb-1">Moonbirds</h4>
               <p class="color-grey fs-14 mb-0">
@@ -592,7 +592,6 @@
       </div>
     </div>
     <!--End Item-->
-    <?php } ?>
   </div>
 </template>
 
