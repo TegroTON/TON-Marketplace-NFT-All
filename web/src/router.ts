@@ -10,7 +10,7 @@ export const router = createRouter({
     history: createWebHashHistory(),
     routes: [
         {path: '/', component: Index},
-        {path: '/collection/:address', component: Collection},
+        {path: '/collection/:address', component: Collection, props: true},
         {path: '/create', component: CreateNft},
         {path: '/explore', component: Explore},
         {path: '/item/:address', component: Item},

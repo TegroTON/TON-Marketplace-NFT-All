@@ -29,25 +29,19 @@
               <div class="card-body p-4 p-lg-2 p-xl-3 p-xxl-4">
                 <div class="d-flex flex-column flex-md-row flex-lg-column align-items-center mb-5">
                   <div class="collection__image mb-4 mb-md-0 mb-lg-4 ms-auto ms-md-0 ms-lg-auto me-auto">
-                    <img alt="" class="img-fluid rounded-circle" src="/assets/img/author/author-17.jpg">
+                    <img :src="collection.metadata.image" alt="" class="img-fluid rounded-circle">
                   </div>
                   <div class="d-flex mx-0 mx-lg-auto">
                     <a class="btn btn-sm btn-outline-primary" href="#!">Subscribe</a>
                   </div>
                 </div>
                 <h1 class="collection__name fs-24 mb-4">
-                  <span>TON NFT Tegro Cat</span>
+                  <span>{{ collection.metadata.name }}</span>
                   <i class="fa-solid fa-circle-check fs-22 color-yellow ms-2"></i>
                 </h1>
                 <div class="collection__desc color-grey mb-4">
-                  <p>
-                    TON Tegro Cat are unique NFTs with cats created only for the TON network. <br>
-                    Our TON NFT "Cats" is a community of 9,999 super-rare, artfully crafted, collectible cats.
-                  </p>
-                  <p class="collection__desc color-grey">
-                    Each Cat is an individual being. The collection was created by the TegroMoney team, the creators of
-                    the TGR token on The Open Network blockchain.
-                  </p>
+                  <p>{{ collection.metadata.description }}</p>
+
                   <a class="collection__link text-white" href="#!" target="__blank">
                     <i class="fa-regular fa-link-simple color-yellow me-2"></i>
                     boredapeyachtclub.com
@@ -62,7 +56,7 @@
                 </div>
               </div>
               <div class="card-footer text-center border-top px-5 py-3">
-                Created by <span class="color-yellow">Smircs</span>
+                Created by <span class="color-yellow">{{ collection.contract.owner }}</span>
                 <i class="fa-solid fa-circle-check color-yellow fs-14 ms-1"></i>
               </div>
             </div>
@@ -85,7 +79,9 @@
                 </div>
                 <div class="card-blur__item p-4 border-end text-center">
                   <h5 class="text-uppercase fs-14 color-grey" style="letter-spacing: 1px;">Items</h5>
-                  <p class="m-0 text-uppercase fw-medium" style="letter-spacing: 1px;">1.3K</p>
+                  <p class="m-0 text-uppercase fw-medium" style="letter-spacing: 1px;">{{
+                      collection.contract.size
+                    }}</p>
                 </div>
                 <div class="card-blur__item p-4 border-end text-center">
                   <h5 class="text-uppercase fs-14 color-grey" style="letter-spacing: 1px;">Owners</h5>
@@ -93,11 +89,11 @@
                 </div>
                 <div class="card-blur__item p-4 border-end text-center">
                   <h5 class="text-uppercase fs-14 color-grey" style="letter-spacing: 1px;">Blockchain</h5>
-                  <p class="m-0 text-uppercase fw-medium" style="letter-spacing: 1px;">TON Conin</p>
+                  <p class="m-0 text-uppercase fw-medium" style="letter-spacing: 1px;">TON Coin</p>
                 </div>
                 <div class="card-blur__item p-4 text-center">
                   <h5 class="text-uppercase fs-14 color-grey" style="letter-spacing: 1px;">address</h5>
-                  <p class="m-0 text-uppercase fw-medium" style="letter-spacing: 1px;">0x15f...d860</p>
+                  <p class="m-0 text-uppercase fw-medium text-truncate" style="letter-spacing: 1px;">{{ address }}</p>
                 </div>
               </div>
             </div>
@@ -108,18 +104,23 @@
                   role="tablist">
                 <li class="collections__nav-item">
                   <button id="Owned-tab" aria-controls="Owned"
-                          aria-selected="true" class="collections__nav-link d-flex align-items-center text-nowrap active" data-bs-target="#Owned" data-bs-toggle="tab" role="tab"
+                          aria-selected="true"
+                          class="collections__nav-link d-flex align-items-center text-nowrap active"
+                          data-bs-target="#Owned" data-bs-toggle="tab" role="tab"
                           type="button">Items
                   </button>
                 </li>
                 <li class="collections__nav-item">
                   <button id="Activity-tab" aria-controls="Activity"
-                          aria-selected="false" class="collections__nav-link d-flex align-items-center text-nowrap" data-bs-target="#Activity" data-bs-toggle="tab"
+                          aria-selected="false" class="collections__nav-link d-flex align-items-center text-nowrap"
+                          data-bs-target="#Activity" data-bs-toggle="tab"
                           role="tab" type="button">Activity
                   </button>
                 </li>
                 <button aria-controls="collapseFilters"
-                        aria-expanded="false" class="btn btn-sm btn-secondary ms-auto d-flex align-items-center btn-filter" data-bs-toggle="collapse" href="#collapseFilters"
+                        aria-expanded="false"
+                        class="btn btn-sm btn-secondary ms-auto d-flex align-items-center btn-filter"
+                        data-bs-toggle="collapse" href="#collapseFilters"
                         role="button">
                   <i class="fa-regular fa-filter-list me-2"></i> Sort
                 </button>
@@ -196,10 +197,51 @@ import {defineComponent} from "vue";
 import ActivityList from "../components/ActivityList.vue";
 import CollectionList from "../components/CollectionList.vue";
 import CollectionFilters from "../components/CollectionFilters.vue";
+import gql from "graphql-tag";
 
 export default defineComponent({
   name: "Collection",
-  components: {CollectionFilters, CollectionList, ActivityList}
+  components: {CollectionFilters, CollectionList, ActivityList},
+  props: {
+    address: String,
+  },
+  apollo: {
+    collection: {
+      query: gql`query collection($address: String!) {
+        collection(address: $address) {
+          contract {
+            owner
+            size
+          }
+          metadata {
+            name
+            description
+            image
+          }
+        }
+      }`,
+      variables() {
+        return {
+          address: this.address
+        }
+      }
+    }
+  },
+  data() {
+    return {
+      collection: {
+        contract: {
+          owner: "",
+          size: 0,
+        },
+        metadata: {
+          name: "Loading...",
+          description: "",
+          image: "",
+        }
+      }
+    }
+  }
 })
 </script>
 
