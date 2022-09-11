@@ -1,10 +1,8 @@
 <template>
   <section class="nft-hero">
     <picture>
-      <source srcset="assets/img/nft-hero.webp" type="image/webp">
-      <source srcset="assets/img/nft-hero.jpg" type="image/jpeg">
-      <img alt="Tegro Cat" class="nft-hero__image" height="275" loading="lazy" src="assets/img/nft-hero.jpg"
-           width="340">
+      <img :src="collection.metadata.coverImage ?? 'assets/img/nft-hero.webp'" alt="Tegro Cat" class="nft-hero__image"
+           loading="lazy">
     </picture>
   </section>
   <main class="main-page">
@@ -217,6 +215,7 @@ export default defineComponent({
             name
             description
             image
+            coverImage
           }
         }
       }`,
@@ -238,6 +237,7 @@ export default defineComponent({
           name: "Loading...",
           description: "",
           image: "",
+          coverImage: ""
         }
       }
     }

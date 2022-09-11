@@ -8,10 +8,12 @@ data class CollectionMetadataQuery(
     val name: String?,
     val description: String?,
     val image: String?,
+    val coverImage: String?,
 ) {
     constructor(it: CollectionMetadata) : this(
         name = it.name,
         description = it.description,
         image = it.image,
+        coverImage = it.coverImage,
     )
 }
