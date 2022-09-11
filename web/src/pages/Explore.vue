@@ -46,14 +46,14 @@
           <div class="col-sm-6 col-lg-4 col-xl-3 mb-4">
             <a href="/collection.php" class="card card-gradient top-effect" title="Collection Name">
               <picture>
-                <source srcset="./assets/img/collections/collect-image-01.webp" type="image/webp">
-                <source srcset="./assets/img/collections/collect-image-01.jpg" type="image/jpeg">
-                <img src="./assets/img/collections/collect-image-01.jpg" class="image-300x300" loading="lazy"
+                <source srcset="assets/img/collections/collect-image-01.webp" type="image/webp">
+                <source srcset="assets/img/collections/collect-image-01.jpg" type="image/jpeg">
+                <img src="assets/img/collections/collect-image-01.jpg" class="image-300x300" loading="lazy"
                      width="1920" height="340" alt="Moonbirds">
               </picture>
               <div class="card-body">
                 <div class="card-avatar">
-                  <img src="./assets/img/author/author-01.jpg" class="img-fluid" loading="lazy" width="120" height=""
+                  <img src="assets/img/author/author-01.jpg" class="img-fluid" loading="lazy" width="120" height=""
                        alt="Moonbirds">
                 </div>
                 <div class="d-flex flex-wrap align-items-center">
@@ -84,14 +84,14 @@
           <div class="col-sm-6 col-lg-4 col-xl-3 mb-4">
             <a href="/collection.php" class="card card-gradient top-effect" title="Collection Name">
               <picture>
-                <source srcset="./assets/img/collections/collect-image-13.webp" type="image/webp">
-                <source srcset="./assets/img/collections/collect-image-13.jpg" type="image/jpeg">
-                <img src="./assets/img/collections/collect-image-13.jpg" class="image-300x300" loading="lazy"
+                <source srcset="assets/img/collections/collect-image-13.webp" type="image/webp">
+                <source srcset="assets/img/collections/collect-image-13.jpg" type="image/jpeg">
+                <img src="assets/img/collections/collect-image-13.jpg" class="image-300x300" loading="lazy"
                      width="340" height="275" alt="PudgyPenguins">
               </picture>
               <div class="card-body">
                 <div class="card-avatar">
-                  <img src="./assets/img/author/author-02.jpg" class="img-fluid" loading="lazy" width="80" height="80"
+                  <img src="assets/img/author/author-02.jpg" class="img-fluid" loading="lazy" width="80" height="80"
                        alt="PudgyPenguins">
                 </div>
                 <div class="d-flex flex-wrap align-items-center">
@@ -122,14 +122,14 @@
           <div class="col-sm-6 col-lg-4 col-xl-3 mb-4">
             <a href="/collection.php" class="card card-gradient top-effect" title="Collection Name">
               <picture>
-                <source srcset="./assets/img/collections/collect-image-12.webp" type="image/webp">
-                <source srcset="./assets/img/collections/collect-image-12.jpg" type="image/jpeg">
-                <img src="./assets/img/collections/collect-image-12.jpg" class="image-300x300" loading="lazy"
+                <source srcset="assets/img/collections/collect-image-12.webp" type="image/webp">
+                <source srcset="assets/img/collections/collect-image-12.jpg" type="image/jpeg">
+                <img src="assets/img/collections/collect-image-12.jpg" class="image-300x300" loading="lazy"
                      width="340" height="275" alt="Elctric Sheep">
               </picture>
               <div class="card-body">
                 <div class="card-avatar">
-                  <img src="./assets/img/author/author-04.jpg" class="img-fluid" loading="lazy" width="80" height="80"
+                  <img src="assets/img/author/author-04.jpg" class="img-fluid" loading="lazy" width="80" height="80"
                        alt="Elctric Sheep">
                 </div>
                 <div class="d-flex flex-wrap align-items-center">
@@ -160,14 +160,14 @@
           <div class="col-sm-6 col-lg-4 col-xl-3 mb-4">
             <a href="/collection.php" class="card card-gradient top-effect" title="Collection Name">
               <picture>
-                <source srcset="./assets/img/collections/collect-image-11.webp" type="image/webp">
-                <source srcset="./assets/img/collections/collect-image-11.jpg" type="image/jpeg">
-                <img src="./assets/img/collections/collect-image-11.jpg" class="image-300x300" loading="lazy"
+                <source srcset="assets/img/collections/collect-image-11.webp" type="image/webp">
+                <source srcset="assets/img/collections/collect-image-11.jpg" type="image/jpeg">
+                <img src="assets/img/collections/collect-image-11.jpg" class="image-300x300" loading="lazy"
                      width="340" height="275" alt="The currency">
               </picture>
               <div class="card-body">
                 <div class="card-avatar">
-                  <img src="./assets/img/author/author-05.jpg" class="img-fluid" loading="lazy" width="80" height="80"
+                  <img src="assets/img/author/author-05.jpg" class="img-fluid" loading="lazy" width="80" height="80"
                        alt="Moonbirds">
                 </div>
                 <div class="d-flex flex-wrap align-items-center">
@@ -198,14 +198,14 @@
           <div class="col-sm-6 col-lg-4 col-xl-3 mb-4">
             <a href="/collection.php" class="card card-gradient top-effect" title="Collection Name">
               <picture>
-                <source srcset="./assets/img/collections/collect-image-10.webp" type="image/webp">
-                <source srcset="./assets/img/collections/collect-image-10.jpg" type="image/jpeg">
-                <img src="./assets/img/collections/collect-image-10.jpg" class="image-300x300" loading="lazy"
+                <source srcset="assets/img/collections/collect-image-10.webp" type="image/webp">
+                <source srcset="assets/img/collections/collect-image-10.jpg" type="image/jpeg">
+                <img src="assets/img/collections/collect-image-10.jpg" class="image-300x300" loading="lazy"
                      width="340" height="275" alt="TON NFT Tegro...">
               </picture>
               <div class="card-body">
                 <div class="card-avatar">
-                  <img src="./assets/img/author/author-06.jpg" class="img-fluid" loading="lazy" width="80" height="80"
+                  <img src="assets/img/author/author-06.jpg" class="img-fluid" loading="lazy" width="80" height="80"
                        alt="TON NFT Tegro...">
                 </div>
                 <div class="d-flex flex-wrap align-items-center">
@@ -236,14 +236,14 @@
           <div class="col-sm-6 col-lg-4 col-xl-3 mb-4">
             <a href="/collection.php" class="card card-gradient top-effect" title="Collection Name">
               <picture>
-                <source srcset="./assets/img/collections/collect-image-09.webp" type="image/webp">
-                <source srcset="./assets/img/collections/collect-image-09.jpg" type="image/jpeg">
-                <img src="./assets/img/collections/collect-image-09.jpg" class="image-300x300" loading="lazy"
+                <source srcset="assets/img/collections/collect-image-09.webp" type="image/webp">
+                <source srcset="assets/img/collections/collect-image-09.jpg" type="image/jpeg">
+                <img src="assets/img/collections/collect-image-09.jpg" class="image-300x300" loading="lazy"
                      width="340" height="275" alt="PudgyPenguins">
               </picture>
               <div class="card-body">
                 <div class="card-avatar">
-                  <img src="./assets/img/author/author-07.jpg" class="img-fluid" loading="lazy" width="80" height="80"
+                  <img src="assets/img/author/author-07.jpg" class="img-fluid" loading="lazy" width="80" height="80"
                        alt="PudgyPenguins">
                 </div>
                 <div class="d-flex flex-wrap align-items-center">
@@ -274,14 +274,14 @@
           <div class="col-sm-6 col-lg-4 col-xl-3 mb-4">
             <a href="/collection.php" class="card card-gradient top-effect" title="Collection Name">
               <picture>
-                <source srcset="./assets/img/collections/collect-image-08.webp" type="image/webp">
-                <source srcset="./assets/img/collections/collect-image-08.jpg" type="image/jpeg">
-                <img src="./assets/img/collections/collect-image-08.jpg" class="image-300x300" loading="lazy"
+                <source srcset="assets/img/collections/collect-image-08.webp" type="image/webp">
+                <source srcset="assets/img/collections/collect-image-08.jpg" type="image/jpeg">
+                <img src="assets/img/collections/collect-image-08.jpg" class="image-300x300" loading="lazy"
                      width="340" height="275" alt="Emblem Vault">
               </picture>
               <div class="card-body">
                 <div class="card-avatar">
-                  <img src="./assets/img/author/author-08.jpg" class="img-fluid" loading="lazy" width="80" height="80"
+                  <img src="assets/img/author/author-08.jpg" class="img-fluid" loading="lazy" width="80" height="80"
                        alt="Emblem Vault">
                 </div>
                 <div class="d-flex flex-wrap align-items-center">
@@ -312,14 +312,14 @@
           <div class="col-sm-6 col-lg-4 col-xl-3 mb-4">
             <a href="/collection.php" class="card card-gradient top-effect" title="Collection Name">
               <picture>
-                <source srcset="./assets/img/collections/collect-image-07.webp" type="image/webp">
-                <source srcset="./assets/img/collections/collect-image-07.jpg" type="image/jpeg">
-                <img src="./assets/img/collections/collect-image-07.jpg" class="image-300x300" loading="lazy"
+                <source srcset="assets/img/collections/collect-image-07.webp" type="image/webp">
+                <source srcset="assets/img/collections/collect-image-07.jpg" type="image/jpeg">
+                <img src="assets/img/collections/collect-image-07.jpg" class="image-300x300" loading="lazy"
                      width="340" height="275" alt="PudgyPenguins">
               </picture>
               <div class="card-body">
                 <div class="card-avatar">
-                  <img src="./assets/img/author/author-10.jpg" class="img-fluid" loading="lazy" width="80" height="80"
+                  <img src="assets/img/author/author-10.jpg" class="img-fluid" loading="lazy" width="80" height="80"
                        alt="PudgyPenguins">
                 </div>
                 <div class="d-flex flex-wrap align-items-center">
@@ -350,14 +350,14 @@
           <div class="col-sm-6 col-lg-4 col-xl-3 mb-4">
             <a href="/collection.php" class="card card-gradient top-effect" title="Collection Name">
               <picture>
-                <source srcset="./assets/img/collections/collect-image-06.webp" type="image/webp">
-                <source srcset="./assets/img/collections/collect-image-06.jpg" type="image/jpeg">
-                <img src="./assets/img/collections/collect-image-06.jpg" class="image-300x300" loading="lazy"
+                <source srcset="assets/img/collections/collect-image-06.webp" type="image/webp">
+                <source srcset="assets/img/collections/collect-image-06.jpg" type="image/jpeg">
+                <img src="assets/img/collections/collect-image-06.jpg" class="image-300x300" loading="lazy"
                      width="340" height="275" alt="Emblem Vault">
               </picture>
               <div class="card-body">
                 <div class="card-avatar">
-                  <img src="./assets/img/author/author-11.jpg" class="img-fluid" loading="lazy" width="80" height="80"
+                  <img src="assets/img/author/author-11.jpg" class="img-fluid" loading="lazy" width="80" height="80"
                        alt="Emblem Vault">
                 </div>
                 <div class="d-flex flex-wrap align-items-center">
@@ -388,14 +388,14 @@
           <div class="col-sm-6 col-lg-4 col-xl-3 mb-4">
             <a href="/collection.php" class="card card-gradient top-effect" title="Collection Name">
               <picture>
-                <source srcset="./assets/img/collections/collect-image-05.webp" type="image/webp">
-                <source srcset="./assets/img/collections/collect-image-05.jpg" type="image/jpeg">
-                <img src="./assets/img/collections/collect-image-05.jpg" class="image-300x300" loading="lazy"
+                <source srcset="assets/img/collections/collect-image-05.webp" type="image/webp">
+                <source srcset="assets/img/collections/collect-image-05.jpg" type="image/jpeg">
+                <img src="assets/img/collections/collect-image-05.jpg" class="image-300x300" loading="lazy"
                      width="340" height="275" alt="Elctric Sheep">
               </picture>
               <div class="card-body">
                 <div class="card-avatar">
-                  <img src="./assets/img/author/author-12.jpg" class="img-fluid" loading="lazy" width="80" height="80"
+                  <img src="assets/img/author/author-12.jpg" class="img-fluid" loading="lazy" width="80" height="80"
                        alt="Elctric Sheep">
                 </div>
                 <div class="d-flex flex-wrap align-items-center">
@@ -426,14 +426,14 @@
           <div class="col-sm-6 col-lg-4 col-xl-3 mb-4">
             <a href="/collection.php" class="card card-gradient top-effect" title="Collection Name">
               <picture>
-                <source srcset="./assets/img/collections/collect-image-04.webp" type="image/webp">
-                <source srcset="./assets/img/collections/collect-image-04.jpg" type="image/jpeg">
-                <img src="./assets/img/collections/collect-image-04.jpg" class="image-300x300" loading="lazy"
+                <source srcset="assets/img/collections/collect-image-04.webp" type="image/webp">
+                <source srcset="assets/img/collections/collect-image-04.jpg" type="image/jpeg">
+                <img src="assets/img/collections/collect-image-04.jpg" class="image-300x300" loading="lazy"
                      width="340" height="275" alt="The currency">
               </picture>
               <div class="card-body">
                 <div class="card-avatar">
-                  <img src="./assets/img/author/author-13.jpg" class="img-fluid" loading="lazy" width="80" height="80"
+                  <img src="assets/img/author/author-13.jpg" class="img-fluid" loading="lazy" width="80" height="80"
                        alt="The currency">
                 </div>
                 <div class="d-flex flex-wrap align-items-center">
@@ -464,14 +464,14 @@
           <div class="col-sm-6 col-lg-4 col-xl-3 mb-4">
             <a href="/collection.php" class="card card-gradient top-effect" title="Collection Name">
               <picture>
-                <source srcset="./assets/img/collections/collect-image-03.webp" type="image/webp">
-                <source srcset="./assets/img/collections/collect-image-03.jpg" type="image/jpeg">
-                <img src="./assets/img/collections/collect-image-03.jpg" class="image-300x300" loading="lazy"
+                <source srcset="assets/img/collections/collect-image-03.webp" type="image/webp">
+                <source srcset="assets/img/collections/collect-image-03.jpg" type="image/jpeg">
+                <img src="assets/img/collections/collect-image-03.jpg" class="image-300x300" loading="lazy"
                      width="340" height="275" alt="PudgyPenguins">
               </picture>
               <div class="card-body">
                 <div class="card-avatar">
-                  <img src="./assets/img/author/author-14.jpg" class="img-fluid" loading="lazy" width="80" height="80"
+                  <img src="assets/img/author/author-14.jpg" class="img-fluid" loading="lazy" width="80" height="80"
                        alt="PudgyPenguins">
                 </div>
                 <div class="d-flex flex-wrap align-items-center">
@@ -502,14 +502,14 @@
           <div class="col-sm-6 col-lg-4 col-xl-3 mb-4">
             <a href="/collection.php" class="card card-gradient top-effect" title="Collection Name">
               <picture>
-                <source srcset="./assets/img/collections/collect-image-01.webp" type="image/webp">
-                <source srcset="./assets/img/collections/collect-image-01.jpg" type="image/jpeg">
-                <img src="./assets/img/collections/collect-image-01.jpg" class="image-300x300" loading="lazy"
+                <source srcset="assets/img/collections/collect-image-01.webp" type="image/webp">
+                <source srcset="assets/img/collections/collect-image-01.jpg" type="image/jpeg">
+                <img src="assets/img/collections/collect-image-01.jpg" class="image-300x300" loading="lazy"
                      width="340" height="275" alt="Moonbirds">
               </picture>
               <div class="card-body">
                 <div class="card-avatar">
-                  <img src="./assets/img/author/author-01.jpg" class="img-fluid" loading="lazy" width="80" height="80"
+                  <img src="assets/img/author/author-01.jpg" class="img-fluid" loading="lazy" width="80" height="80"
                        alt="Moonbirds">
                 </div>
                 <div class="d-flex flex-wrap align-items-center">
@@ -540,14 +540,14 @@
           <div class="col-sm-6 col-lg-4 col-xl-3 mb-4">
             <a href="/collection.php" class="card card-gradient top-effect" title="Collection Name">
               <picture>
-                <source srcset="./assets/img/collections/collect-image-13.webp" type="image/webp">
-                <source srcset="./assets/img/collections/collect-image-13.jpg" type="image/jpeg">
-                <img src="./assets/img/collections/collect-image-13.jpg" class="image-300x300" loading="lazy"
+                <source srcset="assets/img/collections/collect-image-13.webp" type="image/webp">
+                <source srcset="assets/img/collections/collect-image-13.jpg" type="image/jpeg">
+                <img src="assets/img/collections/collect-image-13.jpg" class="image-300x300" loading="lazy"
                      width="340" height="275" alt="PudgyPenguins">
               </picture>
               <div class="card-body">
                 <div class="card-avatar">
-                  <img src="./assets/img/author/author-02.jpg" class="img-fluid" loading="lazy" width="80" height="80"
+                  <img src="assets/img/author/author-02.jpg" class="img-fluid" loading="lazy" width="80" height="80"
                        alt="PudgyPenguins">
                 </div>
                 <div class="d-flex flex-wrap align-items-center">
@@ -578,14 +578,14 @@
           <div class="col-sm-6 col-lg-4 col-xl-3 mb-4">
             <a href="/collection.php" class="card card-gradient top-effect" title="Collection Name">
               <picture>
-                <source srcset="./assets/img/collections/collect-image-12.webp" type="image/webp">
-                <source srcset="./assets/img/collections/collect-image-12.jpg" type="image/jpeg">
-                <img src="./assets/img/collections/collect-image-12.jpg" class="image-300x300" loading="lazy"
+                <source srcset="assets/img/collections/collect-image-12.webp" type="image/webp">
+                <source srcset="assets/img/collections/collect-image-12.jpg" type="image/jpeg">
+                <img src="assets/img/collections/collect-image-12.jpg" class="image-300x300" loading="lazy"
                      width="340" height="275" alt="Elctric Sheep">
               </picture>
               <div class="card-body">
                 <div class="card-avatar">
-                  <img src="./assets/img/author/author-04.jpg" class="img-fluid" loading="lazy" width="80" height="80"
+                  <img src="assets/img/author/author-04.jpg" class="img-fluid" loading="lazy" width="80" height="80"
                        alt="Elctric Sheep">
                 </div>
                 <div class="d-flex flex-wrap align-items-center">
@@ -616,14 +616,14 @@
           <div class="col-sm-6 col-lg-4 col-xl-3 mb-4">
             <a href="/collection.php" class="card card-gradient top-effect" title="Collection Name">
               <picture>
-                <source srcset="./assets/img/collections/collect-image-11.webp" type="image/webp">
-                <source srcset="./assets/img/collections/collect-image-11.jpg" type="image/jpeg">
-                <img src="./assets/img/collections/collect-image-11.jpg" class="image-300x300" loading="lazy"
+                <source srcset="assets/img/collections/collect-image-11.webp" type="image/webp">
+                <source srcset="assets/img/collections/collect-image-11.jpg" type="image/jpeg">
+                <img src="assets/img/collections/collect-image-11.jpg" class="image-300x300" loading="lazy"
                      width="340" height="275" alt="The currency">
               </picture>
               <div class="card-body">
                 <div class="card-avatar">
-                  <img src="./assets/img/author/author-05.jpg" class="img-fluid" loading="lazy" width="80" height="80"
+                  <img src="assets/img/author/author-05.jpg" class="img-fluid" loading="lazy" width="80" height="80"
                        alt="Moonbirds">
                 </div>
                 <div class="d-flex flex-wrap align-items-center">

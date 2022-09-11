@@ -1,9 +1,9 @@
 <template>
   <section class="nft-hero">
     <picture>
-      <source srcset="./assets/img/nft-hero.webp" type="image/webp">
-      <source srcset="./assets/img/nft-hero.jpg" type="image/jpeg">
-      <img src="./assets/img/nft-hero.jpg" class="nft-hero__image" loading="lazy" width="340" height="275"
+      <source srcset="assets/img/nft-hero.webp" type="image/webp">
+      <source srcset="assets/img/nft-hero.jpg" type="image/jpeg">
+      <img src="assets/img/nft-hero.jpg" class="nft-hero__image" loading="lazy" width="340" height="275"
            alt="Tegro Cat">
     </picture>
   </section>
@@ -131,7 +131,7 @@
               <div class="d-block d-sm-flex flex-wrap align-items-center">
                 <div class="m-3">
                   <label class="color-grey mb-2">Category:</label>
-                  <select class="form-select" aria-label="Select Category">
+                  <select class="form-select border" aria-label="Select Category">
                     <option selected>All</option>
                     <option value="1">One</option>
                     <option value="2">Two</option>
@@ -140,7 +140,7 @@
                 </div>
                 <div class="m-3">
                   <label class="color-grey mb-2">Properties:</label>
-                  <select class="form-select" aria-label="Select Category">
+                  <select class="form-select border" aria-label="Select Category">
                     <option selected>All 354</option>
                     <option value="1">One</option>
                     <option value="2">Two</option>
@@ -149,7 +149,7 @@
                 </div>
                 <div class="m-3">
                   <label class="color-grey mb-2">Sale type:</label>
-                  <select class="form-select" aria-label="Select Category">
+                  <select class="form-select border" aria-label="Select Category">
                     <option selected>All</option>
                     <option value="1">One</option>
                     <option value="2">Two</option>
@@ -158,7 +158,7 @@
                 </div>
                 <div class="m-3">
                   <label class="color-grey mb-2">Price range:</label>
-                  <select class="form-select" aria-label="Select Category">
+                  <select class="form-select border" aria-label="Select Category">
                     <option selected>ETH 5 - 15</option>
                     <option value="1">One</option>
                     <option value="2">Two</option>
@@ -167,7 +167,7 @@
                 </div>
                 <div class="m-3 ms-xxl-auto">
                   <label class="color-grey mb-2">Sort:</label>
-                  <select class="form-select" aria-label="Select Category">
+                  <select class="form-select border" aria-label="Select Category">
                     <option selected>Recently listed</option>
                     <option value="1">Price: low to high</option>
                     <option value="2">Price: high to low</option>

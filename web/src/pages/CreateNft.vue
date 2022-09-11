@@ -12,7 +12,7 @@
               <div class="col-lg-5 col-xl-4 order-2 order-lg-1 text-center text-lg-start">
                 <div class="border rounded-20 p-3 p-md-4 text-center mb-4">
                   <div>
-                    <img class="card-image img-fluid" src="./assets/img/cats/t-cat-01.jpg" loading="lazy" width="276"
+                    <img class="card-image img-fluid" src="assets/img/cats/t-cat-01.jpg" loading="lazy" width="276"
                          height="250" alt="TON NFT Tegro Cat">
                     <div class="px-1 py-0">
                       <h4 class="fs-18 d-flex align-items-center my-4">
@@ -46,7 +46,7 @@
                     <div
                         class="d-flex flex-column flex-sm-row align-items-center bg-soft border rounded-20 p-2 overflow-hidden">
                       <div class="p-2 bg-soft rounded-20">
-                        <img src="https://market.unerd.eu/assets/img/tonhub.png" alt="TonHub">
+                        <img src="assets/img/tonhub.png" alt="TonHub">
                       </div>
                       <div class="mb-2 mb-sm-0 p-2 text-center text-sm-start">
                                  <span class="d-block text-truncate mb-1 color-grey" style="max-width: 200px;">
@@ -199,7 +199,7 @@
                       </div>
                       <div class="col-12 col-sm-6 col-md-4">
                         <button type="button" class="btn btn-soft active py-4 w-100">
-                          <img class="mb-3" src="./assets/img/logo/apple-icon-57x57.png"
+                          <img class="mb-3" src="assets/img/logo/apple-icon-57x57.png"
                                alt="Libermall - NFT Marketplace" width="28">
                           <span class="d-block fs-18 text-capitalize">Libermall</span>
                           <span class="d-block fs-14 color-grey text-capitalize mt-1">Liber</span>

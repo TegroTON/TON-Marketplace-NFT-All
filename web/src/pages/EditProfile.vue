@@ -14,7 +14,7 @@
                 </div>
                 <div class="collection__image ms-auto me-5 mb-4 mt--60">
                   <button type="button" data-bs-toggle="modal" data-bs-target="#UpdateCoverModal">
-                    <img src="/assets/img/user-1.svg?v=2" alt="" class="img-fluid rounded-circle" width="120"
+                    <img src="assets/img/user-1.svg?v=2" alt="" class="img-fluid rounded-circle" width="120"
                          height="120">
                     <i class="fa-regular fa-images fa-2x"></i>
                   </button>
@@ -22,7 +22,7 @@
               </div>
               <div class="col-lg-5 col-xl-4 order-2 order-lg-1 text-center text-lg-start">
                 <div class="px-4 mb-0 mb-lg-4 position-sticky" style="top: 140px;">
-                  <img src="/assets/img/verify.jpg?v=2" alt="" class="img-fluid rounded w-100 mb-4">
+                  <img src="assets/img/verify.jpg?v=2" alt="" class="img-fluid rounded w-100 mb-4">
                   <h4 class="fw-bold fs-22">Verify your account</h4>
                   <p class="color-grey mb-4">
                     Proceed with verification pocess to get more visibility and gain truston Libermall

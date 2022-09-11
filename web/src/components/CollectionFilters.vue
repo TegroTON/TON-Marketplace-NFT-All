@@ -556,7 +556,7 @@
       <div class="collapse position-relative overflow-auto" id="collapseCollection">
         <a href="/collection.php" class="card-item-details d-block border hover px-4 py-3 rounded text-white mb-3">
           <div class="d-flex align-items-center">
-            <img src="/assets/img/author/author-17.jpg" alt="" class="img-fluid rounded-circle" width="40">
+            <img src="assets/img/author/author-17.jpg" alt="" class="img-fluid rounded-circle" width="40">
             <div class="ms-3">
               <h4 class="collection__name fs-16 mb-1">Tegro Cat <i
                   class="fa-solid fa-circle-check color-yellow ms-2"></i></h4>
@@ -574,7 +574,7 @@
         </a>
         <a href="/collection.php" class="card-item-details d-block border hover px-4 py-3 rounded text-white mb-3">
           <div class="d-flex align-items-center">
-            <img src="/assets/img/author/author-02.jpg" alt="" class="img-fluid rounded-circle" width="40">
+            <img src="assets/img/author/author-02.jpg" alt="" class="img-fluid rounded-circle" width="40">
             <div class="ms-3">
               <h4 class="collection__name fs-16 mb-1">Moonbirds</h4>
               <p class="color-grey fs-14 mb-0">

@@ -3,7 +3,7 @@
     <div class="container-fluid">
       <nav class="navbar navbar-expand-lg d-flex align-items-center p-0">
         <a class="navbar-logo me-5" href="/">
-          <img class="navbar-logo__img" src="./assets/img/logo/apple-icon-57x57.png" alt="Libermall - NFT Marketplace">
+          <img class="navbar-logo__img" src="assets/img/logo/apple-icon-57x57.png" alt="Libermall - NFT Marketplace">
           <span class="navbar-logo__name d-none d-xxl-block">Libermall</span>
         </a>
         <button class="navbar-toggler btn btn-secondary order-2 order-xl-1 ms-3" type="button" data-bs-toggle="collapse"
@@ -59,9 +59,10 @@
               <a class="nav-link" href="#">Create</a>
             </li>
           </ul>
-          <div v-if="/* Signed In */" class="dropdown dropstart order-3 order-lg-4">
+          <!-- TODO: Show this when signed in -->
+          <div v-if="false" class="dropdown dropstart order-3 order-lg-4">
             <button type="button" id="dropdownMenuProfile" data-bs-toggle="dropdown" aria-expanded="false">
-              <img src="/assets/img/user-1.svg" alt="" class="rounded-circle profile-image" width="42" height="42">
+              <img src="assets/img/user-1.svg" alt="" class="rounded-circle profile-image" width="42" height="42">
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenuProfile">
               <li><a class="dropdown-item" href="/my-profile.php"><i class="fa-regular fa-user me-3"></i>Profile</a>

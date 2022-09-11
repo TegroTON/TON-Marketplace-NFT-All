@@ -1,7 +1,6 @@
 import {createApp} from 'vue'
 import App from './App.vue'
-import '~bootstrap'
-import './assets/scss/styles.scss'
+import './scss/global.scss'
 import {createPinia} from "pinia";
 import {router} from "./router";
 import {ApolloClient, createHttpLink, InMemoryCache} from "@apollo/client/core";

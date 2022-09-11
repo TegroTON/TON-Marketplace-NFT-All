@@ -15,7 +15,7 @@
               <div class="col-lg-5 col-xl-5 mb-4 mb-lg-0">
                 <!-- Start NFT Image -->
                 <div class="position-sticky" style="top: 140px;">
-                  <img class="item-details__image" data-enlargable src="/assets/img/item-details-image.jpg" alt="">
+                  <img class="item-details__image" data-enlargable src="assets/img/item-details-image.jpg" alt="">
                 </div>
                 <!-- // End NFT Image -->
               </div>
@@ -80,7 +80,7 @@
                        class="card-item-details d-block border bg-soft hover px-4 py-3 rounded text-white">
                       <h4 class="fs-14 color-grey mb-4">Owner</h4>
                       <div class="d-flex align-items-center">
-                        <img src="/assets/img/author/author-12.jpg" alt="" class="img-fluid rounded-circle" width="40"
+                        <img src="assets/img/author/author-12.jpg" alt="" class="img-fluid rounded-circle" width="40"
                              height="40">
                         <h4 class="collection__name fs-16 mb-0 ms-3">
                           NFT Tegro
@@ -94,7 +94,7 @@
                        class="card-item-details d-block border bg-soft hover px-4 py-3 rounded text-white">
                       <h4 class="fs-14 color-grey mb-4">Collection</h4>
                       <div class="d-flex align-items-center">
-                        <img src="/assets/img/author/author-17.jpg" alt="" class="img-fluid rounded-circle" width="40">
+                        <img src="assets/img/author/author-17.jpg" alt="" class="img-fluid rounded-circle" width="40">
                         <h4 class="collection__name fs-16 mb-0 ms-3">
                           Tegro Cat
                         </h4>

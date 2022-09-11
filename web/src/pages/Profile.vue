@@ -1,9 +1,9 @@
 <template>
   <section class="nft-hero">
     <picture>
-      <source srcset="./assets/img/profile-hero.webp" type="image/webp">
-      <source srcset="./assets/img/profile-hero.jpg" type="image/jpeg">
-      <img src="./assets/img/profile-hero.jpg" class="nft-hero__image" loading="lazy" width="340" height="275"
+      <source srcset="assets/img/profile-hero.webp" type="image/webp">
+      <source srcset="assets/img/profile-hero.jpg" type="image/jpeg">
+      <img src="assets/img/profile-hero.jpg" class="nft-hero__image" loading="lazy" width="340" height="275"
            alt="Tegro Cat">
     </picture>
   </section>
@@ -30,7 +30,7 @@
               <div class="card-body p-4 p-lg-2 p-xl-3 p-xxl-4">
                 <div class="d-flex flex-column flex-md-row flex-lg-column align-items-center mb-5">
                   <div class="collection__image mb-4 mb-md-0 mb-lg-4 ms-auto ms-md-0 ms-lg-auto me-auto">
-                    <img src="/assets/img/cats/t-cat-02.jpg" alt="" class="img-fluid rounded-circle" width="80"
+                    <img src="assets/img/cats/t-cat-02.jpg" alt="" class="img-fluid rounded-circle" width="80"
                          height="80">
                   </div>
                   <div class="d-flex mx-0 mx-lg-auto">

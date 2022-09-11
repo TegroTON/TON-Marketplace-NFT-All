@@ -4,7 +4,7 @@
       <div class="row accordion modified-collapse" id="accordionFooter">
         <div class="col-md-12 col-lg-3 me-auto mb-5 mb-lg-0">
           <div class="footer__logo d-flex align-items-center mb-4">
-            <img class="navbar-logo__img" src="./assets/img/logo/apple-icon-57x57.png"
+            <img class="navbar-logo__img" src="assets/img/logo/apple-icon-57x57.png"
                  alt="Libermall - NFT Marketplace">
             <span class="navbar-logo__name fs-24 d-none d-md-block ms-3">Libermall</span>
           </div>

@@ -4,7 +4,7 @@
       <div class="container-fluid ">
         <div class="row justify-content-center">
           <div class="col-md-6 col-lg-3 text-center ">
-            <img class="rounded img-fluid mb-4" src="/assets/img/item-details-image.jpg" alt="Tergo Cat" width="200">
+            <img class="rounded img-fluid mb-4" src="assets/img/item-details-image.jpg" alt="Tergo Cat" width="200">
             <div class="ms-4">
               <h5 class="fs-28 mb-2">Nice! You've successfully put <span class="d-block">an NFT up for auction!</span>
               </h5>
