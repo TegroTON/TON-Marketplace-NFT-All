@@ -8,8 +8,9 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.Resource
-import org.ton.api.liteclient.config.LiteClientConfigGlobal
+import org.ton.adnl.client.engine.cio.CIOAdnlClientEngine
 import org.ton.lite.client.LiteClient
+import org.ton.logger.Logger
 
 @Configuration
 class LiteClientConfiguration(
@@ -19,10 +20,37 @@ class LiteClientConfiguration(
     @OptIn(ExperimentalSerializationApi::class)
     @Bean
     fun liteClient() = LiteClient(
+        CIOAdnlClientEngine.create(),
         Json {
             ignoreUnknownKeys = true
         }
-            .decodeFromStream<LiteClientConfigGlobal>(jsonConfig.inputStream))
+            .decodeFromStream(jsonConfig.inputStream),
+        TonLogger()
+    )
+
+    companion object : KLogging()
+}
+
+private class TonLogger(override var level: Logger.Level = Logger.Level.DEBUG) : Logger {
+    override fun log(level: Logger.Level, message: () -> String) {
+        when (level) {
+            Logger.Level.DEBUG -> {
+                logger.debug(message)
+            }
+
+            Logger.Level.FATAL -> {
+                logger.error(message)
+            }
+
+            Logger.Level.INFO -> {
+                logger.info(message)
+            }
+
+            Logger.Level.WARN -> {
+                logger.warn(message)
+            }
+        }
+    }
 
     companion object : KLogging()
 }
