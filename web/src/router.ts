@@ -9,11 +9,11 @@ import Profile from "./pages/Profile.vue";
 export const router = createRouter({
     history: createWebHashHistory(),
     routes: [
-        {path: '/', component: Index},
-        {path: '/collection/:address', component: Collection, props: true},
-        {path: '/create', component: CreateNft},
-        {path: '/explore', component: Explore},
-        {path: '/item/:address', component: Item},
-        {path: '/profile/:address', component: Profile},
+        {name: 'index', path: '/', component: Index},
+        {name: 'collection', path: '/collection/:address', component: Collection, props: true},
+        {name: 'create', path: '/create', component: CreateNft},
+        {name: 'explore', path: '/explore', component: Explore},
+        {name: 'item', path: '/item/:address', component: Item},
+        {name: 'profile', path: '/profile/:address', component: Profile},
     ]
 })

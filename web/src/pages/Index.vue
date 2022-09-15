@@ -264,7 +264,8 @@
         </div>
         <div class="row pt-3">
           <div v-for="collection in collections" class="col-sm-6 col-xxl-4">
-            <router-link :title="collection.metadata.name" :to="'/collection/' + collection.address" class="d-block">
+            <router-link :title="collection.metadata.name"
+                         :to="{name: 'collection', params: { address: collection.address }}" class="d-block">
               <div class="card d-flex flex-lg-row align-items-center p-3 p-xl-4 rounded-20 mb-4">
                 <div class="collection__picbox position-relative me-4 mb-4 mb-lg-0">
                   <picture>

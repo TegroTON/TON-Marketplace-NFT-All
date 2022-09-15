@@ -175,7 +175,12 @@
             </div>
             <div id="myTabContent" class="tab-content py-4">
               <div id="Owned" aria-labelledby="Owned-tab" class="tab-pane fade show active" role="tabpanel">
-                <collection-list></collection-list>
+
+                <div class="row">
+                  <div v-for="item in collection.items" class="col-sm-6 col-xl-4 col-xxl-3 mb-4">
+                    <collection-item-card :address="item.address"></collection-item-card>
+                  </div>
+                </div>
               </div>
               <div id="Activity" aria-labelledby="Activity-tab" class="tab-pane fade" role="tabpanel">
                 <activity-list></activity-list>
@@ -193,15 +198,18 @@
 <script lang="ts">
 import {defineComponent} from "vue";
 import ActivityList from "../components/ActivityList.vue";
-import CollectionList from "../components/CollectionList.vue";
 import CollectionFilters from "../components/CollectionFilters.vue";
 import gql from "graphql-tag";
+import CollectionItemCard from "../components/CollectionItemCard.vue";
 
 export default defineComponent({
   name: "Collection",
-  components: {CollectionFilters, CollectionList, ActivityList},
+  components: {CollectionItemCard, CollectionFilters, ActivityList},
   props: {
-    address: String,
+    address: {
+      type: String,
+      required: true,
+    }
   },
   apollo: {
     collection: {
@@ -216,6 +224,9 @@ export default defineComponent({
             description
             image
             coverImage
+          }
+          items(take: 5) {
+            address
           }
         }
       }`,
@@ -238,7 +249,8 @@ export default defineComponent({
           description: "",
           image: "",
           coverImage: ""
-        }
+        },
+        items: [] as { address: string }[]
       }
     }
   }
