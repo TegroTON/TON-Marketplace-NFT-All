@@ -42,6 +42,10 @@ class SaleService(
         }
     }
 
+    fun onChange(address: MsgAddressInt) {
+        cache()?.evictIfPresent(address)
+    }
+
     private fun cache() = cacheManager.getCache("sale")
 
     companion object : KLogging()

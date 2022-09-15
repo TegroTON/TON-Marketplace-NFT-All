@@ -120,6 +120,13 @@ class CollectionService(
             .map { getItemAddress(address, it, referenceBlock) }
     }
 
+    fun onChange(address: MsgAddressInt) {
+        contractCache()?.evictIfPresent(address)
+        metadataCache()?.evictIfPresent(address)
+        // TODO: Somehow evict old item addresses
+//        itemAddressCache()?.evictIfPresent(address)
+    }
+
     private fun contractCache() = cacheManager.getCache("collection.contract")
     private fun metadataCache() = cacheManager.getCache("collection.metadata")
     private fun itemAddressCache() = cacheManager.getCache("collection.item_address")

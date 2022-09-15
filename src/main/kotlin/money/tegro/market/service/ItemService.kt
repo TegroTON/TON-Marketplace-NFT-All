@@ -72,6 +72,11 @@ class ItemService(
         }
     }
 
+    fun onChange(address: MsgAddressInt) {
+        contractCache()?.evictIfPresent(address)
+        metadataCache()?.evictIfPresent(address)
+    }
+
     private fun contractCache() = cacheManager.getCache("item.contract")
     private fun metadataCache() = cacheManager.getCache("item.metadata")
 

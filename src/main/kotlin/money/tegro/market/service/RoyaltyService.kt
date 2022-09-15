@@ -42,6 +42,9 @@ class RoyaltyService(
         }
     }
 
+    fun onChange(address: MsgAddressInt) {
+        cache()?.evictIfPresent(address)
+    }
 
     private fun cache() = cacheManager.getCache("royalty")
 

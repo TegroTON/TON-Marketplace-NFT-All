@@ -47,10 +47,5 @@ class RabbitConfiguration {
             setMessageConverter(messageConverter)
         }
 
-//    @RabbitListener(queues = ["market.blocks"])
-//    fun blocks(block: Block) {
-//        logger.info("workchain ${block.info.shard.workchain_id} seqno ${block.info.seq_no}")
-//    }
-
     companion object : KLogging()
 }
