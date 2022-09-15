@@ -2,7 +2,6 @@ package money.tegro.market.configuration
 
 import mu.KLogging
 import org.springframework.amqp.core.*
-import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.amqp.rabbit.connection.ConnectionFactory
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.amqp.support.converter.AbstractMessageConverter
@@ -48,10 +47,10 @@ class RabbitConfiguration {
             setMessageConverter(messageConverter)
         }
 
-    @RabbitListener(queues = ["market.blocks"])
-    fun blocks(block: Block) {
-        logger.info("workchain ${block.info.shard.workchain_id} seqno ${block.info.seq_no}")
-    }
+//    @RabbitListener(queues = ["market.blocks"])
+//    fun blocks(block: Block) {
+//        logger.info("workchain ${block.info.shard.workchain_id} seqno ${block.info.seq_no}")
+//    }
 
     companion object : KLogging()
 }
