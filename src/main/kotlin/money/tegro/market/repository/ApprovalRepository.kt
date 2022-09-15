@@ -1,12 +1,13 @@
 package money.tegro.market.repository
 
+import kotlinx.coroutines.flow.Flow
 import money.tegro.market.model.ApprovalModel
-import org.springframework.data.repository.PagingAndSortingRepository
+import org.springframework.data.repository.kotlin.CoroutineSortingRepository
 import org.ton.block.MsgAddressInt
 
-interface ApprovalRepository : PagingAndSortingRepository<ApprovalModel, MsgAddressInt> {
-    fun existsByApprovedIsTrueAndAddress(addressInt: MsgAddressInt): Boolean
-    fun existsByApprovedIsFalseAndAddress(addressInt: MsgAddressInt): Boolean
+interface ApprovalRepository : CoroutineSortingRepository<ApprovalModel, MsgAddressInt> {
+    suspend fun existsByApprovedIsTrueAndAddress(addressInt: MsgAddressInt): Boolean
+    suspend fun existsByApprovedIsFalseAndAddress(addressInt: MsgAddressInt): Boolean
 
-    fun findAllByApprovedIsTrue(): List<ApprovalModel>
+    fun findAllByApprovedIsTrue(): Flow<ApprovalModel>
 }

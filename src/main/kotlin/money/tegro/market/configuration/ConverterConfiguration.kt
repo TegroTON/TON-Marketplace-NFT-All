@@ -1,4 +1,4 @@
-package money.tegro.market.converters
+package money.tegro.market.configuration
 
 import money.tegro.market.toRaw
 import org.springframework.context.annotation.Bean
@@ -11,7 +11,7 @@ import org.ton.tlb.parse
 import org.ton.tlb.storeTlb
 
 @Configuration
-class MsgAddressIntConverters {
+class ConverterConfiguration {
     @Bean
     fun msgAddressInt2ByteArrayConverter() =
         object : Converter<MsgAddressInt, ByteArray> {

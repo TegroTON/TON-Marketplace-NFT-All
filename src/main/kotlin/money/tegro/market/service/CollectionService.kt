@@ -26,7 +26,6 @@ class CollectionService(
 ) {
     fun listAll() =
         approvalRepository.findAllByApprovedIsTrue()
-            .asFlow()
             .map { it.address }
             .filter { getContract(it) != null }
 
