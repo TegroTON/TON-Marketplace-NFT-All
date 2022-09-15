@@ -1,7 +1,7 @@
 package money.tegro.market.query
 
 import com.expediagroup.graphql.generator.annotations.GraphQLName
-import money.tegro.market.contract.CollectionContract
+import money.tegro.market.contract.nft.CollectionContract
 import money.tegro.market.toRaw
 
 @GraphQLName("CollectionContract")

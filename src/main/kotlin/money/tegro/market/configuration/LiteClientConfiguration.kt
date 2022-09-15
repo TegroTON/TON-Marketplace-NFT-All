@@ -1,4 +1,4 @@
-package money.tegro.market.factory
+package money.tegro.market.configuration
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -12,8 +12,8 @@ import org.ton.api.liteclient.config.LiteClientConfigGlobal
 import org.ton.lite.client.LiteClient
 
 @Configuration
-class LiteClientFactory(
-    @Value("\${LITE_CONFIG:classpath:config-sandbox.json}")
+class LiteClientConfiguration(
+    @Value("\${lite-client.config:classpath:config-sandbox.json}")
     private val jsonConfig: Resource
 ) {
     @OptIn(ExperimentalSerializationApi::class)

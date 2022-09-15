@@ -1,6 +1,6 @@
 package money.tegro.market.service
 
-import money.tegro.market.contract.RoyaltyContract
+import money.tegro.market.contract.nft.RoyaltyContract
 import money.tegro.market.repository.ApprovalRepository
 import money.tegro.market.toRaw
 import mu.KLogging

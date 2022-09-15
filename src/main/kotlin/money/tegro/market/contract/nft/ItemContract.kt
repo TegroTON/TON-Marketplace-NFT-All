@@ -1,4 +1,4 @@
-package money.tegro.market.contract
+package money.tegro.market.contract.nft
 
 import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.block.AddrStd

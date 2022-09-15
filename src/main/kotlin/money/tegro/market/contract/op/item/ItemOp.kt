@@ -1,4 +1,4 @@
-package money.tegro.market.op
+package money.tegro.market.contract.op.item
 
 import org.ton.tlb.TlbCodec
 import org.ton.tlb.TlbCombinator
@@ -10,9 +10,9 @@ sealed interface ItemOp {
 
 private object ItemOpCombinator : TlbCombinator<ItemOp>() {
     override val constructors: List<TlbConstructor<out ItemOp>> =
-        listOf(TransferItemOp.tlbCodec())
+        listOf(TransferOp.tlbCodec())
 
     override fun getConstructor(value: ItemOp): TlbConstructor<out ItemOp> = when (value) {
-        is TransferItemOp -> TransferItemOp.tlbCodec()
+        is TransferOp -> TransferOp.tlbCodec()
     }
 }

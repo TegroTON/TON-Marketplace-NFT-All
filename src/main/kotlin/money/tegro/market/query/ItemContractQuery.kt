@@ -1,7 +1,7 @@
 package money.tegro.market.query
 
 import com.expediagroup.graphql.generator.annotations.GraphQLName
-import money.tegro.market.contract.ItemContract
+import money.tegro.market.contract.nft.ItemContract
 import money.tegro.market.toRaw
 import org.ton.block.MsgAddressInt
 

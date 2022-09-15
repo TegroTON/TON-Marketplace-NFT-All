@@ -1,7 +1,7 @@
 package money.tegro.market.service
 
-import money.tegro.market.contract.CollectionContract
-import money.tegro.market.contract.ItemContract
+import money.tegro.market.contract.nft.CollectionContract
+import money.tegro.market.contract.nft.ItemContract
 import money.tegro.market.metadata.ItemMetadata
 import money.tegro.market.repository.ApprovalRepository
 import money.tegro.market.toRaw
