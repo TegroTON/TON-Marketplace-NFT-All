@@ -3,10 +3,7 @@ package money.tegro.market
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.take
-import org.ton.block.AddrStd
-import org.ton.block.AddrVar
-import org.ton.block.MsgAddress
-import org.ton.block.MsgAddressInt
+import org.ton.block.*
 import org.ton.boc.BagOfCells
 import org.ton.cell.Cell
 import org.ton.crypto.base64
@@ -22,6 +19,11 @@ fun MsgAddress.toRaw() = when (this) {
 }
 
 fun Cell.toBase64() = base64(BagOfCells(this).toByteArray())
+
+fun Block.accountBlockAddresses() =
+    this.extra.account_blocks.toMap()
+        .keys
+        .map { AddrStd(this.info.shard.workchain_id, it.account_addr) }
 
 fun <T> Flow<T>.dropTake(drop: Int?, take: Int?): Flow<T> =
     this.drop(minOf(maxOf(drop ?: 0, 0), FLOW_DROPTAKE_DROP_MAX))

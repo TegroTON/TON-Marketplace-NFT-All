@@ -4,20 +4,23 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
+import money.tegro.market.accountBlockAddresses
 import money.tegro.market.contract.nft.CollectionContract
 import money.tegro.market.metadata.CollectionMetadata
 import money.tegro.market.repository.ApprovalRepository
 import money.tegro.market.toRaw
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments.kv
+import org.springframework.amqp.core.ExchangeTypes
+import org.springframework.amqp.rabbit.annotation.Exchange
+import org.springframework.amqp.rabbit.annotation.Queue
+import org.springframework.amqp.rabbit.annotation.QueueBinding
+import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.cache.CacheManager
 import org.springframework.stereotype.Service
 import org.ton.api.exception.TvmException
 import org.ton.api.tonnode.TonNodeBlockIdExt
-import org.ton.block.AddrNone
-import org.ton.block.AddrStd
-import org.ton.block.MsgAddress
-import org.ton.block.MsgAddressInt
+import org.ton.block.*
 import org.ton.lite.client.LiteClient
 
 @Service
@@ -120,11 +123,31 @@ class CollectionService(
             .map { getItemAddress(address, it, referenceBlock) }
     }
 
-    fun onChange(address: MsgAddressInt) {
-        contractCache()?.evictIfPresent(address)
-        metadataCache()?.evictIfPresent(address)
-        // TODO: Somehow evict old item addresses
-//        itemAddressCache()?.evictIfPresent(address)
+    @RabbitListener(
+        bindings = [
+            QueueBinding(
+                value = Queue(
+                    name = "blocks.market.collection",
+                ),
+                exchange = Exchange(
+                    name = "blocks",
+                    type = ExchangeTypes.TOPIC,
+                ),
+                key = ["live"], // Only live blocks
+            )
+        ]
+    )
+    fun onLiveBlock(block: Block) {
+        block.accountBlockAddresses()
+            .forEach {
+                if (contractCache()?.evictIfPresent(it) == true)
+                    logger.debug("evicted {}", kv("address", it.toRaw()))
+                if (metadataCache()?.evictIfPresent(it) == true)
+                    logger.debug("evicted {}", kv("address", it.toRaw()))
+
+                // TODO: Somehow evict old item addresses
+                //        itemAddressCache()?.evictIfPresent(address)
+            }
     }
 
     private fun contractCache() = cacheManager.getCache("collection.contract")

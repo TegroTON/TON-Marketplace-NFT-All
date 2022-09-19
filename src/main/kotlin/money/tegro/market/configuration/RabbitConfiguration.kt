@@ -1,7 +1,9 @@
 package money.tegro.market.configuration
 
 import mu.KLogging
-import org.springframework.amqp.core.*
+import org.springframework.amqp.core.Message
+import org.springframework.amqp.core.MessageBuilder
+import org.springframework.amqp.core.MessageProperties
 import org.springframework.amqp.rabbit.connection.ConnectionFactory
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.amqp.support.converter.AbstractMessageConverter
@@ -16,16 +18,6 @@ import org.ton.tlb.storeTlb
 
 @Configuration
 class RabbitConfiguration {
-    @Bean
-    fun queue(): Queue = QueueBuilder.durable("market.blocks").autoDelete().build()
-
-    @Bean
-    fun exchange(): Exchange = ExchangeBuilder.topicExchange("blocks").durable(true).build<TopicExchange>()
-
-    @Bean
-    fun binding(queue: Queue, exchange: Exchange): Binding =
-        BindingBuilder.bind(queue).to(exchange).with("#").noargs()
-
     @Bean
     fun messageConverter() = object : AbstractMessageConverter() {
         override fun createMessage(`object`: Any, messageProperties: MessageProperties): Message {
