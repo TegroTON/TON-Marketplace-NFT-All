@@ -10,7 +10,7 @@ import {createApolloProvider} from "@vue/apollo-option";
 const apollo = createApolloProvider({
     defaultClient: new ApolloClient({
         link: createHttpLink({
-            uri: 'http://localhost:8080/graphql'
+            uri: 'http://37.9.13.166:8081/graphql'
         }),
         cache: new InMemoryCache()
     })

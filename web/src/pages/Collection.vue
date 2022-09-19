@@ -1,7 +1,7 @@
 <template>
   <section class="nft-hero">
     <picture>
-      <img :src="collection.metadata.coverImage ?? 'assets/img/nft-hero.webp'" alt="Tegro Cat" class="nft-hero__image"
+      <img :src="collection.metadata.coverImage ?? collection.metadata.image" alt="Tegro Cat" class="nft-hero__image"
            loading="lazy">
     </picture>
   </section>
@@ -12,7 +12,7 @@
           <div class="col-lg-4 col-xl-4 col-xxl-3 mb-4 mb-lg-0">
             <!-- Start Collection Info -->
             <div class="card card-blur p-0 mt--100 mb-4">
-              <div class="card__share d-flex position-absolute" style="top: 8px; right: 8px">
+              <div v-if="false" class="card__share d-flex position-absolute" style="top: 8px; right: 8px">
                 <button class="btn btn-cube" type="button"><i class="fa-regular fa-share-nodes"></i></button>
                 <div class="dropdown">
                   <button id="dropdownMenuButton1" aria-expanded="false" class="btn btn-cube" data-bs-toggle="dropdown"
@@ -29,7 +29,7 @@
                   <div class="collection__image mb-4 mb-md-0 mb-lg-4 ms-auto ms-md-0 ms-lg-auto me-auto">
                     <img :src="collection.metadata.image" alt="" class="img-fluid rounded-circle">
                   </div>
-                  <div class="d-flex mx-0 mx-lg-auto">
+                  <div v-if="false" class="d-flex mx-0 mx-lg-auto">
                     <a class="btn btn-sm btn-outline-primary" href="#!">Subscribe</a>
                   </div>
                 </div>
@@ -40,12 +40,12 @@
                 <div class="collection__desc color-grey mb-4">
                   <p>{{ collection.metadata.description }}</p>
 
-                  <a class="collection__link text-white" href="#!" target="__blank">
+                  <a v-if="false" class="collection__link text-white" href="#!" target="__blank">
                     <i class="fa-regular fa-link-simple color-yellow me-2"></i>
                     boredapeyachtclub.com
                   </a>
                 </div>
-                <div class="libermall__soclinks">
+                <div v-if="false" class="libermall__soclinks">
                   <a class="libermall__soclinks-item ms-0" href="#!"><i class="fa-brands fa-telegram"></i></a>
                   <a class="libermall__soclinks-item" href="#!"><i class="fa-brands fa-discord"></i></a>
                   <a class="libermall__soclinks-item" href="#!"><i class="fa-brands fa-instagram"></i></a>
@@ -54,24 +54,24 @@
                 </div>
               </div>
               <div class="card-footer text-center border-top px-5 py-3">
-                Created by <span class="color-yellow">{{ collection.contract.owner }}</span>
+                Created by <span class="color-yellow">{{ shortenedOwner }}</span>
                 <i class="fa-solid fa-circle-check color-yellow fs-14 ms-1"></i>
               </div>
             </div>
             <!-- End Collection Info -->
             <!-- Start Collection Filters -->
-            <collection-filters></collection-filters>
+            <collection-filters v-if="false"></collection-filters>
             <!-- End Collection Filters -->
           </div>
           <div class="col-lg-8 col-xl-8 col-xxl-9">
             <!-- Start Collection Stat -->
             <div id="mouseScroll" class="card card-blur mb-4 overflow-auto">
               <div class="d-flex align-items-center justify-content-between">
-                <div class="card-blur__item p-4 border-end text-center">
+                <div v-if="false" class="card-blur__item p-4 border-end text-center">
                   <h5 class="text-uppercase fs-14 color-grey" style="letter-spacing: 1px;">floor</h5>
                   <p class="m-0 text-uppercase fw-medium" style="letter-spacing: 1px;">0.04 eTH</p>
                 </div>
-                <div class="card-blur__item p-4 border-end text-center">
+                <div v-if="false" class="card-blur__item p-4 border-end text-center">
                   <h5 class="text-uppercase fs-14 color-grey" style="letter-spacing: 1px;">volume</h5>
                   <p class="m-0 text-uppercase fw-medium" style="letter-spacing: 1px;">40.61 ETH</p>
                 </div>
@@ -81,17 +81,18 @@
                       collection.contract.size
                     }}</p>
                 </div>
-                <div class="card-blur__item p-4 border-end text-center">
+                <div v-if="false" class="card-blur__item p-4 border-end text-center">
                   <h5 class="text-uppercase fs-14 color-grey" style="letter-spacing: 1px;">Owners</h5>
                   <p class="m-0 text-uppercase fw-medium" style="letter-spacing: 1px;">461</p>
                 </div>
                 <div class="card-blur__item p-4 border-end text-center">
                   <h5 class="text-uppercase fs-14 color-grey" style="letter-spacing: 1px;">Blockchain</h5>
-                  <p class="m-0 text-uppercase fw-medium" style="letter-spacing: 1px;">TON Coin</p>
+                  <p class="m-0 text-uppercase fw-medium" style="letter-spacing: 1px;">TON</p>
                 </div>
                 <div class="card-blur__item p-4 text-center">
                   <h5 class="text-uppercase fs-14 color-grey" style="letter-spacing: 1px;">address</h5>
-                  <p class="m-0 text-uppercase fw-medium text-truncate" style="letter-spacing: 1px;">{{ address }}</p>
+                  <p class="m-0 fw-medium text-truncate" style="letter-spacing: 1px;">
+                    {{ shortenedAddress }}</p>
                 </div>
               </div>
             </div>
@@ -108,14 +109,14 @@
                           type="button">Items
                   </button>
                 </li>
-                <li class="collections__nav-item">
+                <li v-if="false" class="collections__nav-item">
                   <button id="Activity-tab" aria-controls="Activity"
                           aria-selected="false" class="collections__nav-link d-flex align-items-center text-nowrap"
                           data-bs-target="#Activity" data-bs-toggle="tab"
                           role="tab" type="button">Activity
                   </button>
                 </li>
-                <button aria-controls="collapseFilters"
+                <button v-if="false" aria-controls="collapseFilters"
                         aria-expanded="false"
                         class="btn btn-sm btn-secondary ms-auto d-flex align-items-center btn-filter"
                         data-bs-toggle="collapse" href="#collapseFilters"
@@ -124,7 +125,7 @@
                 </button>
               </ul>
             </div>
-            <div id="collapseFilters" class="collections__filters collapse modified-collapse">
+            <div v-if="false" id="collapseFilters" class="collections__filters collapse modified-collapse">
               <div class="d-block d-sm-flex flex-wrap align-items-center">
                 <div class="m-3">
                   <label class="color-grey mb-2">Category:</label>
@@ -187,7 +188,7 @@
               </div>
             </div>
             <!-- End Collection Tabs -->
-            <button class="btn btn-outline-secondary mt-3 w-100" type="button">LOAD MORE</button>
+            <button v-if="false" class="btn btn-outline-secondary mt-3 w-100" type="button">LOAD MORE</button>
           </div>
         </div>
       </div>
@@ -201,6 +202,7 @@ import ActivityList from "../components/ActivityList.vue";
 import CollectionFilters from "../components/CollectionFilters.vue";
 import gql from "graphql-tag";
 import CollectionItemCard from "../components/CollectionItemCard.vue";
+import normalizeAndShorten from "../utility";
 
 export default defineComponent({
   name: "Collection",
@@ -225,7 +227,7 @@ export default defineComponent({
             image
             coverImage
           }
-          items(take: 5) {
+          items(take: 25) {
             address
           }
         }
@@ -252,6 +254,14 @@ export default defineComponent({
         },
         items: [] as { address: string }[]
       }
+    }
+  },
+  computed: {
+    shortenedAddress() {
+      return normalizeAndShorten(this.address)
+    },
+    shortenedOwner() {
+      return normalizeAndShorten(this.collection.contract.owner)
     }
   }
 })

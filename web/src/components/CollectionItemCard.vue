@@ -24,9 +24,9 @@
         </div>
       </div>
     </router-link>
-    <button
-        class="btn btn-sm btn-details__like d-flex align-items-center bg-soft blur-filter py-2 px-3 position-absolute mt-2 ms-2"
-        type="button">
+    <button v-if="false"
+            class="btn btn-sm btn-details__like d-flex align-items-center bg-soft blur-filter py-2 px-3 position-absolute mt-2 ms-2"
+            type="button">
       <i class="fa-regular fa-heart m-0 me-sm-2 fs-16"></i>
       <span class="d-block d-sm-inline mt-1 mt-sm-0 fs-14">24</span>
     </button>

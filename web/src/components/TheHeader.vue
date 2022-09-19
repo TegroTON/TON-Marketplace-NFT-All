@@ -13,8 +13,8 @@
           <i class="fa-regular fa-bars fs-20"></i>
         </button>
         <div id="navbarHeader" class="collapse navbar-collapse ">
-          <form
-              class="header__search flex-fill d-block d-lg-none d-xl-block mx-0 mx-lg-5 mb-3 mb-lg-0 order-1 order-lg-2">
+          <form v-if="false"
+                class="header__search flex-fill d-block d-lg-none d-xl-block mx-0 mx-lg-5 mb-3 mb-lg-0 order-1 order-lg-2">
             <div class="input-group">
               <input aria-describedby="basic-addon2" aria-label="Search" class="form-control" placeholder="Search ..."
                      type="text">
@@ -26,13 +26,17 @@
             </div>
           </form>
           <div class="dropdown order-4 order-lg-1">
-            <button id="dropdownMenuCat" aria-expanded="false"
+            <router-link :to="{name: 'explore'}" class="btn btn-primary d-flex flex-nowrap align-items-center">
+              <i class="fa-regular fa-grid-2 me-2"></i>
+              Explore
+            </router-link>
+            <button v-if="false" id="dropdownMenuCat" aria-expanded="false"
                     class="btn btn-primary d-flex flex-nowrap align-items-center"
                     data-bs-toggle="dropdown" type="button">
               <i class="fa-regular fa-grid-2 me-2"></i>
               Explore
             </button>
-            <ul aria-labelledby="dropdownMenuCat" class="dropdown-menu animate slideIn mt-3">
+            <ul v-if="false" aria-labelledby="dropdownMenuCat" class="dropdown-menu animate slideIn mt-3">
               <li><a class="dropdown-item" href="#"><i class="fa-regular fa-hexagon-vertical-nft-slanted me-3"></i>All
                 NFTs</a></li>
               <li><a class="dropdown-item" href="#"><i class="fa-regular fa-hexagon-image me-3"></i>Solanas</a></li>
@@ -50,7 +54,7 @@
               </li>
             </ul>
           </div>
-          <ul class="navbar-nav d-flex flex-row py-4 py-lg-0 ms-0 ms-lg-auto pe-5 order-2 order-lg-3">
+          <ul v-if="false" class="navbar-nav d-flex flex-row py-4 py-lg-0 ms-0 ms-lg-auto pe-5 order-2 order-lg-3">
             <li class="nav-item">
               <a class="nav-link" href="#">Stats</a>
             </li>
@@ -75,7 +79,9 @@
               </li>
             </ul>
           </div>
-          <button v-else class="btn btn-soft d-flex flex-nowrap align-items-center btn-mobile-fixed order-3 order-lg-4"
+          <!--          TODO: Fix that-->
+          <button v-if="false"
+                  class="btn btn-soft d-flex flex-nowrap align-items-center btn-mobile-fixed order-3 order-lg-4"
                   data-bs-target="#ConnectModal"
                   data-bs-toggle="modal" type="button">
             <i class="fa-regular fa-arrow-right-to-arc me-2"></i>

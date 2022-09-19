@@ -16,13 +16,13 @@
             <div class="row alight-items-center">
               <div class="col-md-12 col-lg-9 col-xl-9 col-xxl-7 text-center text-md-start">
                 <h1 class="hero__title">
-                  Discover the Exclusive <span class="d-block">NFT Collection</span>
+                  Witness the birth of <span class="d-block">Libermall</span>
                 </h1>
                 <div class="hero__desc">
-                  Click My Collections and set up your collection. <br>
-                  Add social links, a description, profile & banner images, <br> and set a secondary sales fee.
+                  An upcoming NFT marketplace based on The Open Network. <br>
+                  Launching soon in the main network.
                 </div>
-                <a class="btn btn-outline-primary" href="#!">
+                <a v-if="false" class="btn btn-outline-primary" href="#!">
                   <span>Learn more</span>
                 </a>
               </div>
@@ -37,14 +37,13 @@
             <div class="row alight-items-center">
               <div class="col-md-12 col-lg-9 col-xl-9 col-xxl-7 text-center text-md-start">
                 <h1 class="hero__title">
-                  Discover the Exclusive <span class="d-block">NFT Collection</span>
+                  Early Access in the <span class="d-block">testnet</span>
                 </h1>
                 <div class="hero__desc">
-                  Click My Collections and set up your collection.
-                  <span class="d-inline d-lg-block">Add social links, a description, profile & banner images,</span> and
-                  set a secondary sales fee.
+                  This is a demo version for the testing network. <br>
+                  Many more features will be added before the final release.
                 </div>
-                <a class="btn btn-outline-primary" href="#!">
+                <a v-if="false" class="btn btn-outline-primary" href="#!">
                   <span>Learn more</span>
                 </a>
               </div>
@@ -78,13 +77,13 @@
           Discover, Collect and sell <span class="color-yellow">extraordinary NFTs</span>
         </h2>
         <p class="section__desc mb-5">
-          Libermall is the world's first and largest NFT marketplace
+          Libermall is an upcoming NFT marketplace
         </p>
         <div class="d-flex flex-wrap align-items-center justify-content-center">
-          <a class="btn btn-primary m-3" href="/explore.php">
+          <router-link :to="{name: 'explore'}" class="btn btn-primary m-3">
             Explore
-          </a>
-          <a class="btn btn-outline-primary m-3" href="#!">
+          </router-link>
+          <a v-if="false" class="btn btn-outline-primary m-3" href="#!">
             + Create
           </a>
         </div>
@@ -97,15 +96,14 @@
     <section id="Libermall" class="libermall section">
       <div class="libermall__container container-fluid">
         <h2 class="section__title mb-3">
-          TON is in beta <span class="d-block d-md-inline">on Libermall</span>
+          Libermall is in <span class="d-block d-md-inline">Early Access</span>
         </h2>
         <div class="libermall__buttons d-flex align-items-center">
-          <a class="btn btn-dark" href="#!">Explore</a>
+          <router-link :to="{name: 'explore'}" class="btn btn-dark">Explore</router-link>
           <div class="libermall__soclinks ms-5 d-none d-md-flex">
-            <a class="libermall__soclinks-item" href="#!"><i class="fa-brands fa-telegram"></i></a>
-            <a class="libermall__soclinks-item" href="#!"><i class="fa-brands fa-discord"></i></a>
-            <a class="libermall__soclinks-item" href="#!"><i class="fa-brands fa-twitter"></i></a>
-            <a class="libermall__soclinks-item" href="#!"><i class="fa-brands fa-instagram"></i></a>
+            <a class="libermall__soclinks-item" href="https://t.me/LiberMall"><i class="fa-brands fa-telegram"></i></a>
+            <a class="libermall__soclinks-item" href="https://twitter.com/LiberMallNFT"><i
+                class="fa-brands fa-twitter"></i></a>
           </div>
         </div>
       </div>
@@ -114,7 +112,7 @@
        ============================================= -->
     <!-- Start of Notable section
        ============================================= -->
-    <section id="notable" class="notable section">
+    <section v-if="false" id="notable" class="notable section">
       <div class="notable__container container-fluid">
         <div class="notable__head">
           <h2 class="section__title mb-5">
@@ -249,7 +247,7 @@
       <div class="collection__container container-fluid">
         <div class="d-block d-sm-flex align-items-center mb-56">
           <h2 class="section__title mb-0">Top <span class="color-yellow">collections</span></h2>
-          <div class="dropdown mt-4 mt-sm-0 ms-0 ms-sm-auto">
+          <div v-if="false" class="dropdown mt-4 mt-sm-0 ms-0 ms-sm-auto">
             <a id="dropdownMenuLink" aria-expanded="false" class="btn btn-secondary dropdown-toggle"
                data-bs-toggle="dropdown"
                href="#" role="button">
@@ -278,11 +276,11 @@
                 </div>
                 <div class="collection__body mb-3 mb-lg-0">
                   <h4 class="fs-20 mb-3 text-truncate" style="max-width: 224px">{{ collection.metadata.name }}</h4>
-                  <p class="mb-0 color-grey text-center text-lg-start">
+                  <p v-if="false" class="mb-0 color-grey text-center text-lg-start">
                     Floor: <span class="ms-1 text-uppercase">3,02 TON</span>
                   </p>
                 </div>
-                <div class="collection__info d-flex d-lg-block text-center text-lg-end ms-0 ms-lg-auto">
+                <div v-if="false" class="collection__info d-flex d-lg-block text-center text-lg-end ms-0 ms-lg-auto">
                   <div class="fw-medium text-uppercase text-white mb-3 me-3 me-lg-0">3.8k TON</div>
                   <div class="fw-medium color-grey">
                     $2.68M
@@ -293,7 +291,7 @@
             </router-link>
           </div>
         </div>
-        <div class="mt-5 text-center">
+        <div v-if="f" class="mt-5 text-center">
           <a class="btn btn-primary" href="#!">Go to ranking</a>
         </div>
       </div>
@@ -302,7 +300,7 @@
        ============================================= -->
     <!-- Start of Create section
        ============================================= -->
-    <section id="create" class="create section">
+    <section v-if="false" id="create" class="create section">
       <div class="create__container container-fluid position-relative">
         <h2 class="section__title">
           Create and sell <span class="color-yellow">your NFTs</span>
@@ -384,7 +382,7 @@
        ============================================= -->
     <!-- Start of Category section
        ============================================= -->
-    <section id="category" class="category section pt-150">
+    <section v-if="false" id="category" class="category section pt-150">
       <div class="category__container container-fluid">
         <div class="category__head">
           <h2 class="section__title">
