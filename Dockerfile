@@ -1,13 +1,12 @@
-FROM amazoncorretto:11-alpine AS build
+FROM amazoncorretto:17-alpine AS build
 
 WORKDIR /work
 COPY . /work
 
-RUN chmod +x gradlew
-RUN ./gradlew --no-daemon :shadowJar
+RUN chmod +x gradlew && ./gradlew --no-daemon bootJar
 
-FROM amazoncorretto:11-alpine
+FROM amazoncorretto:17-alpine
 
-COPY --from=build /work/build/libs/market-*-all.jar /app/market.jar
+COPY --from=build /work/build/libs/market-*.jar /app/market.jar
 
 ENTRYPOINT ["java","-jar","/app/market.jar"]
