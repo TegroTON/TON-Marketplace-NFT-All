@@ -1,5 +1,7 @@
 package money.tegro.market.service
 
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import money.tegro.market.accountBlockAddresses
 import money.tegro.market.contract.nft.CollectionContract
 import money.tegro.market.contract.nft.ItemContract
@@ -27,6 +29,12 @@ class ItemService(
     private val liteClient: LiteClient,
     private val approvalRepository: ApprovalRepository,
 ) {
+    // Standalone items
+    fun listAll() =
+        approvalRepository.findAllByApprovedIsTrue()
+            .map { it.address }
+            .filter { getContract(it) != null }
+
     suspend fun getContract(address: MsgAddressInt): ItemContract? {
         val cachedValue = contractCache()?.get(address)
         return if (cachedValue != null) { // Cache hit

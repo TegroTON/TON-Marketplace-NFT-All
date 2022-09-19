@@ -291,7 +291,7 @@
             </router-link>
           </div>
         </div>
-        <div v-if="f" class="mt-5 text-center">
+        <div v-if="false" class="mt-5 text-center">
           <a class="btn btn-primary" href="#!">Go to ranking</a>
         </div>
       </div>

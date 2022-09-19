@@ -38,6 +38,9 @@ class RootQuery(
     suspend fun item(address: String) =
         ItemQuery(MsgAddressInt(address))
 
+    suspend fun profile(address: String) =
+        ProfileQuery(MsgAddressInt(address))
+
     suspend fun transfer(item: String, destination: String, response: String) = TransactionRequestQuery(
         dest = MsgAddressInt(item),
         value = BigInt(100_000_000),
