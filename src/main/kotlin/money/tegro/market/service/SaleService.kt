@@ -18,6 +18,7 @@ import org.ton.block.AddrStd
 import org.ton.block.Block
 import org.ton.block.MsgAddressInt
 import org.ton.lite.client.LiteClient
+import java.util.*
 
 @Service
 class SaleService(
@@ -25,23 +26,25 @@ class SaleService(
     private val approvalRepository: ApprovalRepository,
 ) {
     private val cache =
-        caffeineBuilder<MsgAddressInt, SaleContract?>().build()
+        caffeineBuilder<MsgAddressInt, Optional<SaleContract>>().build()
 
     suspend fun get(address: MsgAddressInt): SaleContract? =
         cache.getOrPut(address) { sale ->
             if (approvalRepository.existsByApprovedIsFalseAndAddress(sale)) { // Explicitly forbidden
                 logger.debug("{} was disapproved", kv("address", sale.toRaw()))
-                null
+                Optional.empty()
             } else {
                 try {
                     logger.debug("fetching sale information {}", kv("address", sale.toRaw()))
                     SaleContract.of(sale as AddrStd, liteClient)
+                        .let { Optional.of(it) }
                 } catch (e: TvmException) {
                     logger.warn("could not get sale information for {}", kv("address", sale.toRaw()), e)
-                    null
+                    Optional.empty()
                 }
             }
         }
+            .orElse(null)
 
     @RabbitListener(
         bindings = [

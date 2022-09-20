@@ -18,6 +18,7 @@ import org.ton.block.AddrStd
 import org.ton.block.Block
 import org.ton.block.MsgAddressInt
 import org.ton.lite.client.LiteClient
+import java.util.*
 
 @Service
 class ItemContractService(
@@ -25,23 +26,25 @@ class ItemContractService(
     private val approvalRepository: ApprovalRepository,
 ) {
     private val cache =
-        caffeineBuilder<MsgAddressInt, ItemContract?>().build()
+        caffeineBuilder<MsgAddressInt, Optional<ItemContract>>().build()
 
     suspend fun get(address: MsgAddressInt): ItemContract? =
         cache.getOrPut(address) { item ->
             if (approvalRepository.existsByApprovedIsFalseAndAddress(item)) { // Explicitly forbidden
                 logger.debug("{} was disapproved", kv("address", item.toRaw()))
-                null
+                Optional.empty()
             } else {
                 try {
                     logger.debug("fetching item {}", kv("address", item.toRaw()))
                     ItemContract.of(item as AddrStd, liteClient)
+                        .let { Optional.of(it) }
                 } catch (e: TvmException) {
                     logger.warn("could not get item information for {}", kv("address", item.toRaw()), e)
-                    null
+                    Optional.empty()
                 }
             }
         }
+            .orElse(null)
 
     @RabbitListener(
         bindings = [

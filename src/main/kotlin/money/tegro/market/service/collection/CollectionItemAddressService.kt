@@ -20,6 +20,7 @@ import org.ton.block.Block
 import org.ton.block.MsgAddress
 import org.ton.block.MsgAddressInt
 import org.ton.lite.client.LiteClient
+import java.util.*
 
 @Service
 class CollectionItemAddressService(
@@ -27,7 +28,7 @@ class CollectionItemAddressService(
     private val approvalRepository: ApprovalRepository,
 ) {
     private val cache =
-        caffeineBuilder<Pair<MsgAddressInt, ULong>, MsgAddress?>().build()
+        caffeineBuilder<Pair<MsgAddressInt, ULong>, Optional<MsgAddress>>().build()
 
     suspend fun get(
         address: MsgAddressInt,
@@ -38,19 +39,21 @@ class CollectionItemAddressService(
             if (approvalRepository.existsByApprovedIsTrueAndAddress(collection)) { // Has been explicitly approved
                 try {
                     CollectionContract.itemAddressOf(collection as AddrStd, index, liteClient, referenceBlock())
+                        .let { Optional.of(it) }
                 } catch (e: TvmException) {
                     logger.warn(
                         "could not get item {} address of {}",
                         kv("index", index.toString()),
                         kv("collection", collection.toRaw())
                     )
-                    null
+                    Optional.empty()
                 }
             } else {
                 logger.warn("{} was not approved", kv("address", address.toRaw()))
-                null
+                Optional.empty()
             }
         }
+            .orElse(null)
 
     @RabbitListener(
         bindings = [

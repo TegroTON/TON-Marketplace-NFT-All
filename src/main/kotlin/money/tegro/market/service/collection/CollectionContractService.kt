@@ -19,6 +19,7 @@ import org.ton.block.AddrStd
 import org.ton.block.Block
 import org.ton.block.MsgAddressInt
 import org.ton.lite.client.LiteClient
+import java.util.*
 
 @Service
 class CollectionContractService(
@@ -26,7 +27,7 @@ class CollectionContractService(
     private val approvalRepository: ApprovalRepository,
 ) {
     private val cache =
-        caffeineBuilder<MsgAddressInt, CollectionContract?>().build()
+        caffeineBuilder<MsgAddressInt, Optional<CollectionContract>>().build()
 
     suspend fun get(
         address: MsgAddressInt,
@@ -37,15 +38,17 @@ class CollectionContractService(
                 try {
                     logger.debug("fetching collection {}", kv("address", collection.toRaw()))
                     CollectionContract.of(collection as AddrStd, liteClient, referenceBlock())
+                        .let { Optional.of(it) }
                 } catch (e: TvmException) {
                     logger.warn("could not get collection information for {}", kv("address", collection.toRaw()), e)
-                    null
+                    Optional.empty()
                 }
             } else {
                 logger.warn("{} was not approved", kv("address", collection.toRaw()))
-                null
+                Optional.empty()
             }
         }
+            .orElse(null)
 
     @RabbitListener(
         bindings = [

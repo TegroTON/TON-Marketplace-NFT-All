@@ -18,6 +18,7 @@ import org.ton.block.AddrStd
 import org.ton.block.Block
 import org.ton.block.MsgAddressInt
 import org.ton.lite.client.LiteClient
+import java.util.*
 
 @Service
 class RoyaltyService(
@@ -25,23 +26,25 @@ class RoyaltyService(
     private val approvalRepository: ApprovalRepository,
 ) {
     private val cache =
-        caffeineBuilder<MsgAddressInt, RoyaltyContract?>().build()
+        caffeineBuilder<MsgAddressInt, Optional<RoyaltyContract>>().build()
 
     suspend fun get(address: MsgAddressInt): RoyaltyContract? =
         cache.getOrPut(address) { royalty ->
             if (approvalRepository.existsByApprovedIsFalseAndAddress(royalty)) { // Explicitly forbidden
                 logger.debug("{} was disapproved", kv("address", royalty.toRaw()))
-                null
+                Optional.empty()
             } else {
                 try {
                     logger.debug("fetching royalty information {}", kv("address", royalty.toRaw()))
                     RoyaltyContract.of(royalty as AddrStd, liteClient)
+                        .let { Optional.of(it) }
                 } catch (e: TvmException) {
                     logger.warn("could not get royalty information for {}", kv("address", royalty.toRaw()), e)
-                    null
+                    Optional.empty()
                 }
             }
         }
+            .orElse(null)
 
     @RabbitListener(
         bindings = [

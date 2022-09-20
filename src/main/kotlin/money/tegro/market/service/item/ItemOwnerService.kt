@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service
 import org.ton.block.Block
 import org.ton.block.MsgAddress
 import org.ton.block.MsgAddressInt
+import java.util.*
 
 @Service
 class ItemOwnerService(
@@ -20,14 +21,16 @@ class ItemOwnerService(
     private val saleService: SaleService,
 ) {
     private val cache =
-        caffeineBuilder<MsgAddressInt, MsgAddress?>().build()
+        caffeineBuilder<MsgAddressInt, Optional<MsgAddress>>().build()
 
     suspend fun get(address: MsgAddressInt): MsgAddress? =
         cache.getOrPut(address) { item ->
             val owner = itemContractService.get(item)?.owner
-            (owner as? MsgAddressInt)?.let { saleService.get(it)?.owner }
-                ?: owner
+            ((owner as? MsgAddressInt)?.let { saleService.get(it)?.owner }
+                ?: owner)
+                .let { Optional.ofNullable(it) }
         }
+            .orElse(null)
 
     @RabbitListener(
         bindings = [

@@ -15,6 +15,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.stereotype.Service
 import org.ton.block.Block
 import org.ton.block.MsgAddressInt
+import java.util.*
 
 @Service
 class CollectionMetadataService(
@@ -22,7 +23,7 @@ class CollectionMetadataService(
     private val approvalRepository: ApprovalRepository,
 ) {
     private val cache =
-        caffeineBuilder<MsgAddressInt, CollectionMetadata?>().build()
+        caffeineBuilder<MsgAddressInt, Optional<CollectionMetadata>>().build()
 
     suspend fun get(address: MsgAddressInt): CollectionMetadata? =
         cache.getOrPut(address) { collection ->
@@ -31,11 +32,13 @@ class CollectionMetadataService(
                     ?.let {
                         CollectionMetadata.of(it.content)
                     }
+                    .let { Optional.ofNullable(it) }
             } else {
                 logger.warn("{} was not approved", kv("address", collection.toRaw()))
-                null
+                Optional.empty()
             }
         }
+            .orElse(null)
 
     @RabbitListener(
         bindings = [
