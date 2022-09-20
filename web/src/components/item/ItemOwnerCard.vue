@@ -4,7 +4,8 @@
     <div class="card-item-details d-block border bg-soft hover px-4 py-3 rounded text-white">
       <h4 class="fs-14 color-grey mb-4">Owner</h4>
       <div class="d-flex align-items-center">
-        <img alt="" class="img-fluid rounded-circle" height="40" src="assets/img/author/author-12.jpg" width="40">
+        <img alt="" class="img-fluid rounded-circle" height="40" src="../../../assets/img/author/author-12.jpg"
+             width="40">
         <h4 class="collection__name fs-16 mb-0 ms-3">
           {{ shortOwnerAddress }}
         </h4>
@@ -17,10 +18,10 @@
 <script lang="ts">
 import {defineComponent} from "vue";
 import gql from "graphql-tag";
-import {normalizeAndShorten} from "../utility";
+import {normalizeAndShorten} from "../../utility";
 
 export default defineComponent({
-  name: "TheItemOwnerCard",
+  name: "ItemOwnerCard",
   props: {
     address: {
       type: String,

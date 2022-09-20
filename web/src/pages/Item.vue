@@ -4,7 +4,7 @@
       <div class="container-fluid">
         <div class="row justify-content-center">
           <div class="col-md-10 col-lg-12 col-xxl-9">
-            <the-item-breadcrumb :address="address"></the-item-breadcrumb>
+            <item-breadcrumbs :address="address"></item-breadcrumbs>
             <div class="row justify-content-center mb-4">
               <div class="col-lg-5 col-xl-5 mb-4 mb-lg-0">
                 <!-- Start NFT Image -->
@@ -51,21 +51,21 @@
                 </div>
                 <!-- // End Action Link -->
                 <!-- Start Price Card -->
-                <the-item-price-card :address="address"></the-item-price-card>
+                <item-price-card :address="address"></item-price-card>
                 <!-- // End Price Card -->
                 <!-- Start Owner & Collection -->
                 <div class="row">
-                  <the-item-owner-card :address="address"></the-item-owner-card>
-                  <the-item-collection-card :address="address"></the-item-collection-card>
+                  <item-owner-card :address="address"></item-owner-card>
+                  <item-collection-card :address="address"></item-collection-card>
                 </div>
                 <!-- // End Owner & Collection -->
                 <!-- Start Details Card -->
-                <the-item-details-card :address="address"></the-item-details-card>
+                <item-details-card :address="address"></item-details-card>
                 <!-- // End Details Card -->
               </div>
             </div>
             <!-- Start Attributes Card -->
-            <the-item-attributes-card :address="address"></the-item-attributes-card>
+            <item-attributes-card :address="address"></item-attributes-card>
             <!-- // End Attributes Card -->
 
             <!-- Start Transaction Table -->
@@ -155,23 +155,23 @@ import EnlargeableImage from "../components/EnlargeableImage.vue";
 import gql from "graphql-tag";
 import {Address, fromNano} from "ton";
 import {normalizeAndShorten} from "../utility";
-import TheItemBreadcrumb from "../components/TheItemBreadcrumb.vue";
-import TheItemAttributesCard from "../components/TheItemAttributesCard.vue";
-import TheItemDetailsCard from "../components/TheItemDetailsCard.vue";
-import TheItemOwnerCard from "../components/TheItemOwnerCard.vue";
-import TheItemCollectionCard from "../components/TheItemCollectionCard.vue";
+import ItemBreadcrumbs from "../components/item/ItemBreadcrumbs.vue";
+import ItemAttributesCard from "../components/item/ItemAttributesCard.vue";
+import ItemDetailsCard from "../components/item/ItemDetailsCard.vue";
+import ItemOwnerCard from "../components/item/ItemOwnerCard.vue";
+import ItemCollectionCard from "../components/item/ItemCollectionCard.vue";
 import ShareModal from "../modals/ShareModal.vue";
-import TheItemPriceCard from "../components/TheItemPriceCard.vue";
+import ItemPriceCard from "../components/item/ItemPriceCard.vue";
 import BuyNowModal from "../modals/BuyNowModal.vue";
 
 export default defineComponent({
   name: "Item",
   components: {
     BuyNowModal,
-    TheItemPriceCard,
+    ItemPriceCard,
     ShareModal,
-    TheItemCollectionCard,
-    TheItemOwnerCard, TheItemDetailsCard, TheItemAttributesCard, TheItemBreadcrumb, EnlargeableImage
+    ItemCollectionCard,
+    ItemOwnerCard, ItemDetailsCard, ItemAttributesCard, ItemBreadcrumbs, EnlargeableImage
   },
   props: {
     address: {

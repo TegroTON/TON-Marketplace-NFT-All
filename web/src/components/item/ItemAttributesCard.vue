@@ -29,7 +29,7 @@ import {defineComponent} from "vue";
 import gql from "graphql-tag";
 
 export default defineComponent({
-  name: "TheItemAttributesCard",
+  name: "ItemAttributesCard",
   props: {
     address: {
       type: String,

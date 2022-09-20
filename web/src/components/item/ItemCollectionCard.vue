@@ -16,10 +16,10 @@
 <script lang="ts">
 import {defineComponent} from "vue";
 import gql from "graphql-tag";
-import defaultImage from "../../assets/img/user-1.svg";
+import defaultImage from "../../../assets/img/user-1.svg";
 
 export default defineComponent({
-  name: "TheItemCollectionCard",
+  name: "ItemCollectionCard",
   props: {
     address: {
       type: String,

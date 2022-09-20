@@ -18,10 +18,10 @@
 <script lang="ts">
 import {defineComponent} from "vue";
 import gql from "graphql-tag";
-import {formatPrice} from "../utility";
+import {formatPrice} from "../../utility";
 
 export default defineComponent({
-  name: "TheItemPriceCard",
+  name: "ItemPriceCard",
   props: {
     address: {
       type: String,

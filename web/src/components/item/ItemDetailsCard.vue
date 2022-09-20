@@ -34,10 +34,10 @@
 <script lang="ts">
 import gql from "graphql-tag";
 import {defineComponent} from "vue";
-import {explorerLink, toFriendly} from "../utility";
+import {explorerLink, toFriendly} from "../../utility";
 
 export default defineComponent({
-  name: "TheItemDetailsCard",
+  name: "ItemDetailsCard",
   props: {
     address: {
       type: String,

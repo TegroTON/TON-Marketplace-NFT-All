@@ -21,7 +21,7 @@ import {defineComponent} from "vue";
 import gql from "graphql-tag";
 
 export default defineComponent({
-  name: "TheItemBreadcrumb",
+  name: "ItemBreadcrumbs",
   props: {
     address: {
       type: String,
