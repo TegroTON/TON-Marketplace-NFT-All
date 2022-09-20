@@ -5,7 +5,8 @@ import com.expediagroup.graphql.generator.annotations.GraphQLName
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import money.tegro.market.dropTake
-import money.tegro.market.service.ProfileService
+import money.tegro.market.service.profile.ProfileOwnedCollectionService
+import money.tegro.market.service.profile.ProfileOwnedItemService
 import money.tegro.market.toRaw
 import org.springframework.beans.factory.annotation.Autowired
 import org.ton.block.MsgAddressInt
@@ -18,22 +19,22 @@ data class ProfileQuery(
     @GraphQLName("address")
     val addressString: String = address.toRaw()
 
-    suspend fun items(
-        @GraphQLIgnore @Autowired profileService: ProfileService,
+    suspend fun ownedItems(
         drop: Int? = null,
         take: Int? = null,
+        @GraphQLIgnore @Autowired profileOwnedItemService: ProfileOwnedItemService,
     ) =
-        profileService.listItemsOf(address)
+        profileOwnedItemService.get(address)
             .dropTake(drop, take)
             .map { ItemQuery(it) }
             .toList()
 
     suspend fun collections(
-        @GraphQLIgnore @Autowired profileService: ProfileService,
         drop: Int? = null,
         take: Int? = null,
+        @GraphQLIgnore @Autowired profileOwnedCollectionService: ProfileOwnedCollectionService,
     ) =
-        profileService.listCollectionsOf(address)
+        profileOwnedCollectionService.get(address)
             .dropTake(drop, take)
             .map { CollectionQuery(it) }
             .toList()

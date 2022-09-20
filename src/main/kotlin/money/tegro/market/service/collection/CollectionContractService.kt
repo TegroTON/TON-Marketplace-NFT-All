@@ -1,8 +1,8 @@
-package money.tegro.market.service
+package money.tegro.market.service.collection
 
 import com.sksamuel.aedile.core.caffeineBuilder
 import money.tegro.market.accountBlockAddresses
-import money.tegro.market.contract.nft.RoyaltyContract
+import money.tegro.market.contract.nft.CollectionContract
 import money.tegro.market.repository.ApprovalRepository
 import money.tegro.market.toRaw
 import mu.KLogging
@@ -14,32 +14,36 @@ import org.springframework.amqp.rabbit.annotation.QueueBinding
 import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.stereotype.Service
 import org.ton.api.exception.TvmException
+import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.block.AddrStd
 import org.ton.block.Block
 import org.ton.block.MsgAddressInt
 import org.ton.lite.client.LiteClient
 
 @Service
-class RoyaltyService(
+class CollectionContractService(
     private val liteClient: LiteClient,
     private val approvalRepository: ApprovalRepository,
 ) {
     private val cache =
-        caffeineBuilder<MsgAddressInt, RoyaltyContract?>().build()
+        caffeineBuilder<MsgAddressInt, CollectionContract?>().build()
 
-    suspend fun get(address: MsgAddressInt): RoyaltyContract? =
-        cache.getOrPut(address) { royalty ->
-            if (approvalRepository.existsByApprovedIsFalseAndAddress(royalty)) { // Explicitly forbidden
-                logger.debug("{} was disapproved", kv("address", royalty.toRaw()))
-                null
-            } else {
+    suspend fun get(
+        address: MsgAddressInt,
+        referenceBlock: suspend () -> TonNodeBlockIdExt? = { liteClient.getLastBlockId() }
+    ): CollectionContract? =
+        cache.getOrPut(address) { collection ->
+            if (approvalRepository.existsByApprovedIsTrueAndAddress(collection)) { // Has been explicitly approved
                 try {
-                    logger.debug("fetching royalty information {}", kv("address", royalty.toRaw()))
-                    RoyaltyContract.of(royalty as AddrStd, liteClient)
+                    logger.debug("fetching collection {}", kv("address", collection.toRaw()))
+                    CollectionContract.of(collection as AddrStd, liteClient, referenceBlock())
                 } catch (e: TvmException) {
-                    logger.warn("could not get royalty information for {}", kv("address", royalty.toRaw()), e)
+                    logger.warn("could not get collection information for {}", kv("address", collection.toRaw()), e)
                     null
                 }
+            } else {
+                logger.warn("{} was not approved", kv("address", collection.toRaw()))
+                null
             }
         }
 
@@ -47,7 +51,7 @@ class RoyaltyService(
         bindings = [
             QueueBinding(
                 value = Queue(
-                    name = "blocks.market.royalty",
+                    name = "blocks.market.collection.contract",
                 ),
                 exchange = Exchange(
                     name = "blocks",

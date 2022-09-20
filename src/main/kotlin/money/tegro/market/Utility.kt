@@ -26,8 +26,7 @@ fun Block.accountBlockAddresses() =
         .map { AddrStd(this.info.shard.workchain_id, it.account_addr) }
 
 fun <T> Flow<T>.dropTake(drop: Int?, take: Int?): Flow<T> =
-    this.drop(minOf(maxOf(drop ?: 0, 0), FLOW_DROPTAKE_DROP_MAX))
-        .take(minOf(maxOf(take ?: FLOW_DROPTAKE_TAKE_MAX, 0), FLOW_DROPTAKE_DROP_MAX))
+    this.drop(maxOf(drop ?: 0, 0))
+        .take(minOf(maxOf(take ?: 0, 0), FLOW_DROPTAKE_TAKE_MAX))
 
-const val FLOW_DROPTAKE_DROP_MAX = 100
-const val FLOW_DROPTAKE_TAKE_MAX = 100
+const val FLOW_DROPTAKE_TAKE_MAX = 128

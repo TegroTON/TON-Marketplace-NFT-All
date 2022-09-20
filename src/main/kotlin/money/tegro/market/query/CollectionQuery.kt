@@ -5,8 +5,10 @@ import com.expediagroup.graphql.generator.annotations.GraphQLName
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.toList
 import money.tegro.market.dropTake
-import money.tegro.market.service.CollectionService
-import money.tegro.market.service.RoyaltyService
+import money.tegro.market.service.collection.CollectionContractService
+import money.tegro.market.service.collection.CollectionItemListService
+import money.tegro.market.service.collection.CollectionItemOwnerNumberService
+import money.tegro.market.service.collection.CollectionMetadataService
 import money.tegro.market.toRaw
 import org.springframework.beans.factory.annotation.Autowired
 import org.ton.block.MsgAddressInt
@@ -19,27 +21,42 @@ data class CollectionQuery(
     @GraphQLName("address")
     val addressString: String = address.toRaw()
 
-    suspend fun contract(
-        @GraphQLIgnore @Autowired collectionService: CollectionService
+    suspend fun itemNumber(
+        @GraphQLIgnore @Autowired collectionContractService: CollectionContractService,
     ) =
-        collectionService.getContract(address)?.let { CollectionContractQuery(it) }
+        collectionContractService.get(address)?.next_item_index?.toString()
 
-    suspend fun metadata(
-        @GraphQLIgnore @Autowired collectionService: CollectionService
+    suspend fun ownerNumber(
+        @GraphQLIgnore @Autowired collectionItemOwnerNumberService: CollectionItemOwnerNumberService,
     ) =
-        collectionService.getMetadata(address)?.let { CollectionMetadataQuery(it) }
+        collectionItemOwnerNumberService.get(address).toString()
 
-    suspend fun royalty(
-        @GraphQLIgnore @Autowired royaltyService: RoyaltyService
+    suspend fun owner(
+        @GraphQLIgnore @Autowired collectionContractService: CollectionContractService,
     ) =
-        royaltyService.get(address)?.let { RoyaltyQuery(it) }
+        collectionContractService.get(address)?.owner?.toRaw()
+
+    suspend fun name(
+        @GraphQLIgnore @Autowired collectionMetadataService: CollectionMetadataService,
+    ) =
+        collectionMetadataService.get(address)?.name
+
+    suspend fun description(
+        @GraphQLIgnore @Autowired collectionMetadataService: CollectionMetadataService,
+    ) =
+        collectionMetadataService.get(address)?.description
+
+    suspend fun image(
+        @GraphQLIgnore @Autowired collectionMetadataService: CollectionMetadataService,
+    ) =
+        collectionMetadataService.get(address)?.image
 
     suspend fun items(
-        @GraphQLIgnore @Autowired collectionService: CollectionService,
+        @GraphQLIgnore @Autowired collectionItemListService: CollectionItemListService,
         drop: Int? = null,
         take: Int? = null,
     ) =
-        collectionService.listItemAddresses(address)
+        collectionItemListService.get(address)
             .dropTake(drop, take)
             .mapNotNull { info -> (info as? MsgAddressInt)?.let { ItemQuery(it) } }
             .toList()

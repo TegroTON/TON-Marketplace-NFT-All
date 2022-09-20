@@ -1,8 +1,9 @@
-package money.tegro.market.service
+package money.tegro.market.service.item
 
 import com.sksamuel.aedile.core.caffeineBuilder
 import money.tegro.market.accountBlockAddresses
-import money.tegro.market.contract.nft.RoyaltyContract
+import money.tegro.market.contract.nft.CollectionContract
+import money.tegro.market.metadata.ItemMetadata
 import money.tegro.market.repository.ApprovalRepository
 import money.tegro.market.toRaw
 import mu.KLogging
@@ -13,32 +14,38 @@ import org.springframework.amqp.rabbit.annotation.Queue
 import org.springframework.amqp.rabbit.annotation.QueueBinding
 import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.stereotype.Service
-import org.ton.api.exception.TvmException
 import org.ton.block.AddrStd
 import org.ton.block.Block
 import org.ton.block.MsgAddressInt
 import org.ton.lite.client.LiteClient
 
 @Service
-class RoyaltyService(
+class ItemMetadataService(
     private val liteClient: LiteClient,
     private val approvalRepository: ApprovalRepository,
+    private val itemContractService: ItemContractService,
 ) {
     private val cache =
-        caffeineBuilder<MsgAddressInt, RoyaltyContract?>().build()
+        caffeineBuilder<MsgAddressInt, ItemMetadata?>().build()
 
-    suspend fun get(address: MsgAddressInt): RoyaltyContract? =
-        cache.getOrPut(address) { royalty ->
-            if (approvalRepository.existsByApprovedIsFalseAndAddress(royalty)) { // Explicitly forbidden
-                logger.debug("{} was disapproved", kv("address", royalty.toRaw()))
+    suspend fun get(address: MsgAddressInt): ItemMetadata? =
+        cache.getOrPut(address) { item ->
+            if (approvalRepository.existsByApprovedIsFalseAndAddress(item)) { // Explicitly forbidden
+                logger.debug("{} was disapproved", kv("address", item.toRaw()))
                 null
             } else {
-                try {
-                    logger.debug("fetching royalty information {}", kv("address", royalty.toRaw()))
-                    RoyaltyContract.of(royalty as AddrStd, liteClient)
-                } catch (e: TvmException) {
-                    logger.warn("could not get royalty information for {}", kv("address", royalty.toRaw()), e)
-                    null
+                itemContractService.get(item)?.let { contract ->
+                    ItemMetadata.of(
+                        (contract.collection as? AddrStd) // Collection items
+                            ?.let {
+                                CollectionContract.itemContent(
+                                    it,
+                                    contract.index,
+                                    contract.individual_content,
+                                    liteClient
+                                )
+                            }
+                            ?: contract.individual_content) // Standalone items
                 }
             }
         }
@@ -47,7 +54,7 @@ class RoyaltyService(
         bindings = [
             QueueBinding(
                 value = Queue(
-                    name = "blocks.market.royalty",
+                    name = "blocks.market.item.metadata",
                 ),
                 exchange = Exchange(
                     name = "blocks",

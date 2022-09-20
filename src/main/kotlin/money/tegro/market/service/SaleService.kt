@@ -1,5 +1,6 @@
 package money.tegro.market.service
 
+import com.sksamuel.aedile.core.caffeineBuilder
 import money.tegro.market.accountBlockAddresses
 import money.tegro.market.contract.nft.SaleContract
 import money.tegro.market.repository.ApprovalRepository
@@ -11,7 +12,6 @@ import org.springframework.amqp.rabbit.annotation.Exchange
 import org.springframework.amqp.rabbit.annotation.Queue
 import org.springframework.amqp.rabbit.annotation.QueueBinding
 import org.springframework.amqp.rabbit.annotation.RabbitListener
-import org.springframework.cache.CacheManager
 import org.springframework.stereotype.Service
 import org.ton.api.exception.TvmException
 import org.ton.block.AddrStd
@@ -21,34 +21,27 @@ import org.ton.lite.client.LiteClient
 
 @Service
 class SaleService(
-    private val cacheManager: CacheManager,
     private val liteClient: LiteClient,
     private val approvalRepository: ApprovalRepository,
 ) {
-    suspend fun get(address: MsgAddressInt): SaleContract? {
-        val cachedValue = cache()?.get(address)
-        return if (cachedValue != null) { // Cache hit
-            logger.trace("cache hit on {}", kv("address", address.toRaw()))
-            cachedValue.get() as? SaleContract
-        } else {
-            if (approvalRepository.existsByApprovedIsFalseAndAddress(address)) { // Explicitly forbidden
-                logger.debug("{} was disapproved", kv("address", address.toRaw()))
+    private val cache =
+        caffeineBuilder<MsgAddressInt, SaleContract?>().build()
+
+    suspend fun get(address: MsgAddressInt): SaleContract? =
+        cache.getOrPut(address) { sale ->
+            if (approvalRepository.existsByApprovedIsFalseAndAddress(sale)) { // Explicitly forbidden
+                logger.debug("{} was disapproved", kv("address", sale.toRaw()))
                 null
             } else {
                 try {
-                    logger.debug("fetching sale information {}", kv("address", address.toRaw()))
-                    SaleContract.of(address as AddrStd, liteClient)
+                    logger.debug("fetching sale information {}", kv("address", sale.toRaw()))
+                    SaleContract.of(sale as AddrStd, liteClient)
                 } catch (e: TvmException) {
-                    logger.warn("could not get sale information for {}", kv("address", address.toRaw()), e)
+                    logger.warn("could not get sale information for {}", kv("address", sale.toRaw()), e)
                     null
                 }
             }
-                .also { contract -> // Even if the result is null, cache it
-                    cache()?.put(address, contract)
-                }
         }
-    }
-
 
     @RabbitListener(
         bindings = [
@@ -67,12 +60,9 @@ class SaleService(
     fun onLiveBlock(block: Block) {
         block.accountBlockAddresses()
             .forEach {
-                if (cache()?.evictIfPresent(it) == true)
-                    logger.debug("evicted {}", kv("address", it.toRaw()))
+                cache.underlying().synchronous().invalidate(it as MsgAddressInt)
             }
     }
-
-    private fun cache() = cacheManager.getCache("sale")
 
     companion object : KLogging()
 }

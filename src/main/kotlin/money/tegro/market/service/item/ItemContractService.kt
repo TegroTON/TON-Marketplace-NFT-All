@@ -1,8 +1,8 @@
-package money.tegro.market.service
+package money.tegro.market.service.item
 
 import com.sksamuel.aedile.core.caffeineBuilder
 import money.tegro.market.accountBlockAddresses
-import money.tegro.market.contract.nft.RoyaltyContract
+import money.tegro.market.contract.nft.ItemContract
 import money.tegro.market.repository.ApprovalRepository
 import money.tegro.market.toRaw
 import mu.KLogging
@@ -20,24 +20,24 @@ import org.ton.block.MsgAddressInt
 import org.ton.lite.client.LiteClient
 
 @Service
-class RoyaltyService(
+class ItemContractService(
     private val liteClient: LiteClient,
     private val approvalRepository: ApprovalRepository,
 ) {
     private val cache =
-        caffeineBuilder<MsgAddressInt, RoyaltyContract?>().build()
+        caffeineBuilder<MsgAddressInt, ItemContract?>().build()
 
-    suspend fun get(address: MsgAddressInt): RoyaltyContract? =
-        cache.getOrPut(address) { royalty ->
-            if (approvalRepository.existsByApprovedIsFalseAndAddress(royalty)) { // Explicitly forbidden
-                logger.debug("{} was disapproved", kv("address", royalty.toRaw()))
+    suspend fun get(address: MsgAddressInt): ItemContract? =
+        cache.getOrPut(address) { item ->
+            if (approvalRepository.existsByApprovedIsFalseAndAddress(item)) { // Explicitly forbidden
+                logger.debug("{} was disapproved", kv("address", item.toRaw()))
                 null
             } else {
                 try {
-                    logger.debug("fetching royalty information {}", kv("address", royalty.toRaw()))
-                    RoyaltyContract.of(royalty as AddrStd, liteClient)
+                    logger.debug("fetching item {}", kv("address", item.toRaw()))
+                    ItemContract.of(item as AddrStd, liteClient)
                 } catch (e: TvmException) {
-                    logger.warn("could not get royalty information for {}", kv("address", royalty.toRaw()), e)
+                    logger.warn("could not get item information for {}", kv("address", item.toRaw()), e)
                     null
                 }
             }
@@ -47,7 +47,7 @@ class RoyaltyService(
         bindings = [
             QueueBinding(
                 value = Queue(
-                    name = "blocks.market.royalty",
+                    name = "blocks.market.item.contract",
                 ),
                 exchange = Exchange(
                     name = "blocks",
