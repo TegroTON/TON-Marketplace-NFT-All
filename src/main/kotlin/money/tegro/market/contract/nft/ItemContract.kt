@@ -20,7 +20,7 @@ data class ItemContract(
         suspend fun of(
             address: AddrStd,
             liteClient: LiteClient,
-            referenceBlock: TonNodeBlockIdExt? = null
+            referenceBlock: TonNodeBlockIdExt?,
         ): ItemContract =
             liteClient.runSmcMethod(
                 LiteServerAccountId(address),

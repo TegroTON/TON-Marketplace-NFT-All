@@ -52,9 +52,9 @@ data class CollectionQuery(
         collectionMetadataService.get(address)?.image
 
     suspend fun items(
-        @GraphQLIgnore @Autowired collectionItemListService: CollectionItemListService,
         drop: Int? = null,
         take: Int? = null,
+        @GraphQLIgnore @Autowired collectionItemListService: CollectionItemListService,
     ) =
         collectionItemListService.get(address)
             .dropTake(drop, take)

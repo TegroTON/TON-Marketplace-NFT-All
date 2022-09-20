@@ -20,7 +20,7 @@ data class CollectionContract(
         suspend fun of(
             address: AddrStd,
             liteClient: LiteClient,
-            referenceBlock: TonNodeBlockIdExt? = null
+            referenceBlock: TonNodeBlockIdExt?,
         ): CollectionContract =
             liteClient.runSmcMethod(
                 LiteServerAccountId(address),
@@ -41,7 +41,7 @@ data class CollectionContract(
             collection: AddrStd,
             index: ULong,
             liteClient: LiteClient,
-            referenceBlock: TonNodeBlockIdExt? = null
+            referenceBlock: TonNodeBlockIdExt?,
         ): MsgAddress =
             liteClient.runSmcMethod(
                 LiteServerAccountId(collection),
@@ -59,7 +59,7 @@ data class CollectionContract(
             index: ULong,
             individualContent: Cell,
             liteClient: LiteClient,
-            referenceBlock: TonNodeBlockIdExt? = null
+            referenceBlock: TonNodeBlockIdExt?,
         ): Cell =
             liteClient.runSmcMethod(
                 LiteServerAccountId(collection),

@@ -4,6 +4,7 @@ import com.sksamuel.aedile.core.caffeineBuilder
 import money.tegro.market.accountBlockAddresses
 import money.tegro.market.contract.nft.ItemContract
 import money.tegro.market.repository.ApprovalRepository
+import money.tegro.market.service.ReferenceBlockService
 import money.tegro.market.toRaw
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments.kv
@@ -23,6 +24,7 @@ import java.util.*
 @Service
 class ItemContractService(
     private val liteClient: LiteClient,
+    private val referenceBlockService: ReferenceBlockService,
     private val approvalRepository: ApprovalRepository,
 ) {
     private val cache =
@@ -36,7 +38,7 @@ class ItemContractService(
             } else {
                 try {
                     logger.debug("fetching item {}", kv("address", item.toRaw()))
-                    ItemContract.of(item as AddrStd, liteClient)
+                    ItemContract.of(item as AddrStd, liteClient, referenceBlockService.get())
                         .let { Optional.of(it) }
                 } catch (e: TvmException) {
                     logger.warn("could not get item information for {}", kv("address", item.toRaw()), e)

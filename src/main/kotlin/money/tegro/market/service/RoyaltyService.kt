@@ -23,6 +23,7 @@ import java.util.*
 @Service
 class RoyaltyService(
     private val liteClient: LiteClient,
+    private val referenceBlockService: ReferenceBlockService,
     private val approvalRepository: ApprovalRepository,
 ) {
     private val cache =
@@ -36,7 +37,7 @@ class RoyaltyService(
             } else {
                 try {
                     logger.debug("fetching royalty information {}", kv("address", royalty.toRaw()))
-                    RoyaltyContract.of(royalty as AddrStd, liteClient)
+                    RoyaltyContract.of(royalty as AddrStd, liteClient, referenceBlockService.get())
                         .let { Optional.of(it) }
                 } catch (e: TvmException) {
                     logger.warn("could not get royalty information for {}", kv("address", royalty.toRaw()), e)

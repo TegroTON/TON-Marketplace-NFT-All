@@ -5,6 +5,7 @@ import money.tegro.market.accountBlockAddresses
 import money.tegro.market.contract.nft.CollectionContract
 import money.tegro.market.metadata.ItemMetadata
 import money.tegro.market.repository.ApprovalRepository
+import money.tegro.market.service.ReferenceBlockService
 import money.tegro.market.toRaw
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments.kv
@@ -23,6 +24,7 @@ import java.util.*
 @Service
 class ItemMetadataService(
     private val liteClient: LiteClient,
+    private val referenceBlockService: ReferenceBlockService,
     private val approvalRepository: ApprovalRepository,
     private val itemContractService: ItemContractService,
 ) {
@@ -44,7 +46,8 @@ class ItemMetadataService(
                                         it,
                                         contract.index,
                                         contract.individual_content,
-                                        liteClient
+                                        liteClient,
+                                        referenceBlockService.get(),
                                     )
                                 }
                                 ?: contract.individual_content) // Standalone items

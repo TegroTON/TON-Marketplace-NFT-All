@@ -23,6 +23,7 @@ import java.util.*
 @Service
 class SaleService(
     private val liteClient: LiteClient,
+    private val referenceBlockService: ReferenceBlockService,
     private val approvalRepository: ApprovalRepository,
 ) {
     private val cache =
@@ -36,7 +37,7 @@ class SaleService(
             } else {
                 try {
                     logger.debug("fetching sale information {}", kv("address", sale.toRaw()))
-                    SaleContract.of(sale as AddrStd, liteClient)
+                    SaleContract.of(sale as AddrStd, liteClient, referenceBlockService.get())
                         .let { Optional.of(it) }
                 } catch (e: TvmException) {
                     logger.warn("could not get sale information for {}", kv("address", sale.toRaw()), e)

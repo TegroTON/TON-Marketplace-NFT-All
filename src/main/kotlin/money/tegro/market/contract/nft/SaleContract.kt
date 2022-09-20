@@ -23,7 +23,7 @@ data class SaleContract(
         suspend fun of(
             address: AddrStd,
             liteClient: LiteClient,
-            referenceBlock: TonNodeBlockIdExt? = null
+            referenceBlock: TonNodeBlockIdExt?,
         ): SaleContract =
             liteClient.runSmcMethod(
                 LiteServerAccountId(address),

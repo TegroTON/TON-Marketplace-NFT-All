@@ -19,7 +19,7 @@ data class RoyaltyContract(
         suspend fun of(
             address: AddrStd,
             liteClient: LiteClient,
-            referenceBlock: TonNodeBlockIdExt? = null
+            referenceBlock: TonNodeBlockIdExt?,
         ): RoyaltyContract =
             liteClient.runSmcMethod(
                 LiteServerAccountId(address),

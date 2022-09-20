@@ -4,6 +4,7 @@ import com.sksamuel.aedile.core.caffeineBuilder
 import money.tegro.market.accountBlockAddresses
 import money.tegro.market.contract.nft.CollectionContract
 import money.tegro.market.repository.ApprovalRepository
+import money.tegro.market.service.ReferenceBlockService
 import money.tegro.market.toRaw
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments.kv
@@ -14,7 +15,6 @@ import org.springframework.amqp.rabbit.annotation.QueueBinding
 import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.stereotype.Service
 import org.ton.api.exception.TvmException
-import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.block.AddrStd
 import org.ton.block.Block
 import org.ton.block.MsgAddressInt
@@ -24,20 +24,18 @@ import java.util.*
 @Service
 class CollectionContractService(
     private val liteClient: LiteClient,
+    private val referenceBlockService: ReferenceBlockService,
     private val approvalRepository: ApprovalRepository,
 ) {
     private val cache =
         caffeineBuilder<MsgAddressInt, Optional<CollectionContract>>().build()
 
-    suspend fun get(
-        address: MsgAddressInt,
-        referenceBlock: suspend () -> TonNodeBlockIdExt? = { liteClient.getLastBlockId() }
-    ): CollectionContract? =
+    suspend fun get(address: MsgAddressInt): CollectionContract? =
         cache.getOrPut(address) { collection ->
             if (approvalRepository.existsByApprovedIsTrueAndAddress(collection)) { // Has been explicitly approved
                 try {
                     logger.debug("fetching collection {}", kv("address", collection.toRaw()))
-                    CollectionContract.of(collection as AddrStd, liteClient, referenceBlock())
+                    CollectionContract.of(collection as AddrStd, liteClient, referenceBlockService.get())
                         .let { Optional.of(it) }
                 } catch (e: TvmException) {
                     logger.warn("could not get collection information for {}", kv("address", collection.toRaw()), e)
