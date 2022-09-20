@@ -45,7 +45,7 @@
 <script lang="ts">
 import {defineComponent} from "vue";
 import gql from "graphql-tag";
-import {fromNano} from "ton";
+import {formatPrice} from "../utility";
 
 export default defineComponent({
   name: "CollectionItemCard",
@@ -88,7 +88,7 @@ export default defineComponent({
   },
   computed: {
     formattedPrice: function () {
-      return fromNano(this.item.fullPrice) + " TON"
+      return formatPrice(this.item.fullPrice)
     }
   },
 })
