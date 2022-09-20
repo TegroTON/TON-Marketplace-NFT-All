@@ -5,8 +5,10 @@ import com.expediagroup.graphql.generator.annotations.GraphQLName
 import money.tegro.market.service.item.ItemContractService
 import money.tegro.market.service.item.ItemMetadataService
 import money.tegro.market.service.item.ItemOwnerService
+import money.tegro.market.service.item.ItemSaleService
 import money.tegro.market.toRaw
 import org.springframework.beans.factory.annotation.Autowired
+import org.ton.bigint.BigInt
 import org.ton.block.MsgAddressInt
 
 @GraphQLName("Item")
@@ -52,4 +54,45 @@ data class ItemQuery(
     ) =
         itemMetadataService.get(address)?.attributes.orEmpty()
             .map { ItemAttributeQuery(it) }
+
+    suspend fun isOnSale(
+        @GraphQLIgnore @Autowired itemSaleService: ItemSaleService,
+    ) =
+        itemSaleService.get(address) != null
+
+    suspend fun saleAddress(
+        @GraphQLIgnore @Autowired itemOwnerService: ItemOwnerService,
+        @GraphQLIgnore @Autowired itemSaleService: ItemSaleService,
+    ) =
+        if (itemSaleService.get(address) != null) {
+            itemOwnerService.get(address)?.toRaw()
+        } else {
+            null
+        }
+
+    suspend fun fullPrice(
+        @GraphQLIgnore @Autowired itemSaleService: ItemSaleService,
+    ) =
+        itemSaleService.get(address)?.full_price?.toString() ?: "0"
+
+    suspend fun royaltyAmount(
+        @GraphQLIgnore @Autowired itemSaleService: ItemSaleService,
+    ) =
+        itemSaleService.get(address)?.royalty?.toString() ?: "0"
+
+    suspend fun marketplaceFee(
+        @GraphQLIgnore @Autowired itemSaleService: ItemSaleService,
+    ) =
+        itemSaleService.get(address)?.marketplace_fee?.toString() ?: "0"
+
+    fun networkFee() = SALE_NETWORK_FEE.toString() // 1 TON
+
+    suspend fun buyPrice(
+        @GraphQLIgnore @Autowired itemSaleService: ItemSaleService,
+    ) =
+        itemSaleService.get(address)?.full_price?.plus(SALE_NETWORK_FEE)?.toString() ?: "0"
+
+    companion object {
+        private val SALE_NETWORK_FEE = BigInt(1_000_000_000L)
+    }
 }

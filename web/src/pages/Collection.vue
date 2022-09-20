@@ -1,7 +1,7 @@
 <template>
   <section class="nft-hero">
     <picture>
-      <img :src="collection.metadata.coverImage ?? collection.metadata.image" alt="Tegro Cat" class="nft-hero__image"
+      <img :src="collection.image" alt="Tegro Cat" class="nft-hero__image"
            loading="lazy">
     </picture>
   </section>
@@ -27,18 +27,18 @@
               <div class="card-body p-4 p-lg-2 p-xl-3 p-xxl-4">
                 <div class="d-flex flex-column flex-md-row flex-lg-column align-items-center mb-5">
                   <div class="collection__image mb-4 mb-md-0 mb-lg-4 ms-auto ms-md-0 ms-lg-auto me-auto">
-                    <img :src="collection.metadata.image" alt="" class="img-fluid rounded-circle">
+                    <img :src="collection.image" alt="" class="img-fluid rounded-circle">
                   </div>
                   <div v-if="false" class="d-flex mx-0 mx-lg-auto">
                     <a class="btn btn-sm btn-outline-primary" href="#!">Subscribe</a>
                   </div>
                 </div>
                 <h1 class="collection__name fs-24 mb-4">
-                  <span>{{ collection.metadata.name }}</span>
+                  <span>{{ collection.name }}</span>
                   <i class="fa-solid fa-circle-check fs-22 color-yellow ms-2"></i>
                 </h1>
                 <div class="collection__desc color-grey mb-4">
-                  <p>{{ collection.metadata.description }}</p>
+                  <p>{{ collection.description }}</p>
 
                   <a v-if="false" class="collection__link text-white" href="#!" target="__blank">
                     <i class="fa-regular fa-link-simple color-yellow me-2"></i>
@@ -77,13 +77,11 @@
                 </div>
                 <div class="card-blur__item p-4 border-end text-center">
                   <h5 class="text-uppercase fs-14 color-grey" style="letter-spacing: 1px;">Items</h5>
-                  <p class="m-0 text-uppercase fw-medium" style="letter-spacing: 1px;">{{
-                      collection.contract.size
-                    }}</p>
+                  <p class="m-0 text-uppercase fw-medium" style="letter-spacing: 1px;">{{ collection.itemNumber }}</p>
                 </div>
-                <div v-if="false" class="card-blur__item p-4 border-end text-center">
+                <div class="card-blur__item p-4 border-end text-center">
                   <h5 class="text-uppercase fs-14 color-grey" style="letter-spacing: 1px;">Owners</h5>
-                  <p class="m-0 text-uppercase fw-medium" style="letter-spacing: 1px;">461</p>
+                  <p class="m-0 text-uppercase fw-medium" style="letter-spacing: 1px;">{{ collection.ownerNumber }}</p>
                 </div>
                 <div class="card-blur__item p-4 border-end text-center">
                   <h5 class="text-uppercase fs-14 color-grey" style="letter-spacing: 1px;">Blockchain</h5>
@@ -91,8 +89,7 @@
                 </div>
                 <div class="card-blur__item p-4 text-center">
                   <h5 class="text-uppercase fs-14 color-grey" style="letter-spacing: 1px;">address</h5>
-                  <p class="m-0 fw-medium text-truncate" style="letter-spacing: 1px;">
-                    {{ shortenedAddress }}</p>
+                  <p class="m-0 fw-medium text-truncate" style="letter-spacing: 1px;"> {{ shortenedAddress }}</p>
                 </div>
               </div>
             </div>
@@ -202,7 +199,7 @@ import ActivityList from "../components/ActivityList.vue";
 import CollectionFilters from "../components/CollectionFilters.vue";
 import gql from "graphql-tag";
 import CollectionItemCard from "../components/CollectionItemCard.vue";
-import normalizeAndShorten from "../utility";
+import {normalizeAndShorten} from "../utility";
 
 export default defineComponent({
   name: "Collection",
@@ -217,16 +214,12 @@ export default defineComponent({
     collection: {
       query: gql`query collection($address: String!) {
         collection(address: $address) {
-          contract {
-            owner
-            size
-          }
-          metadata {
-            name
-            description
-            image
-            coverImage
-          }
+          owner
+          itemNumber
+          ownerNumber
+          name
+          description
+          image
           items(take: 25) {
             address
           }
@@ -242,16 +235,12 @@ export default defineComponent({
   data() {
     return {
       collection: {
-        contract: {
-          owner: "",
-          size: 0,
-        },
-        metadata: {
-          name: "Loading...",
-          description: "",
-          image: "",
-          coverImage: ""
-        },
+        owner: null as string | null,
+        itemNumber: "0",
+        ownerNumber: "0",
+        name: "Loading..." as string | null,
+        description: "" as string | null,
+        image: null as string | null,
         items: [] as { address: string }[]
       }
     }
@@ -261,7 +250,10 @@ export default defineComponent({
       return normalizeAndShorten(this.address)
     },
     shortenedOwner() {
-      return normalizeAndShorten(this.collection.contract.owner)
+      if (this.collection.owner !== null)
+        return normalizeAndShorten(this.collection.owner)
+      else
+        return "..."
     }
   }
 })

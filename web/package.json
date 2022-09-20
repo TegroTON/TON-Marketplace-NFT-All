@@ -19,6 +19,7 @@
     "jquery": "^3.6.1",
     "pinia": "^2.0.20",
     "qrcode.vue": "^3.3.3",
+    "share-url": "^1.2.0",
     "slick-carousel": "^1.8.1",
     "ton": "^12.0.1",
     "ton-x": "^2.0.0",

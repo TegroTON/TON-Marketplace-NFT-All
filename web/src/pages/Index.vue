@@ -262,12 +262,12 @@
         </div>
         <div class="row pt-3">
           <div v-for="collection in collections" class="col-sm-6 col-xxl-4">
-            <router-link :title="collection.metadata.name"
+            <router-link :title="collection.name"
                          :to="{name: 'collection', params: { address: collection.address }}" class="d-block">
               <div class="card d-flex flex-lg-row align-items-center p-3 p-xl-4 rounded-20 mb-4">
                 <div class="collection__picbox position-relative me-4 mb-4 mb-lg-0">
                   <picture>
-                    <img :alt="collection.metadata.name" :src="collection.metadata.image"
+                    <img :alt="collection.name" :src="collection.image"
                          class="image-80x80 rounded-circle"
                          height="80" loading="lazy" width="80">
                   </picture>
@@ -275,7 +275,7 @@
                      style="right: -4%;"></i>
                 </div>
                 <div class="collection__body mb-3 mb-lg-0">
-                  <h4 class="fs-20 mb-3 text-truncate" style="max-width: 224px">{{ collection.metadata.name }}</h4>
+                  <h4 class="fs-20 mb-3 text-truncate" style="max-width: 224px">{{ collection.name }}</h4>
                   <p v-if="false" class="mb-0 color-grey text-center text-lg-start">
                     Floor: <span class="ms-1 text-uppercase">3,02 TON</span>
                   </p>
@@ -473,18 +473,24 @@ export default defineComponent({
   name: "Index",
   components: {SlickCarousel},
   apollo: {
-    collections: gql`query {
-      collections {
-        address
-        metadata {
+    collections: {
+      query: gql`query collections($take: Int) {
+        collections(take: $take) {
+          address
           name
           image
         }
-      }
-    }`
+      }`,
+      variables() {
+        return {
+          take: 9
+        }
+      },
+    }
   },
   data() {
     return {
+      collections: [] as { address: string, name: string | null, image: string | null }[],
       slickOptions: {
         dots: true,
         infinite: false,
@@ -537,7 +543,6 @@ export default defineComponent({
           // instead of a settings object
         ]
       },
-      collections: [] as { address: String, metadata: { name: String | null, image: String | null } }[]
     }
   }
 })
