@@ -15,7 +15,10 @@ class CollectionItemOwnerNumberService(
     private val itemOwnerService: ItemOwnerService,
 ) {
     private val cache =
-        caffeineBuilder<MsgAddressInt, ULong>().build()
+        caffeineBuilder<MsgAddressInt, ULong> {
+            // TODO: Configuration
+        }
+            .build()
 
     suspend fun get(address: MsgAddressInt): ULong =
         cache.getOrPut(address) { collection ->

@@ -1,7 +1,6 @@
 package money.tegro.market.service.item
 
 import com.sksamuel.aedile.core.caffeineBuilder
-import money.tegro.market.accountBlockAddresses
 import money.tegro.market.contract.nft.CollectionContract
 import money.tegro.market.metadata.ItemMetadata
 import money.tegro.market.repository.ApprovalRepository
@@ -9,14 +8,8 @@ import money.tegro.market.service.ReferenceBlockService
 import money.tegro.market.toRaw
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments.kv
-import org.springframework.amqp.core.ExchangeTypes
-import org.springframework.amqp.rabbit.annotation.Exchange
-import org.springframework.amqp.rabbit.annotation.Queue
-import org.springframework.amqp.rabbit.annotation.QueueBinding
-import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.stereotype.Service
 import org.ton.block.AddrStd
-import org.ton.block.Block
 import org.ton.block.MsgAddressInt
 import org.ton.lite.client.LiteClient
 import java.util.*
@@ -29,7 +22,9 @@ class ItemMetadataService(
     private val itemContractService: ItemContractService,
 ) {
     private val cache =
-        caffeineBuilder<MsgAddressInt, Optional<ItemMetadata>>().build()
+        caffeineBuilder<MsgAddressInt, Optional<ItemMetadata>> {
+            // TODO: Configuration
+        }.build()
 
     suspend fun get(address: MsgAddressInt): ItemMetadata? =
         cache.getOrPut(address) { item ->
@@ -56,27 +51,6 @@ class ItemMetadataService(
             }
         }
             .orElse(null)
-
-    @RabbitListener(
-        bindings = [
-            QueueBinding(
-                value = Queue(
-                    name = "blocks.market.item.metadata",
-                ),
-                exchange = Exchange(
-                    name = "blocks",
-                    type = ExchangeTypes.TOPIC,
-                ),
-                key = ["live"], // Only live blocks
-            )
-        ]
-    )
-    fun onLiveBlock(block: Block) {
-        block.accountBlockAddresses()
-            .forEach {
-                cache.underlying().synchronous().invalidate(it as MsgAddressInt)
-            }
-    }
 
     companion object : KLogging()
 }
