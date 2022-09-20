@@ -153,8 +153,6 @@
 import {defineComponent} from "vue";
 import EnlargeableImage from "../components/EnlargeableImage.vue";
 import gql from "graphql-tag";
-import {Address, fromNano} from "ton";
-import {normalizeAndShorten} from "../utility";
 import ItemBreadcrumbs from "../components/item/ItemBreadcrumbs.vue";
 import ItemAttributesCard from "../components/item/ItemAttributesCard.vue";
 import ItemDetailsCard from "../components/item/ItemDetailsCard.vue";
@@ -183,6 +181,7 @@ export default defineComponent({
     item: {
       query: gql`query item($address: String!) {
         item(address: $address) {
+          address
           index
           owner
           name
@@ -207,6 +206,7 @@ export default defineComponent({
   data() {
     return {
       item: {
+        address: this.address,
         index: "0",
         owner: null as string | null,
         name: null as string | null,
@@ -223,23 +223,9 @@ export default defineComponent({
     }
   },
   computed: {
-
-
     itemDisplayName: function () {
       return this.item.name ?? ("Item no. " + this.item.index)
     },
-    itemAddress: function () {
-      return Address.parse(this.address).toFriendly({urlSafe: true, bounceable: true, testOnly: true})
-    },
-    ownerAddress: function () {
-      if (this.item.owner !== null)
-        return normalizeAndShorten(this.item.owner)
-      else
-        return "..."
-    },
-    formattedPrice: function () {
-      return fromNano(this.item.fullPrice) + " TON"
-    }
   }
 })
 </script>

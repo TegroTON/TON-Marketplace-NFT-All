@@ -46,8 +46,9 @@ export default defineComponent({
   },
   apollo: {
     item: {
-      query: gql`query item($address: String!) {
+      query: gql`query itemDetails($address: String!) {
         item(address: $address) {
+          address
           isOnSale
           saleAddress
         }
@@ -62,6 +63,7 @@ export default defineComponent({
   data() {
     return {
       item: {
+        address: this.address,
         isOnSale: false,
         saleAddress: null as string | null,
       }

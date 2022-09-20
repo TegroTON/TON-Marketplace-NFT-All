@@ -38,8 +38,9 @@ export default defineComponent({
   },
   apollo: {
     item: {
-      query: gql`query item($address: String!) {
+      query: gql`query itemAttributes($address: String!) {
         item(address: $address) {
+          address
           attributes {
             trait
             value
@@ -56,6 +57,7 @@ export default defineComponent({
   data() {
     return {
       item: {
+        address: this.address,
         attributes: [] as { trait: string, value: string }[],
       }
     }

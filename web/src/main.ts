@@ -12,7 +12,13 @@ const apollo = createApolloProvider({
         link: createHttpLink({
             uri: 'http://localhost:8080/graphql'
         }),
-        cache: new InMemoryCache()
+        cache: new InMemoryCache({
+            typePolicies: {
+                Item: {keyFields: ["address"]},
+                Collection: {keyFields: ["address"]},
+                Profile: {keyFields: ["address"]},
+            }
+        })
     })
 })
 

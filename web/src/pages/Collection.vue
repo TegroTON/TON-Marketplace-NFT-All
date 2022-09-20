@@ -214,6 +214,7 @@ export default defineComponent({
     collection: {
       query: gql`query collection($address: String!) {
         collection(address: $address) {
+          address
           owner
           itemNumber
           ownerNumber
@@ -235,6 +236,7 @@ export default defineComponent({
   data() {
     return {
       collection: {
+        address: this.address,
         owner: null as string | null,
         itemNumber: "0",
         ownerNumber: "0",

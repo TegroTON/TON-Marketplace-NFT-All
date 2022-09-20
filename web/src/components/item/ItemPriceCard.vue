@@ -30,8 +30,9 @@ export default defineComponent({
   },
   apollo: {
     item: {
-      query: gql`query item($address: String!) {
+      query: gql`query itemPrice($address: String!) {
         item(address: $address) {
+          address
           isOnSale
           fullPrice
           networkFee
@@ -47,6 +48,7 @@ export default defineComponent({
   data() {
     return {
       item: {
+        address: this.address,
         isOnSale: false,
         fullPrice: "0",
         networkFee: "0",

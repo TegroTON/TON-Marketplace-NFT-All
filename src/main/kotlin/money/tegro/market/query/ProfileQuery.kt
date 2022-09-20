@@ -2,6 +2,7 @@ package money.tegro.market.query
 
 import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.expediagroup.graphql.generator.annotations.GraphQLName
+import com.expediagroup.graphql.generator.scalars.ID
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import money.tegro.market.dropTake
@@ -17,7 +18,7 @@ data class ProfileQuery(
     val address: MsgAddressInt
 ) {
     @GraphQLName("address")
-    val addressString: String = address.toRaw()
+    val addressString: ID = ID(address.toRaw())
 
     suspend fun ownedItems(
         drop: Int? = null,

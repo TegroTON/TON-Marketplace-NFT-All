@@ -2,6 +2,7 @@ package money.tegro.market.query
 
 import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.expediagroup.graphql.generator.annotations.GraphQLName
+import com.expediagroup.graphql.generator.scalars.ID
 import money.tegro.market.service.item.ItemContractService
 import money.tegro.market.service.item.ItemMetadataService
 import money.tegro.market.service.item.ItemOwnerService
@@ -17,7 +18,7 @@ data class ItemQuery(
     val address: MsgAddressInt,
 ) {
     @GraphQLName("address")
-    val addressString: String = address.toRaw()
+    val addressString: ID = ID(address.toRaw())
 
     suspend fun index(
         @GraphQLIgnore @Autowired itemContractService: ItemContractService,

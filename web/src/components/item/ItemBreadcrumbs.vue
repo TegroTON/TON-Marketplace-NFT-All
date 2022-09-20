@@ -30,8 +30,9 @@ export default defineComponent({
   },
   apollo: {
     item: {
-      query: gql`query item($address: String!) {
+      query: gql`query itemBreadcrumbs($address: String!) {
         item(address: $address) {
+          address
           index
           name
           collection {
@@ -50,6 +51,7 @@ export default defineComponent({
   data() {
     return {
       item: {
+        address: this.address,
         index: "0" as string | null,
         name: null as string | null,
         collection: null as {

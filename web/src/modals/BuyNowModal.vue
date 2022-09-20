@@ -77,6 +77,7 @@ export default defineComponent({
     item: {
       query: gql`query item($address: String!) {
         item(address: $address) {
+          address
           index
           name
           image
@@ -87,6 +88,7 @@ export default defineComponent({
           networkFee
           buyPrice
           collection {
+            address
             name
           }
         }
@@ -101,6 +103,7 @@ export default defineComponent({
   data() {
     return {
       item: {
+        address: this.address,
         index: "0",
         name: null as string | null,
         image: null as string | null,
@@ -111,6 +114,7 @@ export default defineComponent({
         networkFee: "0",
         buyPrice: "0",
         collection: null as {
+          address: string,
           name: string | null
         } | null,
       }

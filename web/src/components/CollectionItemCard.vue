@@ -57,8 +57,9 @@ export default defineComponent({
   },
   apollo: {
     item: {
-      query: gql`query item($address: String!) {
+      query: gql`query collectionItem($address: String!) {
         item(address: $address) {
+          address
           index
           name
           image
@@ -76,6 +77,7 @@ export default defineComponent({
   data() {
     return {
       item: {
+        address: this.address,
         index: "0",
         name: "Loading..." as string | null,
         image: "" as string | null,
