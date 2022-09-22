@@ -52,6 +52,11 @@ data class CollectionQuery(
     ) =
         collectionMetadataService.get(address)?.image
 
+    suspend fun coverImage(
+        @GraphQLIgnore @Autowired collectionMetadataService: CollectionMetadataService,
+    ) =
+        collectionMetadataService.get(address)?.coverImage
+
     suspend fun items(
         drop: Int? = null,
         take: Int? = null,

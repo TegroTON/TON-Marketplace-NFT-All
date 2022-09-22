@@ -13,7 +13,6 @@ import org.springframework.amqp.rabbit.annotation.Queue
 import org.springframework.amqp.rabbit.annotation.QueueBinding
 import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.stereotype.Service
-import org.ton.api.exception.TvmException
 import org.ton.block.AddrStd
 import org.ton.block.Block
 import org.ton.block.MsgAddressInt
@@ -35,14 +34,9 @@ class RoyaltyService(
                 logger.debug("{} was disapproved", kv("address", royalty.toRaw()))
                 Optional.empty()
             } else {
-                try {
-                    logger.debug("fetching royalty information {}", kv("address", royalty.toRaw()))
-                    RoyaltyContract.of(royalty as AddrStd, liteClient, referenceBlockService.get())
-                        .let { Optional.of(it) }
-                } catch (e: TvmException) {
-                    logger.warn("could not get royalty information for {}", kv("address", royalty.toRaw()), e)
-                    Optional.empty()
-                }
+                logger.debug("fetching royalty information {}", kv("address", royalty.toRaw()))
+                RoyaltyContract.of(royalty as AddrStd, liteClient, referenceBlockService.get())
+                    .let { Optional.ofNullable(it) }
             }
         }
             .orElse(null)

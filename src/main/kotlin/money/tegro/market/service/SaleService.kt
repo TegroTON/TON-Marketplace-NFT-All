@@ -13,7 +13,6 @@ import org.springframework.amqp.rabbit.annotation.Queue
 import org.springframework.amqp.rabbit.annotation.QueueBinding
 import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.stereotype.Service
-import org.ton.api.exception.TvmException
 import org.ton.block.AddrStd
 import org.ton.block.Block
 import org.ton.block.MsgAddressInt
@@ -35,14 +34,9 @@ class SaleService(
                 logger.debug("{} was disapproved", kv("address", sale.toRaw()))
                 Optional.empty()
             } else {
-                try {
-                    logger.debug("fetching sale information {}", kv("address", sale.toRaw()))
-                    SaleContract.of(sale as AddrStd, liteClient, referenceBlockService.get())
-                        .let { Optional.of(it) }
-                } catch (e: TvmException) {
-                    logger.warn("could not get sale information for {}", kv("address", sale.toRaw()), e)
-                    Optional.empty()
-                }
+                logger.debug("fetching sale information {}", kv("address", sale.toRaw()))
+                SaleContract.of(sale as AddrStd, liteClient, referenceBlockService.get())
+                    .let { Optional.ofNullable(it) }
             }
         }
             .orElse(null)

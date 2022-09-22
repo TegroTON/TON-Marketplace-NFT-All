@@ -1,6 +1,9 @@
 package money.tegro.market.contract.nft
 
+import money.tegro.market.toRaw
 import mu.KLogging
+import net.logstash.logback.argument.StructuredArguments.kv
+import org.ton.api.exception.TvmException
 import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.bigint.BigInt
 import org.ton.block.AddrStd
@@ -24,21 +27,33 @@ data class SaleContract(
             address: AddrStd,
             liteClient: LiteClient,
             referenceBlock: TonNodeBlockIdExt?,
-        ): SaleContract =
-            liteClient.runSmcMethod(
-                LiteServerAccountId(address),
-                referenceBlock ?: liteClient.getLastBlockId(),
-                "get_sale_data"
-            ).toMutableVmStack().let {
-                SaleContract(
-                    marketplace = it.popSlice().loadTlb(MsgAddress),
-                    item = it.popSlice().loadTlb(MsgAddress),
-                    owner = it.popSlice().loadTlb(MsgAddress),
-                    full_price = it.popNumber().toBigInt(),
-                    marketplace_fee = it.popNumber().toBigInt(),
-                    royalty_destination = it.popSlice().loadTlb(MsgAddress),
-                    royalty = it.popNumber().toBigInt(),
+        ): SaleContract? =
+            try {
+                liteClient.runSmcMethod(
+                    LiteServerAccountId(address),
+                    referenceBlock ?: liteClient.getLastBlockId(),
+                    "get_sale_data"
                 )
+            } catch (e: TvmException) {
+                logger.warn("could not get sale information for {}", kv("address", address.toRaw()), e)
+                null
             }
+                ?.toMutableVmStack()
+                ?.let {
+                    try {
+                        SaleContract(
+                            marketplace = it.popSlice().loadTlb(MsgAddress),
+                            item = it.popSlice().loadTlb(MsgAddress),
+                            owner = it.popSlice().loadTlb(MsgAddress),
+                            full_price = it.popNumber().toBigInt(),
+                            marketplace_fee = it.popNumber().toBigInt(),
+                            royalty_destination = it.popSlice().loadTlb(MsgAddress),
+                            royalty = it.popNumber().toBigInt(),
+                        )
+                    } catch (e: ClassCastException) {
+                        logger.warn("could not get sale information for {}", kv("address", address.toRaw()), e)
+                        null
+                    }
+                }
     }
 }

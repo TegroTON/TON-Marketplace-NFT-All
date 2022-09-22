@@ -15,12 +15,7 @@
               </div>
               <div class="col-lg-7 col-xl-7">
                 <!-- Start Desc Card -->
-                <div class="card-item-details mb-5">
-                  <div v-if="item.isOnSale" class="item-details__badge badge__green mb-4">For Sale</div>
-                  <div v-else class="item-details__badge mb-4">Not for sale</div>
-                  <h1 class="item-details__title mb-3">{{ itemDisplayName }}</h1>
-                  <p class="item-details__desc mb-0"> {{ item.description }} </p>
-                </div>
+                <item-details-card :address="address"></item-details-card>
                 <!-- // End Desc Card -->
                 <!-- Start Action Link -->
                 <div class="card-item-details d-flex align-items-center border bg-soft px-4 py-3 rounded mb-4">
@@ -182,18 +177,7 @@ export default defineComponent({
       query: gql`query item($address: String!) {
         item(address: $address) {
           address
-          index
-          owner
-          name
-          description
           image
-          isOnSale
-          fullPrice
-          collection {
-            address
-            name
-            image
-          }
         }
       }`,
       variables() {
@@ -207,25 +191,9 @@ export default defineComponent({
     return {
       item: {
         address: this.address,
-        index: "0",
-        owner: null as string | null,
-        name: null as string | null,
-        description: null as string | null,
         image: null as string | null,
-        isOnSale: false,
-        fullPrice: "0",
-        collection: null as null | {
-          address: string,
-          name: null | string,
-          image: null | string,
-        },
       }
     }
   },
-  computed: {
-    itemDisplayName: function () {
-      return this.item.name ?? ("Item no. " + this.item.index)
-    },
-  }
 })
 </script>
