@@ -3,7 +3,7 @@ import App from './App.vue'
 import '~bootstrap'
 import './scss/global.scss'
 import {createPinia} from "pinia";
-import {router} from "./router";
+import {router} from "./routes";
 import {ApolloClient, createHttpLink, InMemoryCache} from "@apollo/client/core";
 import {createApolloProvider} from "@vue/apollo-option";
 
