@@ -34,6 +34,7 @@ export const useConnectionStore = defineStore('connection', {
             } else {
                 // nil
             }
+            this.provider = null
         }
     }
 })
