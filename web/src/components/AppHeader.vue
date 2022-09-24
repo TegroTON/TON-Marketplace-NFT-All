@@ -63,33 +63,22 @@
             </li>
           </ul>
           <!-- TODO -->
-          <button v-if="true"
-                  class="btn btn-soft d-flex flex-nowrap align-items-center btn-mobile-fixed order-3 order-lg-4"
-                  data-bs-target="#ConnectModal"
-                  data-bs-toggle="modal" type="button">
-            <i class="fa-regular fa-arrow-right-to-arc me-2"></i>
-            Connect
-          </button>
-          <div v-else class="dropdown dropstart order-3 order-lg-4">
+          <div v-if="isConnected" class="dropdown dropstart order-3 order-lg-4">
             <button id="dropdownMenuProfile" aria-expanded="false" data-bs-toggle="dropdown" type="button">
-              <img alt="" class="rounded-circle profile-image" height="42" src="./src/assets/user-1.svg" width="42">
+              <img alt="" class="rounded-circle profile-image" height="42" src="../assets/user-1.svg" width="42">
             </button>
             <ul aria-labelledby="dropdownMenuProfile" class="dropdown-menu">
               <li>
                 <a class="dropdown-item" href="/my-profile.php"><i class="fa-regular fa-user me-3"></i>Profile</a>
               </li>
               <li>
-                <a class="dropdown-item" href="/create-nft.php">
-                  <i class="fa-regular fa-hexagon-vertical-nft me-3"></i>Create NFT
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item border-0" href="#">
+                <a class="dropdown-item border-0" @click="disconnect()">
                   <i class="fa-regular fa-link-simple-slash me-3"></i>Disconnect
                 </a>
               </li>
             </ul>
           </div>
+          <connect v-else></connect>
         </div>
       </nav>
     </div>
@@ -98,9 +87,19 @@
 
 <script lang="ts">
 import {defineComponent} from "vue";
+import Connect from "./Connect.vue";
+import {useConnectionStore} from "../stores/ConnectionStore";
+import {mapActions, mapState} from "pinia";
 
 export default defineComponent({
   name: "AppHeader",
+  components: {Connect},
+  computed: {
+    ...mapState(useConnectionStore, ['isConnected', 'walletAddress']),
+  },
+  methods: {
+    ...mapActions(useConnectionStore, ['disconnect'])
+  }
 })
 </script>
 

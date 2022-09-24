@@ -2,7 +2,6 @@
   <app-header></app-header>
   <router-view></router-view>
   <app-footer></app-footer>
-  <div id="modals"></div>
 </template>
 
 <script lang="ts">
