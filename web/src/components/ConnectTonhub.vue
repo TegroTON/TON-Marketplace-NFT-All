@@ -39,7 +39,6 @@
 
 <script lang="ts">
 import {defineComponent} from "vue";
-import {mapActions, mapState, mapWritableState} from "pinia";
 import {useConnectionStore} from "../stores/ConnectionStore";
 import {useTonhubConnectionStore} from "../stores/TonhubConnectionStore";
 import QrcodeVue from "qrcode.vue";
@@ -47,15 +46,27 @@ import QrcodeVue from "qrcode.vue";
 export default defineComponent({
   name: "ConnectTonhub",
   components: {QrcodeVue},
+  setup() {
+    const connectionStore = useConnectionStore()
+    const tonhubConnectionStore = useTonhubConnectionStore()
+
+    return {
+      connectionStore: connectionStore,
+      tonhubConnectionStore: tonhubConnectionStore,
+    }
+  },
   computed: {
-    ...mapState(useTonhubConnectionStore, ['isConnected', 'connectionLink']),
-    ...mapWritableState(useConnectionStore, ['provider']),
+    isConnected() {
+      return this.connectionStore.isConnected
+    },
+    connectionLink() {
+      return this.tonhubConnectionStore.connectionLink
+    }
   },
   methods: {
-    ...mapActions(useTonhubConnectionStore, ['connect']),
     connectTonhub() {
-      this.provider = 'tonhub'
-      this.connect()
+      this.connectionStore.provider = 'tonhub'
+      this.tonhubConnectionStore.connect()
           .then(() => {
             console.log("tonhub connected")
             // TODO: Fucking fuck, due to parent component being destroyed as soon as wallet is connected, this leaves

@@ -29,18 +29,24 @@
 
 <script lang="ts">
 import {defineComponent} from "vue";
-import {mapState} from "pinia";
 import {useConnectionStore} from "../stores/ConnectionStore";
 import ConnectTonhub from "./ConnectTonhub.vue";
 
 export default defineComponent({
   name: "Connect",
   components: {ConnectTonhub},
+  setup() {
+    return {
+      connectionStore: useConnectionStore()
+    }
+  },
   computed: {
-    ...mapState(useConnectionStore, {
-      isConnected: 'isConnected',
-      isTonhubAvailable: (store) => store.availableProviders.includes('tonhub'),
-    }),
+    isConnected() {
+      return this.connectionStore.isConnected
+    },
+    isTonhubAvailable() {
+      return this.connectionStore.availableProviders.includes('tonhub')
+    }
   },
 })
 </script>

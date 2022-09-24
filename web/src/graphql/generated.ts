@@ -213,6 +213,13 @@ export type ItemOwnerQueryVariables = Exact<{
 
 export type ItemOwnerQuery = { __typename?: 'Query', item: { __typename?: 'Item', address: string, owner?: { __typename?: 'Profile', address: string } | null } };
 
+export type ItemPriceQueryVariables = Exact<{
+  address: Scalars['String'];
+}>;
+
+
+export type ItemPriceQuery = { __typename?: 'Query', item: { __typename?: 'Item', address: string, sale?: { __typename?: 'Sale', address: string, fullPrice?: string | null, networkFee: string } | null, owner?: { __typename?: 'Profile', address: string } | null } };
+
 export type TopCollectionsQueryVariables = Exact<{
   take: Scalars['Int'];
 }>;
@@ -392,6 +399,25 @@ export const ItemOwnerDocument = gql`
 
 export function useItemOwnerQuery(options: Omit<Urql.UseQueryArgs<never, ItemOwnerQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<ItemOwnerQuery>({ query: ItemOwnerDocument, ...options });
+};
+export const ItemPriceDocument = gql`
+    query itemPrice($address: String!) {
+  item(address: $address) {
+    address
+    sale {
+      address
+      fullPrice
+      networkFee
+    }
+    owner {
+      address
+    }
+  }
+}
+    `;
+
+export function useItemPriceQuery(options: Omit<Urql.UseQueryArgs<never, ItemPriceQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<ItemPriceQuery>({ query: ItemPriceDocument, ...options });
 };
 export const TopCollectionsDocument = gql`
     query topCollections($take: Int!) {
