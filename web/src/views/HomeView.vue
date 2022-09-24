@@ -114,7 +114,7 @@
        ============================================= -->
     <!-- Start of Notable section
        ============================================= -->
-    <section id="notable" class="notable section">
+    <section v-if="false" id="notable" class="notable section">
       <div class="notable__container container-fluid">
         <div class="notable__head">
           <h2 class="section__title mb-5">
@@ -150,57 +150,7 @@
     <!-- Start of Collections section
        ============================================= -->
     <section class="collections section">
-      <div class="collection__container container-fluid">
-        <div class="d-block d-sm-flex align-items-center mb-56">
-          <h2 class="section__title mb-0">Top <span class="color-yellow">collections</span></h2>
-          <div class="dropdown mt-4 mt-sm-0 ms-0 ms-sm-auto">
-            <a id="dropdownMenuLink" aria-expanded="false" class="btn btn-secondary dropdown-toggle"
-               data-bs-toggle="dropdown"
-               href="#" role="button">
-              Last 24 hours
-            </a>
-            <ul aria-labelledby="dropdownMenuLink" class="dropdown-menu animate slideIn mt-5">
-              <li><a class="dropdown-item" href="#">1 Day</a></li>
-              <li><a class="dropdown-item" href="#">3 Days</a></li>
-              <li><a class="dropdown-item" href="#">7 days</a></li>
-            </ul>
-          </div>
-        </div>
-        <div class="row pt-3">
-          <div class="col-sm-6 col-xxl-4">
-            <a class="d-block" href="#!" title="Mutant Ape Yach ClubMutant">
-              <div class="card d-flex flex-lg-row align-items-center p-3 p-xl-4 rounded-20 mb-4">
-                <div class="collection__picbox position-relative me-4 mb-4 mb-lg-0">
-                  <picture>
-                    <source srcset="./assets/img/collections/img-1.webp" type="image/webp">
-                    <source srcset="./assets/img/collections/img-1.jpg" type="image/jpeg">
-                    <img alt="Mutant Ape Yach ClubMutant" class="image-80x80 rounded-circle" height="80"
-                         loading="lazy" src="./assets/img/collections/img-1.jpg" width="80">
-                  </picture>
-                  <i class="fa-solid fa-circle-check fs-22 color-yellow position-absolute bottom-0"
-                     style="right: -4%;"></i>
-                </div>
-                <div class="collection__body mb-3 mb-lg-0">
-                  <h4 class="fs-20 mb-3 text-truncate" style="max-width: 224px">Mutant Ape Yach ClubMutant</h4>
-                  <p class="mb-0 color-grey text-center text-lg-start">
-                    Floor: <span class="ms-1 text-uppercase">3,02 TON</span>
-                  </p>
-                </div>
-                <div class="collection__info d-flex d-lg-block text-center text-lg-end ms-0 ms-lg-auto">
-                  <div class="fw-medium text-uppercase text-white mb-3 me-3 me-lg-0">3.8k TON</div>
-                  <div class="fw-medium color-grey">
-                    $2.68M
-                    <span class="color-green ms-2">+8.84%</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-          </div>
-        </div>
-        <div class="mt-5 text-center">
-          <a class="btn btn-primary" href="#!">Go to ranking</a>
-        </div>
-      </div>
+      <home-top-collections></home-top-collections>
     </section>
     <!-- End of Collections section
        ============================================= -->
@@ -288,7 +238,7 @@
        ============================================= -->
     <!-- Start of Category section
        ============================================= -->
-    <section id="category" class="category section pt-150">
+    <section v-if="false" id="category" class="category section pt-150">
       <div class="category__container container-fluid">
         <div class="category__head">
           <h2 class="section__title">
@@ -318,10 +268,11 @@
 <script lang="ts">
 import {defineComponent} from "vue";
 import SlickCarousel from "../components/SlickCarousel.vue";
+import HomeTopCollections from "../components/HomeTopCollections.vue";
 
 export default defineComponent({
   name: "HomeView",
-  components: {SlickCarousel},
+  components: {HomeTopCollections, SlickCarousel},
   data() {
     return {
       slickOptions: {

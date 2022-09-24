@@ -1,20 +1,20 @@
 <template>
   <stats-bar>
-    <stats-bar-entry>
+    <stats-bar-entry v-if="false">
       <template #name>Floor</template>
       <template #value>0 TON</template>
     </stats-bar-entry>
-    <stats-bar-entry>
+    <stats-bar-entry v-if="false">
       <template #name>Volume</template>
       <template #value>1 TON</template>
     </stats-bar-entry>
     <stats-bar-entry>
       <template #name>Items</template>
-      <template #value>1337</template>
+      <template #value>{{ itemNumber }}</template>
     </stats-bar-entry>
     <stats-bar-entry>
       <template #name>Owners</template>
-      <template #value>69</template>
+      <template #value>{{ ownerNumber }}</template>
     </stats-bar-entry>
     <stats-bar-entry>
       <template #name>Blockchain</template>
@@ -22,7 +22,7 @@
     </stats-bar-entry>
     <stats-bar-entry preserve-case>
       <template #name>Address</template>
-      <template #value>djfasjdlkf</template>
+      <template #value>{{ formattedAddress }}</template>
     </stats-bar-entry>
   </stats-bar>
 </template>
@@ -31,6 +31,8 @@
 import {defineComponent} from "vue";
 import StatsBar from "./StatsBar.vue";
 import StatsBarEntry from "./StatsBarEntry.vue";
+import {useCollectionStatsQuery} from "../graphql/generated";
+import {normalizeAndShorten} from "../utility";
 
 export default defineComponent({
   name: "CollectionStats",
@@ -41,6 +43,28 @@ export default defineComponent({
       type: String,
     }
   },
+  setup(props) {
+    const request = useCollectionStatsQuery({variables: {address: props.address}})
+
+    return {
+      data: request.data
+    }
+  },
+  computed: {
+    itemNumber() {
+      return this.data?.collection?.itemNumber ?? '...'
+    },
+    ownerNumber() {
+      return this.data?.collection?.ownerNumber ?? '...'
+    },
+    formattedAddress() {
+      if (this.data?.collection?.address != null) {
+        return normalizeAndShorten(this.data?.collection?.address)
+      } else {
+        return '...'
+      }
+    },
+  }
 })
 </script>
 

@@ -1,31 +1,22 @@
 <template>
   <entity-info>
     <template #image>
-      <img alt="" class="img-fluid rounded-circle" src="/assets/img/author/author-17.jpg">
+      <img :src="collectionImage" alt="" class="img-fluid rounded-circle">
     </template>
     <template #actions>
       <a class="btn btn-sm btn-outline-primary" href="#!">Subscribe</a>
     </template>
     <template #name>
-      <span>TON NFT Tegro Cat</span>
+      <span>{{ collectionDisplayName }}</span>
       <i class="fa-solid fa-circle-check fs-22 color-yellow ms-2"></i>
     </template>
     <template #description>
       <p>
-        TON Tegro Cat are unique NFTs with cats created only for the TON network. <br>
-        Our TON NFT "Cats" is a community of 9,999 super-rare, artfully crafted, collectible cats.
+        {{ collectionDescription }}
       </p>
-      <p class="collection__desc color-grey">
-        Each Cat is an individual being. The collection was created by the TegroMoney team, the creators of
-        the TGR token on The Open Network blockchain.
-      </p>
-      <a class="collection__link text-white" href="#!" target="__blank">
-        <i class="fa-regular fa-link-simple color-yellow me-2"></i>
-        boredapeyachtclub.com
-      </a>
     </template>
-    <template #footer>
-      Created by <span class="color-yellow">Smircs</span>
+    <template v-if="hasAnOwner" #footer>
+      Created by <span class="color-yellow">{{ formattedOwnerAddress }}</span>
       <i class="fa-solid fa-circle-check color-yellow fs-14 ms-1"></i>
     </template>
   </entity-info>
@@ -33,7 +24,10 @@
 
 <script lang="ts">
 import {defineComponent} from "vue";
+import {useCollectionInfoQuery} from "../graphql/generated";
 import EntityInfo from "./EntityInfo.vue";
+import defaultImage from "../assets/user-1.svg";
+import {normalizeAndShorten} from "../utility";
 
 export default defineComponent({
   name: "CollectionInfo",
@@ -42,6 +36,34 @@ export default defineComponent({
     address: {
       type: String,
       required: true,
+    }
+  },
+  setup(props) {
+    const result = useCollectionInfoQuery({variables: {address: props.address}})
+
+    return {
+      data: result.data
+    }
+  },
+  computed: {
+    collectionImage() {
+      return this.data?.collection?.image ?? defaultImage
+    },
+    collectionDisplayName() {
+      return this.data?.collection?.name ?? 'Untitled Collection'
+    },
+    collectionDescription() {
+      return this.data?.collection?.description ?? ''
+    },
+    hasAnOwner() {
+      return this.data?.collection?.owner != null
+    },
+    formattedOwnerAddress() {
+      if (this.data?.collection?.owner != null) {
+        return normalizeAndShorten(this.data?.collection?.owner)
+      } else {
+        return ''
+      }
     }
   }
 })

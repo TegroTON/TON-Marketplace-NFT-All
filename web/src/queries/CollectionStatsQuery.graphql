@@ -1,0 +1,7 @@
+query collectionStats($address: String!) {
+    collection(address: $address) {
+        address
+        itemNumber
+        ownerNumber
+    }
+}

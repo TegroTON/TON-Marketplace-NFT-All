@@ -1,0 +1,9 @@
+query collectionInfo($address: String!) {
+    collection(address: $address) {
+        address
+        image
+        name
+        description
+        owner
+    }
+}
