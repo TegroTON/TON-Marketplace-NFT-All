@@ -1,6 +1,7 @@
 import {defineStore} from "pinia";
 import {useLocalStorage} from "@vueuse/core";
 import {useTonhubConnectionStore} from "./TonhubConnectionStore";
+import {TransactionRequest} from "../graphql/generated";
 
 export const useConnectionStore = defineStore('connection', {
     state: () => ({
@@ -35,6 +36,14 @@ export const useConnectionStore = defineStore('connection', {
                 // nil
             }
             this.provider = null
+        },
+
+        async requestTransaction(options: TransactionRequest) {
+            if (this.provider === 'tonhub') {
+                useTonhubConnectionStore().requestTransaction(options)
+            } else {
+                // nil
+            }
         }
     }
 })

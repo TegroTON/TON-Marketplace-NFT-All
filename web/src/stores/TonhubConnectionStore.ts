@@ -1,6 +1,7 @@
 import {defineStore} from "pinia";
 import {TonhubConnector, TonhubCreatedSession, TonhubWalletConfig} from "ton-x";
 import {useLocalStorage} from "@vueuse/core";
+import {TransactionRequest} from "../graphql/generated";
 
 export const useTonhubConnectionStore = defineStore('tonhubConnection', {
     state: () => ({
@@ -64,25 +65,18 @@ export const useTonhubConnectionStore = defineStore('tonhubConnection', {
                 TonhubConnector.verifyWalletConfig(this.session.id, this.walletConfig) // Its correctly signed
         },
 
-        async requestTransaction({to, value, timeout = 5 * 60 * 1000, stateInit = null, text = null, payload = null}: {
-            to: string,
-            value: string,
-            timeout: number,
-            stateInit?: string | null | undefined,
-            text?: string | null | undefined,
-            payload?: string | null | undefined,
-        }) {
+        async requestTransaction(options: TransactionRequest) {
             await this.checkConnection()
             if (this.isConnected && this.session !== null && this.walletConfig !== null) {
                 let response = await this.connector.requestTransaction({
                     seed: this.session.seed,
                     appPublicKey: this.walletConfig.appPublicKey,
-                    to: to,
-                    value: value,
-                    timeout: timeout,
-                    stateInit: stateInit,
-                    text: text,
-                    payload: payload,
+                    to: options.dest,
+                    value: options.value,
+                    timeout: 5 * 60 * 1000,
+                    stateInit: options.stateInit,
+                    text: null, // TODO
+                    payload: options.payload,
                 })
 
                 if (response.type === 'success') {

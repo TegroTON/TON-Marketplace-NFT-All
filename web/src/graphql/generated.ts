@@ -46,6 +46,13 @@ export type Item = {
   owner?: Maybe<Profile>;
   royalty?: Maybe<Royalty>;
   sale?: Maybe<Sale>;
+  transfer: TransactionRequest;
+};
+
+
+export type ItemTransferArgs = {
+  newOwner: Scalars['String'];
+  responseDestination?: InputMaybe<Scalars['String']>;
 };
 
 export type ItemAttribute = {
@@ -79,7 +86,6 @@ export type Query = {
   collections: Array<Collection>;
   item: Item;
   profile: Profile;
-  transfer: TransactionRequest;
 };
 
 
@@ -103,13 +109,6 @@ export type QueryProfileArgs = {
   address: Scalars['String'];
 };
 
-
-export type QueryTransferArgs = {
-  destination: Scalars['String'];
-  item: Scalars['String'];
-  response: Scalars['String'];
-};
-
 export type Royalty = {
   __typename?: 'Royalty';
   destination: Scalars['String'];
@@ -131,6 +130,7 @@ export type TransactionRequest = {
   dest: Scalars['String'];
   payload?: Maybe<Scalars['String']>;
   stateInit?: Maybe<Scalars['String']>;
+  text?: Maybe<Scalars['String']>;
   value: Scalars['String'];
 };
 
@@ -226,6 +226,15 @@ export type TopCollectionsQueryVariables = Exact<{
 
 
 export type TopCollectionsQuery = { __typename?: 'Query', collections: Array<{ __typename?: 'Collection', address: string, name?: string | null, image?: string | null }> };
+
+export type TransferItemQueryVariables = Exact<{
+  address: Scalars['String'];
+  newOwner: Scalars['String'];
+  responseDestination?: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type TransferItemQuery = { __typename?: 'Query', item: { __typename?: 'Item', transfer: { __typename?: 'TransactionRequest', value: string, dest: string, stateInit?: string | null, payload?: string | null, text?: string | null } } };
 
 
 export const CollectionInfoDocument = gql`
@@ -431,4 +440,21 @@ export const TopCollectionsDocument = gql`
 
 export function useTopCollectionsQuery(options: Omit<Urql.UseQueryArgs<never, TopCollectionsQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<TopCollectionsQuery>({ query: TopCollectionsDocument, ...options });
+};
+export const TransferItemDocument = gql`
+    query transferItem($address: String!, $newOwner: String!, $responseDestination: String) {
+  item(address: $address) {
+    transfer(newOwner: $newOwner, responseDestination: $responseDestination) {
+      value
+      dest
+      stateInit
+      payload
+      text
+    }
+  }
+}
+    `;
+
+export function useTransferItemQuery(options: Omit<Urql.UseQueryArgs<never, TransferItemQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<TransferItemQuery>({ query: TransferItemDocument, ...options });
 };

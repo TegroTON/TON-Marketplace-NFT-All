@@ -49,6 +49,7 @@ type Item {
   owner: Profile
   royalty: Royalty
   sale: Sale
+  transfer(newOwner: String!, responseDestination: String): TransactionRequest!
 }
 
 type ItemAttribute {
@@ -67,7 +68,6 @@ type Query {
   collections(drop: Int, take: Int): [Collection!]!
   item(address: String!): Item!
   profile(address: String!): Profile!
-  transfer(destination: String!, item: String!, response: String!): TransactionRequest!
 }
 
 type Royalty {
@@ -88,5 +88,6 @@ type TransactionRequest {
   dest: String!
   payload: String
   stateInit: String
+  text: String
   value: String!
 }

@@ -1,0 +1,11 @@
+query transferItem($address: String!, $newOwner: String!, $responseDestination: String) {
+    item(address: $address) {
+        transfer(newOwner: $newOwner, responseDestination: $responseDestination) {
+            value
+            dest
+            stateInit
+            payload
+            text
+        }
+    }
+}

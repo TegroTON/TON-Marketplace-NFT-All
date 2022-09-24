@@ -14,7 +14,7 @@ import org.ton.logger.Logger
 
 @Configuration
 class LiteClientConfiguration(
-    @Value("\${lite-client.config:classpath:tegro-testnet-global.config.json}")
+    @Value("\${lite-client.config:classpath:config-sandbox.json}")
     private val jsonConfig: Resource
 ) {
     @OptIn(ExperimentalSerializationApi::class)

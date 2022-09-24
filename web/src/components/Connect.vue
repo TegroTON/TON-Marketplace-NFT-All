@@ -70,13 +70,12 @@
 <script lang="ts">
 import {defineComponent} from "vue";
 import {useConnectionStore} from "../stores/ConnectionStore";
-import ConnectTonhub from "./ConnectTonhub.vue";
 import {useTonhubConnectionStore} from "../stores/TonhubConnectionStore";
 import QrcodeVue from "qrcode.vue";
 
 export default defineComponent({
   name: "Connect",
-  components: {ConnectTonhub, QrcodeVue},
+  components: {QrcodeVue},
   setup() {
     const connectionStore = useConnectionStore()
     const tonhubConnectionStore = useTonhubConnectionStore()

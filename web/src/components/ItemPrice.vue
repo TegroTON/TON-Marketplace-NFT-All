@@ -17,9 +17,7 @@
     <button class="btn btn-primary flex-fill m-2" data-bs-target="#SelectTypeModal" data-bs-toggle="modal"
             type="button">Put up for sale
     </button>
-    <button class="btn btn-soft flex-fill m-2" data-bs-target="#SendFriendModal" data-bs-toggle="modal" type="button">
-      Send a friend
-    </button>
+    <transfer-item :item="address"></transfer-item>
   </div>
 </template>
 
@@ -28,9 +26,11 @@ import {defineComponent} from "vue";
 import {useItemPriceQuery} from "../graphql/generated";
 import {formatPrice, toFriendly} from "../utility";
 import {useConnectionStore} from "../stores/ConnectionStore";
+import TransferItem from "./TransferItem.vue";
 
 export default defineComponent({
   name: "ItemPrice",
+  components: {TransferItem},
   props: {
     address: {
       type: String,

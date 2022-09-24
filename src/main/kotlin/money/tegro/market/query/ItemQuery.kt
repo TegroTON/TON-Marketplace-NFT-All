@@ -3,11 +3,19 @@ package money.tegro.market.query
 import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.expediagroup.graphql.generator.annotations.GraphQLName
 import com.expediagroup.graphql.generator.scalars.ID
+import money.tegro.market.contract.op.item.ItemOp
+import money.tegro.market.contract.op.item.TransferOp
 import money.tegro.market.metadata.ItemMetadataAttribute
 import money.tegro.market.service.item.*
 import money.tegro.market.toRaw
 import org.springframework.beans.factory.annotation.Autowired
-import org.ton.block.MsgAddressInt
+import org.ton.bigint.BigInt
+import org.ton.block.*
+import org.ton.cell.Cell
+import org.ton.cell.CellBuilder
+import org.ton.crypto.SecureRandom
+import org.ton.tlb.storeTlb
+import kotlin.random.nextULong
 
 @GraphQLName("Item")
 data class ItemQuery(
@@ -73,4 +81,26 @@ data class ItemQuery(
         @GraphQLIgnore @Autowired itemRoyaltyService: ItemRoyaltyService,
     ) =
         itemRoyaltyService.get(address)?.let { RoyaltyQuery(it) }
+
+    suspend fun transfer(
+        newOwner: String,
+        responseDestination: String?,
+    ) = TransactionRequestQuery(
+        dest = address,
+        value = BigInt(100_000_000),
+        stateInit = null,
+        text = "NFT Item Transfer",
+        payload = CellBuilder.createCell {
+            storeTlb(
+                ItemOp, TransferOp(
+                    query_id = SecureRandom.nextULong(),
+                    new_owner = MsgAddressInt(newOwner),
+                    response_destination = responseDestination?.let { MsgAddressInt(it) } ?: AddrNone,
+                    custom_payload = Maybe.of(null),
+                    forward_amount = VarUInteger(BigInt(50_000_000)),
+                    forward_payload = Either.of(Cell.of(), null)
+                )
+            )
+        }
+    )
 }
