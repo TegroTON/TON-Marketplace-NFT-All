@@ -58,10 +58,10 @@ import defaultImage from "../assets/user-1.svg";
 export default defineComponent({
   name: 'HomeTopCollections',
   setup() {
-    const result = useTopCollectionsQuery({variables: {take: 9}})
+    const response = useTopCollectionsQuery({variables: {take: 9}})
 
     return {
-      data: result.data
+      data: response.data
     }
   },
   computed: {

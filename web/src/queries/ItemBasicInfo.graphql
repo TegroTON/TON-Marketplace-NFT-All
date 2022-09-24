@@ -1,0 +1,12 @@
+query itemBasicInfo($address: String!) {
+    item(address: $address) {
+        address
+        index
+        image
+        name
+        sale {
+            address
+            fullPrice
+        }
+    }
+}

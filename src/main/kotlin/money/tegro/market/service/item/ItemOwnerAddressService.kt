@@ -7,7 +7,7 @@ import org.ton.block.MsgAddress
 import org.ton.block.MsgAddressInt
 
 @Service
-class ItemOwnerService(
+class ItemOwnerAddressService(
     private val itemContractService: ItemContractService,
     private val saleService: SaleService,
 ) {

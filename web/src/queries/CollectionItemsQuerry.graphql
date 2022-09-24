@@ -1,0 +1,8 @@
+query collectionItems($address: String!, $drop: Int, $take: Int) {
+    collection(address: $address) {
+        address
+        items(drop: $drop, take: $take) {
+            address
+        }
+    }
+}

@@ -44,10 +44,10 @@ export default defineComponent({
     }
   },
   setup(props) {
-    const request = useCollectionStatsQuery({variables: {address: props.address}})
+    const response = useCollectionStatsQuery({variables: {address: props.address}})
 
     return {
-      data: request.data
+      data: response.data
     }
   },
   computed: {
@@ -58,11 +58,7 @@ export default defineComponent({
       return this.data?.collection?.ownerNumber ?? '...'
     },
     formattedAddress() {
-      if (this.data?.collection?.address != null) {
-        return normalizeAndShorten(this.data?.collection?.address)
-      } else {
-        return '...'
-      }
+      return normalizeAndShorten(this.address)
     },
   }
 })

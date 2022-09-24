@@ -34,26 +34,21 @@ type Collection {
   itemNumber: String
   items(drop: Int, take: Int): [Item!]!
   name: String
-  owner: String
+  owner: Profile
   ownerNumber: String!
 }
 
 type Item {
   address: ID!
   attributes: [ItemAttribute!]!
-  buyPrice: String!
   collection: Collection
   description: String
-  fullPrice: String!
   image: String
   index: String
-  isOnSale: Boolean!
-  marketplaceFee: String!
   name: String
-  networkFee: String!
-  owner: String
-  royaltyAmount: String!
-  saleAddress: String
+  owner: Profile
+  royalty: Royalty
+  sale: Sale
 }
 
 type ItemAttribute {
@@ -73,6 +68,20 @@ type Query {
   item(address: String!): Item!
   profile(address: String!): Profile!
   transfer(destination: String!, item: String!, response: String!): TransactionRequest!
+}
+
+type Royalty {
+  destination: String!
+  value: Float!
+}
+
+type Sale {
+  address: ID!
+  buyPrice: String
+  fullPrice: String
+  marketplaceFee: String
+  networkFee: String!
+  royaltyAmount: String
 }
 
 type TransactionRequest {

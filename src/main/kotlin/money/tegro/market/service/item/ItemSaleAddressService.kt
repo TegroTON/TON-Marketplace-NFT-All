@@ -6,12 +6,18 @@ import org.springframework.stereotype.Service
 import org.ton.block.MsgAddressInt
 
 @Service
-class ItemSaleService(
+class ItemSaleAddressService(
     private val itemContractService: ItemContractService,
     private val saleService: SaleService,
 ) {
-    suspend fun get(address: MsgAddressInt) =
-        (itemContractService.get(address)?.owner as? MsgAddressInt)?.let { saleService.get(it) }
+    suspend fun get(address: MsgAddressInt): MsgAddressInt? {
+        val owner = itemContractService.get(address)?.owner
+        return if ((owner as? MsgAddressInt)?.let { saleService.get(it) } != null) {
+            owner
+        } else {
+            null
+        }
+    }
 
     companion object : KLogging()
 }

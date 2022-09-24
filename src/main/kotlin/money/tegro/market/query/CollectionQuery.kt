@@ -35,7 +35,8 @@ data class CollectionQuery(
     suspend fun owner(
         @GraphQLIgnore @Autowired collectionContractService: CollectionContractService,
     ) =
-        collectionContractService.get(address)?.owner?.toRaw()
+        (collectionContractService.get(address)?.owner as? MsgAddressInt)
+            ?.let { ProfileQuery(it) }
 
     suspend fun name(
         @GraphQLIgnore @Autowired collectionMetadataService: CollectionMetadataService,

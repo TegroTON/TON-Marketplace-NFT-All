@@ -4,6 +4,8 @@ query collectionInfo($address: String!) {
         image
         name
         description
-        owner
+        owner {
+            address
+        }
     }
 }
