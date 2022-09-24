@@ -78,7 +78,7 @@
               </li>
             </ul>
           </div>
-          <connect v-else></connect>
+          <connect></connect>
         </div>
       </nav>
     </div>

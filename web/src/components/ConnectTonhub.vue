@@ -13,9 +13,9 @@
   </a>
 
   <teleport to="#modals">
-    <div v-if="!isConnected" id="ConnectTonhubModal" aria-hidden="true" class="modal fade" tabindex="-1">
+    <div id="ConnectTonhubModal" aria-hidden="true" class="modal fade" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered mobile-modal-bottom">
-        <div class="modal-content border-0">
+        <div v-if="!isConnected" class="modal-content border-0">
           <div class="modal-header d-block border-0 mb-3">
             <h5 id="ConnectTonhubModalLabel" class="modal-title mb-2 fs-24">Connect Tonhub</h5>
             <p class="fs-18 color-grey pe-5">
@@ -30,6 +30,19 @@
             <a :href="connectionLink">
               <img src="../assets/tonhub_mini_white.svg">
             </a>
+          </div>
+        </div>
+        <div v-else class="modal-content border-0">
+          <div class="modal-header d-block border-0 mb-3">
+            <h5 id="ConnectTonhubModalLabel" class="modal-title mb-2 fs-24">Successfully Connected</h5>
+            <p class="fs-18 color-grey pe-5">
+              You have successfully connected
+            </p>
+            <button aria-label="Close" class="border-0 p-0 modal-close" data-bs-dismiss="modal" type="button"><i
+                class="fa-solid fa-xmark fa-lg"></i></button>
+          </div>
+          <div class="modal-body d-block text-center">
+            ppp
           </div>
         </div>
       </div>
@@ -69,9 +82,6 @@ export default defineComponent({
       this.tonhubConnectionStore.connect()
           .then(() => {
             console.log("tonhub connected")
-            // TODO: Fucking fuck, due to parent component being destroyed as soon as wallet is connected, this leaves
-            // the stupid bootstrap's modal backdrop on. This is a simple but yucky solution - to simply refresh the page
-            this.$router.go()
           })
     },
   },

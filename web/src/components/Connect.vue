@@ -1,8 +1,8 @@
 <template>
-  <button
-      class="btn btn-soft d-flex flex-nowrap align-items-center btn-mobile-fixed order-3 order-lg-4"
-      data-bs-target="#ConnectModal"
-      data-bs-toggle="modal" type="button">
+  <button v-if="!isConnected"
+          class="btn btn-soft d-flex flex-nowrap align-items-center btn-mobile-fixed order-3 order-lg-4"
+          data-bs-target="#ConnectModal"
+          data-bs-toggle="modal" type="button">
     <i class="fa-regular fa-arrow-right-to-arc me-2"></i> Connect
   </button>
 
