@@ -1,0 +1,13 @@
+query itemDetails($address: String!) {
+    item(address: $address) {
+        address
+        index
+        royalty {
+            destination
+            value
+        }
+        sale {
+            address
+        }
+    }
+}

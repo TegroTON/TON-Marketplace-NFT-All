@@ -90,7 +90,7 @@
       </div>
       <tabs-container>
         <tab-content id="tab-content-items" active by="#tab-button-items">
-          <collection-items-list :address="address"></collection-items-list>
+          <collection-items :address="address"></collection-items>
         </tab-content>
 
         <tab-content id="tab-content-activity" by="#tab-button-activity">
@@ -111,12 +111,12 @@ import CollectionLayout from "../layouts/CollectionLayout.vue";
 import TabsBar from "../components/TabsBar.vue";
 import TabsContainer from "../components/TabsContainer.vue";
 import TabContent from "../components/TabContent.vue";
-import CollectionItemsList from "../components/CollectionItemsList.vue";
+import CollectionItems from "../components/CollectionItems.vue";
 
 export default defineComponent({
   name: "CollectionView",
   components: {
-    CollectionItemsList,
+    CollectionItems,
     TabContent,
     TabsContainer,
     TabsBar, CollectionLayout, TabBarButton, CollectionInfo, CollectionStats, EntityHero

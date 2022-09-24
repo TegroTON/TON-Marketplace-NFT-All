@@ -37,7 +37,7 @@
 
 <script lang="ts">
 import {defineComponent} from "vue";
-import {useItemBasicInfoQuery} from "../graphql/generated";
+import {useItemCardQuery} from "../graphql/generated";
 import defaultImage from "../assets/user-1.svg";
 import {formatPrice} from "../utility";
 
@@ -50,7 +50,7 @@ export default defineComponent({
     }
   },
   setup(props) {
-    const response = useItemBasicInfoQuery({variables: {address: props.address}})
+    const response = useItemCardQuery({variables: {address: props.address}})
 
     return {
       data: response.data
@@ -58,7 +58,7 @@ export default defineComponent({
   },
   computed: {
     link() {
-      return {to: 'item', params: {address: this.address}}
+      return {name: 'item', params: {address: this.address}}
     },
     image() {
       return this.data?.item?.image ?? defaultImage

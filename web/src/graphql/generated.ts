@@ -157,12 +157,61 @@ export type CollectionStatsQueryVariables = Exact<{
 
 export type CollectionStatsQuery = { __typename?: 'Query', collection: { __typename?: 'Collection', address: string, itemNumber?: string | null, ownerNumber: string } };
 
-export type ItemBasicInfoQueryVariables = Exact<{
+export type ItemAttributesQueryVariables = Exact<{
   address: Scalars['String'];
 }>;
 
 
-export type ItemBasicInfoQuery = { __typename?: 'Query', item: { __typename?: 'Item', address: string, index?: string | null, image?: string | null, name?: string | null, sale?: { __typename?: 'Sale', address: string, fullPrice?: string | null } | null } };
+export type ItemAttributesQuery = { __typename?: 'Query', item: { __typename?: 'Item', address: string, attributes: Array<{ __typename?: 'ItemAttribute', trait: string, value: string }> } };
+
+export type ItemBreadcrumbQueryVariables = Exact<{
+  address: Scalars['String'];
+}>;
+
+
+export type ItemBreadcrumbQuery = { __typename?: 'Query', item: { __typename?: 'Item', address: string, index?: string | null, name?: string | null, collection?: { __typename?: 'Collection', address: string, name?: string | null } | null } };
+
+export type ItemCardQueryVariables = Exact<{
+  address: Scalars['String'];
+}>;
+
+
+export type ItemCardQuery = { __typename?: 'Query', item: { __typename?: 'Item', address: string, index?: string | null, image?: string | null, name?: string | null, sale?: { __typename?: 'Sale', address: string, fullPrice?: string | null } | null } };
+
+export type ItemCollectionQueryVariables = Exact<{
+  address: Scalars['String'];
+}>;
+
+
+export type ItemCollectionQuery = { __typename?: 'Query', item: { __typename?: 'Item', address: string, collection?: { __typename?: 'Collection', address: string, name?: string | null, image?: string | null } | null } };
+
+export type ItemContentQueryVariables = Exact<{
+  address: Scalars['String'];
+}>;
+
+
+export type ItemContentQuery = { __typename?: 'Query', item: { __typename?: 'Item', address: string, image?: string | null } };
+
+export type ItemDescriptionQueryVariables = Exact<{
+  address: Scalars['String'];
+}>;
+
+
+export type ItemDescriptionQuery = { __typename?: 'Query', item: { __typename?: 'Item', address: string, index?: string | null, name?: string | null, description?: string | null, sale?: { __typename?: 'Sale', address: string } | null } };
+
+export type ItemDetailsQueryVariables = Exact<{
+  address: Scalars['String'];
+}>;
+
+
+export type ItemDetailsQuery = { __typename?: 'Query', item: { __typename?: 'Item', address: string, index?: string | null, royalty?: { __typename?: 'Royalty', destination: string, value: number } | null, sale?: { __typename?: 'Sale', address: string } | null } };
+
+export type ItemOwnerQueryVariables = Exact<{
+  address: Scalars['String'];
+}>;
+
+
+export type ItemOwnerQuery = { __typename?: 'Query', item: { __typename?: 'Item', address: string, owner?: { __typename?: 'Profile', address: string } | null } };
 
 export type TopCollectionsQueryVariables = Exact<{
   take: Scalars['Int'];
@@ -216,8 +265,40 @@ export const CollectionStatsDocument = gql`
 export function useCollectionStatsQuery(options: Omit<Urql.UseQueryArgs<never, CollectionStatsQueryVariables>, 'query'> = {}) {
   return Urql.useQuery<CollectionStatsQuery>({ query: CollectionStatsDocument, ...options });
 };
-export const ItemBasicInfoDocument = gql`
-    query itemBasicInfo($address: String!) {
+export const ItemAttributesDocument = gql`
+    query itemAttributes($address: String!) {
+  item(address: $address) {
+    address
+    attributes {
+      trait
+      value
+    }
+  }
+}
+    `;
+
+export function useItemAttributesQuery(options: Omit<Urql.UseQueryArgs<never, ItemAttributesQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<ItemAttributesQuery>({ query: ItemAttributesDocument, ...options });
+};
+export const ItemBreadcrumbDocument = gql`
+    query itemBreadcrumb($address: String!) {
+  item(address: $address) {
+    address
+    index
+    name
+    collection {
+      address
+      name
+    }
+  }
+}
+    `;
+
+export function useItemBreadcrumbQuery(options: Omit<Urql.UseQueryArgs<never, ItemBreadcrumbQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<ItemBreadcrumbQuery>({ query: ItemBreadcrumbDocument, ...options });
+};
+export const ItemCardDocument = gql`
+    query itemCard($address: String!) {
   item(address: $address) {
     address
     index
@@ -231,8 +312,86 @@ export const ItemBasicInfoDocument = gql`
 }
     `;
 
-export function useItemBasicInfoQuery(options: Omit<Urql.UseQueryArgs<never, ItemBasicInfoQueryVariables>, 'query'> = {}) {
-  return Urql.useQuery<ItemBasicInfoQuery>({ query: ItemBasicInfoDocument, ...options });
+export function useItemCardQuery(options: Omit<Urql.UseQueryArgs<never, ItemCardQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<ItemCardQuery>({ query: ItemCardDocument, ...options });
+};
+export const ItemCollectionDocument = gql`
+    query itemCollection($address: String!) {
+  item(address: $address) {
+    address
+    collection {
+      address
+      name
+      image
+    }
+  }
+}
+    `;
+
+export function useItemCollectionQuery(options: Omit<Urql.UseQueryArgs<never, ItemCollectionQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<ItemCollectionQuery>({ query: ItemCollectionDocument, ...options });
+};
+export const ItemContentDocument = gql`
+    query itemContent($address: String!) {
+  item(address: $address) {
+    address
+    image
+  }
+}
+    `;
+
+export function useItemContentQuery(options: Omit<Urql.UseQueryArgs<never, ItemContentQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<ItemContentQuery>({ query: ItemContentDocument, ...options });
+};
+export const ItemDescriptionDocument = gql`
+    query itemDescription($address: String!) {
+  item(address: $address) {
+    address
+    index
+    name
+    description
+    sale {
+      address
+    }
+  }
+}
+    `;
+
+export function useItemDescriptionQuery(options: Omit<Urql.UseQueryArgs<never, ItemDescriptionQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<ItemDescriptionQuery>({ query: ItemDescriptionDocument, ...options });
+};
+export const ItemDetailsDocument = gql`
+    query itemDetails($address: String!) {
+  item(address: $address) {
+    address
+    index
+    royalty {
+      destination
+      value
+    }
+    sale {
+      address
+    }
+  }
+}
+    `;
+
+export function useItemDetailsQuery(options: Omit<Urql.UseQueryArgs<never, ItemDetailsQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<ItemDetailsQuery>({ query: ItemDetailsDocument, ...options });
+};
+export const ItemOwnerDocument = gql`
+    query itemOwner($address: String!) {
+  item(address: $address) {
+    address
+    owner {
+      address
+    }
+  }
+}
+    `;
+
+export function useItemOwnerQuery(options: Omit<Urql.UseQueryArgs<never, ItemOwnerQueryVariables>, 'query'> = {}) {
+  return Urql.useQuery<ItemOwnerQuery>({ query: ItemOwnerDocument, ...options });
 };
 export const TopCollectionsDocument = gql`
     query topCollections($take: Int!) {

@@ -1,4 +1,4 @@
-query itemBasicInfo($address: String!) {
+query itemCard($address: String!) {
     item(address: $address) {
         address
         index

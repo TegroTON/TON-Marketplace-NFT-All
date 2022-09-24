@@ -1,0 +1,8 @@
+query itemOwner($address: String!) {
+    item(address: $address) {
+        address
+        owner {
+            address
+        }
+    }
+}

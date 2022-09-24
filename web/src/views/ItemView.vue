@@ -38,24 +38,24 @@
       </div>
       <!-- // End Action Link -->
       <!-- Start Price Card -->
-      <item-price></item-price>
+      <item-price :address="address"></item-price>
       <!-- // End Price Card -->
       <!-- Start Owner & Collection -->
       <div class="row">
         <div class="col-xl-6 mx-auto mb-4">
-          <item-owner></item-owner>
+          <item-owner :address="address"></item-owner>
         </div>
         <div class="col-xl-6 mb-4">
-          <item-collection></item-collection>
+          <item-collection :address="address"></item-collection>
         </div>
       </div>
       <!-- // End Owner & Collection -->
       <!-- Start Details Card -->
-      <item-details></item-details>
+      <item-details :address="address"></item-details>
       <!-- // End Details Card -->
     </template>
     <template #extra>
-      <item-attributes></item-attributes>
+      <item-attributes :address="address"></item-attributes>
     </template>
   </item-layout>
 </template>
@@ -74,6 +74,12 @@ import ItemAttributes from "../components/ItemAttributes.vue";
 
 export default defineComponent({
   name: "ItemView",
+  props: {
+    address: {
+      type: String,
+      required: true,
+    }
+  },
   components: {
     ItemAttributes,
     ItemDetails,

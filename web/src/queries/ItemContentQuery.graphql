@@ -1,0 +1,6 @@
+query itemContent($address: String!) {
+    item(address: $address) {
+        address
+        image
+    }
+}

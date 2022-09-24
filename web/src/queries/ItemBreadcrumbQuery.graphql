@@ -1,0 +1,11 @@
+query itemBreadcrumb($address: String!) {
+    item(address: $address) {
+        address
+        index
+        name
+        collection {
+            address
+            name
+        }
+    }
+}

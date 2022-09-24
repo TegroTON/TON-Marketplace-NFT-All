@@ -27,6 +27,12 @@ import {defineComponent} from "vue";
 
 export default defineComponent({
   name: "ItemPrice",
+  props: {
+    address: {
+      type: String,
+      required: true,
+    }
+  },
 })
 </script>
 

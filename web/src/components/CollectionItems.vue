@@ -14,7 +14,7 @@ import {useCollectionItemsQuery} from "../graphql/generated";
 import ItemCard from "./ItemCard.vue";
 
 export default defineComponent({
-  name: "CollectionItemsList",
+  name: "CollectionItems",
   components: {ItemCard},
   props: {
     address: {
