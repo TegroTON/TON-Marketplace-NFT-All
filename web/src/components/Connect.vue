@@ -1,11 +1,7 @@
 <template>
-  <button v-if="!isConnected"
-          class="order-4 px-6 py-3.5 rounded-lg bg-opacity-5 bg-white hover:bg-opacity-10 focus:bg-opacity-10 uppercase text-sm"
-          data-bs-target="#ConnectModal"
-          data-bs-toggle="modal"
-          type="button" @click="disconnect()">
+  <base-secondary-button class="order-4 text-sm" @click="disconnect()">
     <i class="fa-regular fa-arrow-right-to-arc mr-2"></i> Connect
-  </button>
+  </base-secondary-button>
 
   <teleport to="#modals">
     <div id="ConnectModal" aria-hidden="true" class="modal fade" tabindex="-1">
@@ -72,10 +68,11 @@ import {defineComponent} from "vue";
 import {useConnectionStore} from "../stores/ConnectionStore";
 import {useTonhubConnectionStore} from "../stores/TonhubConnectionStore";
 import QrcodeVue from "qrcode.vue";
+import BaseSecondaryButton from "./base/BaseSecondaryButton.vue";
 
 export default defineComponent({
   name: "Connect",
-  components: {QrcodeVue},
+  components: {BaseSecondaryButton, QrcodeVue},
   setup() {
     const connectionStore = useConnectionStore()
     const tonhubConnectionStore = useTonhubConnectionStore()
