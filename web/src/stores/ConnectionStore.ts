@@ -40,7 +40,7 @@ export const useConnectionStore = defineStore('connection', {
 
         async requestTransaction(options: TransactionRequest) {
             if (this.provider === 'tonhub') {
-                useTonhubConnectionStore().requestTransaction(options)
+                await useTonhubConnectionStore().requestTransaction(options)
             } else {
                 // nil
             }

@@ -6,7 +6,7 @@
   <teleport to="#modals">
     <div id="TransferModal" aria-hidden="true" aria-labelledby="EnterPriceModalLabel" class="modal fade" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered mobile-modal-bottom">
-        <div class="modal-content border-0">
+        <div v-if="!isComplete" class="modal-content border-0">
           <div class="modal-header border-0 mb-4">
             <h5 id="SelectTypeModalLabel" class="modal-title fs-24">Transfer ownership</h5>
             <button aria-label="Close" class="border-0 p-0 modal-close" data-bs-dismiss="modal" type="button">
@@ -56,6 +56,19 @@
             </form>
           </div>
         </div>
+        <div v-else class="modal-content border-0">
+          <div class="modal-header border-0 mb-4">
+            <h5 id="SelectTypeModalLabel" class="modal-title fs-24">Transfer ownership</h5>
+            <button aria-label="Close" class="border-0 p-0 modal-close" data-bs-dismiss="modal" type="button">
+              <i class="fa-solid fa-xmark fa-lg"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>
+              Success! You may close this window now
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </teleport>
@@ -102,6 +115,9 @@ export default defineComponent({
     },
     isInProgress() {
       return this.state == 'in_progress'
+    },
+    isComplete() {
+      return this.state == 'complete'
     }
   },
   methods: {
@@ -120,7 +136,9 @@ export default defineComponent({
       if (this.state == 'valid' && this.data?.item?.transfer != null) {
         this.state = 'in_progress'
         this.connectionStore.requestTransaction(this.data?.item?.transfer)
-        this.state = 'complete'
+            .then(() => {
+              this.state = 'complete'
+            })
       }
     }
   }
