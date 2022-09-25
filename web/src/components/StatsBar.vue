@@ -13,7 +13,3 @@ export default defineComponent({
   name: "StatsBar",
 })
 </script>
-
-<style lang="scss" scoped>
-
-</style>

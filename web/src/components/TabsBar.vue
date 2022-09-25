@@ -11,7 +11,3 @@ export default defineComponent({
   name: "TabsBar",
 })
 </script>
-
-<style lang="scss" scoped>
-
-</style>

@@ -1,6 +1,8 @@
 <template>
   <app-header></app-header>
-  <router-view></router-view>
+  <main class="lg:mx-6 mx-3">
+    <router-view></router-view>
+  </main>
   <app-footer></app-footer>
 </template>
 
@@ -14,4 +16,26 @@ export default defineComponent({
   components: {AppFooter, AppHeader},
 })
 </script>
+
+<style>
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+::-webkit-scrollbar {
+  @apply w-1 h-1
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-900
+}
+
+::-webkit-scrollbar-thumb {
+  @apply rounded-md bg-gray-900
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply rounded-md bg-gray-700
+}
+</style>
 

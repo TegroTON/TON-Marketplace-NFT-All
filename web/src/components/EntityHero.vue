@@ -11,7 +11,3 @@ export default defineComponent({
   name: "EntityHero",
 })
 </script>
-
-<style lang="scss" scoped>
-
-</style>

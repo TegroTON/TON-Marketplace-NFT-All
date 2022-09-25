@@ -11,7 +11,3 @@ export default defineComponent({
   name: "TabsContainer",
 })
 </script>
-
-<style lang="scss" scoped>
-
-</style>

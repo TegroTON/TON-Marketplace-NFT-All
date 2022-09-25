@@ -1,10 +1,10 @@
 <template>
   <button v-if="!isConnected"
-          class="btn btn-soft d-flex flex-nowrap align-items-center btn-mobile-fixed order-3 order-lg-4"
+          class="order-4 px-6 py-3.5 rounded-lg bg-opacity-5 bg-white hover:bg-opacity-10 focus:bg-opacity-10 uppercase text-sm"
           data-bs-target="#ConnectModal"
           data-bs-toggle="modal"
           type="button" @click="disconnect()">
-    <i class="fa-regular fa-arrow-right-to-arc me-2"></i> Connect
+    <i class="fa-regular fa-arrow-right-to-arc mr-2"></i> Connect
   </button>
 
   <teleport to="#modals">
@@ -113,7 +113,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style lang="scss" scoped>
-
-</style>

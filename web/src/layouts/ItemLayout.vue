@@ -32,7 +32,3 @@ export default defineComponent({
   name: "ItemLayout",
 })
 </script>
-
-<style lang="scss" scoped>
-
-</style>

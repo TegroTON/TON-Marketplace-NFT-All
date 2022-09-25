@@ -1,65 +1,52 @@
 <template>
-  <header class="header">
-    <div class="container-fluid">
-      <nav class="navbar navbar-expand-lg d-flex align-items-center p-0">
-        <router-link :to="{name:'home'}" class="navbar-logo me-5">
-          <img alt="Libermall - NFT Marketplace" class="navbar-logo__img" src="../assets/logo/apple-icon-57x57.png">
-          <span class="navbar-logo__name d-none d-xxl-block">Libermall</span>
+  <header class="sticky z-40 top-0 py-6 sm:py-7  bg-opacity-80 bg-dark-900 backdrop-blur-2xl">
+    <div class="container relative mx-auto px-2.5">
+      <nav class="relative flex flex-wrap p-0 items-center justify-between">
+        <router-link class="flex items-center mr-12 no-underline text-gray-500" to="/">
+          <img alt="Libermall - NFT Marketplace" class="w-12 h-12 object-contain"
+               src="../assets/logo/apple-icon-57x57.png">
+          <span class="font-raleway text-3xl font-bold ml-6 text-white hidden 2xl:block">Libermall</span>
         </router-link>
-        <button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"
-                class="navbar-toggler btn btn-secondary order-2 order-xl-1 ms-3" data-bs-target="#navbarHeader"
-                data-bs-toggle="collapse"
-                type="button">
-          <i class="fa-regular fa-bars fs-20"></i>
+        <button class="px-6 py-3.5 text-white border-gray-700 bg-gray-700 lg:hidden" type="button"
+                @click="toggleNavbar">
+          <i class="fa-regular fa-bars text-xl"></i>
         </button>
-        <div id="navbarHeader" class="collapse navbar-collapse">
-          <form
-              class="header__search flex-fill d-block d-lg-none d-xl-block mx-0 mx-lg-5 mb-3 mb-lg-0 order-1 order-lg-2"
-              disabled>
-            <div class="input-group">
-              <input aria-describedby="basic-addon2" aria-label="Search" class="form-control" placeholder="Search ..."
-                     type="text">
-              <div class="input-group-text p-0">
-                <button class="btn" type="submit">
-                  <i class="fa-solid fa-magnifying-glass color-grey"></i>
+        <div :hidden="isNavbarClosed"
+             class="px-3 py-6 basis-full flex-grow items-center  lg:flex lg:basis-auto">
+          <form class="mb-4 xl:mb-0 mx-0 xl:mx-12 order-1 lg:order-2 flex-auto lg:hidden xl:block" disabled>
+            <div class="border border-solid border-border-soft bg-soft rounded-lg flex flex-wrap items-stretch w-full">
+              <input
+                  class="rounded-lg rounded-tr-none rounded-br-none bg-transparent border-0 border-gray-900 focus:ring-gray-700 px-3 py-1.5 flex-auto min-w-0 text-white"
+                  placeholder="Search ..." type="text">
+              <div
+                  class="-ml-1 rounded-tl-none rounded-bl-none text-gray-500 border hover:border-0 focus:border-0 border-gray-900 hover:bg-white focus:bg-white  hover:bg-opacity-5 focus:bg-opacity-5 rounded-md p-0 flex items-center text-center">
+                <button class="px-6 py-3.5" type="submit">
+                  <i class="fa-solid fa-magnifying-glass text-gray-500"></i>
                 </button>
               </div>
             </div>
           </form>
-          <div class="dropdown order-4 order-lg-1">
-            <button id="dropdownMenuCat" aria-expanded="false"
-                    class="btn btn-primary d-flex flex-nowrap align-items-center"
-                    data-bs-toggle="dropdown" type="button">
-              <i class="fa-regular fa-grid-2 me-2"></i>
-              Explore
-            </button>
-            <ul aria-labelledby="dropdownMenuCat" class="dropdown-menu animate slideIn mt-3">
-              <li><a class="dropdown-item" href="#"><i class="fa-regular fa-hexagon-vertical-nft-slanted me-3"></i>All
-                NFTs</a></li>
-              <li><a class="dropdown-item" href="#"><i class="fa-regular fa-hexagon-image me-3"></i>Solanas</a></li>
-              <li><a class="dropdown-item" href="#"><i class="fa-regular fa-paintbrush-fine me-3"></i>Art</a></li>
-              <li><a class="dropdown-item" href="#"><i class="fa-regular fa-rabbit me-3"></i>Collectibles</a></li>
-              <li><a class="dropdown-item" href="#"><i class="fa-regular fa-server me-3"></i>Domain Names</a></li>
-              <li><a class="dropdown-item" href="#"><i class="fa-regular fa-music me-3"></i>Music</a></li>
-              <li><a class="dropdown-item" href="#"><i class="fa-regular fa-camera me-3"></i>Photography</a></li>
-              <li><a class="dropdown-item" href="#"><i class="fa-regular fa-futbol me-3"></i>Sports</a></li>
-              <li><a class="dropdown-item" href="#"><i class="fa-regular fa-heart-circle-bolt me-3"></i>Trading
-                Cards</a></li>
-              <li><a class="dropdown-item" href="#"><i class="fa-regular fa-money-bills-simple me-3"></i>Utility</a>
-              </li>
-              <li><a class="dropdown-item" href="#"><i class="fa-regular fa-vr-cardboard me-3"></i>Virtual Worlds</a>
+          <div class="relative order-4 lg:order-1">
+            <router-link
+                class="flex items-center flex-nowrap px-7 py-3.5 text-gray-900 border-yellow hover:border-yellow-hover bg-yellow hover:bg-yellow-hover text-sm uppercase font-medium border-2 lg:rounded-lg"
+                to="/explore'"
+                type="button">
+              <i class="fa-regular fa-grid-2 mr-2"></i> Explore
+            </router-link>
+            <ul v-if="false" class="absolute z-50 m-0 list-none text-left">
+              <li>
+                <a class="px-6 py-3 text-white border-b-2 border-b-gray-700" href="#">
+                  <i class="fa-regular fa-hexagon-vertical-nft-slanted mr-2"></i> All NFTs
+                </a>
               </li>
             </ul>
           </div>
-          <ul class="navbar-nav d-flex flex-row py-4 py-lg-0 ms-0 ms-lg-auto pe-5 order-2 order-lg-3">
-            <li class="nav-item">
-              <a class="nav-link" href="#">Stats</a>
+          <ul class="pl-0 mb-0 list-none pr-12 py-6 ml-0 lg:ml-auto order-2 lg:order-3 flex flex-row text-gray-500">
+            <li class="uppercase px-5 py-0 font-medium text-sm">
+              <a href="#">Stats</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Resources</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Create</a>
+            <li class="uppercase px-5 py-0 font-medium text-sm">
+              <a href="#">Resources</a>
             </li>
           </ul>
           <!-- TODO -->
@@ -94,15 +81,19 @@ import {mapActions, mapState} from "pinia";
 export default defineComponent({
   name: "AppHeader",
   components: {Connect},
+  data() {
+    return {
+      isNavbarClosed: true
+    }
+  },
   computed: {
     ...mapState(useConnectionStore, ['isConnected', 'walletAddress']),
   },
   methods: {
-    ...mapActions(useConnectionStore, ['disconnect'])
+    ...mapActions(useConnectionStore, ['disconnect']),
+    toggleNavbar() {
+      this.isNavbarClosed = !this.isNavbarClosed
+    },
   }
 })
 </script>
-
-<style lang="scss" scoped>
-
-</style>

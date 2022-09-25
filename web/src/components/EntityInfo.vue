@@ -48,7 +48,3 @@ export default defineComponent({
   name: "EntityInfo",
 })
 </script>
-
-<style lang="scss" scoped>
-
-</style>
