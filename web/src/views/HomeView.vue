@@ -174,7 +174,7 @@
        ============================================= -->
     <!-- Start of Collections section
        ============================================= -->
-    <section class="py-16 relative">
+    <section class="px-4 py-16 relative">
       <home-top-collections></home-top-collections>
     </section>
     <!-- End of Collections section

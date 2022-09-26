@@ -1,28 +1,24 @@
 <template>
-  <div class="container px-4">
+  <div class="container">
     <div class="block sm:flex items-center mb-14">
       <h2 class="font-raleway text-5xl font-medium mb-0">
         Top <span class="text-yellow">collections</span>
       </h2>
     </div>
     <div class="grid grid-cols-2 xl:grid-cols-3">
-      <div
-        v-for="collection in collections"
-        :key="collection.index"
-        class="col"
-      >
+      <div v-for="collection in collections" :key="collection.index">
         <router-link
           :title="collection.name"
           :to="collection.link"
           class="block"
         >
           <div
-            class="flex items-center flex-col p-4 xl:p-6 rounded-3xl mb-6 bg-dark-700"
+            class="flex lg:flex-row items-center flex-col p-4 xl:p-6 rounded-3xl mb-6 bg-dark-700"
           >
             <div class="relative top-0 left-0 mb-4 mr-6">
               {{ collection.index }}
             </div>
-            <div class="relative h-16 mb-6 mr-6">
+            <div class="relative h-16 mb-6 lg:mb-0 mr-6">
               <picture>
                 <img
                   :alt="collection.name"
