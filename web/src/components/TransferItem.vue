@@ -94,10 +94,10 @@ export default defineComponent({
     const state = ref('invalid' as 'invalid' | 'valid' | 'in_progress' | 'complete')
 
     const response = useTransferItemQuery({
-      pause: state == 'invalid', // Wait for a valid address
+      pause: state.value == 'invalid', // Wait for a valid address
       variables: {
         address: props.item,
-        newOwner: destination!!!,
+        newOwner: destination.value!,
         responseDestination: connectionStore.walletAddress,
       }
     })

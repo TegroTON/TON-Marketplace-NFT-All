@@ -5,7 +5,7 @@ import {TransactionRequest} from "../graphql/generated";
 
 export const useConnectionStore = defineStore('connection', {
     state: () => ({
-        provider: useLocalStorage<string>('connectionProvider', null),
+        provider: useLocalStorage<string | null>('connectionProvider', null),
     }),
     getters: {
         availableProviders() {
@@ -38,7 +38,7 @@ export const useConnectionStore = defineStore('connection', {
             this.provider = null
         },
 
-        async requestTransaction(options: TransactionRequest) {
+        async requestTransaction(options: TransactionRequest): Promise<void> {
             if (this.provider === 'tonhub') {
                 await useTonhubConnectionStore().requestTransaction(options)
             } else {

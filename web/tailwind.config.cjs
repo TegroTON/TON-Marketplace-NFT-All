@@ -24,7 +24,10 @@ module.exports = {
             yellow: {
                 DEFAULT: '#ffd12e',
                 hover: '#ffb82e',
-                gradient: 'linear-gradient(270deg, #fff1bd 0%, #ffe176 100%)',
+                gradient: {
+                    start: '#ffe176',
+                    end: '#fff1bd'
+                }
             },
             hover: {
                 DEFAULT: 'rgb(255 255 255 / 0.03)',

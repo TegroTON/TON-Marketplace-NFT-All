@@ -1,0 +1,33 @@
+{
+  "env": {
+    "node": true
+  },
+  "extends": [
+    "prettier",
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:vue/vue3-recommended"
+  ],
+  "plugins": [
+    "prettier"
+  ],
+  "rules": {
+    "vue/max-attributes-per-line": "off",
+    "vue/html-self-closing": [
+      "error",
+      {
+        "html": {
+          "void": "always",
+          "normal": "never",
+          "component": "never"
+        },
+        "svg": "never",
+        "math": "never"
+      }
+    ]
+  },
+  "ignorePatterns": [
+    "src/assets/**/*.js",
+    "src/**/*generated.ts"
+  ]
+}
