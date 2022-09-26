@@ -7,10 +7,10 @@
                src="../assets/logo/apple-icon-57x57.png">
           <span class="font-raleway text-3xl font-bold ml-6 text-white hidden 2xl:block">Libermall</span>
         </router-link>
-        <base-secondary-button class="lg:hidden  text-xl" @click="toggleNavbar">
+        <base-button class="lg:hidden  text-xl" secondary @click="toggleNavbar">
           <i v-if="isNavbarOpen" class="fa-regular fa-xmark"></i>
           <i v-else class="fa-regular fa-bars"></i>
-        </base-secondary-button>
+        </base-button>
         <div
             :class="isNavbarOpen ? 'fixed' : 'hidden'"
             class="left-0 top-0 px-3 py-6 w-3/4 h-screen overflow-auto bg-dark-900 basis-full flex-grow items-center  lg:h-auto lg:flex lg:basis-auto">
@@ -22,19 +22,19 @@
                   placeholder="Search ..." type="text">
               <div
                   class="-ml-1 rounded-tl-none rounded-bl-none rounded-md p-0 flex items-center text-center">
-                <base-secondary-button type="submit">
+                <base-button secondary type="submit">
                   <i class="fa-solid fa-magnifying-glass text-gray-500"></i>
-                </base-secondary-button>
+                </base-button>
               </div>
             </div>
           </form>
           <div class="relative order-4 lg:order-1">
             <router-link to="/explore'">
-              <base-primary-button
-                  class="flex items-center flex-nowrap text-sm uppercase font-medium border"
-                  type="button">
+              <base-button class="flex items-center flex-nowrap text-sm uppercase font-medium border"
+                           primary
+                           type="button">
                 <i class="fa-regular fa-grid-2 mr-2"></i> Explore
-              </base-primary-button>
+              </base-button>
             </router-link>
           </div>
           <ul class="pl-0 mb-0 list-none pr-12 py-6 ml-0 lg:ml-auto order-2 lg:order-3 flex flex-row text-gray-500">
@@ -73,12 +73,11 @@ import {defineComponent} from "vue";
 import Connect from "./Connect.vue";
 import {useConnectionStore} from "../stores/ConnectionStore";
 import {mapActions, mapState} from "pinia";
-import BaseSecondaryButton from "./base/BaseSecondaryButton.vue";
-import BasePrimaryButton from "./base/BasePrimaryButton.vue";
+import BaseButton from "./base/BaseButton.vue";
 
 export default defineComponent({
   name: "AppHeader",
-  components: {BasePrimaryButton, BaseSecondaryButton, Connect},
+  components: {BaseButton, Connect},
   data() {
     return {
       isNavbarOpen: false

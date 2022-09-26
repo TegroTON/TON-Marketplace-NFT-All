@@ -1,8 +1,6 @@
 <template>
   <app-header></app-header>
-  <main class="lg:mx-6 mx-3">
-    <router-view></router-view>
-  </main>
+  <router-view></router-view>
   <app-footer></app-footer>
 </template>
 
