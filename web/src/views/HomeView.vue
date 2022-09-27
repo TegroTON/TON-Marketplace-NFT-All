@@ -181,7 +181,7 @@
        ============================================= -->
     <!-- Start of Create section
        ============================================= -->
-    <section id="create" class="create section">
+    <section v-if="false" id="create" class="create section">
       <div class="create__container container-fluid position-relative">
         <h2 class="section__title">
           Create and sell <span class="color-yellow">your NFTs</span>
