@@ -18,6 +18,14 @@ fun MsgAddress.toRaw() = when (this) {
     else -> null
 }
 
+fun MsgAddress.toShortFriendly() = when (this) {
+    is AddrStd -> this.toString(userFriendly = true, urlSafe = true, bounceable = true).let {
+        it.take(4) + "..." + it.takeLast(5)
+    }
+
+    else -> null
+}
+
 fun Cell.toBase64() = base64(BagOfCells(this).toByteArray())
 
 fun Block.accountBlockAddresses() =

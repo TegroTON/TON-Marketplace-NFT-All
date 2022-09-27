@@ -19,7 +19,7 @@ import org.ton.lite.client.LiteClient
 class ReferenceBlockService(
     private val liteClient: LiteClient,
 ) {
-    private lateinit var referenceBlock: TonNodeBlockIdExt
+    private var referenceBlock: TonNodeBlockIdExt = runBlocking { liteClient.getLastBlockId() }
 
     fun get() = referenceBlock
 
@@ -41,7 +41,7 @@ class ReferenceBlockService(
     )
     fun onLiveBlock(block: Block) {
         if (block.info.shard.workchain_id == -1) { // Masterchain
-            if (!this::referenceBlock.isInitialized || referenceBlock.seqno < block.info.seq_no.toInt()) {
+            if (referenceBlock.seqno < block.info.seq_no.toInt()) {
                 referenceBlock = runBlocking { // TODO: fugly
                     liteClient.lookupBlock(
                         TonNodeBlockId(
