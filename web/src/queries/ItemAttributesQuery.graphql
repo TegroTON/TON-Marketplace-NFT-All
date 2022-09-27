@@ -1,9 +1,0 @@
-query itemAttributes($address: String!) {
-    item(address: $address) {
-        address
-        attributes {
-            trait
-            value
-        }
-    }
-}

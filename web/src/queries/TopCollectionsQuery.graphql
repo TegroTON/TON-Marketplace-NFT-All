@@ -1,7 +1,0 @@
-query topCollections($take: Int!) {
-    collections(take: $take) {
-        address
-        name
-        image
-    }
-}
