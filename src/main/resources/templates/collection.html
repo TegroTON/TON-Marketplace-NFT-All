@@ -1,19 +1,66 @@
 <!DOCTYPE html>
-<html lang="en" layout:decorate="~{layouts/main}">
+<html lang="en" translate="yes" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title th:inline="text">[[${name}]]</title>
+  <meta charset="UTF-8">
+  <meta
+    content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui, viewport-fit=cover"
+    name="viewport"
+  >
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="telephone=no" name="format-detection">
+  <meta content="translate" name="google">
+  <link rel="apple-touch-icon" sizes="57x57" th:href="@{/img/logo/apple-icon-57x57.png}">
+  <link rel="apple-touch-icon" sizes="60x60" th:href="@{/img/logo/apple-icon-60x60.png}">
+  <link rel="apple-touch-icon" sizes="72x72" th:href="@{/img/logo/apple-icon-72x72.png}">
+  <link rel="apple-touch-icon" sizes="76x76" th:href="@{/img/logo/apple-icon-76x76.png}">
+  <link rel="apple-touch-icon" sizes="114x114" th:href="@{/img/logo/apple-icon-114x114.png}">
+  <link rel="apple-touch-icon" sizes="120x120" th:href="@{/img/logo/apple-icon-120x120.png}">
+  <link rel="apple-touch-icon" sizes="144x144" th:href="@{/img/logo/apple-icon-144x144.png}">
+  <link rel="apple-touch-icon" sizes="152x152" th:href="@{/img/logo/apple-icon-152x152.png}">
+  <link rel="apple-touch-icon" sizes="180x180" th:href="@{/img/logo/apple-icon-180x180.png}">
+  <link rel="icon" sizes="192x192" th:href="@{/img/logo/android-icon-192x192.png}" type="image/png">
+  <link rel="icon" sizes="32x32" th:href="@{/img/logo/favicon-32x32.png}" type="image/png">
+  <link rel="icon" sizes="96x96" th:href="@{/img/logo/favicon-96x96.png}" type="image/png">
+  <link rel="icon" sizes="16x16" th:href="@{/img/logo/favicon-16x16.png}" type="image/png">
+  <link href="/manifest.json" rel="manifest">
+  <meta content="#ffffff" name="msapplication-TileColor">
+  <meta content="./assets/img/logo/apple-icon-114x114.png" name="msapplication-TileImage">
+  <meta content="#050b1c" name="theme-color">
+  <meta content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no, viewport-fit=cover"
+        name="viewport"
+  >
+  <meta content="Libermall" property="og:site_name"/>
+  <meta content="Libermall" property="og:title"/>
+  <meta content="The easiest way to store, send, and receive Toncoin on The Open Network" property="og:description"/>
+  <meta content="/img/libermall-preview.png" property="og:image"/>
+  <meta content="https://Libermall.com" property="og:url"/>
+  <meta content="Libermall" name="twitter:title">
+  <meta content="summary_large_image" name="twitter:card">
+  <meta content="/wallet-preview.png" name="twitter:image"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Raleway:wght@600;700;900&family=Roboto:wght@300;400;500&display=swap"
+    rel="stylesheet"
+  >
+  <link href="https://unpkg.com/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="../static/css/app.css" rel="stylesheet" th:href="@{/css/app.css}">
+  <script async crossorigin="anonymous" src="../static/js/fontawesome-pro.min.js"
+          th:src="@{/js/fontawesome-pro.min.js}"
+  ></script>
+  <title>Libermall - an NFT marketplace</title>
 </head>
 <body>
-<section class="nft-hero" layout:fragment="hero">
+<header th:replace="~{fragments/header :: header}"></header>
+<section class="nft-hero">
   <picture>
-    <source th:srcset="@{/img/nft-hero.webp}" type="image/webp">
-    <source th:srcset="@{/assets/img/nft-hero.jpg}" type="image/jpeg">
-    <img alt="Tegro Cat" class="nft-hero__image" height="275" loading="lazy" th:src="@{assets/img/nft-hero.jpg}"
-         width="340"
+    <img alt="Collection" class="nft-hero__image" height="275" loading="lazy" src="../static/img/nft-hero.png"
+         th:alt="${name}"
+         th:src="${coverImage}"
     >
   </picture>
 </section>
-<main layout:fragment="content" th:inline="text">
+<main class="main-page">
   <section class="nfr-collection section pt-0">
     <div class="container-fluid">
       <div class="row">
@@ -43,11 +90,11 @@
                 </div>
               </div>
               <h1 class="collection__name fs-24 mb-4">
-                <span>[[${name}]]</span>
+                <span th:text="${name}">...</span>
                 <i class="fa-solid fa-circle-check fs-22 color-yellow ms-2"></i>
               </h1>
               <div class="collection__desc color-grey mb-4">
-                <p>[[${description}]]</p>
+                <p th:text="${description}"></p>
                 <!--/*
                 <a class="collection__link text-white" href="#!" target="__blank">
                   <i class="fa-regular fa-link-simple color-yellow me-2"></i>
@@ -66,7 +113,7 @@
               */-->
             </div>
             <div class="card-footer text-center border-top px-5 py-3">
-              Created by <span class="color-yellow">[[${ownerShort}]]</span>
+              Created by <span class="color-yellow" th:text="${ownerShort}">...</span>
               <i class="fa-solid fa-circle-check color-yellow fs-14 ms-1"></i>
             </div>
           </div>
@@ -83,11 +130,12 @@
             <div class="d-flex align-items-center justify-content-between">
               <div class="card-blur__item p-4 border-end text-center">
                 <h5 class="text-uppercase fs-14 color-grey" style="letter-spacing: 1px;">Items</h5>
-                <p class="m-0 text-uppercase fw-medium" style="letter-spacing: 1px;">[[${itemNumber}]]</p>
+                <p class="m-0 text-uppercase fw-medium" style="letter-spacing: 1px;" th:text="${itemNumber}">...</p>
               </div>
               <div class="card-blur__item p-4 border-end text-center">
                 <h5 class="text-uppercase fs-14 color-grey" style="letter-spacing: 1px;">Owners</h5>
-                <p class="m-0 text-uppercase fw-medium" style="letter-spacing: 1px;">[[${itemOwnerNumber}]]</p>
+                <p class="m-0 text-uppercase fw-medium" style="letter-spacing: 1px;" th:text="${itemOwnerNumber}">
+                  ...</p>
               </div>
               <div class="card-blur__item p-4 border-end text-center">
                 <h5 class="text-uppercase fs-14 color-grey" style="letter-spacing: 1px;">Blockchain</h5>
@@ -95,7 +143,7 @@
               </div>
               <div class="card-blur__item p-4 text-center">
                 <h5 class="text-uppercase fs-14 color-grey" style="letter-spacing: 1px;">address</h5>
-                <p class="m-0 fw-medium" style="letter-spacing: 1px;">[[${addressShort}]]</p>
+                <p class="m-0 fw-medium" style="letter-spacing: 1px;" th:text="${addressShort}"></p>
               </div>
             </div>
           </div>
@@ -113,6 +161,7 @@
                 >Items
                 </button>
               </li>
+              <!--/*
               <li class="collections__nav-item">
                 <button aria-controls="Activity" aria-selected="false"
                         class="collections__nav-link d-flex align-items-center text-nowrap" data-bs-target="#Activity"
@@ -129,8 +178,10 @@
               >
                 <i class="fa-regular fa-filter-list me-2"></i> Sort
               </button>
+              */-->
             </ul>
           </div>
+          <!--/*
           <div class="collections__filters collapse modified-collapse" id="collapseFilters">
             <div class="d-block d-sm-flex flex-wrap align-items-center">
               <div class="m-3">
@@ -180,6 +231,7 @@
               </div>
             </div>
           </div>
+          */-->
           <div class="tab-content py-4" id="myTabContent">
             <div aria-labelledby="Owned-tab" class="tab-pane fade show active" id="Owned" role="tabpanel">
               <!--              TODO -->
@@ -203,7 +255,7 @@
                           </div>
                           <div th:if="${item.isOnSale}">
                             <p class="mb-1 fw-medium color-grey">Price</p>
-                            <p class="m-0 text-white">[[${item.formattedPrice}]]</p>
+                            <p class="m-0 text-white" th:text="${item.formattedPrice}"></p>
                           </div>
                           <!--/*
                           <div>
@@ -251,5 +303,12 @@
     </div>
   </section>
 </main>
+<section th:replace="~{fragments/partners :: section}"></section>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<script src="https://unpkg.com/alpinejs@3.10.3/dist/cdn.min.js" type="text/javascript"></script>
+<script src="https://unpkg.com/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" type="text/javascript"></script>
+<script defer th:src="@{/js/app.js}"></script>
+
+<div id="floatingmes">Shift + Mouse scroll 🤓</div>
 </body>
 </html>

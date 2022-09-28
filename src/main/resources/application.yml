@@ -22,6 +22,3 @@ spring:
       static-locations: file:src/main/resources/static/
       cache:
         period: 0
-graphql:
-  packages:
-    - "money.tegro.market.query"

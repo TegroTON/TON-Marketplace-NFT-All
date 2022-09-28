@@ -7,6 +7,7 @@ import money.tegro.market.service.SaleService
 import money.tegro.market.service.collection.*
 import money.tegro.market.service.item.ItemContractService
 import money.tegro.market.service.item.ItemMetadataService
+import money.tegro.market.service.item.ItemOwnerAddressService
 import money.tegro.market.service.item.ItemSaleAddressService
 import money.tegro.market.toRaw
 import money.tegro.market.toShortFriendly
@@ -28,6 +29,7 @@ class RootController(
     private val itemContractService: ItemContractService,
     private val itemMetadataService: ItemMetadataService,
     private val itemSaleAddressService: ItemSaleAddressService,
+    private val itemOwnerAAddressService: ItemOwnerAddressService,
     private val saleService: SaleService,
 ) {
     @RequestMapping("/")
@@ -68,6 +70,7 @@ class RootController(
                 "addressShort" to collection.toShortFriendly(),
                 "name" to (metadata?.name ?: "Untitled Collection"),
                 "image" to metadata?.image,
+                "coverImage" to (metadata?.coverImage ?: metadata?.image),
                 "description" to metadata?.description.orEmpty(),
                 "ownerShort" to (contract?.owner?.toShortFriendly() ?: "Unknown"),
                 "itemNumber" to (contract?.next_item_index ?: 0uL),
@@ -97,5 +100,43 @@ class RootController(
         )
 
         return "collection"
+    }
+
+    @RequestMapping("/item/{address}")
+    suspend fun item(
+        model: Model,
+        @PathVariable(required = true) address: String,
+    ): String {
+        val item = MsgAddressInt(address)
+        val contract = itemContractService.get(item)
+        val metadata = itemMetadataService.get(item)
+        val ownerAddress = itemOwnerAAddressService.get(item)
+        val saleAddress = itemSaleAddressService.get(item)
+        val sale = saleAddress?.let { saleService.get(it) }
+        val collectionAddress = (contract?.collection as? MsgAddressInt)
+        val collectionMetadata = collectionAddress?.let { collectionMetadataService.get(it) }
+
+        model.addAllAttributes(
+            mapOf(
+                "address" to item.toRaw(),
+                "addressShort" to item.toShortFriendly(),
+                "isInCollection" to (collectionAddress != null),
+                "collectionLink" to if (collectionAddress != null) "/collection/${collectionAddress.toRaw()}" else "/explore",
+                "collectionName" to (collectionMetadata?.name ?: "Untitled Collection"),
+                "collectionImage" to collectionMetadata?.image,
+                "name" to (metadata?.name ?: "Item no. ${contract?.index ?: 0uL}"),
+                "description" to metadata?.description,
+                "image" to metadata?.image,
+                "attributes" to metadata?.attributes.orEmpty()
+                    .map { mapOf("trait" to it.trait, "value" to it.value) },
+                "ownerShort" to (ownerAddress?.toShortFriendly() ?: "Unknown"),
+                "isOnSale" to (saleAddress is MsgAddressInt),
+                "saleAddress" to saleAddress?.toRaw(),
+                "saleAddressShort" to saleAddress?.toShortFriendly(),
+                "fullPrice" to Coins.ofNano(sale?.full_price ?: BigInt.ZERO).toString() + " TON",
+            )
+        )
+
+        return "item";
     }
 }

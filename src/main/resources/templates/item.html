@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en" translate="yes" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui, viewport-fit=cover"
+    name="viewport"
+  >
+  <meta content="yes" name="apple-mobile-web-app-capable">
+  <meta content="telephone=no" name="format-detection">
+  <meta content="translate" name="google">
+  <link rel="apple-touch-icon" sizes="57x57" th:href="@{/img/logo/apple-icon-57x57.png}">
+  <link rel="apple-touch-icon" sizes="60x60" th:href="@{/img/logo/apple-icon-60x60.png}">
+  <link rel="apple-touch-icon" sizes="72x72" th:href="@{/img/logo/apple-icon-72x72.png}">
+  <link rel="apple-touch-icon" sizes="76x76" th:href="@{/img/logo/apple-icon-76x76.png}">
+  <link rel="apple-touch-icon" sizes="114x114" th:href="@{/img/logo/apple-icon-114x114.png}">
+  <link rel="apple-touch-icon" sizes="120x120" th:href="@{/img/logo/apple-icon-120x120.png}">
+  <link rel="apple-touch-icon" sizes="144x144" th:href="@{/img/logo/apple-icon-144x144.png}">
+  <link rel="apple-touch-icon" sizes="152x152" th:href="@{/img/logo/apple-icon-152x152.png}">
+  <link rel="apple-touch-icon" sizes="180x180" th:href="@{/img/logo/apple-icon-180x180.png}">
+  <link rel="icon" sizes="192x192" th:href="@{/img/logo/android-icon-192x192.png}" type="image/png">
+  <link rel="icon" sizes="32x32" th:href="@{/img/logo/favicon-32x32.png}" type="image/png">
+  <link rel="icon" sizes="96x96" th:href="@{/img/logo/favicon-96x96.png}" type="image/png">
+  <link rel="icon" sizes="16x16" th:href="@{/img/logo/favicon-16x16.png}" type="image/png">
+  <link href="/manifest.json" rel="manifest">
+  <meta content="#ffffff" name="msapplication-TileColor">
+  <meta content="./assets/img/logo/apple-icon-114x114.png" name="msapplication-TileImage">
+  <meta content="#050b1c" name="theme-color">
+  <meta content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no, viewport-fit=cover"
+        name="viewport"
+  >
+  <meta content="Libermall" property="og:site_name"/>
+  <meta content="Libermall" property="og:title"/>
+  <meta content="The easiest way to store, send, and receive Toncoin on The Open Network" property="og:description"/>
+  <meta content="/img/libermall-preview.png" property="og:image"/>
+  <meta content="https://Libermall.com" property="og:url"/>
+  <meta content="Libermall" name="twitter:title">
+  <meta content="summary_large_image" name="twitter:card">
+  <meta content="/wallet-preview.png" name="twitter:image"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Raleway:wght@600;700;900&family=Roboto:wght@300;400;500&display=swap"
+    rel="stylesheet"
+  >
+  <link href="https://unpkg.com/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="../static/css/app.css" rel="stylesheet" th:href="@{/css/app.css}">
+  <script async crossorigin="anonymous" src="../static/js/fontawesome-pro.min.js"
+          th:src="@{/js/fontawesome-pro.min.js}"
+  ></script>
+  <title>Libermall - an NFT marketplace</title>
+</head>
+<body x-data="{imageEnlarged: false}">
+<header th:replace="~{fragments/header :: header}"></header>
+<main class="main-page">
+  <section class="item-details section pt-5">
+    <div class="container-fluid">
+      <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-12 col-xxl-9">
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-5 ms-3">
+              <li class="breadcrumb-item"><a href="/explore.php">Explore</a></li>
+              <li class="breadcrumb-item" th:if="${isInCollection}">
+                <a href="/collection" th:href="${collectionLink}" th:text="${collectionName}">Collection</a>
+              </li>
+              <li aria-current="page" class="breadcrumb-item active" th:name="${name}">Item</li>
+            </ol>
+          </nav>
+          <div class="row justify-content-center mb-4">
+            <div class="col-lg-5 col-xl-5 mb-4 mb-lg-0">
+              <!-- Start NFT Image -->
+              <div class="position-sticky" style="top: 140px;">
+                <img alt="" class="item-details__image"
+                     src="../static/img/item-details-image.jpg"
+                     th:src="${image}"
+                     x-on:click="imageEnlarged = !imageEnlarged"
+                >
+              </div>
+              <!-- // End NFT Image -->
+            </div>
+            <div class="col-lg-7 col-xl-7">
+              <!-- Start Desc Card -->
+              <div class="card-item-details mb-5">
+                <div class="item-details__badge badge__green mb-4" th:if="${isOnSale}">For Sale</div>
+                <div class="item-details__badge mb-4" th:unless="${isOnSale}">Not for sale</div>
+                <h1 class="item-details__title mb-3" th:text="${name}">Item</h1>
+                <p class="item-details__desc mb-0" th:text="${description}"></p>
+              </div>
+              <!-- // End Desc Card -->
+              <!-- Start Action Link -->
+              <div class="card-item-details d-flex align-items-center border bg-soft px-4 py-3 rounded mb-4">
+                <button class="btn btn-sm btn-details__like bg-soft px-3" type="button">
+                  <i class="fa-regular fa-heart m-0 me-sm-2"></i>
+                  <span class="d-block d-sm-inline mt-1 mt-sm-0">24</span>
+                </button>
+                <div class="nav-item-details d-flex align-items-center fs-18 ms-auto">
+                  <button class="btn btn-sm px-2 px-3 me-1" type="button"><i
+                    class="fa-regular fa-arrows-rotate d-block d-sm-inline mb-2 mt-sm-0 m-0 me-sm-2"
+                  ></i> Refresh
+                  </button>
+                  <button class="btn btn-sm px-2 px-3 me-1" data-bs-target="#ShareModal" data-bs-toggle="modal"
+                          type="button"
+                  ><i class="fa-regular fa-share-nodes d-block d-sm-inline mb-2 mt-sm-0 m-0 me-sm-2"></i> Share
+                  </button>
+                  <div class="dropdown">
+                    <button aria-expanded="false" class="btn btn-sm btn-cube" data-bs-toggle="dropdown"
+                            id="dropdownMenuButton1"
+                            type="button"
+                    >
+                      <i class="fa-solid fa-ellipsis fs-20"></i>
+                    </button>
+                    <ul aria-labelledby="dropdownMenuButton1" class="dropdown-menu">
+                      <li><a class="dropdown-item" href="#">Place floor bid</a></li>
+                      <li><a class="dropdown-item" href="#">New bid</a></li>
+                      <li><a class="dropdown-item" href="#">Report</a></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <!-- // End Action Link -->
+              <!-- Start Price Card -->
+              <div class="card-item-details border bg-soft p-4 rounded mb-4" th:if="${isOnSale}">
+                <div class="d-flex align-items-center mb-2">
+                  <span class="d-block text-uppercase fs-18 fw-medium">Price:</span>
+                  <span class="price-item__ton d-block ms-auto" th:text="${fullPrice}">NaN</span>
+                </div>
+                <div class="d-flex align-items-center mb-4">
+                  <span class="color-grey">Plus a network fee of 1 TON</span>
+                  <!--/*
+                  <span class="price-item__dollar d-block color-grey text-end ms-auto">$64.09</span>
+                  */-->
+                </div>
+                <button class="btn btn-primary w-100" data-bs-target="#BuyNowModal" data-bs-toggle="modal"
+                        type="button"
+                >Buy Now
+                </button>
+              </div>
+              <!-- // End Price Card -->
+              <!-- Start Owner & Collection -->
+              <div class="row">
+                <div class="col-xl-6 mx-auto mb-4">
+                  <a class="card-item-details d-block border bg-soft hover px-4 py-3 rounded text-white"
+                     href="/profile.php"
+                  >
+                    <h4 class="fs-14 color-grey mb-4">Owner</h4>
+                    <div class="d-flex align-items-center">
+                      <img alt="" class="img-fluid rounded-circle" height="40" src="../static/img/author/author-12.jpg"
+                           th:src="@{/img/author/author-12.jpg}"
+                           width="40"
+                      >
+                      <h4 class="collection__name fs-16 mb-0 ms-3" th:text="${ownerShort}">Owner</h4>
+                      <i class="fa-solid fa-angle-right color-grey ms-auto"></i>
+                    </div>
+                  </a>
+                </div>
+                <div class="col-xl-6 mb-4">
+                  <a class="card-item-details d-block border bg-soft hover px-4 py-3 rounded text-white"
+                     href="/collection.php" th:href="${collectionLink}"
+                  >
+                    <h4 class="fs-14 color-grey mb-4">Collection</h4>
+                    <div class="d-flex align-items-center">
+                      <img alt="" class="img-fluid rounded-circle" src="../static/img/author/author-17.jpg"
+                           th:src="${collectionImage}" width="40"
+                      >
+                      <h4 class="collection__name fs-16 mb-0 ms-3" th:text="${collectionName}">
+                        Collection
+                      </h4>
+                      <i class="fa-solid fa-angle-right color-grey ms-auto"></i>
+                    </div>
+                  </a>
+                </div>
+              </div>
+              <!-- // End Owner & Collection -->
+              <!-- Start Details Card -->
+              <div class="card-item-details border bg-soft p-4 rounded">
+                <h4 class="fs-18 mb-4">Details</h4>
+                <ul class="list-unstyled">
+                  <li class="mb-3">
+                    <a class="d-flex align-items-center p-3 rounded border hover text-white"
+                       href="https://testnet.tonscan.org/address/EQC_-u5FytW3WrGR_UQ_tjVFvFbcIanSh4nHjqP3ojIamkGP"
+                       target="_blank"
+                       th:href="'https://testnet.tonscan.org/address/' + ${address}"
+                    >
+                      <span class="fw-medium color-grey">Contract Address</span>
+                      <span class="col-4 text-truncate ms-auto text-end" th:text="${addressShort}"></span>
+                      <i class="fa-solid fa-angle-right color-grey ms-3"></i>
+                    </a>
+                  </li>
+                  <li class="mb-3" th:if="${isOnSale}">
+                    <a class="d-flex align-items-center p-3 rounded border hover text-white"
+                       href="https://testnet.tonscan.org/address/EQC_-u5FytW3WrGR_UQ_tjVFvFbcIanSh4nHjqP3ojIamkGP"
+                       target="_blank"
+                       th:href="'https://testnet.tonscan.org/address/' + ${saleAddress}"
+                    >
+                      <span class="fw-medium color-grey">Sale Contract</span>
+                      <span class="col-4 text-truncate ms-auto text-end" th:text="${saleAddress}"></span>
+                      <i class="fa-solid fa-angle-right color-grey ms-3"></i>
+                    </a>
+                  </li>
+                  <li class="d-flex align-items-center p-3 rounded border hover text-white mb-3">
+                    <span class="fw-medium color-grey">Metadata</span>
+                    <span class="text-truncate ms-auto">Centralized</span>
+                  </li>
+                </ul>
+              </div>
+              <!-- // End Details Card -->
+            </div>
+          </div>
+          <!-- Start Attributes Card -->
+          <div class="card-item-details border bg-soft p-4 rounded mb-5">
+            <h4 class="fs-18 mb-4">Attributes</h4>
+            <ul class="row list-unstyled">
+              <li class="col-lg-6 col-xl-4 mb-3" th:each="attribute: ${attributes}">
+                <a class="d-flex align-items-center p-3 rounded border hover text-white" href="#!" target="_blank">
+                  <div>
+                    <span class="d-block fs-14 fw-medium color-grey mb-2" th:text="${attribute.trait}">Trait</span>
+                    <span class="d-block fw-medium" th:text="${attribute.value}"></span>
+                  </div>
+                  <!--/*
+                  <div class="ms-auto">
+                    <span class="d-block fs-14 fw-medium color-grey text-end mb-2">Rarity</span>
+                    <div class="d-flex fs-14">
+                      <span>22/100</span>
+                      <span class="mx-1">~</span>
+                      <span class="fw-medium text-end">17.1%</span>
+                    </div>
+                  </div>
+                  <i class="fa-solid fa-angle-right color-grey ms-5"></i>
+                  */-->
+                </a>
+              </li>
+            </ul>
+          </div>
+          <!-- // End Attributes Card -->
+
+          <!-- Start Transaction Table -->
+          <!--/*
+          <h4 class="mb-3 fs-28 px-2">Transaction History</h4>
+          <div class="card-item-details border bg-soft rounded mt-4 table-responsive">
+            <table class="table text-white mb-0">
+              <thead>
+              <tr class="border-bottom">
+                <th class="p-4" scope="col">Type</th>
+                <th class="p-4" scope="col">Price</th>
+                <th class="p-4" scope="col">From</th>
+                <th class="p-4" scope="col">To</th>
+                <th class="p-4" scope="col">Date</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr class="hover">
+                <td class="p-4">
+                  <i class="fa-regular fa-cart-shopping-fast fs-18 me-2"></i>
+                  <span class="fw-medium">Sale</span>
+                </td>
+                <td class="p-4">38 TON</td>
+                <td class="p-4">
+                  <a class="d-block text-truncate" href="/profile.php" style="max-width: 150px;" target="_blank">
+                    <i class="fa-regular fa-circle-user me-2"></i>EQDZr7KDKG0R4Kyauz-iRetnuY7nMKXFIEQn4-44vzygNEvj
+                  </a>
+                </td>
+                <td class="p-4">
+                  <a class="d-block text-truncate" href="/profile.php" style="max-width: 150px;" target="_blank">
+                    <i class="fa-regular fa-circle-user me-2"></i>antonov
+                  </a>
+                </td>
+                <td class="p-4"><i class="fa-regular fa-timer me-2"></i> 2 hours ago</td>
+              </tr>
+              <tr class="hover">
+                <td class="p-4">
+                  <i class="fa-regular fa-arrow-right-arrow-left me-2"></i>
+                  <span class="fw-medium">Transfer</span>
+                </td>
+                <td class="p-4"></td>
+                <td class="p-4">
+                  <a class="d-block text-truncate" href="/profile.php" style="max-width: 150px;" target="_blank">
+                    <i class="fa-regular fa-circle-user me-2"></i>EQDZr7KDKG0R4Kyauz-iRetnuY7nMKXFIEQn4-44vzygNEvj
+                  </a>
+                </td>
+                <td class="p-4">
+                  <a class="d-block text-truncate" href="/profile.php" style="max-width: 150px;" target="_blank">
+                    <i class="fa-regular fa-circle-user me-2"></i>antonov
+                  </a>
+                </td>
+                <td class="p-4"><i class="fa-regular fa-timer me-2"></i> 12 hours ago</td>
+              </tr>
+              <tr class="hover">
+                <td class="p-4">
+                  <i class="fa-regular fa-coin-blank me-2"></i>
+                  <span class="fw-medium">Mint</span>
+                </td>
+                <td class="p-4">40 TON</td>
+                <td class="p-4">
+                  <a class="d-block text-truncate" href="/profile.php" style="max-width: 150px;" target="_blank">
+                    <i class="fa-regular fa-circle-user me-2"></i>EQDZr7KDKG0R4Kyauz-iRetnuY7nMKXFIEQn4-44vzygNEvj
+                  </a>
+                </td>
+                <td class="p-4">
+                  <a class="d-block text-truncate" href="/profile.php" style="max-width: 150px;" target="_blank">
+                    <i class="fa-regular fa-circle-user me-2"></i>antonov
+                  </a>
+                </td>
+                <td class="p-4"><i class="fa-regular fa-timer me-2"></i> 1 day ago</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+          */-->
+          <!-- //End Transaction Table -->
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<section th:replace="~{fragments/partners :: section}"></section>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<script src="https://unpkg.com/alpinejs@3.10.3/dist/cdn.min.js" type="text/javascript"></script>
+<script src="https://unpkg.com/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" type="text/javascript"></script>
+<script defer th:src="@{/js/app.js}"></script>
+
+<div id="floatingmes">Shift + Mouse scroll 🤓</div>
+<div class="item-details__image--size"
+     style="width: 100%; height: 100%; position: fixed; z-index: 10000; top:0; left: 0; cursor: zoom-out;"
+     th:styleappend="'background: rgba(5, 11, 28, .5) url(' + ${image} + ') no-repeat center; background-size: contain; '"
+     x-on:click="imageEnlarged = !imageEnlarged"
+     x-show="imageEnlarged"
+></div>
+</body>
+</html>

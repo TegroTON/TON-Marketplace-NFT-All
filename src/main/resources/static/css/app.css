@@ -59,7 +59,7 @@ body {
     color: var(--dark-500);
     border-width: 1px;
     border-radius: .5rem;
-    box-shadow: none!important;
+    box-shadow: none !important;
 }
 
 .btn:hover, .btn:focus, .btn:active {
@@ -199,7 +199,7 @@ h1, h2, h3, h4 {
 }
 
 .color-grey {
-    color: var(--grey-500)!important;
+    color: var(--grey-500) !important;
 }
 
 .color-green {
@@ -241,7 +241,7 @@ h1, h2, h3, h4 {
 }
 
 .bg-soft {
-    background-color: var(--soft)!important;
+    background-color: var(--soft) !important;
 }
 
 .bg-soft.hover:hover {
@@ -398,17 +398,17 @@ h1, h2, h3, h4 {
 @media (max-width: 500px) {
     .modal-content {
         min-height: 100vh;
-        border-radius: 0!important;
+        border-radius: 0 !important;
     }
 
     .mobile-modal-bottom .modal-content {
         min-height: auto;
         margin-top: auto;
-        padding: 40px 24px!important;
+        padding: 40px 24px !important;
     }
 
     .modal.fade .modal-dialog.mobile-modal-bottom {
-        transform: translate(0,16px)!important;
+        transform: translate(0, 16px) !important;
     }
 
     .modal-dialog {
@@ -488,7 +488,7 @@ h1, h2, h3, h4 {
     border-color: var(--grey-900);
     border-radius: .5rem;
     background-color: var(--dark-900);
-    box-shadow: none!important;
+    box-shadow: none !important;
 }
 
 .form-control:focus {
@@ -807,7 +807,7 @@ h1, h2, h3, h4 {
 
     .btn-mobile-fixed {
         position: sticky;
-        z-index: 999!important;
+        z-index: 999 !important;
         bottom: 0;
         left: 0;
         width: 100%;
@@ -966,7 +966,7 @@ h1, h2, h3, h4 {
     height: 48px;
     margin: -30px 15px 0 15px;
     border-radius: 8px;
-    background-color: var(--grey-700)!important;
+    background-color: var(--grey-700) !important;
 }
 
 .hero .carousel-control-prev {
@@ -1291,7 +1291,7 @@ h1, h2, h3, h4 {
 }
 
 .card-blur, .card-blur .border-end {
-    border-color: rgba(255, 255, 255, .06)!important;
+    border-color: rgba(255, 255, 255, .06) !important;
 }
 
 .card-blur__item {
@@ -1677,7 +1677,7 @@ h1, h2, h3, h4 {
 }
 
 .footer .show {
-    display: block!important;
+    display: block !important;
 }
 
 @media (max-width: 1024px) {
