@@ -9,6 +9,7 @@ import money.tegro.market.service.item.ItemContractService
 import money.tegro.market.service.item.ItemMetadataService
 import money.tegro.market.service.item.ItemOwnerAddressService
 import money.tegro.market.service.item.ItemSaleAddressService
+import money.tegro.market.service.profile.ProfileOwnedItemService
 import money.tegro.market.toRaw
 import money.tegro.market.toShortFriendly
 import org.springframework.stereotype.Controller
@@ -31,6 +32,7 @@ class RootController(
     private val itemSaleAddressService: ItemSaleAddressService,
     private val itemOwnerAAddressService: ItemOwnerAddressService,
     private val saleService: SaleService,
+    private val profileOwnedItemService: ProfileOwnedItemService,
 ) {
     @RequestMapping("/")
     suspend fun index(
@@ -129,6 +131,7 @@ class RootController(
                 "image" to metadata?.image,
                 "attributes" to metadata?.attributes.orEmpty()
                     .map { mapOf("trait" to it.trait, "value" to it.value) },
+                "owner" to ownerAddress?.toRaw(),
                 "ownerShort" to (ownerAddress?.toShortFriendly() ?: "Unknown"),
                 "isOnSale" to (saleAddress is MsgAddressInt),
                 "saleAddress" to saleAddress?.toRaw(),
@@ -138,5 +141,42 @@ class RootController(
         )
 
         return "item";
+    }
+
+    @RequestMapping("/profile/{address}")
+    suspend fun profile(
+        model: Model,
+        @PathVariable(required = true) address: String,
+    ): String {
+        val profile = MsgAddressInt(address)
+
+        model.addAllAttributes(
+            mapOf(
+                "address" to profile.toRaw(),
+                "addressShort" to profile.toShortFriendly(),
+                "ownedItems" to profileOwnedItemService.get(profile)
+                    .mapNotNull { item ->
+                        val itemSale = itemSaleAddressService.get(item)?.let { saleService.get(it) }
+
+                        itemContractService.get(item)?.let { itemContract ->
+                            itemMetadataService.get(item)?.let { itemMetadata ->
+                                mapOf(
+                                    "link" to "/item/${item.toRaw()}",
+                                    "name" to itemMetadata.name,
+                                    "image" to itemMetadata.image,
+                                    "isOnSale" to (itemSale != null),
+                                    "formattedPrice" to Coins.ofNano(itemSale?.full_price ?: BigInt.ZERO)
+                                        .toString() + " TON"
+                                )
+                            }
+                        }
+
+                    }
+                    .take(10)
+                    .toList()
+            )
+        )
+
+        return "profile"
     }
 }
