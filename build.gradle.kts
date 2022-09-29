@@ -6,10 +6,11 @@ plugins {
     kotlin("jvm") version "1.7.10"
     kotlin("plugin.serialization") version "1.7.10"
     kotlin("plugin.spring") version "1.7.0"
+    id("com.github.node-gradle.node") version "3.4.0"
 }
 
 group = "money.tegro"
-version = "0.0.1"
+version = "0.2.0"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 configurations {
@@ -59,4 +60,9 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+node {
+    version.set("16.17.1")
+
 }

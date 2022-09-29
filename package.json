@@ -1,0 +1,27 @@
+{
+  "name": "market",
+  "version": "0.2.0",
+  "description": "Home for the NFT marketplace",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TegroTON/Market.git"
+  },
+  "author": "Anton F.",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "css-loader": "^6.7.1",
+    "style-loader": "^3.3.1",
+    "ts-loader": "^9.4.1",
+    "typescript": "^4.8.4",
+    "webpack": "^5.74.0",
+    "webpack-cli": "^4.10.0"
+  },
+  "dependencies": {
+    "bootstrap": "^5.2.1",
+    "petite-vue": "^0.4.1"
+  }
+}

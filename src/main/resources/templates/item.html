@@ -43,14 +43,9 @@
     href="https://fonts.googleapis.com/css2?family=Raleway:wght@600;700;900&family=Roboto:wght@300;400;500&display=swap"
     rel="stylesheet"
   >
-  <link href="https://unpkg.com/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="../static/css/app.css" rel="stylesheet" th:href="@{/css/app.css}">
-  <script async crossorigin="anonymous" src="../static/js/fontawesome-pro.min.js"
-          th:src="@{/js/fontawesome-pro.min.js}"
-  ></script>
   <title>Libermall - an NFT marketplace</title>
 </head>
-<body x-data="{imageEnlarged: false}">
+<body v-scope="{imageEnlarged: false}">
 <header th:replace="~{fragments/header :: header}"></header>
 <main class="main-page">
   <section class="item-details section pt-5">
@@ -76,7 +71,7 @@
                 <img alt="" class="item-details__image"
                      src="../static/img/item-details-image.jpg"
                      th:src="${item.image}"
-                     x-on:click="imageEnlarged = !imageEnlarged"
+                     v-on:click="imageEnlarged = !imageEnlarged"
                 >
               </div>
               <!-- // End NFT Image -->
@@ -325,16 +320,15 @@
 </main>
 <section th:replace="fragments/partners :: partners"></section>
 <footer th:replace="fragments/footer :: footer"></footer>
-<script src="https://unpkg.com/alpinejs@3.10.3/dist/cdn.min.js" type="text/javascript"></script>
-<script src="https://unpkg.com/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" type="text/javascript"></script>
-<script defer th:src="@{/js/app.js}"></script>
+<div th:replace="modals/connect :: connect_modal"></div>
+<script defer th:src="@{/js/index.js}"></script>
 
 <div id="floatingmes">Shift + Mouse scroll 🤓</div>
 <div class="item-details__image--size"
      style="width: 100%; height: 100%; position: fixed; z-index: 10000; top:0; left: 0; cursor: zoom-out;"
      th:styleappend="'background: rgba(5, 11, 28, .5) url(' + ${item.image} + ') no-repeat center; background-size: contain; '"
-     x-on:click="imageEnlarged = !imageEnlarged"
-     x-show="imageEnlarged"
+     v-if="imageEnlarged"
+     v-on:click="imageEnlarged = !imageEnlarged"
 ></div>
 </body>
 </html>

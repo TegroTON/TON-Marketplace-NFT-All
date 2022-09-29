@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<div aria-hidden="true" class="modal fade" id="ConnectModal" tabindex="-1" th:fragment="connect_modal">
+  <div class="modal-dialog modal-dialog-centered mobile-modal-bottom">
+    <div class="modal-content border-0">
+      <div class="modal-header d-block border-0 mb-3">
+        <h5 class="modal-title mb-2 fs-24" id="ConnectModalLabel">Connect wallet</h5>
+        <p class="fs-18 color-grey pe-5">
+          Choose how you want to connect. There are several wallet providers.
+        </p>
+        <button aria-label="Close" class="border-0 p-0 modal-close" data-bs-dismiss="modal" type="button"><i
+          class="fa-solid fa-xmark fa-lg"
+        ></i></button>
+      </div>
+      <div class="modal-body">
+        <a class="d-flex align-items-center border rounded bg-grey hover-grey mb-3 p-3"
+           data-bs-dismiss="modal"
+           v-if="isTonWalletAvailable"
+           v-on:click="connectTonWallet()"
+        >
+          <div class="d-flex align-items-center">
+            <img alt="Ton Wallet" class="wc-img" height="40" src="../../static/img/ton-wallet.png"
+                 th:src="@{/img/ton-wallet.png}" width="40"
+            >
+            <span class="fs-18 ms-4">Ton Wallet</span>
+          </div>
+          <div class="ms-auto">
+            <i class="fa-solid fa-angle-right"></i>
+          </div>
+        </a>
+        <a class="d-flex align-items-center border rounded bg-grey hover-grey mb-3 p-3" href="#!">
+          <div class="d-flex align-items-center">
+            <img alt="Tonkeeper" class="wc-img" height="40" src="../../static/img/tonkeeper.png"
+                 th:src="@{/img/tonkeeper.png}" width="40"
+            >
+            <span class="fs-18 ms-4">Tonkeeper</span>
+          </div>
+          <div class="ms-auto">
+            <i class="fa-solid fa-angle-right"></i>
+          </div>
+        </a>
+        <a class="d-flex align-items-center border rounded bg-grey hover-grey p-3" href="#!">
+          <div class="d-flex align-items-center">
+            <img alt="Tonhub" class="wc-img" height="40" src="../../static/img/tonhub.png" th:src="@{/img/tonhub.png}"
+                 width="40"
+            >
+            <span class="fs-18 ms-4">Tonhub</span>
+          </div>
+          <div class="ms-auto">
+            <i class="fa-solid fa-angle-right"></i>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

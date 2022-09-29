@@ -43,11 +43,6 @@
     href="https://fonts.googleapis.com/css2?family=Raleway:wght@600;700;900&family=Roboto:wght@300;400;500&display=swap"
     rel="stylesheet"
   >
-  <link href="https://unpkg.com/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="../static/css/app.css" rel="stylesheet" th:href="@{/css/app.css}">
-  <script async crossorigin="anonymous" src="../static/js/fontawesome-pro.min.js"
-          th:src="@{/js/fontawesome-pro.min.js}"
-  ></script>
   <title>Libermall - an NFT marketplace</title>
 </head>
 <body>
@@ -266,9 +261,8 @@
 </main>
 <section th:replace="~{fragments/partners :: partners}"></section>
 <footer th:replace="~{fragments/footer :: footer}"></footer>
-<script src="https://unpkg.com/alpinejs@3.10.3/dist/cdn.min.js" type="text/javascript"></script>
-<script src="https://unpkg.com/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" type="text/javascript"></script>
-<script defer th:src="@{/js/app.js}"></script>
+<div th:replace="modals/connect :: connect_modal"></div>
+<script defer th:src="@{/js/index.js}"></script>
 
 <div id="floatingmes">Shift + Mouse scroll 🤓</div>
 </body>
