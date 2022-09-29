@@ -62,4 +62,13 @@ class RootController(
 
         return "profile"
     }
+
+    @RequestMapping("/explore")
+    suspend fun profile(
+        model: Model,
+    ): String {
+        model.addAttribute("collections", collectionRepository.listAll())
+
+        return "explore"
+    }
 }
