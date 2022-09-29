@@ -60,10 +60,13 @@
           <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-5 ms-3">
               <li class="breadcrumb-item"><a href="/explore.php">Explore</a></li>
-              <li class="breadcrumb-item" th:if="${isInCollection}">
-                <a href="/collection" th:href="${collectionLink}" th:text="${collectionName}">Collection</a>
+              <li class="breadcrumb-item" th:if="${collection != null}">
+                <a href="/collection"
+                   th:href="'/collection/' + ${addressHelper.toRaw(collection.address)}"
+                   th:text="${collection.name}"
+                >Collection</a>
               </li>
-              <li aria-current="page" class="breadcrumb-item active" th:name="${name}">Item</li>
+              <li aria-current="page" class="breadcrumb-item active" th:text="${item.name}">Item</li>
             </ol>
           </nav>
           <div class="row justify-content-center mb-4">
@@ -72,7 +75,7 @@
               <div class="position-sticky" style="top: 140px;">
                 <img alt="" class="item-details__image"
                      src="../static/img/item-details-image.jpg"
-                     th:src="${image}"
+                     th:src="${item.image}"
                      x-on:click="imageEnlarged = !imageEnlarged"
                 >
               </div>
@@ -81,10 +84,10 @@
             <div class="col-lg-7 col-xl-7">
               <!-- Start Desc Card -->
               <div class="card-item-details mb-5">
-                <div class="item-details__badge badge__green mb-4" th:if="${isOnSale}">For Sale</div>
-                <div class="item-details__badge mb-4" th:unless="${isOnSale}">Not for sale</div>
-                <h1 class="item-details__title mb-3" th:text="${name}">Item</h1>
-                <p class="item-details__desc mb-0" th:text="${description}"></p>
+                <div class="item-details__badge mb-4" th:if="${item.fullPrice == null}">Not for sale</div>
+                <div class="item-details__badge badge__green mb-4" th:if="${item.fullPrice != null}">For Sale</div>
+                <h1 class="item-details__title mb-3" th:text="${item.name}">Item</h1>
+                <p class="item-details__desc mb-0" th:text="${item.description}"></p>
               </div>
               <!-- // End Desc Card -->
               <!-- Start Action Link -->
@@ -119,10 +122,10 @@
               </div>
               <!-- // End Action Link -->
               <!-- Start Price Card -->
-              <div class="card-item-details border bg-soft p-4 rounded mb-4" th:if="${isOnSale}">
+              <div class="card-item-details border bg-soft p-4 rounded mb-4" th:if="${item.fullPrice != null}">
                 <div class="d-flex align-items-center mb-2">
                   <span class="d-block text-uppercase fs-18 fw-medium">Price:</span>
-                  <span class="price-item__ton d-block ms-auto" th:text="${fullPrice}">NaN</span>
+                  <span class="price-item__ton d-block ms-auto" th:text="${item.fullPrice}">NaN</span>
                 </div>
                 <div class="d-flex align-items-center mb-4">
                   <span class="color-grey">Plus a network fee of 1 TON</span>
@@ -141,7 +144,7 @@
                 <div class="col-xl-6 mx-auto mb-4">
                   <a class="card-item-details d-block border bg-soft hover px-4 py-3 rounded text-white"
                      href="/profile"
-                     th:href="'/profile/' + ${owner}"
+                     th:href="'/profile/' + ${addressHelper.toRaw(item.owner)}"
                   >
                     <h4 class="fs-14 color-grey mb-4">Owner</h4>
                     <div class="d-flex align-items-center">
@@ -149,22 +152,25 @@
                            th:src="@{/img/author/author-12.jpg}"
                            width="40"
                       >
-                      <h4 class="collection__name fs-16 mb-0 ms-3" th:text="${ownerShort}">Owner</h4>
+                      <h4 class="collection__name fs-16 mb-0 ms-3"
+                          th:text="${addressHelper.toShortFriendly(item.owner)}"
+                      >Owner</h4>
                       <i class="fa-solid fa-angle-right color-grey ms-auto"></i>
                     </div>
                   </a>
                 </div>
                 <div class="col-xl-6 mb-4">
                   <a class="card-item-details d-block border bg-soft hover px-4 py-3 rounded text-white"
-                     href="/collection.php" th:href="${collectionLink}"
+                     href="/explore"
+                     th:href="${collection == null} ? '/explore' : '/collection/' + ${addressHelper.toRaw(collection.address)}"
                   >
                     <h4 class="fs-14 color-grey mb-4">Collection</h4>
                     <div class="d-flex align-items-center">
                       <img alt="" class="img-fluid rounded-circle" src="../static/img/author/author-17.jpg"
-                           th:src="${collectionImage}" width="40"
+                           th:src="${collection?.image}" width="40"
                       >
-                      <h4 class="collection__name fs-16 mb-0 ms-3" th:text="${collectionName}">
-                        Collection
+                      <h4 class="collection__name fs-16 mb-0 ms-3" th:text="${collection?.name}">
+                        Not In Collection
                       </h4>
                       <i class="fa-solid fa-angle-right color-grey ms-auto"></i>
                     </div>
@@ -178,23 +184,27 @@
                 <ul class="list-unstyled">
                   <li class="mb-3">
                     <a class="d-flex align-items-center p-3 rounded border hover text-white"
-                       href="https://testnet.tonscan.org/address/EQC_-u5FytW3WrGR_UQ_tjVFvFbcIanSh4nHjqP3ojIamkGP"
+                       href="#!"
                        target="_blank"
-                       th:href="'https://testnet.tonscan.org/address/' + ${address}"
+                       th:href="'https://testnet.tonscan.org/address/' + ${addressHelper.toRaw(item.address)}"
                     >
                       <span class="fw-medium color-grey">Contract Address</span>
-                      <span class="col-4 text-truncate ms-auto text-end" th:text="${addressShort}"></span>
+                      <span class="col-4 text-truncate ms-auto text-end"
+                            th:text="${addressHelper.toShortFriendly(item.address)}"
+                      ></span>
                       <i class="fa-solid fa-angle-right color-grey ms-3"></i>
                     </a>
                   </li>
-                  <li class="mb-3" th:if="${isOnSale}">
+                  <li class="mb-3" th:if="${item.fullPrice != null}">
                     <a class="d-flex align-items-center p-3 rounded border hover text-white"
                        href="https://testnet.tonscan.org/address/EQC_-u5FytW3WrGR_UQ_tjVFvFbcIanSh4nHjqP3ojIamkGP"
                        target="_blank"
-                       th:href="'https://testnet.tonscan.org/address/' + ${saleAddress}"
+                       th:href="'https://testnet.tonscan.org/address/' + ${addressHelper.toRaw(item.sale)}"
                     >
                       <span class="fw-medium color-grey">Sale Contract</span>
-                      <span class="col-4 text-truncate ms-auto text-end" th:text="${saleAddress}"></span>
+                      <span class="col-4 text-truncate ms-auto text-end"
+                            th:text="${addressHelper.toShortFriendly(item.sale)}"
+                      ></span>
                       <i class="fa-solid fa-angle-right color-grey ms-3"></i>
                     </a>
                   </li>
@@ -211,10 +221,10 @@
           <div class="card-item-details border bg-soft p-4 rounded mb-5">
             <h4 class="fs-18 mb-4">Attributes</h4>
             <ul class="row list-unstyled">
-              <li class="col-lg-6 col-xl-4 mb-3" th:each="attribute: ${attributes}">
+              <li class="col-lg-6 col-xl-4 mb-3" th:each="attribute: ${item.attributes}">
                 <a class="d-flex align-items-center p-3 rounded border hover text-white" href="#!" target="_blank">
                   <div>
-                    <span class="d-block fs-14 fw-medium color-grey mb-2" th:text="${attribute.trait}">Trait</span>
+                    <span class="d-block fs-14 fw-medium color-grey mb-2" th:text="${attribute.key}">Trait</span>
                     <span class="d-block fw-medium" th:text="${attribute.value}"></span>
                   </div>
                   <!--/*
@@ -313,8 +323,8 @@
     </div>
   </section>
 </main>
-<section th:replace="~{fragments/partners :: section}"></section>
-<footer th:replace="~{fragments/footer :: footer}"></footer>
+<section th:replace="fragments/partners :: partners"></section>
+<footer th:replace="fragments/footer :: footer"></footer>
 <script src="https://unpkg.com/alpinejs@3.10.3/dist/cdn.min.js" type="text/javascript"></script>
 <script src="https://unpkg.com/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" type="text/javascript"></script>
 <script defer th:src="@{/js/app.js}"></script>
@@ -322,7 +332,7 @@
 <div id="floatingmes">Shift + Mouse scroll 🤓</div>
 <div class="item-details__image--size"
      style="width: 100%; height: 100%; position: fixed; z-index: 10000; top:0; left: 0; cursor: zoom-out;"
-     th:styleappend="'background: rgba(5, 11, 28, .5) url(' + ${image} + ') no-repeat center; background-size: contain; '"
+     th:styleappend="'background: rgba(5, 11, 28, .5) url(' + ${item.image} + ') no-repeat center; background-size: contain; '"
      x-on:click="imageEnlarged = !imageEnlarged"
      x-show="imageEnlarged"
 ></div>

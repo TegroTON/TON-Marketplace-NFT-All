@@ -143,7 +143,7 @@
         Libermall is an emerging NFT marketplace
       </p>
       <div class="d-flex flex-wrap align-items-center justify-content-center">
-        <a class="btn btn-primary m-3" href="/explore.php">
+        <a class="btn btn-primary m-3" href="/explore">
           Explore
         </a>
         <!--/*
@@ -329,8 +329,10 @@
         */-->
       </div>
       <div class="row pt-3">
-        <div class="col-sm-6 col-xxl-4" th:each="collection: ${topCollections}">
-          <a class="d-block" th:href="${collection.link}" th:title="${collection.name}">
+        <div class="col-sm-6 col-xxl-4" th:each="collection: ${collections}">
+          <a class="d-block" th:href="'/collection/' + ${addressHelper.toRaw(collection.address)}"
+             th:title="${collection.name}"
+          >
             <div class="card d-flex flex-lg-row align-items-center p-3 p-xl-4 rounded-20 mb-4">
               <div class="collection__picbox position-relative me-4 mb-4 mb-lg-0">
                 <picture>
@@ -342,8 +344,7 @@
                 ></i>
               </div>
               <div class="collection__body mb-3 mb-lg-0">
-                <h4 class="fs-20 mb-3 text-truncate" style="max-width: 224px" th:inline="text">
-                  [[${collection.name}]]</h4>
+                <h4 class="fs-20 mb-3 text-truncate" style="max-width: 224px" th:text="${collection.name}"></h4>
                 <p class="mb-0 color-grey text-center text-lg-start">
                   Floor: <span class="ms-1 text-uppercase">3,02 TON</span>
                 </p>
@@ -538,8 +539,9 @@
   </section>
   */-->
 </main>
-<section th:replace="~{fragments/partners :: section}"></section>
-<footer th:replace="~{fragments/footer :: footer}"></footer>
+<section th:replace="fragments/partners :: partners"></section>
+<footer th:replace="fragments/footer :: footer"></footer>
+
 <script src="https://unpkg.com/alpinejs@3.10.3/dist/cdn.min.js" type="text/javascript"></script>
 <script src="https://unpkg.com/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" type="text/javascript"></script>
 <script src="https://unpkg.com/jquery@3.3.1/dist/jquery.min.js" type="text/javascript"></script>
