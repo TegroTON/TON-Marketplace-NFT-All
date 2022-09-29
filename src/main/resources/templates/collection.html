@@ -237,55 +237,10 @@
               <!--              TODO -->
               <div class="row">
                 <!-- Start Item -->
-                <div class="col-sm-6 col-xl-4 col-xxl-3 mb-4" th:each="item: ${collectionItems}">
-                  <div class="card bg-transparent border">
-                    <a class="card-link" th:href="${item.link}">
-                      <picture>
-                        <img class="card-image img-fluid" height="250" loading="lazy"
-                             th:alt="${item.name}" th:src="${item.image}" width="276"
-                        >
-                      </picture>
-                      <div class="card-body px-1 py-0">
-                        <h4 class="fs-18 d-flex align-items-center my-4">
-                          <span class="icon-ton me-2"></span> [[${item.name}]]
-                        </h4>
-                        <div class="d-flex justify-content-between bg-soft rounded p-3 fs-14">
-                          <div th:if="${!item.isOnSale}">
-                            <p class="mb-1 fw-medium color-grey">Not For Sale</p>
-                          </div>
-                          <div th:if="${item.isOnSale}">
-                            <p class="mb-1 fw-medium color-grey">Price</p>
-                            <p class="m-0 text-white" th:text="${item.formattedPrice}"></p>
-                          </div>
-                          <!--/*
-                          <div>
-                            <p class="mb-1 fw-medium color-grey">Highest bid</p>
-                            <p class="m-0 text-white text-end">164 TON</p>
-                          </div>
-                          */-->
-                        </div>
-                      </div>
-                    </a>
-                    <button
-                      class="btn btn-sm btn-details__like d-flex align-items-center bg-soft blur-filter py-2 px-3 position-absolute mt-2 ms-2"
-                      type="button"
-                    >
-                      <i class="fa-regular fa-heart m-0 me-sm-2 fs-16"></i>
-                      <span class="d-block d-sm-inline mt-1 mt-sm-0 fs-14">24</span>
-                    </button>
-                    <div class="card__show-effect">
-                      <button class="btn btn-sm bg-white text-dark py-2" data-bs-target="#BuyNowModal"
-                              data-bs-toggle="modal"
-                              th:if="${item.isOnSale}"
-                              type="button"
-                      >Buy Now
-                      </button>
-                    </div>
-                    <div class="card__blur-bg-hover"
-                         style="background: url(./assets/img/cats/t-cat-01.webp)  no-repeat center center / cover"
-                    ></div>
-                  </div>
-                </div>
+                <div th:each="item: ${collectionItems}"
+                     th:insert="fragments/item_card :: item_card(item)"
+                     th:remove="tag"
+                ></div>
               </div>
               <button class="btn btn-outline-secondary mt-3 w-100" type="button">LOAD MORE</button>
             </div>

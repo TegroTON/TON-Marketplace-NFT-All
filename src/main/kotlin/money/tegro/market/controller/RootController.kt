@@ -85,12 +85,10 @@ class RootController(
                         itemContractService.get(item)?.let { itemContract ->
                             itemMetadataService.get(item)?.let { itemMetadata ->
                                 mapOf(
-                                    "link" to "/item/${item.toRaw()}",
+                                    "address" to item.toRaw(),
                                     "name" to itemMetadata.name,
                                     "image" to itemMetadata.image,
-                                    "isOnSale" to (itemSale != null),
-                                    "formattedPrice" to Coins.ofNano(itemSale?.full_price ?: BigInt.ZERO)
-                                        .toString() + " TON"
+                                    "fullPrice" to itemSale?.full_price?.let { Coins.ofNano(it).toString() }
                                 )
                             }
                         }
