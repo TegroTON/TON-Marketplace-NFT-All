@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<div aria-hidden="true" aria-labelledby="EnterPriceModalLabel" class="modal fade" id="TransferModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered mobile-modal-bottom">
+    <div class="modal-content border-0">
+      <div class="modal-header border-0 mb-4">
+        <h5 class="modal-title fs-24" id="SelectTypeModalLabel">Transfer Ownership</h5>
+        <button aria-label="Close" class="border-0 p-0 modal-close" data-bs-dismiss="modal" type="button"><i
+          class="fa-solid fa-xmark fa-lg"
+        ></i></button>
+      </div>
+      <div class="modal-body">
+        <form action="">
+          <label class="mb-1" for="">New owner address</label>
+          <div class="input-group mb-4">
+            <input class="form-control" placeholder="Enter Address" type="text">
+          </div>
+          <ul class="list-unstyled mb-4 pb-4 border-bottom">
+            <li class="d-flex align-items-center mb-3">
+                     <span class="color-grey">
+                     Forward Amount
+                     <a data-bs-placement="right" data-bs-toggle="tooltip" href="#!"
+                        title="The amount that will be sent to the new owner with ownership confirmation"
+                     ><i class="fa-regular fa-circle-info ms-2"></i></a>
+                     </span>
+              <span class="ms-auto">0.05 TON</span>
+            </li>
+            <li class="d-flex align-items-center">
+                     <span class="color-grey">
+                     Network Fee
+                     <a data-bs-placement="right" data-bs-toggle="tooltip" href="#!"
+                        title="Worst-case scenario network fees, taken by the blockchain to process the transaction.
+                        Unspent amount will be sent back to your wallet"
+                     ><i class="fa-regular fa-circle-info ms-2"></i></a>
+                     </span>
+              <span class="ms-auto">0.05 TON</span>
+            </li>
+          </ul>
+          <div class="d-flex align-items-center fw-medium mb-5">
+            <span>You'll pay</span>
+            <span class="ms-auto">0.1 TON</span>
+          </div>
+          <button class="btn btn-primary w-100" data-bs-target="#CreateContractModal" data-bs-toggle="modal"
+                  type="button"
+          >Transfer Ownership
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

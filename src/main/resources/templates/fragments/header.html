@@ -14,7 +14,7 @@
   <link href="../../static/css/app.css" rel="stylesheet">
 </head>
 <body>
-<header class="header">
+<header @vue:mounted="loadConnection()" class="header">
   <div class="container-fluid">
     <nav class="navbar navbar-expand-lg d-flex align-items-center p-0">
       <a class="navbar-logo me-5" href="/">
@@ -89,7 +89,8 @@
             >
           </button>
           <ul aria-labelledby="dropdownMenuProfile" class="dropdown-menu">
-            <li><a class="dropdown-item" v-bind:href="'/profile/' + wallet?.address"><i class="fa-regular fa-user me-3"
+            <li><a class="dropdown-item" v-bind:href="'/profile/' + connection.wallet?.address"><i
+              class="fa-regular fa-user me-3"
             ></i>Profile</a>
             </li>
             <li><a class="dropdown-item border-0" v-on:click="disconnect()"><i

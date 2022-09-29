@@ -2,7 +2,8 @@ import './fontawesome-pro.min'
 import 'bootstrap'
 import 'bootstrap/dist/css/bootstrap.css'
 import '../resources/static/css/app.css'
-import {createApp} from "petite-vue";
+import {createApp} from "petite-vue"
+import {Address} from "ton";
 
 interface Wallet {
     address: string;
@@ -16,8 +17,19 @@ createApp({
         wallet: null as Wallet | null,
     },
 
+    loadConnection() {
+        let i = localStorage.getItem('connection')
+        if(i != null) {
+            this.connection = JSON.parse(i)
+        }
+    },
+
+    persistConnection() {
+        localStorage.setItem('connection', JSON.stringify(this.connection))
+    },
+
     get isConnected() {
-        return this.provider != null && this.wallet != null
+        return this.connection.provider != null && this.connection.wallet != null
     },
 
     get isTonWalletAvailable() {
@@ -25,14 +37,20 @@ createApp({
     },
 
     async connectTonWallet() {
-        this.provider = 'tonwallet'
-        this.wallet = (await window.ton!.send('ton_requestWallets') as Wallet[])[0]
-        console.log("connected as " + this.wallet.address)
+        this.connection.provider = 'tonwallet'
+        this.connection.wallet = (await window.ton!.send('ton_requestWallets') as Wallet[])[0]
+        this.persistConnection()
     },
 
     disconnect() {
-        this.provider = null
-        this.wallet = null
-    }
+        this.connection.provider = null
+        this.connection.wallet = null
+        this.persistConnection()
+    },
+
+    isUserWallet(address: string) {
+        return this.connection.wallet != null &&
+            Address.parse(address).toString() == Address.parse(this.connection.wallet?.address).toString()
+    },
 })
     .mount()

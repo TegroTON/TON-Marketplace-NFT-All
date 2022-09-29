@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require("webpack");
 
 module.exports = {
     entry: './src/main/typescript/index.ts',
@@ -20,7 +21,11 @@ module.exports = {
             },
         ],
     },
-
+    plugins: [
+        new webpack.ProvidePlugin({
+            Buffer: ['buffer', 'Buffer'],
+        }),
+    ],
     resolve: {
         extensions: ['.tsx', '.ts', '.js'],
     },
