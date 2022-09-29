@@ -1,11 +1,14 @@
 package money.tegro.market.repository
 
 import com.sksamuel.aedile.core.caffeineBuilder
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.*
 import money.tegro.market.accountBlockAddresses
 import money.tegro.market.contract.nft.CollectionContract
 import money.tegro.market.contract.nft.ItemContract
 import money.tegro.market.contract.nft.SaleContract
 import money.tegro.market.metadata.ItemMetadata
+import money.tegro.market.model.CollectionModel
 import money.tegro.market.model.ItemModel
 import money.tegro.market.service.ReferenceBlockService
 import money.tegro.market.toRaw
@@ -20,6 +23,7 @@ import org.springframework.stereotype.Repository
 import org.ton.api.exception.TvmException
 import org.ton.block.AddrStd
 import org.ton.block.Block
+import org.ton.block.MsgAddress
 import org.ton.block.MsgAddressInt
 import org.ton.lite.client.LiteClient
 import java.util.*
@@ -29,6 +33,7 @@ class ItemRepository(
     private val liteClient: LiteClient,
     private val referenceBlockService: ReferenceBlockService,
     private val approvalRepository: ApprovalRepository,
+    private val collectionRepository: CollectionRepository,
 ) {
     suspend fun getByAddress(address: MsgAddressInt): ItemModel =
         ItemModel.of(
@@ -37,6 +42,30 @@ class ItemRepository(
             getMetadata(address),
             getItemSale(address),
         )
+
+    suspend fun listCollectionItems(collection: MsgAddressInt) =
+        collectionRepository.listItemAddresses(collection)
+            .mapNotNull { addr -> (addr as? MsgAddressInt)?.let { getByAddress(it) } }
+
+    suspend fun getItemCollection(item: MsgAddressInt): CollectionModel? =
+        (getContract(item)?.collection as? MsgAddressInt)?.let { collectionRepository.getByAddress(it) }
+
+    @OptIn(FlowPreview::class)
+    fun listAll() =
+        merge(
+            // Collection items
+            collectionRepository.listAll()
+                .flatMapConcat { listCollectionItems(it.address) },
+            // Standalone items
+            approvalRepository.findAllByApprovedIsTrue()
+                .map { it.address }
+                .filter { getContract(it) != null }
+                .map { getByAddress(it) }
+        )
+
+    fun listItemsOwnedBy(owner: MsgAddress) =
+        listAll()
+            .filter { it.owner == owner }
 
     private val contractCache =
         caffeineBuilder<MsgAddressInt, Optional<ItemContract>>().build()
@@ -68,7 +97,7 @@ class ItemRepository(
         }
             .orElse(null)
 
-    private suspend fun getMetadata(item: MsgAddressInt): ItemMetadata? =
+    suspend fun getMetadata(item: MsgAddressInt): ItemMetadata? =
         metadataCache.getOrPut(item) { address ->
             if (approvalRepository.existsByApprovedIsFalseAndAddress(address)) { // Explicitly forbidden
                 logger.debug("{} was disapproved", StructuredArguments.kv("address", address.toRaw()))
@@ -94,7 +123,7 @@ class ItemRepository(
         }
             .orElse(null)
 
-    private suspend fun getSale(sale: MsgAddressInt): SaleContract? =
+    suspend fun getSale(sale: MsgAddressInt): SaleContract? =
         saleCache.getOrPut(sale) { address ->
             if (approvalRepository.existsByApprovedIsFalseAndAddress(address)) { // Explicitly forbidden
                 logger.debug("{} was disapproved", StructuredArguments.kv("address", address.toRaw()))
@@ -107,7 +136,7 @@ class ItemRepository(
         }
             .orElse(null)
 
-    private suspend fun getItemSale(item: MsgAddressInt): SaleContract? =
+    suspend fun getItemSale(item: MsgAddressInt): SaleContract? =
         (getContract(item)?.owner as? MsgAddressInt)?.let { getSale(it) }
 
 

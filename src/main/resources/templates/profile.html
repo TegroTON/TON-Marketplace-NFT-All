@@ -102,7 +102,7 @@
                 </div>
               </div>
               <h1 class="collection__name fs-24 mb-4">
-                <span th:text="${addressShort}">User</span>
+                <span th:text="${addressHelper.toShortFriendly(profile.address)}">User</span>
                 <i class="fa-solid fa-circle-check fs-22 color-yellow ms-2"></i>
               </h1>
               <div class="collection__desc color-grey mb-4">
@@ -146,7 +146,9 @@
               </div>
               <div class="card-blur__item p-4 text-center">
                 <h5 class="text-uppercase fs-14 color-grey" style="letter-spacing: 1px;">address</h5>
-                <p class="m-0 text-uppercase fw-medium" style="letter-spacing: 1px;" th:text="${addressShort}">...</p>
+                <p class="m-0 text-uppercase fw-medium" style="letter-spacing: 1px;"
+                   th:text="${addressHelper.toShortFriendly(profile.address)}"
+                >...</p>
               </div>
             </div>
           </div>
@@ -161,7 +163,7 @@
                         class="collections__nav-link d-flex align-items-center text-nowrap active"
                         data-bs-target="#Owned" data-bs-toggle="tab" id="Owned-tab" role="tab"
                         type="button"
-                >Owned <span class="badge bg-grey ms-2" th:text="${ownedItemNumber}"></span></button>
+                >Owned <span class="badge bg-grey ms-2"><!-- TODO: Number of owned items --></span></button>
               </li>
               <!--/*
               <li class="collections__nav-item ">
@@ -207,56 +209,10 @@
           <div class="tab-content py-4" id="myTabContent">
             <div aria-labelledby="Owned-tab" class="tab-pane fade show active" id="Owned" role="tabpanel">
               <div class="row">
-                <!-- Start Item -->
-                <div class="col-sm-6 col-xl-4 col-xxl-3 mb-4" th:each="item: ${ownedItems}">
-                  <div class="card bg-transparent border">
-                    <a class="card-link" th:href="${item.link}">
-                      <picture>
-                        <img class="card-image img-fluid" height="250" loading="lazy"
-                             th:alt="${item.name}" th:src="${item.image}" width="276"
-                        >
-                      </picture>
-                      <div class="card-body px-1 py-0">
-                        <h4 class="fs-18 d-flex align-items-center my-4">
-                          <span class="icon-ton me-2"></span> [[${item.name}]]
-                        </h4>
-                        <div class="d-flex justify-content-between bg-soft rounded p-3 fs-14">
-                          <div th:if="${!item.isOnSale}">
-                            <p class="mb-1 fw-medium color-grey">Not For Sale</p>
-                          </div>
-                          <div th:if="${item.isOnSale}">
-                            <p class="mb-1 fw-medium color-grey">Price</p>
-                            <p class="m-0 text-white" th:text="${item.formattedPrice}"></p>
-                          </div>
-                          <!--/*
-                          <div>
-                            <p class="mb-1 fw-medium color-grey">Highest bid</p>
-                            <p class="m-0 text-white text-end">164 TON</p>
-                          </div>
-                          */-->
-                        </div>
-                      </div>
-                    </a>
-                    <button
-                      class="btn btn-sm btn-details__like d-flex align-items-center bg-soft blur-filter py-2 px-3 position-absolute mt-2 ms-2"
-                      type="button"
-                    >
-                      <i class="fa-regular fa-heart m-0 me-sm-2 fs-16"></i>
-                      <span class="d-block d-sm-inline mt-1 mt-sm-0 fs-14">24</span>
-                    </button>
-                    <div class="card__show-effect">
-                      <button class="btn btn-sm bg-white text-dark py-2" data-bs-target="#BuyNowModal"
-                              data-bs-toggle="modal"
-                              th:if="${item.isOnSale}"
-                              type="button"
-                      >Buy Now
-                      </button>
-                    </div>
-                    <div class="card__blur-bg-hover"
-                         style="background: url(./assets/img/cats/t-cat-01.webp)  no-repeat center center / cover"
-                    ></div>
-                  </div>
-                </div>
+                <div th:each="item: ${items}"
+                     th:insert="fragments/item_card :: item_card(item)"
+                     th:remove="tag"
+                ></div>
               </div>
             </div>
             <!--/*

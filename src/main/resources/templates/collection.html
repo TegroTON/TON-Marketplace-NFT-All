@@ -243,7 +243,6 @@
             <div aria-labelledby="Owned-tab" class="tab-pane fade show active" id="Owned" role="tabpanel">
               <!--              TODO -->
               <div class="row">
-                <!-- Start Item -->
                 <div th:each="item: ${items}"
                      th:insert="fragments/item_card :: item_card(item)"
                      th:remove="tag"

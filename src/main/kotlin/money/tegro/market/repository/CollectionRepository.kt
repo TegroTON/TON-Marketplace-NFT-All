@@ -29,17 +29,9 @@ class CollectionRepository(
     private val liteClient: LiteClient,
     private val referenceBlockService: ReferenceBlockService,
     private val approvalRepository: ApprovalRepository,
-    private val itemRepository: ItemRepository,
 ) {
     suspend fun getByAddress(address: MsgAddressInt) =
         CollectionModel.of(address, getContract(address), getMetadata(address))
-
-    suspend fun listItems(address: MsgAddressInt) =
-        listItemAddresses(address)
-            .mapNotNull { addr -> (addr as? MsgAddressInt)?.let { itemRepository.getByAddress(it) } }
-
-    suspend fun getItemCollection(item: MsgAddressInt): CollectionModel? =
-        (itemRepository.getContract(item)?.collection as? MsgAddressInt)?.let { getByAddress(it) }
 
     fun listAll() =
         approvalRepository.findAllByApprovedIsTrue()
@@ -56,7 +48,7 @@ class CollectionRepository(
     private val itemAddressCache =
         caffeineBuilder<Pair<MsgAddressInt, ULong>, Optional<MsgAddress>>().build()
 
-    private suspend fun getContract(address: MsgAddressInt): CollectionContract? =
+    suspend fun getContract(address: MsgAddressInt): CollectionContract? =
         contractCache.getOrPut(address) { collection ->
             if (approvalRepository.existsByApprovedIsTrueAndAddress(collection)) { // Has been explicitly approved
                 try {
@@ -77,7 +69,7 @@ class CollectionRepository(
         }
             .orElse(null)
 
-    private suspend fun getMetadata(address: MsgAddressInt): CollectionMetadata? =
+    suspend fun getMetadata(address: MsgAddressInt): CollectionMetadata? =
         metadataCache.getOrPut(address) { collection ->
             if (approvalRepository.existsByApprovedIsTrueAndAddress(collection)) { // Has been explicitly approved
                 getContract(collection)
@@ -92,7 +84,7 @@ class CollectionRepository(
         }
             .orElse(null)
 
-    private suspend fun getItemAddress(
+    suspend fun getItemAddress(
         collection: MsgAddressInt,
         index: ULong,
     ): MsgAddress? =
@@ -121,7 +113,7 @@ class CollectionRepository(
         }
             .orElse(null)
 
-    private suspend fun listItemAddresses(address: MsgAddressInt): Flow<MsgAddress> =
+    suspend fun listItemAddresses(address: MsgAddressInt): Flow<MsgAddress> =
         (0uL until (getContract(address)?.next_item_index ?: 0uL))
             .asFlow()
             .mapNotNull { getItemAddress(address, it) }
