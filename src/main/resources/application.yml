@@ -12,11 +12,3 @@ spring:
     url: r2dbc:postgresql://${POSTGRES_URL:localhost:5432/market}
     username: ${POSTGRES_USER:postgres}
     password: ${POSTGRES_PASSWORD:postgrespw}
-  thymeleaf: # Thymeleaf
-    mode: HTML
-    encoding: UTF-8
-  web:
-    resources:
-      static-locations: file:src/main/resources/static/
-      cache:
-        period: 0

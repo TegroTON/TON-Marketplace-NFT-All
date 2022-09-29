@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "money.tegro"
-version = "0.2.1"
+version = "0.2.3"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 configurations {
@@ -73,7 +73,7 @@ tasks.register<NpxTask>("buildWebpackApp") {
     command.set("webpack")
     args.addAll("build", "--mode=production")
     inputs.files("package.json", "package-lock.json", "tsconfig.json", "webpack.config.js")
-    inputs.dir("src")
+    inputs.dir("src/main/typescript")
     inputs.dir(fileTree("node_modules").exclude(".cache"))
     outputs.dir("src/main/resources/static/js")
 }
