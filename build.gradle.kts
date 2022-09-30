@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "money.tegro"
-version = "0.2.3"
+version = "0.3.0"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 configurations {
