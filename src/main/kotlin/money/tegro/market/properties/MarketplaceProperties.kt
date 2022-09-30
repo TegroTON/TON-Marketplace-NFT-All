@@ -1,12 +1,10 @@
 package money.tegro.market.properties
 
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.boot.context.properties.ConstructorBinding
 import org.ton.bigint.BigInt
 import org.ton.block.MsgAddressInt
 import org.ton.crypto.base64
 
-@ConstructorBinding
 @ConfigurationProperties("market.marketplace")
 class MarketplaceProperties {
     var marketplaceAddress: MsgAddressInt = MsgAddressInt("kQBzkX3JYsluRVlcwD9kaUPpBil0hVrKuIQ4OTOEfkD6tesA")

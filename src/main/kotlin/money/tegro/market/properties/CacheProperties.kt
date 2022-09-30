@@ -1,16 +1,11 @@
 package money.tegro.market.properties
 
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.boot.context.properties.ConstructorBinding
-import org.springframework.boot.context.properties.bind.DefaultValue
-import java.time.Duration
+import kotlin.time.Duration
 
-@ConstructorBinding
 @ConfigurationProperties("market.cache")
-data class CacheProperties(
-    @DefaultValue("PT48H")
-    val collectionMetadataExpires: Duration,
+class CacheProperties {
+    var collectionMetadataExpires: Duration = Duration.parse("PT48H")
 
-    @DefaultValue("PT48H")
-    val itemMetadataExpires: Duration,
-)
+    var itemMetadataExpires: Duration = Duration.parse("PT48H")
+}

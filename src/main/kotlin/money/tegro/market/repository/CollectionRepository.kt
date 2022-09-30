@@ -24,7 +24,6 @@ import org.ton.block.MsgAddress
 import org.ton.block.MsgAddressInt
 import org.ton.lite.client.LiteClient
 import java.util.*
-import kotlin.time.toKotlinDuration
 
 @Repository
 class CollectionRepository(
@@ -46,7 +45,7 @@ class CollectionRepository(
         caffeineBuilder<MsgAddressInt, Optional<CollectionContract>>().build()
     private val metadataCache =
         caffeineBuilder<MsgAddressInt, Optional<CollectionMetadata>> {
-            expireAfterWrite = cacheProperties.collectionMetadataExpires.toKotlinDuration()
+            expireAfterWrite = cacheProperties.collectionMetadataExpires
         }.build()
     private val itemAddressCache =
         caffeineBuilder<Pair<MsgAddressInt, ULong>, Optional<MsgAddress>>().build()
