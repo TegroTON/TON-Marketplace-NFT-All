@@ -6,6 +6,7 @@ import money.tegro.market.accountBlockAddresses
 import money.tegro.market.contract.nft.CollectionContract
 import money.tegro.market.metadata.CollectionMetadata
 import money.tegro.market.model.CollectionModel
+import money.tegro.market.properties.CacheProperties
 import money.tegro.market.service.ReferenceBlockService
 import money.tegro.market.toRaw
 import mu.KLogging
@@ -23,9 +24,11 @@ import org.ton.block.MsgAddress
 import org.ton.block.MsgAddressInt
 import org.ton.lite.client.LiteClient
 import java.util.*
+import kotlin.time.toKotlinDuration
 
 @Repository
 class CollectionRepository(
+    private val cacheProperties: CacheProperties,
     private val liteClient: LiteClient,
     private val referenceBlockService: ReferenceBlockService,
     private val approvalRepository: ApprovalRepository,
@@ -43,7 +46,7 @@ class CollectionRepository(
         caffeineBuilder<MsgAddressInt, Optional<CollectionContract>>().build()
     private val metadataCache =
         caffeineBuilder<MsgAddressInt, Optional<CollectionMetadata>> {
-            // TODO: Configuration
+            expireAfterWrite = cacheProperties.collectionMetadataExpires.toKotlinDuration()
         }.build()
     private val itemAddressCache =
         caffeineBuilder<Pair<MsgAddressInt, ULong>, Optional<MsgAddress>>().build()
