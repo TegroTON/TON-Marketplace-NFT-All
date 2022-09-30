@@ -1,5 +1,7 @@
 const path = require('path');
 const webpack = require("webpack");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+
 
 module.exports = {
     entry: './web/ts/index.ts',
@@ -17,13 +19,16 @@ module.exports = {
             },
             {
                 test: /\.css$/i,
-                use: ['style-loader', 'css-loader'],
+                use: [MiniCssExtractPlugin.loader, 'css-loader'],
             },
         ],
     },
     plugins: [
         new webpack.ProvidePlugin({
             Buffer: ['buffer', 'Buffer'],
+        }),
+        new MiniCssExtractPlugin({
+            filename: 'index.css'
         }),
     ],
     resolve: {
