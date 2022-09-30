@@ -6,12 +6,14 @@ import kotlinx.coroutines.flow.*
 import money.tegro.market.accountBlockAddresses
 import money.tegro.market.contract.nft.CollectionContract
 import money.tegro.market.contract.nft.ItemContract
+import money.tegro.market.contract.nft.RoyaltyContract
 import money.tegro.market.contract.nft.SaleContract
 import money.tegro.market.metadata.ItemMetadata
 import money.tegro.market.model.CollectionModel
 import money.tegro.market.model.ItemModel
 import money.tegro.market.properties.CacheProperties
 import money.tegro.market.service.ReferenceBlockService
+import money.tegro.market.service.RoyaltyService
 import money.tegro.market.toRaw
 import mu.KLogging
 import net.logstash.logback.argument.StructuredArguments
@@ -35,6 +37,7 @@ class ItemRepository(
     private val cacheProperties: CacheProperties,
     private val liteClient: LiteClient,
     private val referenceBlockService: ReferenceBlockService,
+    private val royaltyService: RoyaltyService,
     private val approvalRepository: ApprovalRepository,
     private val collectionRepository: CollectionRepository,
 ) {
@@ -141,6 +144,10 @@ class ItemRepository(
 
     suspend fun getItemSale(item: MsgAddressInt): SaleContract? =
         (getContract(item)?.owner as? MsgAddressInt)?.let { getSale(it) }
+
+    suspend fun getRoyalty(item: MsgAddressInt): RoyaltyContract? =
+        (getContract(item)?.collection as? MsgAddressInt)?.let { royaltyService.get(it) } // Collection item
+            ?: royaltyService.get(item) // Standalone item
 
 
     @RabbitListener(
