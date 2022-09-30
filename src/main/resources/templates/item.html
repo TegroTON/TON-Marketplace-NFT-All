@@ -349,7 +349,7 @@
 <!--/*<section th:replace="fragments/partners :: partners"></section>*/-->
 <footer th:replace="fragments/footer :: footer"></footer>
 <div th:replace="modals/connect :: #ConnectModal"></div>
-<div th:replace="modals/transfer :: #TransferModal"></div>
+<div th:replace="modals/transfer :: transfer_modal(${item.address})"></div>
 <div class="item-details__image--size"
      style="width: 100%; height: 100%; position: fixed; z-index: 10000; top:0; left: 0; cursor: zoom-out;"
      th:styleappend="'background: rgba(5, 11, 28, .5) url(' + ${item.image} + ') no-repeat center; background-size: contain; '"

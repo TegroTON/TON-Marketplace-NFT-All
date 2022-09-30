@@ -5,7 +5,9 @@
   <title>Title</title>
 </head>
 <body>
-<div aria-hidden="true" aria-labelledby="EnterPriceModalLabel" class="modal fade" id="TransferModal" tabindex="-1">
+<div aria-hidden="true" aria-labelledby="EnterPriceModalLabel" class="modal fade" id="TransferModal" tabindex="-1"
+     th:fragment="transfer_modal(itemAddress)" v-scope="{newOwner: null}"
+>
   <div class="modal-dialog modal-dialog-centered mobile-modal-bottom">
     <div class="modal-content border-0">
       <div class="modal-header border-0 mb-4">
@@ -18,7 +20,7 @@
         <form action="">
           <label class="mb-1" for="">New owner address</label>
           <div class="input-group mb-4">
-            <input class="form-control" placeholder="Enter Address" type="text">
+            <input class="form-control" placeholder="Enter Address" type="text" v-model="newOwner">
           </div>
           <ul class="list-unstyled mb-4 pb-4 border-bottom">
             <li class="d-flex align-items-center mb-3">
@@ -45,8 +47,10 @@
             <span>You'll pay</span>
             <span class="ms-auto">0.1 TON</span>
           </div>
-          <button class="btn btn-primary w-100" data-bs-toggle="modal"
+          <button class="btn btn-primary w-100"
+                  th:v-on:click="'requestItemTransferTo(\'' + ${addressHelper.toRaw(itemAddress)} + '\', newOwner)'"
                   type="button"
+                  v-bind:disabled="!isValidAddress(newOwner)"
           >
             Transfer Ownership
           </button>
