@@ -218,6 +218,18 @@
                      th:remove="tag"
                 ></div>
               </div>
+              <div class="d-flex flex-wrap mt-1">
+                <a class="btn btn-outline-secondary flex-fill m-2" href="#!"
+                   th:href="'?drop=' + ${drop - 16}"
+                   th:if="${drop > 0}"
+                >
+                  <i class="fa-solid fa-arrow-left"></i> LOAD PREVIOUS
+                </a>
+                <a class="btn btn-outline-secondary flex-fill m-2" href="#!" th:href="'?drop=' + ${drop + 16}">
+                  <!--/* TODO: Hide when at the end */ -->
+                  LOAD NEXT <i class="fa-solid fa-arrow-right"></i>
+                </a>
+              </div>
             </div>
             <!--/*
             <div aria-labelledby="Onsale-tab" class="tab-pane fade" id="Onsale" role="tabpanel">
@@ -248,7 +260,6 @@
             */-->
           </div>
           <!--/* End Collection Stat */-->
-          <a class="btn btn-outline-secondary mt-3 w-100" type="button">LOAD MORE</a>
         </div>
       </div>
     </div>

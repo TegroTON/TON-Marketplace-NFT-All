@@ -260,7 +260,19 @@
                      th:remove="tag"
                 ></div>
               </div>
-              <a class="btn btn-outline-secondary mt-3 w-100" href="#!">LOAD MORE</a>
+              <div class="d-flex flex-wrap mt-1">
+                <a class="btn btn-outline-secondary flex-fill m-2" href="#!"
+                   th:href="'?drop=' + ${drop - 16}"
+                   th:if="${drop > 0}"
+                >
+                  <i class="fa-solid fa-arrow-left"></i> LOAD PREVIOUS
+                </a>
+                <a class="btn btn-outline-secondary flex-fill m-2" href="#!" th:href="'?drop=' + ${drop + 16}"
+                   th:if="${T(java.lang.Math).max(#lists.size(items), drop) < collection.numberOfItems}"
+                >
+                  LOAD NEXT <i class="fa-solid fa-arrow-right"></i>
+                </a>
+              </div>
             </div>
             <!--/*
             <div aria-labelledby="Activity-tab" class="tab-pane fade" id="Activity" role="tabpanel">
