@@ -43,13 +43,15 @@
     href="https://fonts.googleapis.com/css2?family=Raleway:wght@600;700;900&family=Roboto:wght@300;400;500&display=swap"
     rel="stylesheet"
   >
+  <script async crossorigin="anonymous" src="../static/js/fontawesome-pro.min.js"
+          th:src="@{/js/fontawesome-pro.min.js}"
+  ></script>
   <title>Libermall - an NFT marketplace</title>
 </head>
 <body>
-<header th:replace="~{fragments/header :: header}"></header>
+<header th:replace="fragments/header :: header"></header>
 <main class="main-page">
-  <!-- Start of Hero section
-     ============================================= -->
+  <!--/* Start of Hero section */-->
   <section class="hero section" id="hero">
     <div class="hero__container container-fluid carousel slide p-0" data-bs-ride="carousel" data-interval="false"
          id="carouselHeroIndicators"
@@ -72,9 +74,11 @@
                 A new, modern and slick NFT marketplace is<br>
                 emerging on The Open Network.
               </div>
+              <!--/*
               <a class="btn btn-outline-primary" href="#!">
                 <span>Learn more</span>
               </a>
+              */-->
             </div>
           </div>
           <picture>
@@ -95,9 +99,11 @@
                 This is a preview of a small subset of future features<br>
                 running in the testing network.
               </div>
+              <!--/*
               <a class="btn btn-outline-primary" href="#!">
                 <span>Learn more</span>
               </a>
+              */-->
             </div>
           </div>
           <picture>
@@ -123,10 +129,8 @@
       </button>
     </div>
   </section>
-  <!-- End of Hero section
-     ============================================= -->
-  <!-- Start of Discover section
-     ============================================= -->
+  <!--/* End of Hero section */-->
+  <!--/* Start of Discover section */-->
   <section class="discover section pt-150" id="discover">
     <div class="discover__container container-fluid text-center">
       <h2 class="section__title mb-3">
@@ -147,30 +151,33 @@
       </div>
     </div>
   </section>
-  <!-- End of Discover section
-     ============================================= -->
-  <!-- Start of Libermall section
-     ============================================= -->
+  <!--/* End of Discover section */-->
+  <!--/* Start of Libermall section */-->
   <section class="libermall section" id="Libermall">
     <div class="libermall__container container-fluid">
       <h2 class="section__title mb-3">
-        Early Access in the test network <span class="d-block d-md-inline">on Libermall</span>
+        Early Access <span class="d-block d-md-inline">on Libermall</span>
       </h2>
       <div class="libermall__buttons d-flex align-items-center">
         <a class="btn btn-dark" href="/explore">Explore</a>
         <div class="libermall__soclinks ms-5 d-none d-md-flex">
-          <a class="libermall__soclinks-item" href="#!"><i class="fa-brands fa-telegram"></i></a>
-          <a class="libermall__soclinks-item" href="#!"><i class="fa-brands fa-discord"></i></a>
-          <a class="libermall__soclinks-item" href="#!"><i class="fa-brands fa-twitter"></i></a>
-          <a class="libermall__soclinks-item" href="#!"><i class="fa-brands fa-instagram"></i></a>
+          <a class="libermall__soclinks-item" href="https://t.me/LiberMall"><i class="fa-brands fa-telegram"></i></a>
+          <a class="libermall__soclinks-item" href="https://twitter.com/LiberMallNFT"><i class="fa-brands fa-twitter"
+          ></i></a>
+          <a class="libermall__soclinks-item" href="https://github.com/LiberMall"><i class="fa-brands fa-github"
+          ></i></a>
+          <a class="libermall__soclinks-item" href="https://www.instagram.com/libermallua"><i
+            class="fa-brands fa-instagram"
+          ></i></a>
+          <a class="libermall__soclinks-item" href="https://libermall.medium.com"><i class="fa-brands fa-medium"
+          ></i></a>
+          <a class="libermall__soclinks-item" href="https://vk.com/libermall"><i class="fa-brands fa-vk"></i></a>
         </div>
       </div>
     </div>
   </section>
-  <!-- End of Libermall section
-     ============================================= -->
-  <!-- Start of Notable section
-     ============================================= -->
+  <!--/* End of Libermall section */-->
+  <!--/* Start of Notable section */-->
   <!--/*
   <section class="notable section" id="notable">
     <div class="notable__container container-fluid">
@@ -291,10 +298,8 @@
       </div>
   </section>
   */-->
-  <!-- End of Notable section
-     ============================================= -->
-  <!-- Start of Collections section
-     ============================================= -->
+  <!--/* End of Notable section */-->
+  <!--/* Start of Collections section */-->
   <section class="collections section">
     <div class="collection__container container-fluid">
       <div class="d-block d-sm-flex align-items-center mb-56">
@@ -329,39 +334,45 @@
             <div class="card d-flex flex-lg-row align-items-center p-3 p-xl-4 rounded-20 mb-4">
               <div class="collection__picbox position-relative me-4 mb-4 mb-lg-0">
                 <picture>
-                  <img class="image-80x80 rounded-circle" height="80" loading="lazy"
-                       th:alt="${collection.name}" th:src="${collection.image}" width="80"
+                  <img alt="Collection Image" class="image-80x80 rounded-circle" height="80"
+                       loading="lazy" src="../static/img/user-1.svg" th:alt="${collection.name}"
+                       th:src="${collection.image}"
+                       width="80"
                   >
                 </picture>
+                <!--/*
                 <i class="fa-solid fa-circle-check fs-22 color-yellow position-absolute bottom-0" style="right: -4%;"
                 ></i>
+                */-->
               </div>
               <div class="collection__body mb-3 mb-lg-0">
                 <h4 class="fs-20 mb-3 text-truncate" style="max-width: 224px" th:text="${collection.name}"></h4>
+                <!--/*
                 <p class="mb-0 color-grey text-center text-lg-start">
                   Floor: <span class="ms-1 text-uppercase">3,02 TON</span>
                 </p>
+                */-->
               </div>
               <div class="collection__info d-flex d-lg-block text-center text-lg-end ms-0 ms-lg-auto">
+                <!--/*
                 <div class="fw-medium text-uppercase text-white mb-3 me-3 me-lg-0">3.8k TON</div>
                 <div class="fw-medium color-grey">
                   $2.68M
                   <span class="color-green ms-2">+8.84%</span>
                 </div>
+                */-->
               </div>
             </div>
           </a>
         </div>
       </div>
       <div class="mt-5 text-center">
-        <a class="btn btn-primary" href="#!">Go to ranking</a>
+        <a class="btn btn-primary" href="/explore">Explore All</a>
       </div>
     </div>
   </section>
-  <!-- End of Collections section
-     ============================================= -->
-  <!-- Start of Create section
-     ============================================= -->
+  <!--/* End of Collections section */-->
+  <!--/* Start of Create section */-->
   <!--/*
   <section class="create section" id="create">
     <div class="create__container container-fluid position-relative">
@@ -442,10 +453,8 @@
     </div>
   </section>
   */-->
-  <!-- End of Collections section
-     ============================================= -->
-  <!-- Start of Category section
-     ============================================= -->
+  <!--/* End of Collections section */-->
+  <!--/* Start of Category section */-->
   <!--/*
   <section class="category section pt-150" id="category">
     <div class="category__container container-fluid">
@@ -532,11 +541,10 @@
   </section>
   */-->
 </main>
-<section th:replace="fragments/partners :: partners"></section>
+<!--/*<section th:replace="fragments/partners :: partners"></section>*/-->
 <footer th:replace="fragments/footer :: footer"></footer>
 <div th:replace="modals/connect :: connect_modal"></div>
-<script defer th:src="@{/js/index.js}"></script>
 
-<div id="floatingmes">Shift + Mouse scroll 🤓</div>
+<script defer th:src="@{/bundle/index.js}"></script>
 </body>
 </html>

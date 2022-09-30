@@ -1,7 +1,5 @@
-import './fontawesome-pro.min'
+import '../css/index.css'
 import 'bootstrap'
-import 'bootstrap/dist/css/bootstrap.css'
-import '../resources/static/css/app.css'
 import {createApp} from "petite-vue"
 import {Address} from "ton";
 
@@ -19,7 +17,7 @@ createApp({
 
     loadConnection() {
         let i = localStorage.getItem('connection')
-        if(i != null) {
+        if (i != null) {
             this.connection = JSON.parse(i)
         }
     },

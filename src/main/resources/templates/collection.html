@@ -43,10 +43,13 @@
     href="https://fonts.googleapis.com/css2?family=Raleway:wght@600;700;900&family=Roboto:wght@300;400;500&display=swap"
     rel="stylesheet"
   >
-  <title>Libermall - an NFT marketplace</title>
+  <script async crossorigin="anonymous" src="../static/js/fontawesome-pro.min.js"
+          th:src="@{/js/fontawesome-pro.min.js}"
+  ></script>
+  <title th:text="${collection.name} + ' | Libermall'">Libermall - an NFT marketplace</title>
 </head>
 <body>
-<header th:replace="~{fragments/header :: header}"></header>
+<header th:replace="fragments/header :: header"></header>
 <section class="nft-hero">
   <picture>
     <img alt="Collection" class="nft-hero__image" height="275" loading="lazy" src="../static/img/nft-hero.png"
@@ -60,10 +63,13 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-lg-4 col-xl-4 col-xxl-3 mb-4 mb-lg-0">
-          <!-- Start Collection Info -->
+          <!--/* Start Collection Info */-->
           <div class="card card-blur p-0 mt--100 mb-4">
             <div class="card__share d-flex position-absolute" style="top: 8px; right: 8px">
-              <button class="btn btn-cube" type="button"><i class="fa-regular fa-share-nodes"></i></button>
+              <!--/*
+              <button class="btn btn-cube" type="button">
+                <i class="fa-regular fa-share-nodes"></i>
+              </button>
               <div class="dropdown">
                 <button aria-expanded="false" class="btn btn-cube" data-bs-toggle="dropdown" id="dropdownMenuButton1"
                         type="button"
@@ -74,19 +80,24 @@
                   <li><a class="dropdown-item border-0" href="#">Report page</a></li>
                 </ul>
               </div>
+              */-->
             </div>
             <div class="card-body p-4 p-lg-2 p-xl-3 p-xxl-4">
               <div class="d-flex flex-column flex-md-row flex-lg-column align-items-center mb-5">
                 <div class="collection__image mb-4 mb-md-0 mb-lg-4 ms-auto ms-md-0 ms-lg-auto me-auto">
                   <img alt="" class="img-fluid rounded-circle" th:src="${collection.image}">
                 </div>
+                <!--/*
                 <div class="d-flex mx-0 mx-lg-auto">
                   <a class="btn btn-sm btn-outline-primary" href="#!">Subscribe</a>
                 </div>
+                */-->
               </div>
               <h1 class="collection__name fs-24 mb-4">
                 <span th:text="${collection.name}">...</span>
+                <!--/*
                 <i class="fa-solid fa-circle-check fs-22 color-yellow ms-2"></i>
+                */-->
               </h1>
               <div class="collection__desc color-grey mb-4">
                 <p th:text="${collection.description}"></p>
@@ -108,13 +119,17 @@
               */-->
             </div>
             <div class="card-footer text-center border-top px-5 py-3">
-              Created by <span class="color-yellow" th:text="${addressHelper.toShortFriendly(collection.owner)}"
-            >...</span>
+              Created by <a class="color-yellow" href="/"
+                            th:href="'/profile/' + ${addressHelper.toRaw(collection.owner)}"
+                            th:text="${addressHelper.toShortFriendly(collection.owner)}"
+            >...</a>
+              <!--/*
               <i class="fa-solid fa-circle-check color-yellow fs-14 ms-1"></i>
+              */-->
             </div>
           </div>
-          <!-- End Collection Info -->
-          <!-- Start Collection Filters -->
+          <!--/* End Collection Info */-->
+          <!--/* Start Collection Filters */-->
           <!--/*
           <?php
                   require "_collection-filters.php";
@@ -132,11 +147,13 @@
                    th:text="${collection.numberOfItems}"
                 >...</p>
               </div>
+              <!--/*
               <div class="card-blur__item p-4 border-end text-center">
                 <h5 class="text-uppercase fs-14 color-grey" style="letter-spacing: 1px;">Owners</h5>
                 <p class="m-0 text-uppercase fw-medium" style="letter-spacing: 1px;" th:text="${itemOwnerNumber}">
                   ...</p>
               </div>
+              */-->
               <div class="card-blur__item p-4 border-end text-center">
                 <h5 class="text-uppercase fs-14 color-grey" style="letter-spacing: 1px;">Blockchain</h5>
                 <p class="m-0 text-uppercase fw-medium" style="letter-spacing: 1px;">TON</p>
@@ -145,12 +162,12 @@
                 <h5 class="text-uppercase fs-14 color-grey" style="letter-spacing: 1px;">address</h5>
                 <p class="m-0 fw-medium" style="letter-spacing: 1px;"
                    th:text="${addressHelper.toShortFriendly(collection.address)}"
-                ></p>
+                >...</p>
               </div>
             </div>
           </div>
-          <!-- End Collection Stat -->
-          <!-- Start Collection Tabs -->
+          <!--/* End Collection Stat */-->
+          <!--/* Start Collection Tabs */-->
           <div class="overflow-auto mobile__nav-bottom mb-2 px-2" id="mouseScroll">
             <ul class="nav collections__nav list-unstyled d-flex flex-nowrap align-items-center" id="myTab"
                 role="tablist"
@@ -239,11 +256,11 @@
               <!--              TODO -->
               <div class="row">
                 <div th:each="item: ${items}"
-                     th:insert="fragments/item_card :: item_card(item)"
+                     th:insert="cards/item :: item_card(item)"
                      th:remove="tag"
                 ></div>
               </div>
-              <button class="btn btn-outline-secondary mt-3 w-100" type="button">LOAD MORE</button>
+              <a class="btn btn-outline-secondary mt-3 w-100" href="#!">LOAD MORE</a>
             </div>
             <!--/*
             <div aria-labelledby="Activity-tab" class="tab-pane fade" id="Activity" role="tabpanel">
@@ -253,17 +270,16 @@
             </div>
             */-->
           </div>
-          <!-- End Collection Tabs -->
+          <!--/* End Collection Tabs */-->
         </div>
       </div>
     </div>
   </section>
 </main>
-<section th:replace="~{fragments/partners :: partners}"></section>
-<footer th:replace="~{fragments/footer :: footer}"></footer>
-<div th:replace="modals/connect :: connect_modal"></div>
-<script defer th:src="@{/js/index.js}"></script>
+<!--/*<section th:replace="fragments/partners :: partners"></section>*/-->
+<footer th:replace="fragments/footer :: footer"></footer>
+<div th:replace="modals/connect :: #ConnectModal"></div>
 
-<div id="floatingmes">Shift + Mouse scroll 🤓</div>
+<script defer th:src="@{/bundle/index.js}"></script>
 </body>
 </html>

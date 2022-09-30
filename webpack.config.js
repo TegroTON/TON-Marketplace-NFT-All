@@ -2,10 +2,10 @@ const path = require('path');
 const webpack = require("webpack");
 
 module.exports = {
-    entry: './src/main/typescript/index.ts',
+    entry: './web/ts/index.ts',
     output: {
         filename: 'index.js',
-        path: path.resolve(__dirname, './src/main/resources/static/js/'),
+        path: path.resolve(__dirname, './src/main/resources/static/bundle/'),
     },
     mode: "development",
     module: {

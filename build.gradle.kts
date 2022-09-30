@@ -73,9 +73,9 @@ tasks.register<NpxTask>("buildWebpackApp") {
     command.set("webpack")
     args.addAll("build", "--mode=production")
     inputs.files("package.json", "package-lock.json", "tsconfig.json", "webpack.config.js")
-    inputs.dir("src/main/typescript")
+    inputs.dir("web")
     inputs.dir(fileTree("node_modules").exclude(".cache"))
-    outputs.dir("src/main/resources/static/js")
+    outputs.dir("src/main/resources/static/bundle")
 }
 
 tasks.withType<ProcessResources> {

@@ -43,10 +43,13 @@
     href="https://fonts.googleapis.com/css2?family=Raleway:wght@600;700;900&family=Roboto:wght@300;400;500&display=swap"
     rel="stylesheet"
   >
+  <script async crossorigin="anonymous" src="../static/js/fontawesome-pro.min.js"
+          th:src="@{/js/fontawesome-pro.min.js}"
+  ></script>
   <title>Libermall - an NFT marketplace</title>
 </head>
 <body>
-<header th:replace="~{fragments/header :: header}"></header>
+<header th:replace="fragments/header :: header"></header>
 <main class="main-page">
   <section class="collections section">
     <div class="container-fluid">
@@ -92,7 +95,6 @@
         </ul>
       </div>
       <div class="row collections__list">
-        <!--Card Item-->
         <div class="col-sm-6 col-lg-4 col-xl-3 mb-4" th:each="collection: ${collections}">
           <a class="card card-gradient top-effect" href="/collection/"
              th:href="'/collection/' + ${addressHelper.toRaw(collection.address)}"
@@ -100,14 +102,15 @@
              title="Collection"
           >
             <picture>
-              <img alt="Moonbirds" class="image-300x300" height="340" loading="lazy"
-                   src="" th:src="${collection.coverImage}" width="1920"
+              <img alt="Collection Background" class="image-300x300" height="340" loading="lazy"
+                   src="" th:alt="${collection.name}" th:src="${collection.coverImage}" width="1920"
               >
             </picture>
             <div class="card-body">
               <div class="card-avatar">
                 <img alt="Collection" class="img-fluid" height="" loading="lazy"
                      src="../static/img/author/author-12.jpg"
+                     th:alt="${collection.name}"
                      th:src="${collection.image}"
                      width="120"
                 >
@@ -115,15 +118,19 @@
               <div class="d-flex flex-wrap align-items-center">
                 <div class="me-auto mt-3">
                   <h3 class="fs-20 d-flex align-items-center">
-                    <span class="collections__card-name" th:text="${collection.name}">Collection</span> <i
-                    class="fa-solid fa-circle-check fs-16 color-yellow ms-2"
-                  ></i>
+                    <span class="collections__card-name" th:text="${collection.name}">Collection</span>
+                    <!--/*
+                    <i class="fa-solid fa-circle-check fs-16 color-yellow ms-2"></i>
+                    */-->
                   </h3>
+                  <!--/*
                   <p class="mb-0 color-grey">
                     6.7K owners
                   </p>
+                  */-->
                 </div>
                 <div class="d-flex align-items-center mt-3">
+                  <!--/*
                   <div class="pe-3">
                     <p class="fw-medium text-white mb-2">167.8K eTH</p>
                     <p class="m-0 color-grey">Total volume</p>
@@ -132,6 +139,7 @@
                     <p class="fw-medium text-white mb-2">16.48 eTH</p>
                     <p class="m-0 color-grey">floor</p>
                   </div>
+                  */-->
                 </div>
               </div>
             </div>
@@ -141,11 +149,10 @@
     </div>
   </section>
 </main>
-<section th:replace="fragments/partners :: partners"></section>
+<!--/*<section th:replace="fragments/partners :: partners"></section>*/-->
 <footer th:replace="fragments/footer :: footer"></footer>
-<div th:replace="modals/connect :: connect_modal"></div>
-<script defer th:src="@{/js/index.js}"></script>
+<div th:replace="modals/connect :: #ConnectModal"></div>
 
-<div id="floatingmes">Shift + Mouse scroll 🤓</div>
+<script defer th:src="@{/bundle/index.js}"></script>
 </body>
 </html>

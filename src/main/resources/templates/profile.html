@@ -43,6 +43,9 @@
     href="https://fonts.googleapis.com/css2?family=Raleway:wght@600;700;900&family=Roboto:wght@300;400;500&display=swap"
     rel="stylesheet"
   >
+  <script async crossorigin="anonymous" src="../static/js/fontawesome-pro.min.js"
+          th:src="@{/js/fontawesome-pro.min.js}"
+  ></script>
   <title>Libermall - an NFT marketplace</title>
 </head>
 <body>
@@ -63,8 +66,9 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-lg-4 col-xl-4 col-xxl-3 mb-4 mb-lg-0">
-          <!-- Start Collection Info -->
+          <!--/* Start Collection Info */-->
           <div class="card card-blur p-0 mt--100">
+            <!--/*
             <div class="card__share d-flex position-absolute" style="top: 8px; right: 8px">
               <button class="btn btn-cube" data-bs-target="#ShareModal" data-bs-toggle="modal" type="button"><i
                 class="fa-regular fa-share-nodes"
@@ -80,6 +84,7 @@
                 </ul>
               </div>
             </div>
+            */-->
             <div class="card-body p-4 p-lg-2 p-xl-3 p-xxl-4">
               <div class="d-flex flex-column flex-md-row flex-lg-column align-items-center mb-5">
                 <div class="collection__image mb-4 mb-md-0 mb-lg-4 ms-auto ms-md-0 ms-lg-auto me-auto">
@@ -88,6 +93,7 @@
                        width="80"
                   >
                 </div>
+                <!--/*
                 <div class="d-flex mx-0 mx-lg-auto">
                   <a class="btn btn-sm btn-outline-primary me-3" href="#!">Follow</a>
                   <a class="btn btn-sm btn-soft" data-bs-target="#MessageModal" data-bs-toggle="modal"
@@ -95,10 +101,13 @@
                      href="#!"
                   >Message</a>
                 </div>
+                */-->
               </div>
               <h1 class="collection__name fs-24 mb-4">
-                <span th:text="${addressHelper.toShortFriendly(profile.address)}">User</span>
+                <span th:text="${addressHelper.toShortFriendly(profile.address)}">...</span>
+                <!--/*
                 <i class="fa-solid fa-circle-check fs-22 color-yellow ms-2"></i>
+                */-->
               </h1>
               <div class="collection__desc color-grey mb-4">
                 <!--/*
@@ -122,17 +131,17 @@
               */-->
             </div>
           </div>
-          <!-- End Start Collection Info -->
-          <!-- Start Collection Filters -->
+          <!--/* End Start Collection Info */-->
+          <!--/* Start Collection Filters */-->
           <!--/*
           <?php
                   require "_collection-filters.php";
                   ?>
                   */-->
-          <!-- End Collection Filters -->
+          <!--/* End Collection Filters */-->
         </div>
         <div class="col-lg-8 col-xl-8 col-xxl-9">
-          <!-- Start Collection Stat -->
+          <!--/* Start Collection Stat */-->
           <div class="card card-blur mb-4 overflow-auto" id="mouseScroll">
             <div class="d-flex align-items-center justify-content-between">
               <div class="card-blur__item p-4 border-end text-center">
@@ -147,8 +156,8 @@
               </div>
             </div>
           </div>
-          <!-- End Collection Stat -->
-          <!-- Start Collection Stat -->
+          <!--/* End Collection Stat */-->
+          <!--/* Start Collection Stat */-->
           <div class="overflow-auto mobile__nav-bottom mb-4 px-2" id="mouseScroll">
             <ul class="nav collections__nav list-unstyled d-flex flex-nowrap align-items-center" id="myTab"
                 role="tablist"
@@ -158,7 +167,7 @@
                         class="collections__nav-link d-flex align-items-center text-nowrap active"
                         data-bs-target="#Owned" data-bs-toggle="tab" id="Owned-tab" role="tab"
                         type="button"
-                >Owned <span class="badge bg-grey ms-2"><!-- TODO: Number of owned items --></span></button>
+                >Owned <span class="badge bg-grey ms-2"><!--/* TODO: Number of owned items */--></span></button>
               </li>
               <!--/*
               <li class="collections__nav-item ">
@@ -205,7 +214,7 @@
             <div aria-labelledby="Owned-tab" class="tab-pane fade show active" id="Owned" role="tabpanel">
               <div class="row">
                 <div th:each="item: ${items}"
-                     th:insert="fragments/item_card :: item_card(item)"
+                     th:insert="cards/item :: item_card(item)"
                      th:remove="tag"
                 ></div>
               </div>
@@ -238,18 +247,17 @@
             </div>
             */-->
           </div>
-          <!-- End Collection Stat -->
-          <button class="btn btn-outline-secondary mt-3 w-100" type="button">LOAD MORE</button>
+          <!--/* End Collection Stat */-->
+          <a class="btn btn-outline-secondary mt-3 w-100" type="button">LOAD MORE</a>
         </div>
       </div>
     </div>
   </section>
 </main>
-<section th:replace="~{fragments/partners :: section}"></section>
-<footer th:replace="~{fragments/footer :: footer}"></footer>
-<div th:replace="modals/connect :: connect_modal"></div>
-<script defer th:src="@{/js/index.js}"></script>
+<!--/*<section th:replace="fragments/partners :: partners"></section>*/-->
+<footer th:replace="fragments/footer :: footer"></footer>
+<div th:replace="modals/connect :: #ConnectModal"></div>
 
-<div id="floatingmes">Shift + Mouse scroll 🤓</div>
+<script defer th:src="@{/bundle/index.js}"></script>
 </body>
 </html>

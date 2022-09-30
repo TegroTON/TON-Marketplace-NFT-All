@@ -43,10 +43,13 @@
     href="https://fonts.googleapis.com/css2?family=Raleway:wght@600;700;900&family=Roboto:wght@300;400;500&display=swap"
     rel="stylesheet"
   >
-  <title>Libermall - an NFT marketplace</title>
+  <script async crossorigin="anonymous" src="../static/js/fontawesome-pro.min.js"
+          th:src="@{/js/fontawesome-pro.min.js}"
+  ></script>
+  <title th:text="${item.name} + ' | Libermall'">Libermall - an NFT marketplace</title>
 </head>
 <body v-scope="{imageEnlarged: false}">
-<header th:replace="~{fragments/header :: header}"></header>
+<header th:replace="fragments/header :: header"></header>
 <main class="main-page">
   <section class="item-details section pt-5">
     <div class="container-fluid">
@@ -54,38 +57,42 @@
         <div class="col-md-10 col-lg-12 col-xxl-9">
           <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-5 ms-3">
-              <li class="breadcrumb-item"><a href="/explore.php">Explore</a></li>
+              <li class="breadcrumb-item"><a href="/explore">Explore</a></li>
               <li class="breadcrumb-item" th:if="${collection != null}">
                 <a href="/collection"
                    th:href="'/collection/' + ${addressHelper.toRaw(collection.address)}"
                    th:text="${collection.name}"
-                >Collection</a>
+                >
+                  Collection
+                </a>
               </li>
               <li aria-current="page" class="breadcrumb-item active" th:text="${item.name}">Item</li>
             </ol>
           </nav>
           <div class="row justify-content-center mb-4">
             <div class="col-lg-5 col-xl-5 mb-4 mb-lg-0">
-              <!-- Start NFT Image -->
+              <!--/* Start NFT Image */-->
               <div class="position-sticky" style="top: 140px;">
-                <img alt="" class="item-details__image"
+                <img alt="Item Image" class="item-details__image"
                      src="../static/img/item-details-image.jpg"
+                     th:alt="${item.name}"
                      th:src="${item.image}"
                      v-on:click="imageEnlarged = !imageEnlarged"
                 >
               </div>
-              <!-- // End NFT Image -->
+              <!--/* End NFT Image */-->
             </div>
             <div class="col-lg-7 col-xl-7">
-              <!-- Start Desc Card -->
+              <!--/* Start Desc Card */-->
               <div class="card-item-details mb-5">
                 <div class="item-details__badge mb-4" th:if="${item.fullPrice == null}">Not for sale</div>
                 <div class="item-details__badge badge__green mb-4" th:if="${item.fullPrice != null}">For Sale</div>
                 <h1 class="item-details__title mb-3" th:text="${item.name}">Item</h1>
                 <p class="item-details__desc mb-0" th:text="${item.description}"></p>
               </div>
-              <!-- // End Desc Card -->
-              <!-- Start Action Link -->
+              <!--/* End Desc Card */-->
+              <!--/* Start Action Link */-->
+              <!--/*
               <div class="card-item-details d-flex align-items-center border bg-soft px-4 py-3 rounded mb-4">
                 <button class="btn btn-sm btn-details__like bg-soft px-3" type="button">
                   <i class="fa-regular fa-heart m-0 me-sm-2"></i>
@@ -115,8 +122,9 @@
                   </div>
                 </div>
               </div>
-              <!-- // End Action Link -->
-              <!-- Start Price Card -->
+              /*-->
+              <!--/* End Action Link */-->
+              <!--/* Start Price Card */-->
               <div class="card-item-details border bg-soft p-4 rounded mb-4" th:if="${item.fullPrice != null}">
                 <div class="d-flex align-items-center mb-2">
                   <span class="d-block text-uppercase fs-18 fw-medium">Price:</span>
@@ -128,26 +136,31 @@
                   <span class="price-item__dollar d-block color-grey text-end ms-auto">$64.09</span>
                   */-->
                 </div>
+                <!--/*
                 <button class="btn btn-primary w-100" data-bs-target="#BuyNowModal" data-bs-toggle="modal"
                         type="button"
                 >Buy Now
                 </button>
+                */-->
               </div>
               <div class="card-item-details d-flex flex-wrap border bg-soft p-2 rounded mb-4"
                    th:attr="v-if='isUserWallet(\'' + ${addressHelper.toRaw(item.owner)} + '\')'"
               >
+                <!--/*
                 <button class="btn btn-primary flex-fill m-2" data-bs-target="#SelectTypeModal" data-bs-toggle="modal"
                         type="button"
-                >Put up for sale
+                >
+                  Put up for sale
                 </button>
+                */-->
                 <button class="btn btn-soft flex-fill m-2" data-bs-target="#TransferModal" data-bs-toggle="modal"
                         type="button"
                 >
                   Transfer Ownership
                 </button>
               </div>
-              <!-- // End Price Card -->
-              <!-- Start Owner & Collection -->
+              <!--/* End Price Card */-->
+              <!--/* Start Owner & Collection */-->
               <div class="row">
                 <div class="col-xl-6 mx-auto mb-4">
                   <a class="card-item-details d-block border bg-soft hover px-4 py-3 rounded text-white"
@@ -156,13 +169,13 @@
                   >
                     <h4 class="fs-14 color-grey mb-4">Owner</h4>
                     <div class="d-flex align-items-center">
-                      <img alt="" class="img-fluid rounded-circle" height="40" src="../static/img/author/author-12.jpg"
-                           th:src="@{/img/author/author-12.jpg}"
+                      <img alt="" class="img-fluid rounded-circle" height="40" src="../static/img/user-1.svg"
+                           th:src="@{/img/user-1.svg}"
                            width="40"
                       >
                       <h4 class="collection__name fs-16 mb-0 ms-3"
                           th:text="${addressHelper.toShortFriendly(item.owner)}"
-                      >Owner</h4>
+                      >...</h4>
                       <i class="fa-solid fa-angle-right color-grey ms-auto"></i>
                     </div>
                   </a>
@@ -185,14 +198,14 @@
                   </a>
                 </div>
               </div>
-              <!-- // End Owner & Collection -->
-              <!-- Start Details Card -->
+              <!--/* End Owner & Collection */-->
+              <!--/* Start Details Card */-->
               <div class="card-item-details border bg-soft p-4 rounded">
                 <h4 class="fs-18 mb-4">Details</h4>
                 <ul class="list-unstyled">
                   <li class="mb-3">
                     <a class="d-flex align-items-center p-3 rounded border hover text-white"
-                       href="#!"
+                       href="#"
                        target="_blank"
                        th:href="'https://testnet.tonscan.org/address/' + ${addressHelper.toRaw(item.address)}"
                     >
@@ -205,7 +218,7 @@
                   </li>
                   <li class="mb-3" th:if="${item.fullPrice != null}">
                     <a class="d-flex align-items-center p-3 rounded border hover text-white"
-                       href="https://testnet.tonscan.org/address/EQC_-u5FytW3WrGR_UQ_tjVFvFbcIanSh4nHjqP3ojIamkGP"
+                       href="#"
                        target="_blank"
                        th:href="'https://testnet.tonscan.org/address/' + ${addressHelper.toRaw(item.sale)}"
                     >
@@ -216,21 +229,23 @@
                       <i class="fa-solid fa-angle-right color-grey ms-3"></i>
                     </a>
                   </li>
+                  <!--/*
                   <li class="d-flex align-items-center p-3 rounded border hover text-white mb-3">
                     <span class="fw-medium color-grey">Metadata</span>
                     <span class="text-truncate ms-auto">Centralized</span>
                   </li>
+                  */-->
                 </ul>
               </div>
-              <!-- // End Details Card -->
+              <!--/* End Details Card */-->
             </div>
           </div>
-          <!-- Start Attributes Card -->
-          <div class="card-item-details border bg-soft p-4 rounded mb-5">
+          <!--/* Start Attributes Card */-->
+          <div class="card-item-details border bg-soft p-4 rounded mb-5" th:if="${not #lists.isEmpty(item.attributes)}">
             <h4 class="fs-18 mb-4">Attributes</h4>
             <ul class="row list-unstyled">
               <li class="col-lg-6 col-xl-4 mb-3" th:each="attribute: ${item.attributes}">
-                <a class="d-flex align-items-center p-3 rounded border hover text-white" href="#!" target="_blank">
+                <a class="d-flex align-items-center p-3 rounded border hover text-white" href="#!">
                   <div>
                     <span class="d-block fs-14 fw-medium color-grey mb-2" th:text="${attribute.key}">Trait</span>
                     <span class="d-block fw-medium" th:text="${attribute.value}"></span>
@@ -250,9 +265,9 @@
               </li>
             </ul>
           </div>
-          <!-- // End Attributes Card -->
+          <!--/* End Attributes Card */-->
 
-          <!-- Start Transaction Table -->
+          <!--/* Start Transaction Table */-->
           <!--/*
           <h4 class="mb-3 fs-28 px-2">Transaction History</h4>
           <div class="card-item-details border bg-soft rounded mt-4 table-responsive">
@@ -325,24 +340,24 @@
             </table>
           </div>
           */-->
-          <!-- //End Transaction Table -->
+          <!--/* End Transaction Table */-->
         </div>
       </div>
     </div>
   </section>
 </main>
-<section th:replace="fragments/partners :: partners"></section>
+<!--/*<section th:replace="fragments/partners :: partners"></section>*/-->
 <footer th:replace="fragments/footer :: footer"></footer>
-<div th:replace="modals/connect :: connect_modal"></div>
+<div th:replace="modals/connect :: #ConnectModal"></div>
 <div th:replace="modals/transfer :: #TransferModal"></div>
-<script defer th:src="@{/js/index.js}"></script>
-
-<div id="floatingmes">Shift + Mouse scroll 🤓</div>
 <div class="item-details__image--size"
      style="width: 100%; height: 100%; position: fixed; z-index: 10000; top:0; left: 0; cursor: zoom-out;"
      th:styleappend="'background: rgba(5, 11, 28, .5) url(' + ${item.image} + ') no-repeat center; background-size: contain; '"
      v-if="imageEnlarged"
      v-on:click="imageEnlarged = !imageEnlarged"
+
 ></div>
+
+<script defer th:src="@{/bundle/index.js}"></script>
 </body>
 </html>

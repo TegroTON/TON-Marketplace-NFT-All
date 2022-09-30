@@ -12,3 +12,4 @@ spring:
     url: r2dbc:postgresql://${POSTGRES_URL:localhost:5432/market}
     username: ${POSTGRES_USER:postgres}
     password: ${POSTGRES_PASSWORD:postgrespw}
+
