@@ -20,8 +20,8 @@
       <div class="modal-body">
         <a class="d-flex align-items-center border rounded bg-grey hover-grey mb-3 p-3"
            data-bs-dismiss="modal"
-           v-if="isTonWalletAvailable"
-           v-on:click="connectTonWallet()"
+           v-if="connection.isTonWalletAvailable"
+           v-on:click="connection.connectTonWallet()"
         >
           <div class="d-flex align-items-center">
             <img alt="Ton Wallet" class="wc-img" height="40" src="../../static/img/ton-wallet.png"

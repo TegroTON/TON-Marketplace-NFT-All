@@ -5,7 +5,7 @@
   <title>Title</title>
 </head>
 <body>
-<header @vue:mounted="loadConnection()" class="header">
+<header @vue:mounted="connection.loadConnection()" class="header">
   <div class="container-fluid">
     <nav class="navbar navbar-expand-lg d-flex align-items-center p-0">
       <a class="navbar-logo me-5" href="/">
@@ -81,7 +81,7 @@
           </li>
           */-->
         </ul>
-        <div class="dropdown dropstart order-3 order-lg-4" v-if="isConnected">
+        <div class="dropdown dropstart order-3 order-lg-4" v-if="connection.isConnected">
           <button aria-expanded="false" data-bs-toggle="dropdown" id="dropdownMenuProfile" type="button">
             <img alt="" class="rounded-circle profile-image" height="42" src="../../static/img/user-1.svg"
                  th:src="@{/img/user-1.svg}"
@@ -90,12 +90,12 @@
           </button>
           <ul aria-labelledby="dropdownMenuProfile" class="dropdown-menu">
             <li>
-              <a class="dropdown-item" v-bind:href="'/profile/' + connection.wallet?.address">
+              <a class="dropdown-item" v-bind:href="'/profile/' + connection.walletAddress">
                 <i class="fa-regular fa-user me-3"></i> Profile
               </a>
             </li>
             <li>
-              <a class="dropdown-item border-0" v-on:click="disconnect()">
+              <a class="dropdown-item border-0" v-on:click="connection.disconnect()">
                 <i class="fa-regular fa-link-simple-slash me-3"></i> Disconnect
               </a>
             </li>

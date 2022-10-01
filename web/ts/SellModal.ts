@@ -1,5 +1,6 @@
 import BN from "bn.js";
 import {toNano} from "ton";
+import {TransactionRequest} from "./types/TransactionRequest";
 
 export function SellModal(props: {
     royaltyNumerator: number,
@@ -23,6 +24,14 @@ export function SellModal(props: {
         },
         get fullPrice() {
             return this.price.add(this.royalties.add(this.marketplaceFee))
-        }
+        },
+
+        async prepareItemSaleRequest(item: string, price: BN) {
+            return await (await fetch("/api/v1/sell?" + new URLSearchParams({
+                item: item,
+                seller: this.connection.wallet.address,
+                price: price.toString(),
+            }))).json() as TransactionRequest
+        },
     }
 }
