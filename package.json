@@ -20,7 +20,7 @@
     "@popperjs/core": "^2.11.6",
     "@types/bn.js": "^5.1.1",
     "bn.js": "^5.2.1",
-    "bootstrap": "^5.2.0",
+    "bootstrap": "5.2.0",
     "buffer": "^6.0.3",
     "petite-vue": "^0.4.1",
     "ton": "^12.1.3"
