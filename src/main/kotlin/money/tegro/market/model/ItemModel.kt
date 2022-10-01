@@ -24,8 +24,8 @@ data class ItemModel(
     val marketplace: MsgAddress,
     val fullPrice: BigInt?,
     val marketplaceFee: BigInt?,
+    val royalties: BigInt?,
     val royaltyDestination: MsgAddress,
-    val royaltyAmount: BigInt?,
     val royaltyNumerator: Int,
     val royaltyDenominator: Int,
     val marketplaceFeeNumerator: Int,
@@ -33,6 +33,7 @@ data class ItemModel(
     val saleInitializationFee: BigInt,
     val transferFee: BigInt,
     val networkFee: BigInt,
+    val minimalGasFee: BigInt,
 ) {
     companion object : KLogging() {
         @JvmStatic
@@ -59,8 +60,8 @@ data class ItemModel(
                 marketplace = sale?.marketplace ?: AddrNone,
                 fullPrice = sale?.full_price,
                 marketplaceFee = sale?.marketplace_fee,
+                royalties = sale?.royalty,
                 royaltyDestination = sale?.royalty_destination ?: royalty?.destination ?: AddrNone,
-                royaltyAmount = sale?.royalty,
                 royaltyNumerator = royalty?.numerator ?: 0,
                 royaltyDenominator = royalty?.denominator ?: 1,
                 marketplaceFeeNumerator = properties.marketplaceFeeNumerator,
@@ -68,6 +69,7 @@ data class ItemModel(
                 saleInitializationFee = properties.saleInitializationFee,
                 transferFee = properties.itemTransferFee,
                 networkFee = properties.networkFee,
+                minimalGasFee = properties.minimalGasFee,
             )
         }
     }

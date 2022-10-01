@@ -133,17 +133,17 @@
                   >NaN</span>
                 </div>
                 <div class="d-flex align-items-center mb-4">
-                  <span class="color-grey">Plus a network fee of 1 TON</span>
+                  <span class="color-grey"
+                        th:text="|Plus a network fee of {{ fromNano('${item.minimalGasFee}') }} TON|"
+                  ></span>
                   <!--/*
                   <span class="price-item__dollar d-block color-grey text-end ms-auto">$64.09</span>
                   */-->
                 </div>
-                <!--/*
-                <button class="btn btn-primary w-100" data-bs-target="#BuyNowModal" data-bs-toggle="modal"
+                <button class="btn btn-primary w-100" data-bs-target="#BuyModal" data-bs-toggle="modal"
                         type="button"
                 >Buy Now
                 </button>
-                */-->
               </div>
               <div class="card-item-details d-flex flex-wrap border bg-soft p-2 rounded mb-4"
                    th:attr="v-if=|connection.isUserWallet('${addressHelper.toRaw(item.owner)}')|"
@@ -351,6 +351,7 @@
 <!--/*<section th:replace="fragments/partners :: partners"></section>*/-->
 <footer th:replace="fragments/footer :: footer"></footer>
 <div th:replace="modals/connect :: #ConnectModal"></div>
+<div th:replace="modals/buy :: buy_modal(${item}, ${collection})"></div>
 <div th:replace="modals/sell :: sell_modal(${item})"></div>
 <div th:replace="modals/transfer :: transfer_modal(${item})"></div>
 <div class="item-details__image--size"

@@ -49,6 +49,7 @@ export const connection = {
     },
 
     async requestTransaction(req: TransactionRequest) {
+        console.log(req)
         if (this.connection.provider == 'tonwallet') {
             window.ton!.send("ton_sendTransaction", [{
                 to: req.dest,

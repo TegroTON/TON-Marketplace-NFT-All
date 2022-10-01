@@ -20,4 +20,6 @@ class MarketplaceProperties {
     var itemTransferFee: BigInt = BigInt(50_000_000)
 
     var networkFee: BigInt = BigInt(50_000_000)
+
+    val minimalGasFee: BigInt = BigInt(1_000_000_000)
 }

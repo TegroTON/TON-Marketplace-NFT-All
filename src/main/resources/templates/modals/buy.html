@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<div aria-hidden="true" aria-labelledby="BuyModalLabel" class="modal fade" id="BuyModal" tabindex="-1"
+     th:fragment="buy_modal(item, collection)"
+     th:if="${item.fullPrice != null}"
+>
+  <div class="modal-dialog modal-dialog-centered mobile-modal-bottom">
+    <div class="modal-content border-0">
+      <div class="modal-header border-0 mb-4">
+        <h5 class="modal-title fs-24" id="BuyModalLabel">Buy NFT</h5>
+        <button aria-label="Close" class="border-0 p-0 modal-close" data-bs-dismiss="modal" type="button"><i
+          class="fa-solid fa-xmark fa-lg"
+        ></i></button>
+      </div>
+      <div class="modal-body mb-3">
+        <div class="d-flex align-items-center bg-soft hover rounded p-2 mb-3">
+          <img alt="Item Image" class="rounded image-80x80" src="../../static/img/user-1.svg" th:alt="${item.name}"
+               th:src="${item.image}"
+          >
+          <div class="__body ms-3">
+            <h5 class="fs-18 mb-2" th:text="${item.name}">Item</h5>
+            <p class="mb-0 color-grey fs-14" th:text="${collection.name}">Not In Collection</p>
+          </div>
+        </div>
+        <ul class="list-unstyled mb-3 px-1">
+          <li class="d-flex align-items-center mb-1">
+            <span>NFT Price</span>
+            <span class="ms-auto" th:text="|{{ fromNano('${item.fullPrice}') }} TON|">NaN</span>
+          </li>
+          <li class="d-flex align-items-center fs-14 color-grey mb-1">
+            <span>Creator Royalties</span>
+            <span class="ms-auto" th:text="|{{ fromNano('${item.royalties}') }} TON|">NaN</span>
+          </li>
+          <li class="d-flex align-items-center fs-14 color-grey mb-3">
+            <span>Marketplace Fee</span>
+            <span class="ms-auto" th:text="|{{ fromNano('${item.marketplaceFee}') }} TON|">NaN</span>
+          </li>
+          <li class="d-flex align-items-center mb-1">
+            <span>Network Fee</span>
+            <span class="ms-auto" th:text="|{{ fromNano('${item.minimalGasFee}') }} TON|">NaN</span>
+          </li>
+          <li class="d-flex align-items-center fs-14 color-grey">
+            <span>The rest will be returned to your wallet</span>
+          </li>
+        </ul>
+        <div class="d-flex align-items-center bg-soft border rounded fs-18 fw-medium p-3 mb-3">
+          <span>You Pay</span>
+          <span class="ms-auto" th:text="|{{ fromNano('${item.fullPrice + item.minimalGasFee}') }} TON|">NaN</span>
+        </div>
+        <div class="alert alert-warning" role="alert">
+          <h4 class="alert-heading fs-16">Well done!</h4>
+          <p class="mb-2 fs-14">
+            Libermall is unaffiliated with any NFT projects. We are not responsible for possible losses. Invest at your
+            own risk.
+          </p>
+          <!--/*
+          <a class="color-yellow" href="#!">Learn More</a>
+          */-->
+        </div>
+      </div>
+      <button class="btn btn-primary w-100" data-bs-toggle="modal"
+              th:if="${item.sale != AddrNone}"
+              th:text="|Buy For {{ fromNano('${item.fullPrice + item.minimalGasFee}') }} TON|"
+              th:v-on:click="|connection.requestTransaction({
+                              dest: '${addressHelper.toRaw(item.sale)}',
+                              value: '${item.fullPrice + item.minimalGasFee}',
+                              stateInit: null,
+                              text: 'buy',
+                              payload: null,
+                            })|"
+              type="button"
+      >
+        Buy
+      </button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
