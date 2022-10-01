@@ -147,13 +147,11 @@
               <div class="card-item-details d-flex flex-wrap border bg-soft p-2 rounded mb-4"
                    th:attr="v-if='isUserWallet(\'' + ${addressHelper.toRaw(item.owner)} + '\')'"
               >
-                <!--/*
-                <button class="btn btn-primary flex-fill m-2" data-bs-target="#SelectTypeModal" data-bs-toggle="modal"
+                <button class="btn btn-primary flex-fill m-2" data-bs-target="#SellModal" data-bs-toggle="modal"
                         type="button"
                 >
-                  Put up for sale
+                  Sell
                 </button>
-                */-->
                 <button class="btn btn-soft flex-fill m-2" data-bs-target="#TransferModal" data-bs-toggle="modal"
                         type="button"
                 >
@@ -350,6 +348,7 @@
 <!--/*<section th:replace="fragments/partners :: partners"></section>*/-->
 <footer th:replace="fragments/footer :: footer"></footer>
 <div th:replace="modals/connect :: #ConnectModal"></div>
+<div th:replace="modals/sell :: sell_modal(${item.address})"></div>
 <div th:replace="modals/transfer :: transfer_modal(${item.address})"></div>
 <div class="item-details__image--size"
      style="width: 100%; height: 100%; position: fixed; z-index: 10000; top:0; left: 0; cursor: zoom-out;"

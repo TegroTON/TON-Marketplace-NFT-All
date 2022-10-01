@@ -1,7 +1,7 @@
 import '../css/index.css'
 import 'bootstrap'
 import {createApp} from "petite-vue"
-import {Address} from "ton"
+import {Address, toNano} from "ton"
 
 interface Wallet {
     address: string;
@@ -75,6 +75,15 @@ createApp({
             item: item,
             newOwner: newOwner,
             responseDestination: this.connection.wallet.address,
+        }))).json() as TransactionRequest
+        this.requestTransaction(req)
+    },
+
+    async requestItemSale(item: string, priceTon: number) {
+        let req = await (await fetch("/api/v1/sell?" + new URLSearchParams({
+            item: item,
+            seller: this.connection.wallet.address,
+            price: toNano(priceTon),
         }))).json() as TransactionRequest
         this.requestTransaction(req)
     },

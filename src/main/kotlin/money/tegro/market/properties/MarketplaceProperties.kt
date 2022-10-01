@@ -19,5 +19,5 @@ class MarketplaceProperties {
 
     var itemTransferAmount: BigInt = BigInt(50_000_000)
 
-    var networkFee: BigInt = BigInt(50_000_00)
+    var networkFee: BigInt = BigInt(50_000_000)
 }
