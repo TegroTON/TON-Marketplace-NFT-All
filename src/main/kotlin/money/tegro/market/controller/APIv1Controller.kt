@@ -31,7 +31,7 @@ class APIv1Controller(
         @RequestParam responseDestination: MsgAddressInt?,
     ) = TransactionRequestModel(
         dest = item,
-        value = BigInt(100_000_000),
+        value = marketplaceProperties.itemTransferFee + marketplaceProperties.networkFee,
         stateInit = null,
         text = "NFT Item Transfer",
         payload = CellBuilder.createCell {
@@ -41,7 +41,7 @@ class APIv1Controller(
                     new_owner = newOwner,
                     response_destination = responseDestination ?: AddrNone,
                     custom_payload = Maybe.of(null),
-                    forward_amount = VarUInteger(BigInt(50_000_000)),
+                    forward_amount = VarUInteger(marketplaceProperties.itemTransferFee),
                     forward_payload = Either.of(Cell.of(), null)
                 )
             )
@@ -74,7 +74,7 @@ class APIv1Controller(
 
         return TransactionRequestModel(
             dest = item,
-            value = marketplaceProperties.saleInitializationFee + marketplaceProperties.networkFee,
+            value = marketplaceProperties.saleInitializationFee + marketplaceProperties.itemTransferFee + marketplaceProperties.networkFee,
             stateInit = null,
             text = "NFT put up for sale",
             payload = CellBuilder.createCell {

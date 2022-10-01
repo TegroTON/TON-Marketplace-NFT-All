@@ -17,7 +17,7 @@ class MarketplaceProperties {
 
     var saleInitializationFee: BigInt = BigInt(100_000_000)
 
-    var itemTransferAmount: BigInt = BigInt(50_000_000)
+    var itemTransferFee: BigInt = BigInt(50_000_000)
 
     var networkFee: BigInt = BigInt(50_000_000)
 }

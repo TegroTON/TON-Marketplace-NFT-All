@@ -18,7 +18,7 @@ data class MarketplaceContract(
     val authorizationPublicKey: ByteArray = Ed25519.publicKey(MarketplaceProperties().marketplaceAuthorizationPrivateKey),
     val saleCode: Cell = SaleContract.CODE,
     val saleDeployAmount: BigInt = BigInt(MarketplaceProperties().saleInitializationFee),
-    val transferAmount: BigInt = BigInt(MarketplaceProperties().itemTransferAmount),
+    val transferAmount: BigInt = BigInt(MarketplaceProperties().itemTransferFee),
     val code: Cell = CODE,
     val workchain: Int = 0,
 ) {

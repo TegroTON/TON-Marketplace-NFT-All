@@ -66,7 +66,7 @@ data class ItemModel(
                 marketplaceFeeNumerator = properties.marketplaceFeeNumerator,
                 marketplaceFeeDenominator = properties.marketplaceFeeDenominator,
                 saleInitializationFee = properties.saleInitializationFee,
-                transferFee = properties.itemTransferAmount,
+                transferFee = properties.itemTransferFee,
                 networkFee = properties.networkFee,
             )
         }
