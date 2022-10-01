@@ -129,7 +129,8 @@
               <div class="card-item-details border bg-soft p-4 rounded mb-4" th:if="${item.fullPrice != null}">
                 <div class="d-flex align-items-center mb-2">
                   <span class="d-block text-uppercase fs-18 fw-medium">Price:</span>
-                  <span class="price-item__ton d-block ms-auto" th:text="${item.fullPrice}">NaN</span>
+                  <span class="price-item__ton d-block ms-auto" th:text="|{{fromNano('${item.fullPrice}')}} TON|"
+                  >NaN</span>
                 </div>
                 <div class="d-flex align-items-center mb-4">
                   <span class="color-grey">Plus a network fee of 1 TON</span>
@@ -348,7 +349,7 @@
 <!--/*<section th:replace="fragments/partners :: partners"></section>*/-->
 <footer th:replace="fragments/footer :: footer"></footer>
 <div th:replace="modals/connect :: #ConnectModal"></div>
-<div th:replace="modals/sell :: sell_modal(${item.address})"></div>
+<div th:replace="modals/sell :: sell_modal(${item})"></div>
 <div th:replace="modals/transfer :: transfer_modal(${item.address})"></div>
 <div class="item-details__image--size"
      style="width: 100%; height: 100%; position: fixed; z-index: 10000; top:0; left: 0; cursor: zoom-out;"

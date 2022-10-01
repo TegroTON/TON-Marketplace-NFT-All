@@ -24,7 +24,7 @@
           </div>
           <div th:if="${item.fullPrice != null}">
             <p class="mb-1 fw-medium color-grey">Price</p>
-            <p class="m-0 text-white" th:text="${item.fullPrice} + ' TON'"></p>
+            <p class="m-0 text-white" th:text="|{{ fromNano('${item.fullPrice}')}} TON|"></p>
           </div>
           <!--/*
           <div>

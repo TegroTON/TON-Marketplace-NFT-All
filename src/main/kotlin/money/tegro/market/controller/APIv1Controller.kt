@@ -55,7 +55,8 @@ class APIv1Controller(
         price: BigInt,
     ): TransactionRequestModel {
         val royalty = itemRepository.getRoyalty(item)
-        val marketplaceFee = price * marketplaceProperties.feeNumerator / marketplaceProperties.feeDenominator
+        val marketplaceFee =
+            price * marketplaceProperties.marketplaceFeeNumerator.toBigInt() / marketplaceProperties.marketplaceFeeDenominator.toBigInt()
         val royaltyValue = royalty?.let { price * it.numerator.toBigInt() / it.denominator.toBigInt() } ?: BigInt.ZERO
         val fullPrice = price + royaltyValue + marketplaceFee
 

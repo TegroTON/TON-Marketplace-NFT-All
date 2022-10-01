@@ -12,6 +12,7 @@ import money.tegro.market.metadata.ItemMetadata
 import money.tegro.market.model.CollectionModel
 import money.tegro.market.model.ItemModel
 import money.tegro.market.properties.CacheProperties
+import money.tegro.market.properties.MarketplaceProperties
 import money.tegro.market.service.ReferenceBlockService
 import money.tegro.market.service.RoyaltyService
 import money.tegro.market.toRaw
@@ -34,6 +35,7 @@ import java.util.*
 @Repository
 class ItemRepository(
     private val cacheProperties: CacheProperties,
+    private val marketplaceProperties: MarketplaceProperties,
     private val liteClient: LiteClient,
     private val referenceBlockService: ReferenceBlockService,
     private val royaltyService: RoyaltyService,
@@ -45,7 +47,9 @@ class ItemRepository(
             address,
             getContract(address),
             getMetadata(address),
+            getRoyalty(address),
             getItemSale(address),
+            marketplaceProperties,
         )
 
     suspend fun listCollectionItems(collection: MsgAddressInt) =

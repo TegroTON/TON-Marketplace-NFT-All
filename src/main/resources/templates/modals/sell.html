@@ -6,7 +6,14 @@
 </head>
 <body>
 <div aria-hidden="true" aria-labelledby="EnterPriceModalLabel" class="modal fade" id="SellModal" tabindex="-1"
-     th:fragment="sell_modal(itemAddress)" v-scope="{priceTon: 10.0}"
+     th:fragment="sell_modal(item)"
+     th:v-scope="|SellModal({
+      royaltyNumerator: ${item.royaltyNumerator},
+      royaltyDenominator: ${item.royaltyDenominator},
+      marketplaceFeeNumerator: ${item.marketplaceFeeNumerator},
+      marketplaceFeeDenominator: ${item.marketplaceFeeDenominator},
+      serviceFee: ${item.saleInitializationFee + item.transferFee + item.networkFee},
+      })|"
 >
   <div class="modal-dialog modal-dialog-centered mobile-modal-bottom">
     <div class="modal-content border-0">
@@ -20,35 +27,44 @@
         <form action="">
           <label class="mb-1" for="">Price</label>
           <div class="input-group mb-4">
-            <input class="form-control" placeholder="Enter Price" type="text" v-model="priceTon">
+            <input class="form-control" pattern="[0-9]+(\.[0-9]{0, 9})?" placeholder="Enter Price" type="text"
+                   v-model.number="priceTon"
+            >
             <span class="input-group-text" id="basic-addon1">TON</span>
           </div>
           <ul class="list-unstyled mb-4 pb-4 border-bottom">
             <li class="d-flex align-items-center mb-3">
                      <span class="color-grey">
-                     Service fee
-                     <a data-bs-placement="right" data-bs-toggle="tooltip" href="#!"
-                        title="The commission that the marketplace takes when selling NFTs"
-                     ><i class="fa-regular fa-circle-info ms-2"></i></a>
-                     </span>
-              <span class="ms-auto">0.5 TON</span>
-            </li>
-            <li class="d-flex align-items-center">
-                     <span class="color-grey">
                      Royalties
                      <a data-bs-placement="right" data-bs-toggle="tooltip" href="#!"
-                        title="Percentage of the NFT value that the author receives on each resale"
+                        title="Amount that NFT item author will receive on a successfull sale"
                      ><i class="fa-regular fa-circle-info ms-2"></i></a>
                      </span>
-              <span class="ms-auto">0.5 TON</span>
+              <span class="ms-auto">{{ fromNano(royalties) }} TON</span>
+            </li>
+            <li class="d-flex align-items-center mb-3">
+                     <span class="color-grey">
+                     Marketplace Fee
+                     <a data-bs-placement="right" data-bs-toggle="tooltip" href="#!"
+                        title="Amount that Libermall will receive on a successful sale"
+                     ><i class="fa-regular fa-circle-info ms-2"></i></a>
+                     </span>
+              <span class="ms-auto">{{ fromNano(marketplaceFee) }} TON</span>
             </li>
           </ul>
           <div class="d-flex align-items-center fw-medium mb-5">
-            <span>You'll get</span>
-            <span class="ms-auto">{{ priceTon }} TON</span>
+            <span>Full Price</span>
+            <a data-bs-placement="right" data-bs-toggle="tooltip" href="#!"
+               title="Price for the end buyer, includes the amount you will receive, royalties and marketplace fees"
+            ><i class="fa-regular fa-circle-info ms-2"></i></a>
+            <span class="ms-auto">{{ fromNano(fullPrice) }} TON</span>
+          </div>
+          <div class="d-flex align-items-center fw-medium mb-5">
+            <span>Service Fee</span>
+            <span class="ms-auto">{{ fromNano(serviceFee) }} TON</span>
           </div>
           <button class="btn btn-primary w-100"
-                  th:v-on:click="'requestItemSale(\'' + ${addressHelper.toRaw(itemAddress)} + '\', priceTon)'"
+                  th:v-on:click="|requestItemSale('${addressHelper.toRaw(item.address)}', price)|"
                   type="button"
           >
             Put up for sale

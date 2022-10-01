@@ -11,9 +11,9 @@ class MarketplaceProperties {
 
     var marketplaceAuthorizationPrivateKey: ByteArray = base64("+Oag5l7EVtrqAPlV3CMGUxWNr4uMn5p6h5eWGwK9xcc=")
 
-    var feeNumerator: BigInt = BigInt(5)
+    var marketplaceFeeNumerator = 5
 
-    var feeDenominator: BigInt = BigInt(100)
+    var marketplaceFeeDenominator = 100
 
     var saleInitializationFee: BigInt = BigInt(100_000_000)
 

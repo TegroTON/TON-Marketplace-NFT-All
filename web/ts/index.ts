@@ -1,7 +1,8 @@
 import '../css/index.css'
 import 'bootstrap'
 import {createApp} from "petite-vue"
-import {Address, toNano} from "ton"
+import {Address, fromNano, toNano} from "ton"
+import * as BN from "bn.js";
 
 interface Wallet {
     address: string;
@@ -17,7 +18,36 @@ interface TransactionRequest {
     payload: string | null | undefined;
 }
 
+// Operating with basic numbers here, be cautious
+function SellModal(props: {
+    royaltyNumerator: number,
+    royaltyDenominator: number,
+    marketplaceFeeNumerator: number,
+    marketplaceFeeDenominator: number,
+    serviceFee: string,
+}) {
+    return {
+        priceTon: 10.0,
+        serviceFee: new BN(props.serviceFee),
+
+        get price() {
+            return toNano(this.priceTon)
+        },
+        get royalties() {
+            return this.price.mul(new BN(props.royaltyNumerator)).div(new BN(props.royaltyDenominator))
+        },
+        get marketplaceFee() {
+            return this.price.mul(new BN(props.marketplaceFeeNumerator)).div(new BN(props.marketplaceFeeDenominator))
+        },
+        get fullPrice() {
+            return this.price.add(this.royalties.add(this.marketplaceFee))
+        }
+    }
+}
+
 createApp({
+    SellModal,
+
     connection: {
         provider: null as string | null,
         wallet: null as Wallet | null,
@@ -70,22 +100,22 @@ createApp({
         return false
     },
 
-    async requestItemTransferTo(item: string, newOwner: string) {
+    async requestItemTransfer(item: string, newOwner: string) {
         let req = await (await fetch("/api/v1/transfer?" + new URLSearchParams({
             item: item,
             newOwner: newOwner,
             responseDestination: this.connection.wallet.address,
         }))).json() as TransactionRequest
-        this.requestTransaction(req)
+        await this.requestTransaction(req)
     },
 
-    async requestItemSale(item: string, priceTon: number) {
+    async requestItemSale(item: string, price: BN) {
         let req = await (await fetch("/api/v1/sell?" + new URLSearchParams({
             item: item,
             seller: this.connection.wallet.address,
-            price: toNano(priceTon),
+            price: price.toString(),
         }))).json() as TransactionRequest
-        this.requestTransaction(req)
+        await this.requestTransaction(req)
     },
 
     async requestTransaction(req: TransactionRequest) {
@@ -98,6 +128,13 @@ createApp({
                 stateInit: req.stateInit,
             }])
         }
-    }
+    },
+
+    fromNano(v: any) {
+        return fromNano(v)
+    },
+    toNano(v: number) {
+        return toNano(v)
+    },
 })
     .mount()

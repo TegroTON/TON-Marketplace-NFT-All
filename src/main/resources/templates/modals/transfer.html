@@ -48,7 +48,7 @@
             <span class="ms-auto">0.1 TON</span>
           </div>
           <button class="btn btn-primary w-100"
-                  th:v-on:click="'requestItemTransferTo(\'' + ${addressHelper.toRaw(itemAddress)} + '\', newOwner)'"
+                  th:v-on:click="'requestItemTransfer(\'' + ${addressHelper.toRaw(itemAddress)} + '\', newOwner)'"
                   type="button"
                   v-bind:disabled="!isValidAddress(newOwner)"
           >
