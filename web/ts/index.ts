@@ -2,9 +2,9 @@ import '../css/index.css'
 import 'bootstrap'
 import {createApp} from "petite-vue"
 import {fromNano, toNano} from "ton"
-import {SellModal} from "./SellModal";
+import {SellModal} from "./modals/SellModal";
 import {connection} from "./Connection";
-import {TransferModal} from "./TransferModal";
+import {TransferModal} from "./modals/TransferModal";
 
 createApp({
     connection,

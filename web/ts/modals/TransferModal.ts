@@ -1,7 +1,7 @@
 import BN from "bn.js";
-import {TransactionRequest} from "./types/TransactionRequest";
-import {isValidAddress} from "./utils";
-import {connection} from "./Connection";
+import {TransactionRequest} from "../types/TransactionRequest";
+import {isValidAddress} from "../utils";
+import {connection} from "../Connection";
 
 export function TransferModal(props: {
     transferFee: string,
