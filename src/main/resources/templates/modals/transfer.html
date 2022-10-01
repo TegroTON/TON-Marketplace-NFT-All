@@ -6,7 +6,11 @@
 </head>
 <body>
 <div aria-hidden="true" aria-labelledby="EnterPriceModalLabel" class="modal fade" id="TransferModal" tabindex="-1"
-     th:fragment="transfer_modal(itemAddress)" v-scope="{newOwner: null}"
+     th:fragment="transfer_modal(item)"
+     th:v-scope="|TransferModal({
+        transferFee: ${item.transferFee},
+        networkFee: ${item.networkFee},
+      })|"
 >
   <div class="modal-dialog modal-dialog-centered mobile-modal-bottom">
     <div class="modal-content border-0">
@@ -25,12 +29,12 @@
           <ul class="list-unstyled mb-4 pb-4 border-bottom">
             <li class="d-flex align-items-center mb-3">
                      <span class="color-grey">
-                     Forward Amount
+                     Transfer Fee
                      <a data-bs-placement="right" data-bs-toggle="tooltip" href="#!"
                         title="The amount that will be sent to the new owner with ownership confirmation"
                      ><i class="fa-regular fa-circle-info ms-2"></i></a>
                      </span>
-              <span class="ms-auto">0.05 TON</span>
+              <span class="ms-auto">{{ fromNano(transferFee) }} TON</span>
             </li>
             <li class="d-flex align-items-center">
                      <span class="color-grey">
@@ -40,17 +44,17 @@
                         Unspent amount will be sent back to your wallet"
                      ><i class="fa-regular fa-circle-info ms-2"></i></a>
                      </span>
-              <span class="ms-auto">0.05 TON</span>
+              <span class="ms-auto">{{ fromNano(networkFee) }}  TON</span>
             </li>
           </ul>
           <div class="d-flex align-items-center fw-medium mb-5">
             <span>You'll pay</span>
-            <span class="ms-auto">0.1 TON</span>
+            <span class="ms-auto">{{ fromNano(total) }} TON</span>
           </div>
           <button class="btn btn-primary w-100"
-                  th:v-on:click="'requestItemTransfer(\'' + ${addressHelper.toRaw(itemAddress)} + '\', newOwner)'"
+                  th:v-on:click="|requestItemTransfer('${addressHelper.toRaw(item.address)}', newOwner)|"
                   type="button"
-                  v-bind:disabled="!isValidAddress(newOwner)"
+                  v-bind:disabled="!canTransfer"
           >
             Transfer Ownership
           </button>
