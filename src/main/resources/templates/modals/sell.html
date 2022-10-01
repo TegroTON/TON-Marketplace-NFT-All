@@ -8,11 +8,11 @@
 <div aria-hidden="true" aria-labelledby="EnterPriceModalLabel" class="modal fade" id="SellModal" tabindex="-1"
      th:fragment="sell_modal(item)"
      th:v-scope="|SellModal({
-      royaltyNumerator: ${item.royaltyNumerator},
-      royaltyDenominator: ${item.royaltyDenominator},
-      marketplaceFeeNumerator: ${item.marketplaceFeeNumerator},
-      marketplaceFeeDenominator: ${item.marketplaceFeeDenominator},
-      serviceFee: ${item.saleInitializationFee + item.transferFee + item.networkFee},
+      royaltyNumerator: '${item.royaltyNumerator}',
+      royaltyDenominator: '${item.royaltyDenominator}',
+      marketplaceFeeNumerator: '${item.marketplaceFeeNumerator}',
+      marketplaceFeeDenominator: '${item.marketplaceFeeDenominator}',
+      serviceFee: '${item.saleInitializationFee + item.transferFee + item.networkFee}',
       })|"
 >
   <div class="modal-dialog modal-dialog-centered mobile-modal-bottom">
