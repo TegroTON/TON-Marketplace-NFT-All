@@ -50,6 +50,7 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
     runtimeOnly("org.postgresql:r2dbc-postgresql")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+    implementation(kotlin("script-runtime"))
 }
 
 tasks.withType<KotlinCompile> {

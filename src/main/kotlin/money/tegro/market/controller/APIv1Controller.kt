@@ -89,7 +89,7 @@ class APIv1Controller(
                             storeRef {
                                 storeBytes(
                                     Ed25519.sign(
-                                        marketplaceProperties.marketplaceSalePrivateKey,
+                                        marketplaceProperties.marketplaceAuthorizationPrivateKey,
                                         payloadCell.hash()
                                     )
                                 )
