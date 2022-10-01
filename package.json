@@ -13,15 +13,11 @@
   "author": "Anton F.",
   "license": "UNLICENSED",
   "devDependencies": {
-    "css-loader": "^6.7.1",
-    "mini-css-extract-plugin": "^2.6.1",
-    "style-loader": "^3.3.1",
-    "ts-loader": "^9.4.1",
-    "typescript": "^4.8.4",
-    "webpack": "^5.74.0",
-    "webpack-cli": "^4.10.0"
+    "esbuild": "^0.15.10",
+    "typescript": "^4.8.4"
   },
   "dependencies": {
+    "@popperjs/core": "^2.11.6",
     "@types/bn.js": "^5.1.1",
     "bn.js": "^5.2.1",
     "bootstrap": "^5.2.0",

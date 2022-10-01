@@ -1,4 +1,4 @@
-import com.github.gradle.node.npm.task.NpxTask
+import com.github.gradle.node.task.NodeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -69,16 +69,15 @@ node {
     download.set(true)
 }
 
-tasks.register<NpxTask>("buildWebpackApp") {
+tasks.register<NodeTask>("esbuildApp") {
     dependsOn("npmInstall")
-    command.set("webpack")
-    args.addAll("build", "--mode=production")
-    inputs.files("package.json", "package-lock.json", "tsconfig.json", "webpack.config.js")
+    script.set(file("build.mjs"))
+    inputs.files("package.json", "package-lock.json", "tsconfig.json", "build.mjs")
     inputs.dir("web")
     inputs.dir(fileTree("node_modules").exclude(".cache"))
     outputs.dir("src/main/resources/static/bundle")
 }
 
 tasks.withType<ProcessResources> {
-    dependsOn("buildWebpackApp")
+    dependsOn("esbuildApp")
 }

@@ -2,48 +2,12 @@ import '../css/index.css'
 import 'bootstrap'
 import {createApp} from "petite-vue"
 import {Address, fromNano, toNano} from "ton"
-import * as BN from "bn.js";
+import BN from "bn.js";
+import {Wallet} from "./types/Wallet";
+import {SellModal} from "./SellModal";
+import {TransactionRequest} from "./types/TransactionRequest";
 
-interface Wallet {
-    address: string;
-    publicKey: string;
-    walletVersion: string;
-}
-
-interface TransactionRequest {
-    dest: string;
-    value: string;
-    stateInit: string | null | undefined;
-    text: string | null | undefined;
-    payload: string | null | undefined;
-}
-
-// Operating with basic numbers here, be cautious
-function SellModal(props: {
-    royaltyNumerator: number,
-    royaltyDenominator: number,
-    marketplaceFeeNumerator: number,
-    marketplaceFeeDenominator: number,
-    serviceFee: string,
-}) {
-    return {
-        priceTon: 10.0,
-        serviceFee: new BN(props.serviceFee),
-
-        get price() {
-            return toNano(this.priceTon)
-        },
-        get royalties() {
-            return this.price.mul(new BN(props.royaltyNumerator)).div(new BN(props.royaltyDenominator))
-        },
-        get marketplaceFee() {
-            return this.price.mul(new BN(props.marketplaceFeeNumerator)).div(new BN(props.marketplaceFeeDenominator))
-        },
-        get fullPrice() {
-            return this.price.add(this.royalties.add(this.marketplaceFee))
-        }
-    }
-}
+export let Buffer = require('buffer').Buffer
 
 createApp({
     SellModal,
