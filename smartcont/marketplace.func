@@ -130,7 +130,7 @@
                         .end_cell()
                 );
 
-        send_raw_message(item_msg.end_cell(), 2 + 1); ;; ignore errors. Worst case scenario - we keep item ownership. Fees separately
+        send_raw_message(item_msg.end_cell(), 1); ;; Fees separately
 
         return ();
     }

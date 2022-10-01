@@ -142,6 +142,11 @@ int min_gas_amount() asm "1000000000 PUSHINT"; ;; 1 TON
         return ();
     }
 
+    ;; When item is first transferred to this contract, excess coins are sent here
+    if(op == op::excesses()) {
+        return ();
+    }
+
     throw(0xffff);
 }
 

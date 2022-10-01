@@ -7,7 +7,7 @@ import org.ton.crypto.base64
 
 @ConfigurationProperties("market.marketplace")
 class MarketplaceProperties {
-    var marketplaceAddress: MsgAddressInt = MsgAddressInt("EQDkmyJeVw6cVq_HuqbZ2AO8MlmSpPsfqzuwN_ZfX6obHP0g")
+    var marketplaceAddress: MsgAddressInt = MsgAddressInt("EQDvuJSj-Ay8zz_fgHOoLUm0AaAJul7pihPgtCkTeU07djgA")
 
     var marketplaceAuthorizationPrivateKey: ByteArray = base64("+Oag5l7EVtrqAPlV3CMGUxWNr4uMn5p6h5eWGwK9xcc=")
 
@@ -15,7 +15,7 @@ class MarketplaceProperties {
 
     var feeDenominator: BigInt = BigInt(100)
 
-    var saleInitializationFee: BigInt = BigInt(150_000_000)
+    var saleInitializationFee: BigInt = BigInt(100_000_000)
 
     var itemTransferAmount: BigInt = BigInt(50_000_000)
 
