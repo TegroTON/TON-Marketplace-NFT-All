@@ -1,53 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" translate="yes" xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="UTF-8">
-  <meta
-    content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui, viewport-fit=cover"
-    name="viewport"
-  >
-  <meta content="yes" name="apple-mobile-web-app-capable">
-  <meta content="telephone=no" name="format-detection">
-  <meta content="translate" name="google">
-  <link rel="apple-touch-icon" sizes="57x57" th:href="@{/img/logo/apple-icon-57x57.png}">
-  <link rel="apple-touch-icon" sizes="60x60" th:href="@{/img/logo/apple-icon-60x60.png}">
-  <link rel="apple-touch-icon" sizes="72x72" th:href="@{/img/logo/apple-icon-72x72.png}">
-  <link rel="apple-touch-icon" sizes="76x76" th:href="@{/img/logo/apple-icon-76x76.png}">
-  <link rel="apple-touch-icon" sizes="114x114" th:href="@{/img/logo/apple-icon-114x114.png}">
-  <link rel="apple-touch-icon" sizes="120x120" th:href="@{/img/logo/apple-icon-120x120.png}">
-  <link rel="apple-touch-icon" sizes="144x144" th:href="@{/img/logo/apple-icon-144x144.png}">
-  <link rel="apple-touch-icon" sizes="152x152" th:href="@{/img/logo/apple-icon-152x152.png}">
-  <link rel="apple-touch-icon" sizes="180x180" th:href="@{/img/logo/apple-icon-180x180.png}">
-  <link rel="icon" sizes="192x192" th:href="@{/img/logo/android-icon-192x192.png}" type="image/png">
-  <link rel="icon" sizes="32x32" th:href="@{/img/logo/favicon-32x32.png}" type="image/png">
-  <link rel="icon" sizes="96x96" th:href="@{/img/logo/favicon-96x96.png}" type="image/png">
-  <link rel="icon" sizes="16x16" th:href="@{/img/logo/favicon-16x16.png}" type="image/png">
-  <link href="/manifest.json" rel="manifest">
-  <meta content="#ffffff" name="msapplication-TileColor">
-  <meta content="./assets/img/logo/apple-icon-114x114.png" name="msapplication-TileImage">
-  <meta content="#050b1c" name="theme-color">
-  <meta content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no, viewport-fit=cover"
-        name="viewport"
-  >
-  <meta content="Libermall" property="og:site_name"/>
-  <meta content="Libermall" property="og:title"/>
-  <meta content="The easiest way to store, send, and receive Toncoin on The Open Network" property="og:description"/>
-  <meta content="/img/libermall-preview.png" property="og:image"/>
-  <meta content="https://Libermall.com" property="og:url"/>
-  <meta content="Libermall" name="twitter:title">
-  <meta content="summary_large_image" name="twitter:card">
-  <meta content="/wallet-preview.png" name="twitter:image"/>
-  <link href="https://fonts.googleapis.com" rel="preconnect">
-  <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
-  <link
-    href="https://fonts.googleapis.com/css2?family=Raleway:wght@600;700;900&family=Roboto:wght@300;400;500&display=swap"
-    rel="stylesheet"
-  >
-  <script async crossorigin="anonymous" src="../static/js/fontawesome-pro.min.js"
-          th:src="@{/js/fontawesome-pro.min.js}"
-  ></script>
-  <link href="../static/bundle/index.css" rel="stylesheet" th:href="@{/bundle/index.css}">
-  <title>Libermall - an NFT marketplace</title>
+<head th:replace="fragments/base :: head_base(_)">
 </head>
 <body>
 <header th:replace="~{fragments/header :: header}"></header>
