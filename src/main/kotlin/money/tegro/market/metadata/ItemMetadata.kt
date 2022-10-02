@@ -15,7 +15,7 @@ data class ItemMetadata(
     override val description: String?,
     override val image: String?,
     @JsonSerialize(using = ByteArraySerializer::class)
-    override val imageData: ByteArray?,
+    override val image_data: ByteArray?,
     val attributes: List<ItemMetadataAttribute>? = null,
 ) : Metadata {
     companion object : KLogging() {

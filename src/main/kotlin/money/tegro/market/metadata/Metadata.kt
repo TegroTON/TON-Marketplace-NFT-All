@@ -18,7 +18,7 @@ sealed interface Metadata {
     val name: String?
     val description: String?
     val image: String?
-    val imageData: ByteArray?
+    val image_data: ByteArray?
 
     companion object : KLogging() {
         private val mapper by lazy { jacksonObjectMapper() }

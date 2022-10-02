@@ -26,7 +26,7 @@ data class CollectionModel(
                 name = metadata?.name ?: "Untitled Collection",
                 description = metadata?.description.orEmpty(),
                 image = metadata?.image ?: "", // TODO
-                coverImage = (metadata?.coverImage ?: metadata?.image) ?: "", // TODO
+                coverImage = (metadata?.cover_image ?: metadata?.image) ?: "", // TODO
             )
     }
 }

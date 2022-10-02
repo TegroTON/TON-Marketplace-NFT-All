@@ -15,10 +15,10 @@ data class CollectionMetadata(
     override val description: String?,
     override val image: String?,
     @JsonSerialize(using = ByteArraySerializer::class)
-    override val imageData: ByteArray?,
-    val coverImage: String?,
+    override val image_data: ByteArray?,
+    val cover_image: String?,
     @JsonSerialize(using = ByteArraySerializer::class)
-    val coverImageData: ByteArray?,
+    val cover_image_data: ByteArray?,
 ) : Metadata {
     companion object : KLogging() {
         private val mapper by lazy { jacksonObjectMapper() }
