@@ -94,11 +94,15 @@
                   <span class="price-item__dollar d-block color-grey text-end ms-auto">$64.09</span>
                   */-->
                 </div>
-                <!--/* TODO: Cancel sale option */-->
                 <button class="btn btn-primary w-100" data-bs-target="#BuyModal" data-bs-toggle="modal"
                         th:attr="v-if=|!connection.isUserWallet('${addressHelper.toRaw(item.owner)}')|"
                         type="button"
                 >Buy Now
+                </button>
+                <button class="btn btn-secondary w-100" data-bs-target="#CancelModal" data-bs-toggle="modal"
+                        th:attr="v-if=|connection.isUserWallet('${addressHelper.toRaw(item.owner)}')|"
+                        type="button"
+                >Cancel Sale
                 </button>
               </div>
               <div class="card-item-details d-flex flex-wrap border bg-soft p-2 rounded mb-4"
@@ -307,6 +311,7 @@
 <footer th:replace="fragments/footer :: footer"></footer>
 <div th:replace="modals/connect :: #ConnectModal"></div>
 <div th:replace="modals/buy :: buy_modal(${item}, ${collection})"></div>
+<div th:replace="modals/cancel :: cancel_modal(${item}, ${collection})"></div>
 <div th:replace="modals/sell :: sell_modal(${item})"></div>
 <div th:replace="modals/transfer :: transfer_modal(${item})"></div>
 <div class="item-details__image--size"

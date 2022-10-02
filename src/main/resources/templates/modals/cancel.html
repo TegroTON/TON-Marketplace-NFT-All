@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<div aria-hidden="true" aria-labelledby="CancelModalLabel" class="modal fade" id="CancelModal" tabindex="-1"
+     th:fragment="cancel_modal(item, collection)"
+     th:if="${item.fullPrice != null}"
+>
+  <div class="modal-dialog modal-dialog-centered mobile-modal-bottom">
+    <div class="modal-content border-0">
+      <div class="modal-header border-0 mb-4">
+        <h5 class="modal-title fs-24" id="CancelModalLabel">Cancel NFT Sale</h5>
+        <button aria-label="Close" class="border-0 p-0 modal-close" data-bs-dismiss="modal" type="button"><i
+          class="fa-solid fa-xmark fa-lg"
+        ></i></button>
+      </div>
+      <div class="modal-body mb-3">
+        <div class="d-flex align-items-center bg-soft hover rounded p-2 mb-3">
+          <img alt="Item Image" class="rounded image-80x80" src="../../static/img/user-1.svg" th:alt="${item.name}"
+               th:src="${item.image}"
+          >
+          <div class="__body ms-3">
+            <h5 class="fs-18 mb-2" th:text="${item.name}">Item</h5>
+            <p class="mb-0 color-grey fs-14" th:text="${collection.name}">Not In Collection</p>
+          </div>
+        </div>
+        <ul class="list-unstyled mb-3 px-1">
+          <li class="d-flex align-items-center mb-1">
+            <span>Network Fee</span>
+            <span class="ms-auto" th:text="|{{ fromNano('${item.minimalGasFee}') }} TON|">NaN</span>
+          </li>
+        </ul>
+        <div class="d-flex align-items-center bg-soft border rounded fs-18 fw-medium p-3 mb-3">
+          <span>You Pay</span>
+          <span class="ms-auto" th:text="|{{ fromNano('${item.minimalGasFee}') }} TON|">NaN</span>
+        </div>
+      </div>
+      <button class="btn btn-primary w-100" data-bs-toggle="modal"
+              th:if="${item.sale != AddrNone}"
+              th:v-on:click="|connection.requestTransaction({
+                              dest: '${addressHelper.toRaw(item.sale)}',
+                              value: '${item.minimalGasFee}',
+                              stateInit: null,
+                              text: 'cancel',
+                              payload: null,
+                            })|"
+              type="button"
+      >
+        Cancel Item Sale
+      </button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
