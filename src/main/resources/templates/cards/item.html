@@ -7,7 +7,7 @@
 <body>
 <div class="col-sm-6 col-xl-4 col-xxl-3 mb-4" th:fragment="item_card(item)">
   <div class="card bg-transparent border">
-    <a class="card-link" th:href="'/item/' + ${addressHelper.toRaw(item.address)}">
+    <a class="card-link" th:href="|/item/${{item.address}}|">
       <picture>
         <img alt="Item Image" class="card-image img-fluid" height="250"
              loading="lazy" th:alt="${item.name}" th:src="${item.image}"

@@ -41,7 +41,7 @@
       <button class="btn btn-primary w-100" data-bs-toggle="modal"
               th:if="${item.sale != AddrNone}"
               th:v-on:click="|connection.requestTransaction({
-                              dest: '${addressHelper.toRaw(item.sale)}',
+                              dest: '${{item.sale}}',
                               value: '${item.minimalGasFee}',
                               stateInit: null,
                               text: 'cancel',

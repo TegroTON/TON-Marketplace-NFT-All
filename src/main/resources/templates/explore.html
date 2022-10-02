@@ -51,7 +51,7 @@
       <div class="row collections__list">
         <div class="col-sm-6 col-lg-4 col-xl-3 mb-4" th:each="collection: ${collections}">
           <a class="card card-gradient top-effect" href="/collection/"
-             th:href="'/collection/' + ${addressHelper.toRaw(collection.address)}"
+             th:href="|/collection/${{collection.address}}|"
              th:title="${collection.name}"
              title="Collection"
           >

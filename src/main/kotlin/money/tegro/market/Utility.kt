@@ -8,12 +8,6 @@ import org.ton.boc.BagOfCells
 import org.ton.cell.Cell
 import org.ton.crypto.base64
 
-class AddressHelper {
-    fun toRaw(addr: MsgAddress) = addr.toRaw()
-
-    fun toShortFriendly(addr: MsgAddress) = addr.toShortFriendly()
-}
-
 fun MsgAddressInt.toRaw() = when (this) {
     is AddrStd -> "$workchain_id:$address"
     is AddrVar -> "$workchain_id:$address"

@@ -67,7 +67,7 @@
               th:if="${item.sale != AddrNone}"
               th:text="|Buy For {{ fromNano('${item.fullPrice + item.minimalGasFee}') }} TON|"
               th:v-on:click="|connection.requestTransaction({
-                              dest: '${addressHelper.toRaw(item.sale)}',
+                              dest: '${{item.sale}}}',
                               value: '${item.fullPrice + item.minimalGasFee}',
                               stateInit: null,
                               text: 'buy',

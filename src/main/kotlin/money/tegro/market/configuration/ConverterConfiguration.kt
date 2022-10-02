@@ -4,6 +4,8 @@ import money.tegro.market.toRaw
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.convert.converter.Converter
+import org.ton.block.AddrNone
+import org.ton.block.MsgAddress
 import org.ton.block.MsgAddressInt
 import org.ton.boc.BagOfCells
 import org.ton.cell.CellBuilder
@@ -36,5 +38,22 @@ class ConverterConfiguration {
     fun msgAddressInt2StringConverter() =
         object : Converter<MsgAddressInt, String> {
             override fun convert(it: MsgAddressInt): String = it.toRaw()
+        }
+
+    @Bean
+    fun string2MsgAddressConverter() =
+        object : Converter<String, MsgAddress> {
+            override fun convert(it: String): MsgAddress =
+                if (it.isBlank() || listOf("null", "none", "addr_none").contains(it.trim().lowercase())) {
+                    AddrNone
+                } else {
+                    MsgAddressInt(it)
+                }
+        }
+
+    @Bean
+    fun msgAddressStringConverter() =
+        object : Converter<MsgAddress, String> {
+            override fun convert(it: MsgAddress): String? = it.toRaw()
         }
 }

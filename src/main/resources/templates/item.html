@@ -14,10 +14,7 @@
             <ol class="breadcrumb mb-5 ms-3">
               <li class="breadcrumb-item"><a href="/explore">Explore</a></li>
               <li class="breadcrumb-item" th:if="${collection != null}">
-                <a href="/collection"
-                   th:href="'/collection/' + ${addressHelper.toRaw(collection.address)}"
-                   th:text="${collection.name}"
-                >
+                <a href="/collection" th:href="|/collection/${{collection.address}}|" th:text="${collection.name}">
                   Collection
                 </a>
               </li>
@@ -95,18 +92,18 @@
                   */-->
                 </div>
                 <button class="btn btn-primary w-100" data-bs-target="#BuyModal" data-bs-toggle="modal"
-                        th:attr="v-if=|!connection.isUserWallet('${addressHelper.toRaw(item.owner)}')|"
+                        th:attr="v-if=|!connection.isUserWallet('${{item.owner}}')|"
                         type="button"
                 >Buy Now
                 </button>
                 <button class="btn btn-secondary w-100" data-bs-target="#CancelModal" data-bs-toggle="modal"
-                        th:attr="v-if=|connection.isUserWallet('${addressHelper.toRaw(item.owner)}')|"
+                        th:attr="v-if=|connection.isUserWallet('${{item.owner}}')|"
                         type="button"
                 >Cancel Sale
                 </button>
               </div>
               <div class="card-item-details d-flex flex-wrap border bg-soft p-2 rounded mb-4"
-                   th:attr="v-if=|connection.isUserWallet('${addressHelper.toRaw(item.owner)}')|"
+                   th:attr="v-if=|connection.isUserWallet('${{item.owner}}')|"
                    th:if="${item.fullPrice == null}"
               >
                 <button class="btn btn-primary flex-fill m-2" data-bs-target="#SellModal" data-bs-toggle="modal"
@@ -126,7 +123,7 @@
                 <div class="col-xl-6 mx-auto mb-4">
                   <a class="card-item-details d-block border bg-soft hover px-4 py-3 rounded text-white"
                      href="/profile"
-                     th:href="'/profile/' + ${addressHelper.toRaw(item.owner)}"
+                     th:href="|/profile/${{item.owner}}|"
                   >
                     <h4 class="fs-14 color-grey mb-4">Owner</h4>
                     <div class="d-flex align-items-center">
@@ -134,8 +131,8 @@
                            th:src="@{/img/user-1.svg}"
                            width="40"
                       >
-                      <h4 class="collection__name fs-16 mb-0 ms-3"
-                          th:text="${addressHelper.toShortFriendly(item.owner)}"
+                      <h4 class="collection__name fs-16 mb-0 ms-3 text-truncate"
+                          th:text="${{item.owner}}"
                       >...</h4>
                       <i class="fa-solid fa-angle-right color-grey ms-auto"></i>
                     </div>
@@ -144,7 +141,7 @@
                 <div class="col-xl-6 mb-4">
                   <a class="card-item-details d-block border bg-soft hover px-4 py-3 rounded text-white"
                      href="/explore"
-                     th:href="${collection == null} ? '/explore' : '/collection/' + ${addressHelper.toRaw(collection.address)}"
+                     th:href="${collection == null} ? '/explore' : '/collection/' + ${{collection.address}}"
                   >
                     <h4 class="fs-14 color-grey mb-4">Collection</h4>
                     <div class="d-flex align-items-center">
@@ -168,11 +165,11 @@
                     <a class="d-flex align-items-center p-3 rounded border hover text-white"
                        href="#"
                        target="_blank"
-                       th:href="'https://testnet.tonscan.org/address/' + ${addressHelper.toRaw(item.address)}"
+                       th:href="|https://testnet.tonscan.org/address/${{item.address}}|"
                     >
                       <span class="fw-medium color-grey">Contract Address</span>
                       <span class="col-4 text-truncate ms-auto text-end"
-                            th:text="${addressHelper.toShortFriendly(item.address)}"
+                            th:text="${{item.address}}"
                       ></span>
                       <i class="fa-solid fa-angle-right color-grey ms-3"></i>
                     </a>
@@ -181,11 +178,11 @@
                     <a class="d-flex align-items-center p-3 rounded border hover text-white"
                        href="#"
                        target="_blank"
-                       th:href="'https://testnet.tonscan.org/address/' + ${addressHelper.toRaw(item.sale)}"
+                       th:href="|https://testnet.tonscan.org/address/${{item.sale}}|"
                     >
                       <span class="fw-medium color-grey">Sale Contract</span>
                       <span class="col-4 text-truncate ms-auto text-end"
-                            th:text="${addressHelper.toShortFriendly(item.sale)}"
+                            th:text="${{item.sale}}"
                       ></span>
                       <i class="fa-solid fa-angle-right color-grey ms-3"></i>
                     </a>

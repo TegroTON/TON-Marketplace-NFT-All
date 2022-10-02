@@ -52,7 +52,7 @@
             <span class="ms-auto">{{ fromNano(total) }} TON</span>
           </div>
           <button class="btn btn-primary w-100"
-                  th:v-on:click="|requestItemTransfer('${addressHelper.toRaw(item.address)}', newOwner)|"
+                  th:v-on:click="|requestItemTransfer('${{item.address}}', newOwner)|"
                   type="button"
                   v-bind:disabled="!canTransfer"
           >

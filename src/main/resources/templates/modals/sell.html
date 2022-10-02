@@ -64,7 +64,7 @@
             <span class="ms-auto">{{ fromNano(serviceFee) }} TON</span>
           </div>
           <button class="btn btn-primary w-100"
-                  th:v-on:click="|requestItemSale('${addressHelper.toRaw(item.address)}', price)|"
+                  th:v-on:click="|requestItemSale('${{item.address}}', price)|"
                   type="button"
           >
             Put up for sale
