@@ -27,22 +27,16 @@
             <p class="mb-0 color-grey fs-14" th:text="${collection.name}">Not In Collection</p>
           </div>
         </div>
-        <ul class="list-unstyled mb-3 px-1">
-          <li class="d-flex align-items-center mb-1">
-            <span>Network Fee</span>
-            <span class="ms-auto" th:text="|{{ fromNano('${item.minimalGasFee}') }} TON|">NaN</span>
-          </li>
-        </ul>
         <div class="d-flex align-items-center bg-soft border rounded fs-18 fw-medium p-3 mb-3">
           <span>You Pay</span>
-          <span class="ms-auto" th:text="|{{ fromNano('${item.minimalGasFee}') }} TON|">NaN</span>
+          <span class="ms-auto" th:text="|${{item.minimalGasFee}} TON|">NaN</span>
         </div>
       </div>
       <button class="btn btn-primary w-100" data-bs-toggle="modal"
               th:if="${item.sale != AddrNone}"
               th:v-on:click="|connection.requestTransaction({
                               dest: '${{item.sale}}',
-                              value: '${item.minimalGasFee}',
+                              value: '${item.minimalGasFee.amount.value}',
                               stateInit: null,
                               text: 'cancel',
                               payload: null,

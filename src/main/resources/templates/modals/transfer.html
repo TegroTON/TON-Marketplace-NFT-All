@@ -8,8 +8,8 @@
 <div aria-hidden="true" aria-labelledby="EnterPriceModalLabel" class="modal fade" id="TransferModal" tabindex="-1"
      th:fragment="transfer_modal(item)"
      th:v-scope="|TransferModal({
-        transferFee: '${item.transferFee}',
-        networkFee: '${item.networkFee}',
+        transferFee: '${item.transferFee.amount.value}',
+        networkFee: '${item.networkFee.amount.value}',
       })|"
 >
   <div class="modal-dialog modal-dialog-centered mobile-modal-bottom">

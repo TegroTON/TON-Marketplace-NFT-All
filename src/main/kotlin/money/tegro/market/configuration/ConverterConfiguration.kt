@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.convert.converter.Converter
 import org.ton.block.AddrNone
+import org.ton.block.Coins
 import org.ton.block.MsgAddress
 import org.ton.block.MsgAddressInt
 import org.ton.boc.BagOfCells
@@ -55,5 +56,15 @@ class ConverterConfiguration {
     fun msgAddressStringConverter() =
         object : Converter<MsgAddress, String> {
             override fun convert(it: MsgAddress): String? = it.toRaw()
+        }
+
+    @Bean
+    fun coinsToStringConverter() =
+        object : Converter<Coins, String> {
+            override fun convert(it: Coins): String =
+                it.amount.value.toString().let {
+                    it.dropLast(9).ifEmpty { "0" } + "." +
+                            it.takeLast(9).padStart(9, '0').dropLastWhile { it == '0' }
+                }
         }
 }

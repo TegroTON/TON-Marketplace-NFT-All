@@ -12,7 +12,7 @@
       royaltyDenominator: '${item.royaltyDenominator}',
       marketplaceFeeNumerator: '${item.marketplaceFeeNumerator}',
       marketplaceFeeDenominator: '${item.marketplaceFeeDenominator}',
-      serviceFee: '${item.saleInitializationFee + item.transferFee + item.networkFee}',
+      serviceFee: '${item.saleInitializationFee.amount.value + item.transferFee.amount.value + item.networkFee.amount.value}',
       })|"
 >
   <div class="modal-dialog modal-dialog-centered mobile-modal-bottom">

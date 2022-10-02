@@ -80,12 +80,12 @@
               <div class="card-item-details border bg-soft p-4 rounded mb-4" th:if="${item.fullPrice != null}">
                 <div class="d-flex align-items-center mb-2">
                   <span class="d-block text-uppercase fs-18 fw-medium">Price:</span>
-                  <span class="price-item__ton d-block ms-auto" th:text="|{{fromNano('${item.fullPrice}')}} TON|"
+                  <span class="price-item__ton d-block ms-auto" th:text="|${{item.fullPrice}} TON|"
                   >NaN</span>
                 </div>
                 <div class="d-flex align-items-center mb-4">
                   <span class="color-grey"
-                        th:text="|Plus a network fee of {{ fromNano('${item.minimalGasFee}') }} TON|"
+                        th:text="|Plus a network fee of ${{item.minimalGasFee}} TON|"
                   ></span>
                   <!--/*
                   <span class="price-item__dollar d-block color-grey text-end ms-auto">$64.09</span>

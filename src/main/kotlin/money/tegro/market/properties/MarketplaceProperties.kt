@@ -1,7 +1,7 @@
 package money.tegro.market.properties
 
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.ton.bigint.BigInt
+import org.ton.block.Coins
 import org.ton.block.MsgAddressInt
 import org.ton.crypto.base64
 
@@ -15,11 +15,11 @@ class MarketplaceProperties {
 
     var marketplaceFeeDenominator = 100
 
-    var saleInitializationFee: BigInt = BigInt(100_000_000)
+    var saleInitializationFee: Coins = Coins.ofNano(100_000_000)
 
-    var itemTransferFee: BigInt = BigInt(50_000_000)
+    var itemTransferFee: Coins = Coins.ofNano(50_000_000)
 
-    var networkFee: BigInt = BigInt(50_000_000)
+    var networkFee: Coins = Coins.ofNano(50_000_000)
 
-    val minimalGasFee: BigInt = BigInt(1_000_000_000)
+    val minimalGasFee: Coins = Coins.ofNano(1_000_000_000)
 }

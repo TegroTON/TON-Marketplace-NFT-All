@@ -6,8 +6,8 @@ import money.tegro.market.contract.nft.SaleContract
 import money.tegro.market.metadata.ItemMetadata
 import money.tegro.market.properties.MarketplaceProperties
 import mu.KLogging
-import org.ton.bigint.BigInt
 import org.ton.block.AddrNone
+import org.ton.block.Coins
 import org.ton.block.MsgAddress
 import org.ton.block.MsgAddressInt
 
@@ -22,18 +22,18 @@ data class ItemModel(
     val attributes: Map<String, String>,
     val sale: MsgAddress,
     val marketplace: MsgAddress,
-    val fullPrice: BigInt?,
-    val marketplaceFee: BigInt?,
-    val royalties: BigInt?,
+    val fullPrice: Coins?,
+    val marketplaceFee: Coins?,
+    val royalties: Coins?,
     val royaltyDestination: MsgAddress,
     val royaltyNumerator: Int,
     val royaltyDenominator: Int,
     val marketplaceFeeNumerator: Int,
     val marketplaceFeeDenominator: Int,
-    val saleInitializationFee: BigInt,
-    val transferFee: BigInt,
-    val networkFee: BigInt,
-    val minimalGasFee: BigInt,
+    val saleInitializationFee: Coins,
+    val transferFee: Coins,
+    val networkFee: Coins,
+    val minimalGasFee: Coins,
 ) {
     companion object : KLogging() {
         @JvmStatic
@@ -58,9 +58,9 @@ data class ItemModel(
                 attributes = metadata?.attributes.orEmpty().associate { it.trait to it.value },
                 sale = if (sale != null) contract?.owner ?: AddrNone else AddrNone,
                 marketplace = sale?.marketplace ?: AddrNone,
-                fullPrice = sale?.full_price,
-                marketplaceFee = sale?.marketplace_fee,
-                royalties = sale?.royalty,
+                fullPrice = sale?.full_price?.let(Coins::ofNano),
+                marketplaceFee = sale?.marketplace_fee?.let(Coins::ofNano),
+                royalties = sale?.royalty?.let(Coins::ofNano),
                 royaltyDestination = sale?.royalty_destination ?: royalty?.destination ?: AddrNone,
                 royaltyNumerator = royalty?.numerator ?: 0,
                 royaltyDenominator = royalty?.denominator ?: 1,

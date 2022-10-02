@@ -8,6 +8,7 @@
 <div aria-hidden="true" aria-labelledby="BuyModalLabel" class="modal fade" id="BuyModal" tabindex="-1"
      th:fragment="buy_modal(item, collection)"
      th:if="${item.fullPrice != null}"
+     th:with="total=${T(org.ton.block.Coins).ofNano(item.fullPrice.amount.value + item.minimalGasFee.amount.value)}"
 >
   <div class="modal-dialog modal-dialog-centered mobile-modal-bottom">
     <div class="modal-content border-0">
@@ -30,19 +31,19 @@
         <ul class="list-unstyled mb-3 px-1">
           <li class="d-flex align-items-center mb-1">
             <span>NFT Price</span>
-            <span class="ms-auto" th:text="|{{ fromNano('${item.fullPrice}') }} TON|">NaN</span>
+            <span class="ms-auto" th:text="|${{item.fullPrice}} TON|">NaN</span>
           </li>
           <li class="d-flex align-items-center fs-14 color-grey mb-1">
             <span>Creator Royalties</span>
-            <span class="ms-auto" th:text="|{{ fromNano('${item.royalties}') }} TON|">NaN</span>
+            <span class="ms-auto" th:text="|${{item.royalties}} TON|">NaN</span>
           </li>
           <li class="d-flex align-items-center fs-14 color-grey mb-3">
             <span>Marketplace Fee</span>
-            <span class="ms-auto" th:text="|{{ fromNano('${item.marketplaceFee}') }} TON|">NaN</span>
+            <span class="ms-auto" th:text="|${{item.marketplaceFee}} TON|">NaN</span>
           </li>
           <li class="d-flex align-items-center mb-1">
             <span>Network Fee</span>
-            <span class="ms-auto" th:text="|{{ fromNano('${item.minimalGasFee}') }} TON|">NaN</span>
+            <span class="ms-auto" th:text="|${{item.minimalGasFee}} TON|">NaN</span>
           </li>
           <li class="d-flex align-items-center fs-14 color-grey">
             <span>The rest will be returned to your wallet</span>
@@ -50,7 +51,9 @@
         </ul>
         <div class="d-flex align-items-center bg-soft border rounded fs-18 fw-medium p-3 mb-3">
           <span>You Pay</span>
-          <span class="ms-auto" th:text="|{{ fromNano('${item.fullPrice + item.minimalGasFee}') }} TON|">NaN</span>
+          <span class="ms-auto"
+                th:text="|${{total}} TON|"
+          >NaN</span>
         </div>
         <div class="alert alert-warning" role="alert">
           <h4 class="alert-heading fs-16">Well done!</h4>
@@ -65,10 +68,10 @@
       </div>
       <button class="btn btn-primary w-100" data-bs-toggle="modal"
               th:if="${item.sale != AddrNone}"
-              th:text="|Buy For {{ fromNano('${item.fullPrice + item.minimalGasFee}') }} TON|"
+              th:text="|Buy For ${{total}} TON|"
               th:v-on:click="|connection.requestTransaction({
                               dest: '${{item.sale}}}',
-                              value: '${item.fullPrice + item.minimalGasFee}',
+                              value: '${total.amount.value}',
                               stateInit: null,
                               text: 'buy',
                               payload: null,

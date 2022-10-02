@@ -31,7 +31,7 @@ class APIv1Controller(
         @RequestParam responseDestination: MsgAddressInt?,
     ) = TransactionRequestModel(
         dest = item,
-        value = marketplaceProperties.itemTransferFee + marketplaceProperties.networkFee,
+        value = Coins.ofNano(marketplaceProperties.itemTransferFee.amount.value + marketplaceProperties.networkFee.amount.value),
         stateInit = null,
         text = "NFT Item Transfer",
         payload = CellBuilder.createCell {
@@ -41,7 +41,7 @@ class APIv1Controller(
                     new_owner = newOwner,
                     response_destination = responseDestination ?: AddrNone,
                     custom_payload = Maybe.of(null),
-                    forward_amount = VarUInteger(marketplaceProperties.itemTransferFee),
+                    forward_amount = marketplaceProperties.itemTransferFee.amount,
                     forward_payload = Either.of(Cell.of(), null)
                 )
             )
@@ -74,7 +74,11 @@ class APIv1Controller(
 
         return TransactionRequestModel(
             dest = item,
-            value = marketplaceProperties.saleInitializationFee + marketplaceProperties.itemTransferFee + marketplaceProperties.networkFee,
+            value = Coins.ofNano(
+                marketplaceProperties.saleInitializationFee.amount.value
+                        + marketplaceProperties.itemTransferFee.amount.value
+                        + marketplaceProperties.networkFee.amount.value
+            ),
             stateInit = null,
             text = "NFT put up for sale",
             payload = CellBuilder.createCell {
@@ -84,7 +88,7 @@ class APIv1Controller(
                         new_owner = marketplaceProperties.marketplaceAddress,
                         response_destination = seller,
                         custom_payload = Maybe.of(null),
-                        forward_amount = VarUInteger(marketplaceProperties.saleInitializationFee),
+                        forward_amount = marketplaceProperties.saleInitializationFee.amount,
                         forward_payload = Either.of(CellBuilder.createCell {
                             storeRef(payloadCell)
                             storeRef {
