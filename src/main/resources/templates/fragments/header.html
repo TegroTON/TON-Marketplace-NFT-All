@@ -1,56 +1,80 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:v-bind="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="UTF-8">
   <title>Title</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Raleway:wght@600;700;900&family=Roboto:wght@300;400;500&display=swap"
+    rel="stylesheet"
+  >
+  <link href="../../static/fontawesome/css/all.min.css" rel="stylesheet" th:href="@{/fontawesome/css/all.min.css}">
+  <link href="../../static/bundle/index.css" rel="stylesheet" th:href="@{/bundle/index.css}">
+  <script defer init src="https://unpkg.com/petite-vue"></script>
 </head>
-<body>
-<header @vue:mounted="connection.loadConnection()" class="header">
-  <div class="container-fluid">
-    <nav class="navbar navbar-expand-lg d-flex align-items-center p-0">
-      <a class="navbar-logo me-5" href="/">
-        <img alt="Libermall - NFT Marketplace" class="navbar-logo__img"
+<body class="font-roboto text-white bg-dark-900 antialiased">
+<!--  @vue:mounted="connection.loadConnection()"-->
+<header
+  class="sticky z-30 top-0 px-0 py-6 bg-dark-900/[.08] backdrop-blur-2xl sm:py-8"
+  v-scope="{navbarHidden: true}"
+>
+  <div class="container relative px-3 mx-auto">
+    <nav class="relative flex flex-wrap items-center justify-between p-0">
+      <a class="flex item-center mr-12 items-center" href="/">
+        <img alt="Libermall - NFT Marketplace" class="w-12 h-12 object-contain"
              src="../../static/img/logo/apple-icon-57x57.png" th:src="@{/img/logo/apple-icon-57x57.png}"
         >
-        <span class="navbar-logo__name d-none d-xxl-block">Libermall</span>
+        <span class="font-raleway font-bold text-3xl hidden 2xl:block ml-6">Libermall</span>
       </a>
-      <button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"
-              class="navbar-toggler btn btn-secondary order-2 order-xl-1 ms-3" data-bs-target="#navbarHeader"
-              data-bs-toggle="collapse"
+      <button aria-expanded="false" aria-label="Toggle navigation"
+              class="lg:hidden px-6 py-3 ml-4 order-2 border font-medium text-center text-white rounded-lg bg-dark-700 border-dark-700 hover:bg-gray-900 hover:border-gray-900"
               type="button"
+              v-bind:class="navbarHidden ? '' : 'bg-yellow border-yellow hover:bg-yellow-hover hover:border-yellow-hover'"
+              v-on:click="navbarHidden = !navbarHidden"
       >
-        <i class="fa-regular fa-bars fs-20"></i>
+        <i class="fa-regular text-xl" v-bind:class="navbarHidden ? 'fa-bars' : 'fa-close'"></i>
       </button>
-      <div class="collapse navbar-collapse " id="navbarHeader">
+      <div
+        class="fixed top-0 left-0  w-3/4 h-screen basis-full items-center px-3 py-6 bg-dark-900 lg:flex lg:basis-auto lg:p-0 lg:w-auto lg:h-auto lg:static grow items-center"
+        v-bind:class="navbarHidden ? 'hidden' : 'block'"
+      >
         <form
-          class="header__search flex-fill d-block d-lg-none d-xl-block mx-0 mx-lg-5 mb-3 mb-lg-0 order-1 order-lg-2"
+          class="mx-0 lg:mx-12 mb-4 lg:mb-0 order-1 lg:order-2 block grow"
         >
-          <!--/*
-          <div class="input-group">
-            <input aria-describedby="basic-addon2" aria-label="Search" class="form-control"
-                   placeholder="Search ..."
+          <div
+            class="border border-solid grow border-border-soft rounded-lg bg-soft relative flex flex-wrap items-stretch w-full"
+          >
+            <input aria-describedby="basic-addon2" aria-label="Search"
+                   class="block px-3 py-1.5 w-1/100 min-w-0 min-h-[52] relative flex-auto rounded-tr-none rounded-br-none  bg-transparent border-0"
+                   placeholder="Search..."
                    type="text"
             >
-            <div class="input-group-text p-0">
-              <button class="btn" type="submit">
-                <i class="fa-solid fa-magnifying-glass color-grey"></i>
+            <div class="p-0 border-0 border-gray-900 rounded-lg flex items-center text-center">
+              <button class="px-6 py-3" type="submit">
+                <i class="fa-solid fa-magnifying-glass text-gray-500"></i>
               </button>
             </div>
           </div>
-          */-->
         </form>
-        <div class="dropdown order-4 order-lg-1">
-          <button aria-expanded="false" class="btn btn-primary d-flex flex-nowrap align-items-center"
-                  data-bs-toggle="dropdown"
-                  id="dropdownMenuCat" type="button"
+        <div class="relative order-3 lg:order-1" v-scope="{dropdownHidden: true}">
+          <button aria-expanded="false"
+                  class="text-gray-500 px-6 py-3 m-0 mt-4 lg:mt-0 border-0 rounded-lg uppercase font-medium text-lg flex flex-nowrap items-center
+                  lg:text-dark-900 lg:bg-yellow lg:border-yellow
+                  hover:lg:bg-yellow-hover hover:lg:border-yellow-hover"
+                  type="button"
+                  v-on:click="dropdownHidden = !dropdownHidden"
           >
-            <i class="fa-regular fa-grid-2 me-2"></i>
+            <i class="fa-regular fa-grid-2 mr-2"></i>
             Explore
           </button>
-          <ul aria-labelledby="dropdownMenuCat" class="dropdown-menu animate slideIn mt-3">
+          <ul
+            class="relative block min-w-[240px] rounded-none mt-4 lg:bg-gray-900 lg:rounded-lg lg:absolute transition ease-in-out delay-150 duration-300"
+            v-bind:class="dropdownHidden ? 'lg:invisible lg:opacity-0' : 'lg:visible lg:opacity-100'"
+          >
             <li>
-              <a class="dropdown-item" href="/explore">
-                <i class="fa-regular fa-hexagon-vertical-nft-slanted me-3"></i> All NFTs
+              <a class="px-6 py-3 block hover:lg:bg-dark-700" href="/explore">
+                <i class="fa-regular fa-hexagon-vertical-nft-slanted mr-4"></i> All NFTs
               </a>
             </li>
             <!--/*
@@ -68,8 +92,8 @@
             */-->
           </ul>
         </div>
+        <!--/*
         <ul class="navbar-nav d-flex flex-row py-4 py-lg-0 ms-0 ms-lg-auto pe-5 order-2 order-lg-3">
-          <!--/*
           <li class="nav-item">
             <a class="nav-link" href="#">Stats</a>
           </li>
@@ -79,35 +103,41 @@
           <li class="nav-item">
             <a class="nav-link" href="#">Create</a>
           </li>
-          */-->
         </ul>
-        <div class="dropdown dropstart order-3 order-lg-4" v-if="connection.isConnected">
-          <button aria-expanded="false" data-bs-toggle="dropdown" id="dropdownMenuProfile" type="button">
-            <img alt="" class="rounded-circle profile-image" height="42" src="../../static/img/user-1.svg"
+        */-->
+        <div class="relative order-2 lg:order-3" v-if="'connection.isConnected'" v-scope="{dropdownHidden: true}">
+          <button aria-expanded="false" type="button"
+                  v-on:click="dropdownHidden = !dropdownHidden"
+          >
+            <img alt="" class="rounded-full inline align-middle" height="42" src="../../static/img/user-1.svg"
                  th:src="@{/img/user-1.svg}"
                  width="42"
             >
           </button>
-          <ul aria-labelledby="dropdownMenuProfile" class="dropdown-menu">
+          <ul
+            class="relative block lg:right-full min-w-[240px] rounded-none mt-4 lg:bg-gray-900 lg:rounded-lg lg:absolute transition ease-in-out delay-150 duration-300"
+            v-bind:class="dropdownHidden ? 'lg:invisible lg:opacity-0' : 'lg:visible lg:opacity-100'"
+          >
             <li>
-              <a class="dropdown-item" v-bind:href="'/profile/' + connection.walletAddress">
-                <i class="fa-regular fa-user me-3"></i> Profile
+              <a class="px-6 py-3 block hover:lg:bg-dark-700 border-b border-solid border-dark-700"
+                 v-bind:href="'/profile/' + connection.walletAddress"
+              >
+                <i class="fa-regular fa-user mr-4"></i> Profile
               </a>
             </li>
             <li>
-              <a class="dropdown-item border-0" v-on:click="connection.disconnect()">
-                <i class="fa-regular fa-link-simple-slash me-3"></i> Disconnect
+              <a class="px-6 py-3 block hover:lg:bg-dark-700" v-on:click="connection.disconnect()">
+                <i class="fa-regular fa-link-simple-slash mr-4"></i> Disconnect
               </a>
             </li>
           </ul>
         </div>
-        <button class="btn btn-soft d-flex flex-nowrap align-items-center btn-mobile-fixed order-3 order-lg-4"
-                data-bs-target="#ConnectModal"
-                data-bs-toggle="modal"
-                type="button"
-                v-else
+        <button
+          class="flex flex-wrap items-center order-2 px-6 py-3 sticky bottom-0 left-0 w-full uppercase lg:w-auto hover:bg-white/10"
+          type="button"
+          v-else
         >
-          <i class="fa-regular fa-arrow-right-to-arc me-2"></i> Connect
+          <i class="fa-regular fa-arrow-right-to-arc mr-4"></i> Connect
         </button>
       </div>
     </nav>

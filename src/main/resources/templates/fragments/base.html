@@ -43,10 +43,9 @@
     href="https://fonts.googleapis.com/css2?family=Raleway:wght@600;700;900&family=Roboto:wght@300;400;500&display=swap"
     rel="stylesheet"
   >
-  <script async crossorigin="anonymous" src="../../static/js/fontawesome-pro.min.js"
-          th:src="@{/js/fontawesome-pro.min.js}"
-  ></script>
+  <link href="../../static/fontawesome/css/all.min.css" rel="stylesheet" th:href="@{/fontawesome/css/all.min.css}">
   <link href="../../static/bundle/index.css" rel="stylesheet" th:href="@{/bundle/index.css}">
+  <script defer init src="https://unpkg.com/petite-vue"></script>
 
   <title th:replace="${title}">Libermall - an NFT marketplace</title>
 </head>

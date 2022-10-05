@@ -3,21 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <title>Title</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Raleway:wght@600;700;900&family=Roboto:wght@300;400;500&display=swap"
+    rel="stylesheet"
+  >
+  <link href="../../static/fontawesome/css/all.min.css" rel="stylesheet" th:href="@{/fontawesome/css/all.min.css}">
+  <link href="../../static/bundle/index.css" rel="stylesheet" th:href="@{/bundle/index.css}">
+  <script defer init src="https://unpkg.com/petite-vue"></script>
 </head>
-<body>
-<footer class="footer">
-  <div class="container-fluid">
-    <div class="row accordion modified-collapse" id="accordionFooter">
-      <div class="col-md-12 col-lg-3 me-auto mb-5 mb-lg-0">
-        <div class="footer__logo d-flex align-items-center mb-4">
-          <img alt="Libermall - NFT Marketplace" class="navbar-logo__img"
+<body class="font-roboto text-white bg-dark-900 antialiased">
+<footer class="pt-24 pb-12 px-4">
+  <div class="container relative mx-auto">
+    <div class="flex flex-wrap px-3 grid grid-cols-1 lg:grid-cols-3 gap-12">
+      <div class="mb-12 lg:mb-0 mr-auto">
+        <div class="flex items-center mb-6">
+          <img alt="Libermall - NFT Marketplace" class="align-middle"
                src="../../static/img/logo/apple-icon-57x57.png" th:src="@{/img/logo/apple-icon-57x57.png}"
           >
-          <span class="navbar-logo__name fs-24 d-none d-md-block ms-3">Libermall</span>
+          <span class="hidden">Libermall</span>
         </div>
-        <div class="footer__text mb-5">
-          <h4 class="fs-18">Stay in the loop</h4>
-          <p class="color-grey">
+        <div class="mb-12">
+          <h4 class="font-raleway mb-2 font-medium text-lg">Stay in the loop</h4>
+          <p class="text-gray-500">
             Follow our social media pages to stay in the loop with our newest feature releases, NFT drops, and tips and
             tricks for navigating Libermall.
           </p>
@@ -33,180 +42,72 @@
           </div>
         </div>
         */-->
-        <div class="libermall__soclinks">
-          <a class="libermall__soclinks-item" href="https://t.me/LiberMall"><i class="fa-brands fa-telegram"></i></a>
-          <a class="libermall__soclinks-item" href="https://twitter.com/LiberMallNFT"><i class="fa-brands fa-twitter"
-          ></i></a>
-          <a class="libermall__soclinks-item" href="https://github.com/LiberMall"><i class="fa-brands fa-github"
-          ></i></a>
-          <a class="libermall__soclinks-item" href="https://www.instagram.com/libermallua"><i
-            class="fa-brands fa-instagram"
-          ></i></a>
-          <a class="libermall__soclinks-item" href="https://libermall.medium.com"><i class="fa-brands fa-medium"
-          ></i></a>
-          <a class="libermall__soclinks-item" href="https://vk.com/libermall"><i class="fa-brands fa-vk"></i></a>
+        <div class="flex">
+          <a
+            class="block bg-gray-900 hover:bg-yellow hover:text-dark-900 text-lg flex w-12 h-12 mx-1.5 my-0 border border-solid border-gray-900 rounded-lg items-center justify-center"
+            href="https://t.me/LiberMall"
+            target="_blank"
+          >
+            <i class="fa-brands fa-telegram"></i>
+          </a>
+          <a
+            class="block bg-gray-900 hover:bg-yellow hover:text-dark-900 text-lg flex w-12 h-12 mx-1.5 my-0 border border-solid border-gray-900 rounded-lg items-center justify-center"
+            href="https://twitter.com/LiberMallNFT"
+            target="_blank"
+          >
+            <i class="fa-brands fa-twitter"></i>
+          </a>
+          <a
+            class="block bg-gray-900 hover:bg-yellow hover:text-dark-900 text-lg flex w-12 h-12 mx-1.5 my-0 border border-solid border-gray-900 rounded-lg items-center justify-center"
+            href="https://github.com/LiberMall"
+            target="_blank"
+          >
+            <i class="fa-brands fa-github"></i>
+          </a>
+          <a
+            class="block bg-gray-900 hover:bg-yellow hover:text-dark-900 text-lg flex w-12 h-12 mx-1.5 my-0 border border-solid border-gray-900 rounded-lg items-center justify-center"
+            href="https://www.instagram.com/libermallua"
+            target="_blank"
+          >
+            <i class="fa-brands fa-instagram"></i></a>
+          <a
+            class="block bg-gray-900 hover:bg-yellow hover:text-dark-900 text-lg flex w-12 h-12 mx-1.5 my-0 border border-solid border-gray-900 rounded-lg items-center justify-center"
+            href="https://libermall.medium.com"
+            target="_blank"
+          >
+            <i class="fa-brands fa-medium"></i>
+          </a>
+          <a
+            class="block bg-gray-900 hover:bg-yellow hover:text-dark-900 text-lg flex w-12 h-12 mx-1.5 my-0 border border-solid border-gray-900 rounded-lg items-center justify-center"
+            href="https://vk.com/libermall"
+            target="_blank"
+          ><i class="fa-brands fa-vk"></i></a>
         </div>
       </div>
-      <div class="col-md-12 col-lg-2 py-3 py-lg-0">
+      <div class="py-4">
         <h4 aria-controls="FooterMenu-one" aria-expanded="false"
-            class="d-flex align-items-center text-uppercase fs-18 mb-0 mb-lg-4" data-bs-target="#FooterMenu-one"
-            data-bs-toggle="collapse"
-            style="letter-spacing: 1px;"
+            class="flex items-center uppercase text-lg font-medium tracking-wider mb-0"
         >
-          <span class="me-auto">Marketplace</span>
-          <i class="fa-regular fa-angle-down d-block d-lg-none"></i>
+          Marketplace
         </h4>
-        <ul class="list-unstyled accordion-collapse collapse mt-4 mt-lg-0" data-bs-parent="#accordionFooter"
-            id="FooterMenu-one"
-        >
+        <ul class="mt-6 text-gray-500">
           <li class="mb-2">
-            <a href="/explore">All NFTs</a>
-          </li>
-          <!--/*
-          <li class="mb-2">
-            <a href="#!">Solana NFTs</a>
-          </li>
-          <li class="mb-2">
-            <a href="#!">Art</a>
-          </li>
-          <li class="mb-2">
-            <a href="#!">Collectibles</a>
-          </li>
-          <li class="mb-2">
-            <a href="#!">Domain Names</a>
-          </li>
-          <li class="mb-2">
-            <a href="#!">Music</a>
-          </li>
-          <li class="mb-2">
-            <a href="#!">Photography</a>
-          </li>
-          <li class="mb-2">
-            <a href="#!">Sports</a>
-          </li>
-          <li class="mb-2">
-            <a href="#!">Trading Cards</a>
-          </li>
-          <li class="mb-2">
-            <a href="#!">Utility</a>
-          </li>
-          <li>
-            <a href="#!">Virtual Worlds</a>
-          </li>
-          */-->
-        </ul>
-      </div>
-      <div class="col-md-12 col-lg-2 py-3 py-lg-0">
-        <!--/*
-        <h4 aria-controls="FooterMenu-two" aria-expanded="false"
-            class="d-flex align-items-center text-uppercase fs-18 mb-0 mb-lg-4" data-bs-target="#FooterMenu-two"
-            data-bs-toggle="collapse"
-            style="letter-spacing: 1px;"
-        >
-          <span class="me-auto">My Account</span>
-          <i class="fa-regular fa-angle-down d-block d-lg-none"></i>
-        </h4>
-        <ul class="list-unstyled accordion-collapse collapse mt-4 mt-lg-0" data-bs-parent="#accordionFooter"
-            id="FooterMenu-two"
-        >
-          <li class="mb-2">
-            <a href="#!">Profile</a>
-          </li>
-          <li class="mb-2">
-            <a href="#!">Favorites</a>
-          </li>
-          <li class="mb-2">
-            <a href="#!">Watchlist</a>
-          </li>
-          <li class="mb-2">
-            <a href="#!">My Collections</a>
-          </li>
-          <li class="mb-2">
-            <a href="#!">Settings</a>
+            <a class="hover:text-yellow" href="/explore">All NFTs</a>
           </li>
         </ul>
-        */-->
-      </div>
-      <div class="col-md-12 col-lg-2 py-3 py-lg-0">
-        <!--/*
-        <h4 aria-controls="FooterMenu-three" aria-expanded="false"
-            class="d-flex align-items-center text-uppercase fs-18 mb-0 mb-lg-4" data-bs-target="#FooterMenu-three"
-            data-bs-toggle="collapse"
-            style="letter-spacing: 1px;"
-        >
-          <span class="me-auto">Resources</span>
-          <i class="fa-regular fa-angle-down d-block d-lg-none"></i>
-        </h4>
-        <ul class="list-unstyled accordion-collapse collapse mt-4 mt-lg-0" data-bs-parent="#accordionFooter"
-            id="FooterMenu-three"
-        >
-          <li class="mb-2">
-            <a href="#!">Help Center</a>
-          </li>
-          <li class="mb-2">
-            <a href="#!">Platform Status</a>
-          </li>
-          <li class="mb-2">
-            <a href="#!">Partners</a>
-          </li>
-          <li class="mb-2">
-            <a href="#!">Gas-Free Marketplace</a>
-          </li>
-          <li class="mb-2">
-            <a href="#!">Taxes</a>
-          </li>
-          <li class="mb-2">
-            <a href="#!">Blog</a>
-          </li>
-          <li class="mb-2">
-            <a href="#!">Docs</a>
-          </li>
-          <li>
-            <a href="#!">Newsletter</a>
-          </li>
-        </ul>
-        */-->
-      </div>
-      <div class="col-md-12 col-lg-2 py-3 py-lg-0">
-        <!--/*
-        <h4 aria-controls="FooterMenu-four" aria-expanded="false"
-            class="d-flex align-items-center text-uppercase fs-18 mb-0 mb-lg-4" data-bs-target="#FooterMenu-four"
-            data-bs-toggle="collapse"
-            style="letter-spacing: 1px;"
-        >
-          <span class="me-auto">Company</span>
-          <i class="fa-regular fa-angle-down d-block d-lg-none"></i>
-        </h4>
-        <ul class="list-unstyled accordion-collapse collapse mt-4 mt-lg-0" data-bs-parent="#accordionFooter"
-            id="FooterMenu-four"
-        >
-          <li class="mb-2">
-            <a href="#!">About</a>
-          </li>
-          <li class="mb-2">
-            <a href="#!">Careers</a>
-          </li>
-          <li class="mb-2">
-            <a href="#!">Ventures</a>
-          </li>
-          <li>
-            <a href="#!">Grants</a>
-          </li>
-        </ul>
-        */-->
       </div>
     </div>
-    <div class="footer__bottom color-grey border-top pt-5 mt-5">
-      <div class="row">
-        <div class="col-sm-12 col-md-6 mb-3 mb-md-0">
+    <div class="text-gray-500 pt-12 mt-12 ">
+      <div class="flex flex-wrap">
+        <div>
           <span class="me-auto">©2022 Libermall, Inc</span>
         </div>
+        <!--/*
         <div class="col-sm-12 col-md-6 ms-auto text-end">
-          <!--/*
           <a class="me-3" href="#!">Privacy Police</a>
           <a href="#!">Terms of Service</a>
-          */-->
         </div>
+        */-->
       </div>
     </div>
   </div>
