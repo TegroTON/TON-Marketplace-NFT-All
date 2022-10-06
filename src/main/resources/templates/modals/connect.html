@@ -5,58 +5,37 @@
   <title>Title</title>
 </head>
 <body>
-<div aria-hidden="true" class="modal fade" id="ConnectModal" tabindex="-1" th:fragment="connect_modal">
-  <div class="modal-dialog modal-dialog-centered mobile-modal-bottom">
-    <div class="modal-content border-0">
-      <div class="modal-header d-block border-0 mb-3">
-        <h5 class="modal-title mb-2 fs-24" id="ConnectModalLabel">Connect wallet</h5>
-        <p class="fs-18 color-grey pe-5">
+<div aria-hidden="true" class="top-0 left-0 z-40 w-full h-full bg-dark-900/[.6]" id="ConnectModal" tabindex="-1"
+     th:fragment="connect_modal"
+     v-bind:class="connection.isModalOpen ? 'fixed' : 'hidden'"
+     v-scope="{}"
+>
+  <div class="mx-auto flex items-center relative w-auto max-w-lg min-h-screen">
+    <div class="bg-dark-700 rounded-3xl p-10 relative flex flex-col w-full h-full min-h-full gap-4">
+      <div class="">
+        <h5 class="text-2xl font-raleway font-bold mb-2" id="ConnectModalLabel">Connect wallet</h5>
+        <p class="text-lg text-gray-500">
           Choose how you want to connect. More options will be added in the future.
         </p>
-        <button aria-label="Close" class="border-0 p-0 modal-close" data-bs-dismiss="modal" type="button"><i
-          class="fa-solid fa-xmark fa-lg"
-        ></i></button>
-      </div>
-      <div class="modal-body">
-        <a class="d-flex align-items-center border rounded bg-grey hover-grey mb-3 p-3"
-           data-bs-dismiss="modal"
-           v-if="connection.isTonWalletAvailable"
-           v-on:click="connection.connectTonWallet()"
+        <button aria-label="Close" class="absolute top-6 right-8 opacity-50" type="button"
+                v-on:click="connection.isModalOpen = false"
         >
-          <div class="d-flex align-items-center">
-            <img alt="Ton Wallet" class="wc-img" height="40" src="../../static/img/ton-wallet.png"
-                 th:src="@{/img/ton-wallet.png}" width="40"
-            >
-            <span class="fs-18 ms-4">Ton Wallet</span>
-          </div>
-          <div class="ms-auto">
+          <i class="fa-solid fa-xmark text-2xl"></i>
+        </button>
+      </div>
+      <div class="">
+        <a class="flex items-center gap-4 rounded-lg bg-gray-900 hover:text-yellow-hover mb-4 p-4"
+           v-if="connection.isTonWalletAvailable"
+           v-on:click="connection.isModalOpen = false; connection.connectTonWallet()"
+        >
+          <img alt="Ton Wallet" class="wc-img" height="40" src="../../static/img/ton-wallet.png"
+               th:src="@{/img/ton-wallet.png}" width="40"
+          >
+          <span class="text-lg">Ton Wallet</span>
+          <div class="ml-auto">
             <i class="fa-solid fa-angle-right"></i>
           </div>
         </a>
-        <!--/*
-        <a class="d-flex align-items-center border rounded bg-grey hover-grey mb-3 p-3" href="#!">
-          <div class="d-flex align-items-center">
-            <img alt="Tonkeeper" class="wc-img" height="40" src="../../static/img/tonkeeper.png"
-                 th:src="@{/img/tonkeeper.png}" width="40"
-            >
-            <span class="fs-18 ms-4">Tonkeeper</span>
-          </div>
-          <div class="ms-auto">
-            <i class="fa-solid fa-angle-right"></i>
-          </div>
-        </a>
-        <a class="d-flex align-items-center border rounded bg-grey hover-grey p-3" href="#!">
-          <div class="d-flex align-items-center">
-            <img alt="Tonhub" class="wc-img" height="40" src="../../static/img/tonhub.png" th:src="@{/img/tonhub.png}"
-                 width="40"
-            >
-            <span class="fs-18 ms-4">Tonhub</span>
-          </div>
-          <div class="ms-auto">
-            <i class="fa-solid fa-angle-right"></i>
-          </div>
-        </a>
-        */-->
       </div>
     </div>
   </div>

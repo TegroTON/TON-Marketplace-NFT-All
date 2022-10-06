@@ -10,8 +10,7 @@ createApp({
 
     SellModal,
     TransferModal,
-
-
+    
     fromNano(v: any) {
         return fromNano(v)
     },

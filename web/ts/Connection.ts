@@ -8,8 +8,10 @@ export const connection = {
         wallet: null as Wallet | null,
     },
 
+    isModalOpen: false,
+
     get walletAddress() {
-        return this.connection.wallet.address
+        return this.connection.wallet?.address
     },
 
     loadConnection() {

@@ -25,13 +25,6 @@ esbuild
                 }
             })
         ],
-        watch: {
-            onRebuild(error, result) {
-                if (error) console.error('watch build failed:', error)
-                else {
-                    console.log('watch build succeeded:', result)
-                }
-            },
-        }
+        watch: false,
     })
     .catch(() => process.exit(1));
