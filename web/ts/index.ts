@@ -1,5 +1,4 @@
 import '../css/index.css'
-import 'bootstrap'
 import {createApp} from "petite-vue"
 import {fromNano, toNano} from "ton"
 import {SellModal} from "./modals/SellModal";

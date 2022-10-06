@@ -1,4 +1,7 @@
 import esbuild from 'esbuild'
+import stylePlugin from 'esbuild-style-plugin'
+import tailwindcss from 'tailwindcss'
+import autoprefixer from "autoprefixer";
 
 esbuild
     .build({
@@ -14,6 +17,21 @@ esbuild
         },
         inject: [
             "esbuild.inject.js"
-        ]
+        ],
+        plugins: [
+            stylePlugin({
+                postcss: {
+                    plugins: [tailwindcss, autoprefixer]
+                }
+            })
+        ],
+        watch: {
+            onRebuild(error, result) {
+                if (error) console.error('watch build failed:', error)
+                else {
+                    console.log('watch build succeeded:', result)
+                }
+            },
+        }
     })
     .catch(() => process.exit(1));

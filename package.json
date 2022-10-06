@@ -13,15 +13,16 @@
   "author": "Anton F.",
   "license": "UNLICENSED",
   "devDependencies": {
+    "autoprefixer": "^10.4.12",
     "esbuild": "^0.15.10",
+    "esbuild-style-plugin": "^1.6.0",
+    "postcss": "^8.4.17",
     "tailwindcss": "^3.1.8",
     "typescript": "^4.8.4"
   },
   "dependencies": {
-    "@popperjs/core": "^2.11.6",
     "@types/bn.js": "^5.1.1",
     "bn.js": "^5.2.1",
-    "bootstrap": "5.2.0",
     "buffer": "^6.0.3",
     "petite-vue": "^0.4.1",
     "ton": "^12.1.3"
