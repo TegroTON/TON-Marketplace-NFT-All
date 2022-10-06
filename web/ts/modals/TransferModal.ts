@@ -8,8 +8,8 @@ export function TransferModal(props: {
     networkFee: string,
 }) {
     return {
-        transferFee: new BN(props.transferFee),
-        networkFee: new BN(props.networkFee),
+        transferFee:  /* @__PURE__ */new BN(props.transferFee),
+        networkFee:  /* @__PURE__ */new BN(props.networkFee),
         newOwner: null as string | null,
 
         get total() {

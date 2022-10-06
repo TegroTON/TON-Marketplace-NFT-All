@@ -1,5 +1,5 @@
 import {Wallet} from "./types/Wallet";
-import {Address} from "ton";
+import {Address} from "ton/dist/address/Address";
 import {TransactionRequest} from "./types/TransactionRequest";
 
 export const connection = {

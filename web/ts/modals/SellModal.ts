@@ -1,5 +1,5 @@
 import BN from "bn.js";
-import {toNano} from "ton";
+import {toNano} from "ton/dist/utils/convert";
 import {TransactionRequest} from "../types/TransactionRequest";
 import {connection} from "../Connection";
 

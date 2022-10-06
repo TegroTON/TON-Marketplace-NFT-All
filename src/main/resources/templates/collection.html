@@ -2,6 +2,14 @@
 <html lang="en" translate="yes" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="fragments/base :: head_base(~{::title})">
   <title th:text="${collection.name} + ' | Libermall'">Libermall - an NFT marketplace</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Raleway:wght@600;700;900&family=Roboto:wght@300;400;500&display=swap"
+    rel="stylesheet"
+  >
+  <link href="../static/fontawesome/css/all.min.css" rel="stylesheet">
+  <link href="../static/bundle.css" rel="stylesheet">
 </head>
 <body>
 <header th:replace="fragments/header :: header"></header>
@@ -246,6 +254,6 @@
 <footer th:replace="fragments/footer :: footer"></footer>
 <div th:replace="modals/connect :: #ConnectModal"></div>
 
-<script defer th:src="@{/bundle/index.js}"></script>
+<script src="../static/bundle.js" th:src="@{/bundle.js}"></script>
 </body>
 </html>
