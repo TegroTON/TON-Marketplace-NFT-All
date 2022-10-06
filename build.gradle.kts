@@ -1,4 +1,4 @@
-import com.github.gradle.node.task.NodeTask
+import com.github.gradle.node.npm.task.NpxTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -69,15 +69,39 @@ node {
     download.set(true)
 }
 
-tasks.register<NodeTask>("esbuildApp") {
+tasks.register<NpxTask>("buildTypeScript") {
     dependsOn("npmInstall")
-    script.set(file("build.mjs"))
-    inputs.files("package.json", "package-lock.json", "tsconfig.json", "build.mjs")
-    inputs.dir("web")
+    command.set("esbuild")
+    args.addAll(
+        "--bundle",
+        "--minify",
+        "--inject:esbuild.inject.js",
+        "--outfile=./src/main/resources/static/bundle.js",
+        "./web/ts/index.ts"
+    )
+    inputs.files("package.json", "package-lock.json", "tsconfig.json")
+    inputs.dir("web/ts")
     inputs.dir(fileTree("node_modules").exclude(".cache"))
-    outputs.dir("src/main/resources/static/bundle")
+    outputs.file(file("src/main/resources/static/bundle.js"))
 }
 
+tasks.register<NpxTask>("buildTailwindCSS") {
+    dependsOn("npmInstall")
+    command.set("tailwindcss")
+    args.addAll(
+        "--minify",
+        "--input=./web/css/index.css",
+        "--output=./src/main/resources/static/bundle.css",
+    )
+    inputs.files("package.json", "package-lock.json", "tailwind.config.js")
+    inputs.dir("web/css")
+    inputs.dir("src/main/resources/templates")
+    inputs.dir(fileTree("node_modules").exclude(".cache"))
+    outputs.file(file("src/main/resources/templates/static/bundle.css"))
+}
+
+
 tasks.withType<ProcessResources> {
-    dependsOn("esbuildApp")
+    dependsOn("buildTypeScript")
+    dependsOn("buildTailwindCSS")
 }

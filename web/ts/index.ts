@@ -1,4 +1,3 @@
-import '../css/index.css'
 import {createApp} from "petite-vue"
 import {fromNano, toNano} from "ton"
 import {SellModal} from "./modals/SellModal";
@@ -10,7 +9,7 @@ createApp({
 
     SellModal,
     TransferModal,
-    
+
     fromNano(v: any) {
         return fromNano(v)
     },

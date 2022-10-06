@@ -9,9 +9,8 @@
     href="https://fonts.googleapis.com/css2?family=Raleway:wght@600;700;900&family=Roboto:wght@300;400;500&display=swap"
     rel="stylesheet"
   >
-  <link href="../static/fontawesome/css/all.min.css" rel="stylesheet" th:href="@{/fontawesome/css/all.min.css}">
-  <link href="../static/bundle/index.css" rel="stylesheet" th:href="@{/bundle/index.css}">
-  <script defer init src="https://unpkg.com/petite-vue" th:if="false"></script>
+  <link href="../static/fontawesome/css/all.min.css" rel="stylesheet">
+  <link href="../static/bundle.css" rel="stylesheet">
 </head>
 <body class="font-roboto text-white bg-dark-900 antialiased">
 <header th:replace="fragments/header :: header"></header>
@@ -198,8 +197,8 @@
           </button>
         </div>
       </div>
-      <div class="pt-4 flex flex-wrap grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        <a class="flex flex-col lg:flex-row gap-4 rounded-3xl p-4 mb-6 items-center bg-dark-700 hover:bg-gray-900"
+      <div class="pt-4 flex flex-wrap gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        <a class="flex flex-col lg:flex-row gap-4 rounded-xl p-4 mb-6 items-center bg-dark-700 hover:bg-gray-900"
            href="/"
            th:each="collection, status: ${collections}"
            th:href="|/collection/${{collection.address}}|"
@@ -234,6 +233,6 @@
 <footer th:replace="fragments/footer :: footer"></footer>
 <div th:replace="modals/connect :: connect_modal"></div>
 
-<script th:src="@{/bundle/index.js}"></script>
+<script src="../static/bundle.js" th:src="@{/bundle.js}"></script>
 </body>
 </html>
