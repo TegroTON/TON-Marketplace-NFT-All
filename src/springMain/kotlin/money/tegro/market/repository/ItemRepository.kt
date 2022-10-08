@@ -9,7 +9,6 @@ import money.tegro.market.contract.nft.ItemContract
 import money.tegro.market.contract.nft.RoyaltyContract
 import money.tegro.market.contract.nft.SaleContract
 import money.tegro.market.metadata.ItemMetadata
-import money.tegro.market.model.CollectionModel
 import money.tegro.market.model.ItemModel
 import money.tegro.market.properties.CacheProperties
 import money.tegro.market.properties.MarketplaceProperties
@@ -56,15 +55,12 @@ class ItemRepository(
         collectionRepository.listItemAddresses(collection)
             .mapNotNull { addr -> (addr as? MsgAddressInt)?.let { getByAddress(it) } }
 
-    suspend fun getItemCollection(item: MsgAddressInt): CollectionModel? =
-        (getContract(item)?.collection as? MsgAddressInt)?.let { collectionRepository.getByAddress(it) }
-
     @OptIn(FlowPreview::class)
     fun listAll() =
         merge(
             // Collection items
             collectionRepository.listAll()
-                .flatMapConcat { listCollectionItems(it.address) },
+                .flatMapConcat { listCollectionItems(it) },
             // Standalone items
             approvalRepository.findAllByApprovedIsTrue()
                 .map { it.address }

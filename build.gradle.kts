@@ -1,11 +1,10 @@
 plugins {
-    kotlin("multiplatform") version "1.7.20"
-    kotlin("plugin.serialization") version "1.7.20"
-    kotlin("plugin.spring") version "1.7.20"
+    kotlin("multiplatform") version "1.7.10"
+    kotlin("plugin.serialization") version "1.7.10"
+    kotlin("plugin.spring") version "1.7.10"
 
-    id("org.springframework.boot") version "2.6.8"
+    id("org.springframework.boot") version "2.7.0"
     id("io.spring.dependency-management") version "1.0.14.RELEASE"
-
 }
 
 group = "money.tegro"
@@ -31,6 +30,7 @@ kotlin {
         binaries.executable()
         browser {
             commonWebpackConfig {
+                devServer?.port = 8081
                 cssSupport.enabled = true
                 outputFileName = "index.js"
                 outputPath = File(buildDir, "processedResources/spring/main/static")
@@ -40,8 +40,11 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation("io.github.microutils:kotlin-logging:2.1.23")
+                implementation("org.jetbrains.kotlin:atomicfu:1.6.21")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
+
+                implementation("io.github.microutils:kotlin-logging:2.1.23")
             }
         }
 
@@ -66,7 +69,6 @@ kotlin {
 
                 implementation("net.logstash.logback:logstash-logback-encoder:7.2")
                 implementation("com.github.andreypfau.ton-kotlin:ton-kotlin:c678f34b0a")
-                implementation("org.postgresql:r2dbc-postgresql:0.9.2.RELEASE")
 
                 implementation("org.springframework.boot:spring-boot-starter-actuator")
                 implementation("org.springframework.boot:spring-boot-starter-amqp")
@@ -86,6 +88,7 @@ kotlin {
                 implementation("org.springframework.boot:spring-boot-devtools")
                 runtimeOnly("io.micrometer:micrometer-registry-prometheus")
                 runtimeOnly("org.postgresql:postgresql")
+                implementation("org.postgresql:r2dbc-postgresql")
                 compileOnly("org.springframework.boot:spring-boot-configuration-processor")
             }
         }
@@ -93,5 +96,7 @@ kotlin {
 }
 
 tasks.getByName<Copy>("springProcessResources") {
-    dependsOn(tasks.getByName("reactBrowserDevelopmentWebpack"))
+    from(tasks.getByName("reactBrowserDistribution")) {
+        into("static")
+    }
 }

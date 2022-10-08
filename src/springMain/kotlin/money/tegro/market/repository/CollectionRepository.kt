@@ -5,7 +5,6 @@ import kotlinx.coroutines.flow.*
 import money.tegro.market.accountBlockAddresses
 import money.tegro.market.contract.nft.CollectionContract
 import money.tegro.market.metadata.CollectionMetadata
-import money.tegro.market.model.CollectionModel
 import money.tegro.market.properties.CacheProperties
 import money.tegro.market.service.ReferenceBlockService
 import money.tegro.market.toRaw
@@ -32,14 +31,10 @@ class CollectionRepository(
     private val referenceBlockService: ReferenceBlockService,
     private val approvalRepository: ApprovalRepository,
 ) {
-    suspend fun getByAddress(address: MsgAddressInt) =
-        CollectionModel.of(address, getContract(address), getMetadata(address))
-
     fun listAll() =
         approvalRepository.findAllByApprovedIsTrue()
             .map { it.address }
             .filter { getContract(it) != null }
-            .map { getByAddress(it) }
 
     private val contractCache =
         caffeineBuilder<MsgAddressInt, Optional<CollectionContract>>().build()

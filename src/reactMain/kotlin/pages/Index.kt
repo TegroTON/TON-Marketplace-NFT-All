@@ -1,8 +1,13 @@
 package pages
 
 import classes
+import client.CollectionClient
 import components.Button
 import components.ButtonKind
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
+import mainScope
+import money.tegro.market.dto.TopCollectionDTO
 import react.FC
 import react.Props
 import react.dom.html.AnchorTarget
@@ -20,6 +25,7 @@ import react.dom.html.ReactHTML.picture
 import react.dom.html.ReactHTML.section
 import react.dom.html.ReactHTML.source
 import react.dom.html.ReactHTML.span
+import react.useEffectOnce
 import react.useState
 
 val Index = FC<Props>("Index") {
@@ -262,29 +268,40 @@ val Index = FC<Props>("Index") {
                 div {
                     classes = "pt-4 flex flex-wrap gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
 
-                    // TODO: List of these
-                    a {
-                        classes =
-                            "flex flex-col lg:flex-row gap-4 rounded-xl p-4 mb-6 items-center bg-dark-700 hover:bg-gray-900"
-                        href = "/"
-                        title = "Collection"
+                    var topCollections: List<TopCollectionDTO> by useState(listOf())
 
-                        span {
-                            classes = "font-bold"
-                            +"1" // Index
+                    useEffectOnce {
+                        mainScope.launch {
+                            topCollections = CollectionClient.listTopCollections().toList()
                         }
+                    }
 
-                        picture {
-                            img {
-                                alt = "Collection Image"
-                                classes = "rounded-full w-16 h-16"
-                                src = "./assets/img/user-1.svg"
+                    for ((index, collection) in topCollections.withIndex()) {
+                        a {
+                            key = collection.address
+
+                            classes =
+                                "flex flex-col lg:flex-row gap-4 rounded-xl p-4 items-center bg-dark-700 hover:bg-gray-900"
+                            href = "/collection/" + collection.address
+                            title = collection.name
+
+                            span {
+                                classes = "font-bold"
+                                +"${index + 1}" // Index
                             }
-                        }
 
-                        h4 {
-                            classes = "text-lg font-raleway"
-                            +"Collection Name"
+                            picture {
+                                img {
+                                    alt = collection.name
+                                    classes = "rounded-full w-16 h-16"
+                                    src = collection.image.original
+                                }
+                            }
+
+                            h4 {
+                                classes = "text-lg font-raleway"
+                                +collection.name
+                            }
                         }
                     }
                 }

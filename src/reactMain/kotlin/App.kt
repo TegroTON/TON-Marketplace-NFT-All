@@ -1,5 +1,6 @@
 import components.AppFooter
 import components.AppHeader
+import kotlinx.coroutines.MainScope
 import pages.Collection
 import pages.Index
 import react.FC
@@ -8,6 +9,8 @@ import react.createElement
 import react.router.Route
 import react.router.Routes
 import react.router.dom.HashRouter
+
+val mainScope = MainScope()
 
 val App = FC<Props>("App") {
     AppHeader { }
