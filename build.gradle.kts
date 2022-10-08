@@ -1,13 +1,11 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
-    kotlin("multiplatform") version "1.7.10"
-    kotlin("plugin.serialization") version "1.7.10"
+    kotlin("multiplatform") version "1.7.20"
+    kotlin("plugin.serialization") version "1.7.20"
+    kotlin("plugin.spring") version "1.7.20"
 
-    id("org.springframework.boot") version "2.7.4" apply false
-    id("io.spring.dependency-management") version "1.0.14.RELEASE" apply false
+    id("org.springframework.boot") version "2.6.8"
+    id("io.spring.dependency-management") version "1.0.14.RELEASE"
 
-    kotlin("plugin.spring") version "1.7.10" apply false
 }
 
 group = "money.tegro"
@@ -20,19 +18,13 @@ repositories {
 
 kotlin {
     jvm("spring") {
-        apply(plugin = "org.springframework.boot")
-        apply(plugin = "io.spring.dependency-management")
-        apply(plugin = "org.jetbrains.kotlin.plugin.spring")
-        apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
+        withJava()
 
-        tasks.withType<KotlinCompile> {
+        compilations.all {
             kotlinOptions {
-                freeCompilerArgs = listOf("-Xjsr305=strict")
                 jvmTarget = "17"
+                freeCompilerArgs = listOf("-Xjsr305=strict")
             }
-        }
-        tasks.withType<Test> {
-            useJUnitPlatform()
         }
     }
     js("react", IR) {
@@ -54,8 +46,9 @@ kotlin {
         }
 
         val reactMain by getting {
-            dependsOn(commonMain)
             dependencies {
+                dependsOn(commonMain)
+
                 implementation("org.jetbrains.kotlin-wrappers:kotlin-extensions:1.0.1-pre.399")
                 implementation("org.jetbrains.kotlin-wrappers:kotlin-react:18.2.0-pre.399")
                 implementation("org.jetbrains.kotlin-wrappers:kotlin-react-dom:18.2.0-pre.399")
@@ -68,10 +61,13 @@ kotlin {
             }
         }
         val springMain by getting {
-            dependsOn(commonMain)
             dependencies {
+                dependsOn(commonMain)
+
                 implementation("net.logstash.logback:logstash-logback-encoder:7.2")
                 implementation("com.github.andreypfau.ton-kotlin:ton-kotlin:c678f34b0a")
+                implementation("org.postgresql:r2dbc-postgresql:0.9.2.RELEASE")
+
                 implementation("org.springframework.boot:spring-boot-starter-actuator")
                 implementation("org.springframework.boot:spring-boot-starter-amqp")
                 implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
@@ -90,7 +86,6 @@ kotlin {
                 implementation("org.springframework.boot:spring-boot-devtools")
                 runtimeOnly("io.micrometer:micrometer-registry-prometheus")
                 runtimeOnly("org.postgresql:postgresql")
-                runtimeOnly("org.postgresql:r2dbc-postgresql")
                 compileOnly("org.springframework.boot:spring-boot-configuration-processor")
             }
         }
