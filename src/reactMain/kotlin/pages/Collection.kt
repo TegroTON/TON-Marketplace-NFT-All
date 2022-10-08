@@ -1,6 +1,11 @@
 package pages
 
 import classes
+import client.CollectionClient
+import kotlinx.coroutines.launch
+import kotlinx.js.get
+import mainScope
+import money.tegro.market.dto.CollectionDTO
 import react.FC
 import react.Props
 import react.dom.html.ImgLoading
@@ -12,26 +17,30 @@ import react.dom.html.ReactHTML.main
 import react.dom.html.ReactHTML.p
 import react.dom.html.ReactHTML.picture
 import react.dom.html.ReactHTML.section
-import react.dom.html.ReactHTML.source
 import react.dom.html.ReactHTML.span
+import react.router.useParams
+import react.useEffectOnce
+import react.useState
 
 val Collection = FC<Props> {
+    val params = useParams()
+    val address = requireNotNull(params.get("address"))
+    var collection: CollectionDTO? by useState(null)
+
+    useEffectOnce {
+        mainScope.launch {
+            collection = CollectionClient.getByAddress(address)
+        }
+    }
+
     section {
         classes = "min-w-full m-0 -mb-6 bg-gray-900"
 
         picture {
-            source {
-                srcSet = "./assets/img/nft-hero.webp"
-                type = "image/webp"
-            }
-            source {
-                srcSet = "./assets/img/nft-hero.png"
-                type = "image/png"
-            }
             img {
-                src = "./assets/img/nft-hero.png"
+                src = collection?.coverImage?.original ?: "./assets/img/nft-hero.png"
                 loading = ImgLoading.lazy
-                alt = "Collection Cover"
+                alt = collection?.name ?: "Collection Cover"
                 classes = "w-full h-[340px] object-cover align-middle"
             }
         }
@@ -57,7 +66,7 @@ val Collection = FC<Props> {
                             div { // Image
                                 img {
                                     classes = "w-full h-full rounded-full object-cover align-middle"
-                                    src = "./assets/img/author/author-17.jpg"
+                                    src = collection?.image?.original ?: "./assets/img/user-1.svg"
                                 }
                             }
 
@@ -66,12 +75,12 @@ val Collection = FC<Props> {
 
                         h1 {
                             classes = "text-3xl font-raleway"
-                            +"Collection name"
+                            +(collection?.name ?: "...")
                         }
 
                         div { // Collection description
                             p {
-                                +"Collection description here"
+                                +collection?.description.orEmpty()
                             }
                         }
                     }
@@ -82,7 +91,8 @@ val Collection = FC<Props> {
                         +"Created by "
                         span {
                             classes = "text-yellow"
-                            +"0:ABCDEF..."
+                            +(collection?.owner
+                                ?.let { it.take(6) + "..." + it.takeLast(6) } ?: "...")
                         }
                     }
                 }
@@ -100,12 +110,12 @@ val Collection = FC<Props> {
 
                         h5 {
                             classes = "uppercase text-gray-500"
-                            +"Stat"
+                            +"Items"
                         }
 
                         p {
                             classes = "uppercase"
-                            +"Value"
+                            +(collection?.numberOfItems ?: 0).toString()
                         }
                     }
                 }

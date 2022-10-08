@@ -25,6 +25,7 @@ import react.dom.html.ReactHTML.picture
 import react.dom.html.ReactHTML.section
 import react.dom.html.ReactHTML.source
 import react.dom.html.ReactHTML.span
+import react.router.dom.Link
 import react.useEffectOnce
 import react.useState
 
@@ -277,12 +278,12 @@ val Index = FC<Props>("Index") {
                     }
 
                     for ((index, collection) in topCollections.withIndex()) {
-                        a {
+                        Link {
                             key = collection.address
 
                             classes =
                                 "flex flex-col lg:flex-row gap-4 rounded-xl p-4 items-center bg-dark-700 hover:bg-gray-900"
-                            href = "/collection/" + collection.address
+                            to = "/collection/" + collection.address
                             title = collection.name
 
                             span {
@@ -294,7 +295,7 @@ val Index = FC<Props>("Index") {
                                 img {
                                     alt = collection.name
                                     classes = "rounded-full w-16 h-16"
-                                    src = collection.image.original
+                                    src = collection.image.original ?: "./assets/img/user-1.svg"
                                 }
                             }
 

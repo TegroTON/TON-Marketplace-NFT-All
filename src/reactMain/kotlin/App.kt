@@ -21,7 +21,7 @@ val App = FC<Props>("App") {
                 element = createElement(Index)
             }
             Route {
-                path = "/collection"
+                path = "/collection/:address"
                 element = createElement(Collection)
             }
         }
