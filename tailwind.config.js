@@ -1,6 +1,11 @@
+const path = require('path');
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-    content: ["./src/main/resources/templates/**/*.html"],
+    content: [
+        path.join(__dirname, "/src/reactMain/kotlin/**/*.kt"),
+        path.join(__dirname, "/src/reactMain/resources/**/*.html"),
+    ],
     theme: {
         extend: {
             colors: {
