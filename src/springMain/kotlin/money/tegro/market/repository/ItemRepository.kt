@@ -52,8 +52,8 @@ class ItemRepository(
         )
 
     suspend fun listCollectionItems(collection: MsgAddressInt) =
-        collectionRepository.listItemAddresses(collection)
-            .mapNotNull { addr -> (addr as? MsgAddressInt)?.let { getByAddress(it) } }
+        collectionRepository.listCollectionItems(collection)
+            .mapNotNull { (_, addr) -> (addr as? MsgAddressInt)?.let { getByAddress(it) } }
 
     @OptIn(FlowPreview::class)
     fun listAll() =

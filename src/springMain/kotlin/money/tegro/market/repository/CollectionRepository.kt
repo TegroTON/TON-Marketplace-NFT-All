@@ -1,7 +1,10 @@
 package money.tegro.market.repository
 
 import com.sksamuel.aedile.core.caffeineBuilder
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import money.tegro.market.accountBlockAddresses
 import money.tegro.market.contract.nft.CollectionContract
 import money.tegro.market.metadata.CollectionMetadata
@@ -110,10 +113,13 @@ class CollectionRepository(
         }
             .orElse(null)
 
-    suspend fun listItemAddresses(address: MsgAddressInt): Flow<MsgAddress> =
-        (0uL until (getContract(address)?.next_item_index ?: 0uL))
-            .asFlow()
-            .mapNotNull { getItemAddress(address, it) }
+    fun listCollectionItems(address: MsgAddressInt) =
+        flow {
+            for (index in 0uL until (getContract(address)?.next_item_index ?: 0uL)) {
+                emit(index)
+            }
+        }
+            .mapNotNull { it to getItemAddress(address, it) }
 
 
     @RabbitListener(

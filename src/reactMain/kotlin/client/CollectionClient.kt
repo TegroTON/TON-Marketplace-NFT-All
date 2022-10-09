@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import money.tegro.market.dto.CollectionDTO
+import money.tegro.market.dto.ItemAddressDTO
 import money.tegro.market.dto.TopCollectionDTO
 import money.tegro.market.operations.CollectionOperations
 
@@ -29,4 +30,16 @@ object CollectionClient : CollectionOperations {
             .text()
             .await()
             .let { Json.decodeFromString(it) }
+
+    override fun listCollectionItems(address: String, drop: Int?, take: Int?): Flow<ItemAddressDTO> =
+        flow {
+            window.fetch("http://localhost:8080/api/v1/collection/$address/items?drop=$drop&take=$take")
+                .await()
+                .text()
+                .await()
+                .let { Json.decodeFromString<List<ItemAddressDTO>>(it) }
+                .forEach {
+                    emit(it)
+                }
+        }
 }

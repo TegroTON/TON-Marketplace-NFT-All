@@ -4,14 +4,17 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.take
+import money.tegro.market.dropTake
 import money.tegro.market.dto.CollectionDTO
 import money.tegro.market.dto.ImageDTO
+import money.tegro.market.dto.ItemAddressDTO
 import money.tegro.market.dto.TopCollectionDTO
 import money.tegro.market.operations.CollectionOperations
 import money.tegro.market.repository.CollectionRepository
 import money.tegro.market.toRaw
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.ton.block.MsgAddressInt
 
@@ -45,7 +48,7 @@ class CollectionController(
 
         return CollectionDTO(
             address = collection.toRaw(),
-            numberOfItems = contract.next_item_index.toInt(),
+            numberOfItems = contract.next_item_index,
             owner = contract.owner.toRaw(),
             name = metadata?.name ?: "Untitled Collection",
             description = metadata?.description.orEmpty(),
@@ -57,4 +60,15 @@ class CollectionController(
             ),
         )
     }
+
+    @RequestMapping("/api/v1/collection/{address}/items")
+    override fun listCollectionItems(
+        @PathVariable address: String,
+        @RequestParam(defaultValue = "null") drop: Int?,
+        @RequestParam(defaultValue = "null") take: Int?
+    ): Flow<ItemAddressDTO> =
+        collectionRepository.listCollectionItems(MsgAddressInt(address))
+            .mapNotNull { (index, addr) -> addr?.toRaw()?.let { ItemAddressDTO(index, it) } }
+            .dropTake(drop, take)
+
 }
