@@ -1,10 +1,25 @@
 package money.tegro.market.controller
 
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import com.ionspin.kotlin.bignum.integer.BigInteger
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.mapNotNull
 import money.tegro.market.contract.op.item.ItemOp
 import money.tegro.market.contract.op.item.TransferOp
-import money.tegro.market.model.TransactionRequestModel
+import money.tegro.market.dropTake
+import money.tegro.market.dto.CollectionDTO
+import money.tegro.market.dto.ImageDTO
+import money.tegro.market.dto.ItemDTO
+import money.tegro.market.dto.TransactionRequestDTO
+import money.tegro.market.operations.APIv1Operations
 import money.tegro.market.properties.MarketplaceProperties
+import money.tegro.market.repository.CollectionRepository
 import money.tegro.market.repository.ItemRepository
+import money.tegro.market.toBase64
+import money.tegro.market.toBigInteger
+import money.tegro.market.toRaw
+import mu.KLogging
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -22,48 +37,145 @@ import kotlin.random.nextULong
 @RestController
 class APIv1Controller(
     private val marketplaceProperties: MarketplaceProperties,
+    private val collectionRepository: CollectionRepository,
     private val itemRepository: ItemRepository,
-) {
-    @RequestMapping("/api/v1/transfer")
-    fun transfer(
-        @RequestParam(required = true) item: MsgAddressInt,
-        @RequestParam(required = true) newOwner: MsgAddressInt,
-        @RequestParam responseDestination: MsgAddressInt?,
-    ) = TransactionRequestModel(
-        dest = item,
-        value = Coins.ofNano(marketplaceProperties.itemTransferFee.amount.value + marketplaceProperties.networkFee.amount.value),
+) : APIv1Operations {
+    @RequestMapping("/api/v1/collections/top")
+    override fun listTopCollections(
+        @RequestParam drop: Int?,
+        @RequestParam take: Int?,
+    ): Flow<CollectionDTO> =
+        collectionRepository.listAll()
+            .mapNotNull { address ->
+                try {
+                    getCollection(address.toRaw())
+                } catch (_: Exception) {
+                    null
+                }
+            }
+            .dropTake(drop, take)
+
+    @RequestMapping("/api/v1/collection/{collection}")
+    override suspend fun getCollection(@PathVariable collection: String): CollectionDTO {
+        val address = MsgAddressInt(collection)
+        val contract = requireNotNull(collectionRepository.getContract(address))
+        val metadata = collectionRepository.getMetadata(address)
+
+        return CollectionDTO(
+            address = address.toRaw(),
+            numberOfItems = contract.next_item_index,
+            owner = contract.owner.toRaw(),
+            name = metadata?.name ?: "Untitled Collection",
+            description = metadata?.description.orEmpty(),
+            image = ImageDTO(
+                original = metadata?.image
+            ),
+            coverImage = ImageDTO(
+                original = metadata?.cover_image ?: metadata?.image
+            ),
+        )
+    }
+
+    @RequestMapping("/api/v1/collection/{collection}/items")
+    override fun listCollectionItems(
+        @PathVariable collection: String,
+        @RequestParam drop: Int?,
+        @RequestParam take: Int?
+    ): Flow<ItemDTO> =
+        collectionRepository.listCollectionItems(MsgAddressInt(collection))
+            .mapNotNull { (_, address) ->
+                try {
+                    address?.toRaw()?.let { getItem(it) }
+                } catch (_: Exception) {
+                    null
+                }
+            }
+            .dropTake(drop, take)
+
+    @RequestMapping("/api/v1/item/{item}")
+    override suspend fun getItem(@PathVariable item: String): ItemDTO {
+        val address = MsgAddressInt(item)
+        val contract = requireNotNull(itemRepository.getContract(address))
+        val metadata = itemRepository.getMetadata(address)
+        val sale = itemRepository.getItemSale(address)
+        val royalty = itemRepository.getRoyalty(address)
+
+        return ItemDTO(
+            address = address.toRaw(),
+            index = contract.index,
+            collection = contract.collection.toRaw(),
+            owner = (sale?.owner ?: contract.owner).toRaw(),
+            name = metadata?.name ?: "Item no. ${contract.index}",
+            description = metadata?.description.orEmpty(),
+            image = ImageDTO(
+                original = metadata?.image
+            ),
+            attributes = metadata?.attributes.orEmpty().associate { it.trait to it.value },
+
+            sale = (if (sale != null) contract.owner else null)?.toRaw(),
+            marketplace = sale?.marketplace?.toRaw(),
+            fullPrice = sale?.full_price?.toBigInteger(),
+            marketplaceFee = sale?.marketplace_fee?.toBigInteger(),
+            royalties = sale?.royalty?.toBigInteger(),
+            royaltyDestination = sale?.royalty_destination?.toRaw(),
+            royaltyPercentage = BigDecimal.fromInt(royalty?.numerator ?: 0)
+                    / BigDecimal.fromInt(royalty?.denominator ?: 1),
+            marketplaceFeePercentage = BigDecimal.fromInt(marketplaceProperties.marketplaceFeeNumerator)
+                    / BigDecimal.fromInt(marketplaceProperties.marketplaceFeeDenominator),
+
+            saleInitializationFee = marketplaceProperties.saleInitializationFee.amount.value.toBigInteger(),
+            transferFee = marketplaceProperties.itemTransferFee.amount.value.toBigInteger(),
+            networkFee = marketplaceProperties.networkFee.amount.value.toBigInteger(),
+            minimalGasFee = marketplaceProperties.minimalGasFee.amount.value.toBigInteger(),
+        )
+    }
+
+    @RequestMapping("/api/v1/item/{item}/transfer")
+    override suspend fun transferItem(
+        @PathVariable item: String,
+        @RequestParam(required = true) newOwner: String,
+        @RequestParam responseDestination: String?,
+    ) = TransactionRequestDTO(
+        dest = MsgAddressInt(item).toRaw(),
+        value = (marketplaceProperties.itemTransferFee + marketplaceProperties.networkFee).amount.value.toBigInteger(),
         stateInit = null,
         text = "NFT Item Transfer",
         payload = CellBuilder.createCell {
             storeTlb(
                 ItemOp, TransferOp(
                     query_id = SecureRandom.nextULong(),
-                    new_owner = newOwner,
-                    response_destination = responseDestination ?: AddrNone,
+                    new_owner = MsgAddressInt(newOwner),
+                    response_destination = responseDestination?.let { MsgAddressInt(it) } ?: AddrNone,
                     custom_payload = Maybe.of(null),
                     forward_amount = marketplaceProperties.itemTransferFee.amount,
                     forward_payload = Either.of(Cell.of(), null)
                 )
             )
         }
+            .toBase64()
     )
 
-    @RequestMapping("/api/v1/sell")
-    suspend fun sell(
-        @RequestParam(required = true) item: MsgAddressInt,
-        @RequestParam(required = true) seller: MsgAddressInt,
-        price: BigInt,
-    ): TransactionRequestModel {
-        val royalty = itemRepository.getRoyalty(item)
+    @RequestMapping("/api/v1/item/{item}/sell")
+    override suspend fun sellItem(
+        @PathVariable item: String,
+        @RequestParam(required = true) seller: String,
+        price: BigInteger,
+    ): TransactionRequestDTO {
+        val itemAddress = MsgAddressInt(item)
+        val sellerAddress = MsgAddressInt(seller)
+        val priceBigInt = BigInt(price.toString())
+
+        val royalty = itemRepository.getRoyalty(itemAddress)
         val marketplaceFee =
-            price * marketplaceProperties.marketplaceFeeNumerator.toBigInt() / marketplaceProperties.marketplaceFeeDenominator.toBigInt()
-        val royaltyValue = royalty?.let { price * it.numerator.toBigInt() / it.denominator.toBigInt() } ?: BigInt.ZERO
-        val fullPrice = price + royaltyValue + marketplaceFee
+            priceBigInt * marketplaceProperties.marketplaceFeeNumerator.toBigInt() / marketplaceProperties.marketplaceFeeDenominator.toBigInt()
+        val royaltyValue =
+            royalty?.let { priceBigInt * it.numerator.toBigInt() / it.denominator.toBigInt() } ?: BigInt.ZERO
+        val fullPrice = priceBigInt + royaltyValue + marketplaceFee
 
         val payloadCell = CellBuilder.createCell {
             storeTlb(MsgAddress, marketplaceProperties.marketplaceAddress) // marketplace_address
-            storeTlb(MsgAddress, item) // nft_address
-            storeTlb(MsgAddress, seller) // nft_owner_address
+            storeTlb(MsgAddress, itemAddress) // nft_address
+            storeTlb(MsgAddress, sellerAddress) // nft_owner_address
             storeTlb(Coins.tlbCodec(), Coins.ofNano(fullPrice)) // full_price
             storeRef { // fees_cell
                 storeTlb(Coins, Coins.ofNano(marketplaceFee))
@@ -72,13 +184,11 @@ class APIv1Controller(
             }
         }
 
-        return TransactionRequestModel(
+        return TransactionRequestDTO(
             dest = item,
-            value = Coins.ofNano(
-                marketplaceProperties.saleInitializationFee.amount.value
-                        + marketplaceProperties.itemTransferFee.amount.value
-                        + marketplaceProperties.networkFee.amount.value
-            ),
+            value = (marketplaceProperties.saleInitializationFee
+                    + marketplaceProperties.itemTransferFee
+                    + marketplaceProperties.networkFee).amount.value.toBigInteger(),
             stateInit = null,
             text = "NFT put up for sale",
             payload = CellBuilder.createCell {
@@ -86,7 +196,7 @@ class APIv1Controller(
                     ItemOp, TransferOp(
                         query_id = SecureRandom.nextULong(),
                         new_owner = marketplaceProperties.marketplaceAddress,
-                        response_destination = seller,
+                        response_destination = sellerAddress,
                         custom_payload = Maybe.of(null),
                         forward_amount = marketplaceProperties.saleInitializationFee.amount,
                         forward_payload = Either.of(CellBuilder.createCell {
@@ -102,7 +212,9 @@ class APIv1Controller(
                         }, null)
                     )
                 )
-            }
+            }.toBase64()
         )
     }
+
+    companion object : KLogging()
 }

@@ -60,7 +60,7 @@ val AppHeader = FC<Props>("AppHeader") {
 
                 div {
                     classes =
-                        ("fixed top-0 left-0 w-3/4 h-screen bg-dark-900 basis-full items-center px-3 py-6 lg:flex lg:basis-auto lg:p-0 lg:w-auto lg:h-auto lg:static grow items-center "
+                        ("fixed top-0 left-0 w-3/4 h-screen bg-dark-900 lg:bg-inherit basis-full items-center px-3 py-6 lg:flex lg:basis-auto lg:p-0 lg:w-auto lg:h-auto lg:static grow items-center "
                                 + if (navbarOpen) "block" else "hidden")
 
                     form {

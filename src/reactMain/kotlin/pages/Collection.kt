@@ -1,17 +1,15 @@
 package pages
 
 import classes
-import client.CollectionClient
-import client.ItemClient
+import client.APIv1Client
 import components.Button
 import components.ButtonKind
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.js.get
 import mainScope
-import money.tegro.market.dto.BasicItemDTO
 import money.tegro.market.dto.CollectionDTO
+import money.tegro.market.dto.ItemDTO
 import react.FC
 import react.Props
 import react.dom.html.ImgLoading
@@ -39,7 +37,7 @@ val Collection = FC<Props> {
 
     useEffectOnce {
         mainScope.launch {
-            collection = CollectionClient.getByAddress(address)
+            collection = APIv1Client.getCollection(address)
         }
     }
 
@@ -164,15 +162,11 @@ val Collection = FC<Props> {
                 div { // Collection Body
                     classes = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
 
-                    var items: List<BasicItemDTO> by useState(listOf())
+                    var items: List<ItemDTO> by useState(listOf())
 
                     useEffectOnce {
                         mainScope.launch {
-                            items =
-                                CollectionClient
-                                    .listCollectionItems(address, drop = 0, take = 16)
-                                    .map { ItemClient.getBasicInfoByAddress(it.address) }
-                                    .toList()
+                            items = APIv1Client.listCollectionItems(address, drop = 0, take = 16).toList()
                         }
                     }
 

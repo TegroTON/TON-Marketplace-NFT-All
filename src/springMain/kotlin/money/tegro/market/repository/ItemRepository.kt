@@ -9,7 +9,6 @@ import money.tegro.market.contract.nft.ItemContract
 import money.tegro.market.contract.nft.RoyaltyContract
 import money.tegro.market.contract.nft.SaleContract
 import money.tegro.market.metadata.ItemMetadata
-import money.tegro.market.model.ItemModel
 import money.tegro.market.properties.CacheProperties
 import money.tegro.market.properties.MarketplaceProperties
 import money.tegro.market.service.ReferenceBlockService
@@ -41,36 +40,25 @@ class ItemRepository(
     private val approvalRepository: ApprovalRepository,
     private val collectionRepository: CollectionRepository,
 ) {
-    suspend fun getByAddress(address: MsgAddressInt): ItemModel =
-        ItemModel.of(
-            address,
-            getContract(address),
-            getMetadata(address),
-            getRoyalty(address),
-            getItemSale(address),
-            marketplaceProperties,
-        )
-
-    suspend fun listCollectionItems(collection: MsgAddressInt) =
-        collectionRepository.listCollectionItems(collection)
-            .mapNotNull { (_, addr) -> (addr as? MsgAddressInt)?.let { getByAddress(it) } }
-
     @OptIn(FlowPreview::class)
     fun listAll() =
         merge(
             // Collection items
             collectionRepository.listAll()
-                .flatMapConcat { listCollectionItems(it) },
+                .flatMapConcat {
+                    collectionRepository.listCollectionItems(it).mapNotNull { it.second as? MsgAddressInt }
+                },
             // Standalone items
             approvalRepository.findAllByApprovedIsTrue()
                 .map { it.address }
                 .filter { getContract(it) != null }
-                .map { getByAddress(it) }
         )
 
     fun listItemsOwnedBy(owner: MsgAddress) =
         listAll()
-            .filter { it.owner == owner }
+            .mapNotNull { address -> getContract(address)?.let { address to it.owner } }
+            .filter { (_, itemOwner) -> itemOwner == owner }
+            .map { it.first }
 
     private val contractCache =
         caffeineBuilder<MsgAddressInt, Optional<ItemContract>>().build()

@@ -1,13 +1,13 @@
 package pages
 
 import classes
-import client.CollectionClient
+import client.APIv1Client
 import components.Button
 import components.ButtonKind
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import mainScope
-import money.tegro.market.dto.TopCollectionDTO
+import money.tegro.market.dto.CollectionDTO
 import react.FC
 import react.Props
 import react.dom.html.AnchorTarget
@@ -269,11 +269,11 @@ val Index = FC<Props>("Index") {
                 div {
                     classes = "pt-4 flex flex-wrap gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
 
-                    var topCollections: List<TopCollectionDTO> by useState(listOf())
+                    var topCollections: List<CollectionDTO> by useState(listOf())
 
                     useEffectOnce {
                         mainScope.launch {
-                            topCollections = CollectionClient.listTopCollections().toList()
+                            topCollections = APIv1Client.listTopCollections(drop = 0, take = 9).toList()
                         }
                     }
 

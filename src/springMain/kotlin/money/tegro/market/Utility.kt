@@ -1,8 +1,10 @@
 package money.tegro.market
 
+import com.ionspin.kotlin.bignum.integer.BigInteger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.take
+import org.ton.bigint.BigInt
 import org.ton.block.*
 import org.ton.boc.BagOfCells
 import org.ton.cell.Cell
@@ -35,6 +37,9 @@ fun Block.accountBlockAddresses() =
 
 fun <T> Flow<T>.dropTake(drop: Int?, take: Int?): Flow<T> =
     this.drop(maxOf(drop ?: 0, 0))
-        .take(minOf(maxOf(take ?: 0, 0), FLOW_DROPTAKE_TAKE_MAX))
+        .take(minOf(maxOf(take ?: 1, 0), FLOW_DROPTAKE_TAKE_MAX))
 
 const val FLOW_DROPTAKE_TAKE_MAX = 128
+
+fun BigInt.toBigInteger() =
+    BigInteger.parseString(this.toString()) // TODO

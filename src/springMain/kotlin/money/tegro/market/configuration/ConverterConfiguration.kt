@@ -1,5 +1,7 @@
 package money.tegro.market.configuration
 
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import com.ionspin.kotlin.bignum.integer.BigInteger
 import money.tegro.market.toRaw
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -66,5 +68,29 @@ class ConverterConfiguration {
                     it.dropLast(9).ifEmpty { "0" } + "." +
                             it.takeLast(9).padStart(9, '0').dropLastWhile { it == '0' }
                 }
+        }
+
+    @Bean
+    fun bigIntegerToStringConverter() =
+        object : Converter<BigInteger, String> {
+            override fun convert(source: BigInteger): String = source.toString()
+        }
+
+    @Bean
+    fun strintToBigIntegerConverter() =
+        object : Converter<String, BigInteger> {
+            override fun convert(source: String): BigInteger = BigInteger.parseString(source)
+        }
+
+    @Bean
+    fun bigDecimalToStringConverter() =
+        object : Converter<BigDecimal, String> {
+            override fun convert(source: BigDecimal): String = source.toString()
+        }
+
+    @Bean
+    fun strintToBigDecimalConverter() =
+        object : Converter<String, BigDecimal> {
+            override fun convert(source: String): BigDecimal = BigDecimal.parseString(source)
         }
 }

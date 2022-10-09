@@ -44,6 +44,8 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
 
+                implementation("com.ionspin.kotlin:bignum:0.3.7")
+                implementation("com.ionspin.kotlin:bignum-serialization-kotlinx:0.3.7")
                 implementation("io.github.microutils:kotlin-logging:2.1.23")
             }
         }
@@ -68,13 +70,12 @@ kotlin {
                 dependsOn(commonMain)
 
                 implementation("net.logstash.logback:logstash-logback-encoder:7.2")
-                implementation("com.github.andreypfau.ton-kotlin:ton-kotlin:c678f34b0a")
+                implementation("com.github.andreypfau.ton-kotlin:ton-kotlin:aef363d8c5")
 
                 implementation("org.springframework.boot:spring-boot-starter-actuator")
                 implementation("org.springframework.boot:spring-boot-starter-amqp")
                 implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
                 implementation("org.springframework.boot:spring-boot-starter-jdbc")
-                implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
                 implementation("org.springframework.boot:spring-boot-starter-webflux")
                 implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
                 implementation("com.github.ben-manes.caffeine:caffeine")
@@ -84,7 +85,6 @@ kotlin {
                 implementation("org.jetbrains.kotlin:kotlin-reflect")
                 implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
-                implementation("nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect")
                 implementation("org.springframework.boot:spring-boot-devtools")
                 runtimeOnly("io.micrometer:micrometer-registry-prometheus")
                 runtimeOnly("org.postgresql:postgresql")
