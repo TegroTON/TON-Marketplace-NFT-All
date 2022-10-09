@@ -60,7 +60,7 @@ val Collection = FC<Props> {
         classes = "mx-3 lg:mx-6"
 
         section {
-            classes = "container relative px-3 mx-auto gap-8 grid grid-cols-1 md:grid-cols-3"
+            classes = "container relative px-3 mx-auto gap-8 grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4"
 
             div {// Left panel
                 div { // Card
@@ -112,7 +112,7 @@ val Collection = FC<Props> {
             }
 
             div { // Right panel
-                classes = "md:col-span-2 flex flex-col gap-6"
+                classes = "lg:col-span-2 xl:col-span-3 flex flex-col gap-6"
 
                 div { // Stats card
                     classes =
