@@ -177,32 +177,30 @@ val Collection = FC<Props> {
                     }
 
                     for (item in items) {
-                        div {
-                            classes = "rounded-lg"
+                        Link {
                             key = item.address
 
-                            Link {
-                                classes = "p-4 bg-dark-700 rounded-lg flex flex-col gap-4"
-                                to = "/item/${item.address}"
+                            classes = "p-4 bg-dark-700 rounded-lg flex flex-col gap-4"
+                            to = "/item/${item.address}"
 
-                                picture {
-                                    img {
-                                        classes = "w-full h-52 rounded-lg object-cover"
-                                        src = item.image.original ?: "./assets/img/user-1.svg"
-                                    }
+                            picture {
+                                img {
+                                    classes = "w-full h-52 rounded-lg object-cover"
+                                    src = item.image.original ?: "./assets/img/user-1.svg"
                                 }
+                            }
 
-                                h4 {
-                                    classes = "font-raleway text-lg"
-                                    +(item.name)
-                                }
+                            h4 {
+                                classes = "font-raleway text-lg"
+                                +(item.name)
+                            }
 
-                                div {
-                                    classes = "flex justify-between bg-soft rounded-xl p-4"
+                            div {
+                                classes = "flex justify-between bg-soft rounded-xl p-4"
 
-                                    p {
-                                        +"Not For Sale"
-                                    }
+                                p {
+                                    classes = "w-full text-center"
+                                    +"Not For Sale"
                                 }
                             }
                         }
