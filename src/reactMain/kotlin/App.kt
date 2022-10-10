@@ -3,6 +3,7 @@ import components.AppHeader
 import kotlinx.coroutines.MainScope
 import pages.Collection
 import pages.Index
+import pages.Item
 import react.FC
 import react.Props
 import react.createElement
@@ -23,6 +24,10 @@ val App = FC<Props>("App") {
             Route {
                 path = "/collection/:address"
                 element = createElement(Collection)
+            }
+            Route {
+                path = "/item/:address"
+                element = createElement(Item)
             }
         }
     }

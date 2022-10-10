@@ -1,0 +1,193 @@
+package pages
+
+import classes
+import client.APIv1Client
+import kotlinx.coroutines.launch
+import kotlinx.js.get
+import mainScope
+import money.tegro.market.dto.CollectionDTO
+import money.tegro.market.dto.ItemDTO
+import react.FC
+import react.Props
+import react.dom.html.ReactHTML.div
+import react.dom.html.ReactHTML.h1
+import react.dom.html.ReactHTML.h4
+import react.dom.html.ReactHTML.i
+import react.dom.html.ReactHTML.img
+import react.dom.html.ReactHTML.li
+import react.dom.html.ReactHTML.main
+import react.dom.html.ReactHTML.nav
+import react.dom.html.ReactHTML.ol
+import react.dom.html.ReactHTML.p
+import react.dom.html.ReactHTML.section
+import react.dom.html.ReactHTML.span
+import react.router.dom.Link
+import react.router.useParams
+import react.useEffectOnce
+import react.useState
+
+val Item = FC<Props> {
+    val params = useParams()
+    val address = requireNotNull(params.get("address"))
+    var item: ItemDTO? by useState(null)
+    var collection: CollectionDTO? by useState(null)
+
+    useEffectOnce {
+        mainScope.launch {
+            item = APIv1Client.getItem(address)
+            collection = item?.collection?.let { APIv1Client.getCollection(it) }
+        }
+    }
+
+    main {
+        classes = "mx-3 lg:mx-6"
+
+        section {
+            classes = "container relative pt-12 mx-auto flex flex-col gap-8 justify-center"
+
+            nav {
+                ol {
+                    classes = "flex flex-wrap text-gray-500 gap-2"
+                    li {
+                        Link {
+                            to = "/explore"
+                            +"Explore"
+                        }
+                    }
+                    if (collection != null) {
+                        li {
+                            span {
+                                +"/"
+                            }
+                        }
+                        li {
+                            Link {
+                                to = "/collection/${collection?.address}"
+                                +(collection?.name ?: "Collection")
+                            }
+                        }
+                    }
+                    li {
+                        span {
+                            +"/"
+                        }
+                    }
+                    li {
+                        span {
+                            +(item?.name ?: "This Item")
+                        }
+                    }
+                }
+            }
+
+            div {
+                classes = "grid gap-4 grid-cols-1"
+
+                div {
+                    img {
+                        classes = "w-full h-auto object-cover rounded-2xl"
+                        src = item?.image?.original ?: "./assets/img/user-1.svg"
+                    }
+                }
+
+                div {
+                    classes = "flex flex-col gap-4"
+
+                    div {
+                        classes = "flex gap-2"
+                        if (item?.sale != null) {
+                            div {
+                                classes = "px-6 py-3 text-green bg-green-soft rounded-2xl uppercase"
+                                +"For Sale"
+                            }
+                        } else {
+                            div {
+                                classes = "px-6 py-3 text-white bg-soft rounded-2xl uppercase"
+                                +"Not For Sale"
+                            }
+                        }
+                    }
+
+                    div {
+                        classes = "flex flex-col gap-4"
+
+                        h1 {
+                            classes = "text-3xl font-raleway font-medium"
+                            +(item?.name ?: "Item")
+                        }
+
+                        p {
+                            classes = "text-gray-500"
+                            +item?.description.orEmpty()
+                        }
+                    }
+
+                    // Actions here
+
+                    div {
+                        classes = "grid grid-cols-1 lg:grid-cols-2 gap-4"
+
+                        Link {
+                            classes = "rounded-lg bg-soft px-6 py-4 flex-grow flex flex-col gap-2"
+                            to = "/profile/${item?.owner}"
+
+                            h4 {
+                                classes = "font-raleway text-sm text-gray-500"
+                                +"Owner"
+                            }
+
+                            div {
+                                classes = "flex items-center gap-2"
+
+                                img {
+                                    classes = "w-10 h-10 rounded-full"
+                                    src = "./assets/img/user-1.svg"
+                                }
+
+                                h4 {
+                                    classes = "flex-grow text-lg"
+                                    +(item?.owner?.take(12)?.plus("...") ?: "Owner")
+                                }
+
+                                i {
+                                    classes = "fa-solid fa-angle-right"
+                                }
+                            }
+                        }
+
+                        Link {
+                            classes = "rounded-lg bg-soft px-6 py-4 flex-grow flex flex-col gap-2"
+                            to = collection?.address?.let { "/collection/$it" } ?: "/explore"
+
+                            h4 {
+                                classes = "font-raleway text-sm text-gray-500"
+                                +"Collection"
+                            }
+
+                            div {
+                                classes = "flex items-center gap-2"
+
+                                img {
+                                    classes = "w-10 h-10 rounded-full"
+                                    src = collection?.image?.original ?: "./assets/img/user-1.svg"
+                                }
+
+                                h4 {
+                                    classes = "flex-grow text-lg"
+                                    +(collection?.name ?: "Not In Collection")
+                                }
+
+                                i {
+                                    classes = "fa-solid fa-angle-right"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            div { // Attributes
+            }
+        }
+    }
+}
