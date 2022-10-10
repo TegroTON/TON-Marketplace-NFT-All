@@ -2,6 +2,7 @@ package pages
 
 import classes
 import client.APIv1Client
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.js.get
 import mainScope
@@ -9,6 +10,8 @@ import money.tegro.market.dto.CollectionDTO
 import money.tegro.market.dto.ItemDTO
 import react.FC
 import react.Props
+import react.dom.html.AnchorTarget
+import react.dom.html.ReactHTML.a
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.h1
 import react.dom.html.ReactHTML.h4
@@ -21,6 +24,7 @@ import react.dom.html.ReactHTML.ol
 import react.dom.html.ReactHTML.p
 import react.dom.html.ReactHTML.section
 import react.dom.html.ReactHTML.span
+import react.dom.html.ReactHTML.ul
 import react.router.dom.Link
 import react.router.useParams
 import react.useEffectOnce
@@ -34,8 +38,11 @@ val Item = FC<Props> {
 
     useEffectOnce {
         mainScope.launch {
-            item = APIv1Client.getItem(address)
-            collection = item?.collection?.let { APIv1Client.getCollection(it) }
+            val asyncItem = async { APIv1Client.getItem(address) }
+            val asyncCollection = async { asyncItem.await().collection?.let { APIv1Client.getCollection(it) } }
+
+            item = asyncItem.await()
+            collection = asyncCollection.await()
         }
     }
 
@@ -43,7 +50,7 @@ val Item = FC<Props> {
         classes = "mx-3 lg:mx-6"
 
         section {
-            classes = "container relative pt-12 mx-auto flex flex-col gap-8 justify-center"
+            classes = "container relative pt-12 mx-auto flex flex-col gap-12 justify-center"
 
             nav {
                 ol {
@@ -81,7 +88,7 @@ val Item = FC<Props> {
             }
 
             div {
-                classes = "grid gap-4 grid-cols-1"
+                classes = "grid gap-12 grid-cols-1 lg:grid-cols-3"
 
                 div {
                     img {
@@ -91,7 +98,7 @@ val Item = FC<Props> {
                 }
 
                 div {
-                    classes = "flex flex-col gap-4"
+                    classes = " lg:col-span-2 flex flex-col gap-8"
 
                     div {
                         classes = "flex gap-2"
@@ -109,7 +116,7 @@ val Item = FC<Props> {
                     }
 
                     div {
-                        classes = "flex flex-col gap-4"
+                        classes = "flex flex-col gap-4 px-4"
 
                         h1 {
                             classes = "text-3xl font-raleway font-medium"
@@ -183,10 +190,99 @@ val Item = FC<Props> {
                             }
                         }
                     }
+
+                    div {
+                        classes = "rounded-lg bg-soft px-6 py-4 flex flex-col gap-2"
+
+                        h4 {
+                            classes = "text-lg font-raleway"
+                            +"Details"
+                        }
+
+                        ul {
+                            classes = "flex flex-col gap-2"
+
+                            li {
+                                a {
+                                    classes = "p-4 flex gap-2 items-center rounded-lg border border-gray-900"
+                                    target = AnchorTarget._blank
+                                    href = "https://testnet.tonscan.org/address/${item?.address}"
+
+                                    span {
+                                        classes = "text-gray-500"
+                                        +"Contract Address"
+                                    }
+
+                                    span {
+                                        classes = "flex-grow text-right"
+                                        +(item?.address?.take(12)?.plus("...") ?: "n/a")
+                                    }
+
+                                    i { classes = "fa-solid fa-angle-right" }
+                                }
+                            }
+
+                            if (item?.sale != null) {
+                                li {
+                                    a {
+                                        classes = "p-4 flex gap-2 items-center rounded-lg border border-gray-900"
+                                        target = AnchorTarget._blank
+                                        href = "https://testnet.tonscan.org/address/${item?.sale}"
+
+                                        span {
+                                            classes = "text-gray-500"
+                                            +"Sale Address"
+                                        }
+
+                                        span {
+                                            classes = "flex-grow text-right"
+                                            +(item?.sale?.take(12)?.plus("...") ?: "n/a")
+                                        }
+
+                                        i { classes = "fa-solid fa-angle-right" }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
-            div { // Attributes
+            if (!item?.attributes.isNullOrEmpty()) {
+                div { // Attributes
+                    classes = "rounded-lg bg-soft px-6 py-4 flex flex-col gap-4"
+
+                    h4 {
+                        classes = "text-lg font-raleway"
+                        +"Attributes"
+                    }
+
+                    ul {
+                        classes = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"
+
+                        for ((trait, value) in item?.attributes.orEmpty()) {
+                            li {
+                                key = trait
+
+                                a {
+                                    classes = "p-4 flex gap-2 items-center rounded-lg border border-gray-900"
+                                    target = AnchorTarget._blank
+                                    href = "#"
+
+                                    span {
+                                        classes = "text-gray-500"
+                                        +trait
+                                    }
+
+                                    span {
+                                        classes = "flex-grow text-right"
+                                        +value
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
