@@ -273,7 +273,8 @@ val Index = FC<Props>("Index") {
 
                     useEffectOnce {
                         mainScope.launch {
-                            topCollections = APIv1Client.listTopCollections(drop = 0, take = 9).toList()
+                            topCollections =
+                                APIv1Client.listTopCollections(drop = 0, take = 9).toList()
                         }
                     }
 

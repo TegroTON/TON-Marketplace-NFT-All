@@ -18,7 +18,7 @@ object APIv1Client : APIv1Operations {
 
     override fun listTopCollections(drop: Int?, take: Int?): Flow<CollectionDTO> =
         flow {
-            window.fetch("http://localhost:8080/api/v1/collections/top")
+            window.fetch("http://localhost:8080/api/v1/collections/top?drop=$drop&take=$take")
                 .await()
                 .text()
                 .await()

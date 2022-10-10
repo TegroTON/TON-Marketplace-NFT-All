@@ -2,7 +2,8 @@ package money.tegro.market.dto
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.integer.BigInteger
-import kotlinx.serialization.Contextual
+import com.ionspin.kotlin.bignum.serialization.kotlinx.bigdecimal.BigDecimalHumanReadableSerializer
+import com.ionspin.kotlin.bignum.serialization.kotlinx.biginteger.BigIntegerHumanReadableSerializer
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -18,24 +19,24 @@ data class ItemDTO(
 
     val sale: String?,
     val marketplace: String?,
-    @Contextual
+    @Serializable(with = BigIntegerHumanReadableSerializer::class)
     val fullPrice: BigInteger?,
-    @Contextual
+    @Serializable(with = BigIntegerHumanReadableSerializer::class)
     val marketplaceFee: BigInteger?,
-    @Contextual
+    @Serializable(with = BigIntegerHumanReadableSerializer::class)
     val royalties: BigInteger?,
     val royaltyDestination: String?,
-    @Contextual
+    @Serializable(with = BigDecimalHumanReadableSerializer::class)
     val royaltyPercentage: BigDecimal,
-    @Contextual
+    @Serializable(with = BigDecimalHumanReadableSerializer::class)
     val marketplaceFeePercentage: BigDecimal,
 
-    @Contextual
+    @Serializable(with = BigIntegerHumanReadableSerializer::class)
     val saleInitializationFee: BigInteger,
-    @Contextual
+    @Serializable(with = BigIntegerHumanReadableSerializer::class)
     val transferFee: BigInteger,
-    @Contextual
+    @Serializable(with = BigIntegerHumanReadableSerializer::class)
     val networkFee: BigInteger,
-    @Contextual
+    @Serializable(with = BigIntegerHumanReadableSerializer::class)
     val minimalGasFee: BigInteger,
 )
