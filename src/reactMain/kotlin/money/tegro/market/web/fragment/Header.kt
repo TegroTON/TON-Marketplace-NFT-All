@@ -1,8 +1,10 @@
-package components
+package money.tegro.market.web.fragment
 
-import classes
+import money.tegro.market.web.component.Button
+import money.tegro.market.web.html.classes
+import money.tegro.market.web.model.ButtonKind
+import money.tegro.market.web.props.HeaderProps
 import react.FC
-import react.Props
 import react.dom.html.InputType
 import react.dom.html.ReactHTML.a
 import react.dom.html.ReactHTML.div
@@ -17,7 +19,7 @@ import react.dom.html.ReactHTML.span
 import react.dom.html.ReactHTML.ul
 import react.useState
 
-val AppHeader = FC<Props>("AppHeader") {
+val Header = FC<HeaderProps>("Header") { props ->
     header {
         classes = "sticky z-30 top-0 px-0 py-6 sm:py-8 bg-dark-900/[.9] backdrop-blur-2xl"
 
@@ -134,13 +136,11 @@ val AppHeader = FC<Props>("AppHeader") {
 
                     Button {
                         kind = ButtonKind.SOFT
-
                         classes =
                             "order-2 sticky bottom-4 left-0 w-full lg:w-auto"
+                        onClick = { props.onConnect?.invoke() }
 
-                        i {
-                            classes = "fa-regular fa-arrow-right-to-arc mr-4"
-                        }
+                        i { classes = "fa-regular fa-arrow-right-to-arc mr-4" }
                         +"Connect"
                     }
                 }

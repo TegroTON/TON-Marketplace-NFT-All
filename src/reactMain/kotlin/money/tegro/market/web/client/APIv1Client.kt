@@ -1,4 +1,4 @@
-package client
+package money.tegro.market.web.client
 
 import browser.window
 import com.ionspin.kotlin.bignum.integer.BigInteger

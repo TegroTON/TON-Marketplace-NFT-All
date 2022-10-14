@@ -1,13 +1,14 @@
-package pages
+package money.tegro.market.web.page
 
-import classes
-import client.APIv1Client
+
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.js.get
-import mainScope
 import money.tegro.market.dto.CollectionDTO
 import money.tegro.market.dto.ItemDTO
+import money.tegro.market.web.client.APIv1Client
+import money.tegro.market.web.html.classes
+import money.tegro.market.web.mainScope
 import react.FC
 import react.Props
 import react.dom.html.AnchorTarget
@@ -30,7 +31,7 @@ import react.router.useParams
 import react.useEffectOnce
 import react.useState
 
-val Item = FC<Props> {
+val Item = FC<Props>("Item") {
     val params = useParams()
     val address = requireNotNull(params.get("address"))
     var item: ItemDTO? by useState(null)

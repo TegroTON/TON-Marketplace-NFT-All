@@ -1,13 +1,13 @@
-package pages
+package money.tegro.market.web.page
 
-import classes
-import client.APIv1Client
-import components.Button
-import components.ButtonKind
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
-import mainScope
 import money.tegro.market.dto.CollectionDTO
+import money.tegro.market.web.client.APIv1Client
+import money.tegro.market.web.component.Button
+import money.tegro.market.web.html.classes
+import money.tegro.market.web.mainScope
+import money.tegro.market.web.model.ButtonKind
 import react.FC
 import react.Props
 import react.dom.html.AnchorTarget

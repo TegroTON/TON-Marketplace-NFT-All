@@ -1,6 +1,8 @@
-package components
+package money.tegro.market.web.fragment
 
-import classes
+import money.tegro.market.web.component.Button
+import money.tegro.market.web.html.classes
+import money.tegro.market.web.model.ButtonKind
 import react.FC
 import react.Props
 import react.dom.html.AnchorTarget
@@ -15,7 +17,7 @@ import react.dom.html.ReactHTML.p
 import react.dom.html.ReactHTML.span
 import react.dom.html.ReactHTML.ul
 
-val AppFooter = FC<Props>("AppFooter") {
+val Footer = FC<Props>("Footer") {
     footer {
         classes = "pt-24 pb-12 px-4"
         div {
@@ -75,9 +77,7 @@ val AppFooter = FC<Props>("AppFooter") {
                                         kind = ButtonKind.SOFT
                                         classes = "p-0 w-12 h-12"
 
-                                        i {
-                                            classes = "fa-brands $icon"
-                                        }
+                                        i { classes = "fa-brands $icon" }
                                     }
                                 }
                             }

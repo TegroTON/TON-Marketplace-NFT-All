@@ -1,26 +1,11 @@
-package components
+package money.tegro.market.web.component
 
-import classes
-import dom.html.HTMLButtonElement
+import money.tegro.market.web.html.classes
+import money.tegro.market.web.model.ButtonKind
+import money.tegro.market.web.props.ButtonProps
 import react.FC
-import react.Props
-import react.PropsWithChildren
-import react.dom.events.MouseEventHandler
 import react.dom.html.ButtonType
 import react.dom.html.ReactHTML.button
-
-enum class ButtonKind {
-    PRIMARY,
-    SECONDARY,
-    SOFT
-}
-
-external interface ButtonProps : Props, PropsWithChildren {
-    var kind: ButtonKind?
-
-    var classes: String?
-    var onClick: MouseEventHandler<HTMLButtonElement>?
-}
 
 val Button = FC<ButtonProps>("Button") { props ->
     button {
