@@ -1,12 +1,15 @@
 package money.tegro.market.web.fragment
 
 import money.tegro.market.web.component.Button
+import money.tegro.market.web.context.ConnectionContext
 import money.tegro.market.web.html.classes
 import money.tegro.market.web.model.ButtonKind
 import money.tegro.market.web.props.HeaderProps
 import react.FC
+import react.dom.html.ButtonType
 import react.dom.html.InputType
 import react.dom.html.ReactHTML.a
+import react.dom.html.ReactHTML.button
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.form
 import react.dom.html.ReactHTML.header
@@ -17,9 +20,12 @@ import react.dom.html.ReactHTML.li
 import react.dom.html.ReactHTML.nav
 import react.dom.html.ReactHTML.span
 import react.dom.html.ReactHTML.ul
+import react.useContext
 import react.useState
 
 val Header = FC<HeaderProps>("Header") { props ->
+    val connection = useContext(ConnectionContext)
+
     header {
         classes = "sticky z-30 top-0 px-0 py-6 sm:py-8 bg-dark-900/[.9] backdrop-blur-2xl"
 
@@ -125,23 +131,67 @@ val Header = FC<HeaderProps>("Header") { props ->
                                     classes = "px-6 py-3 block hover:lg:bg-dark-700"
                                     href = "/explore"
 
-                                    i {
-                                        classes = "fa-regular fa-hexagon-vertical-nft-slanted mr-4"
-                                    }
+                                    i { classes = "fa-regular fa-hexagon-vertical-nft-slanted mr-4" }
                                     +"All NFTs"
                                 }
                             }
                         }
                     }
 
-                    Button {
-                        kind = ButtonKind.SOFT
-                        classes =
-                            "order-2 sticky bottom-4 left-0 w-full lg:w-auto"
-                        onClick = { props.onConnect?.invoke() }
+                    var dropdownOpen by useState(false)
+                    if (connection.isConnected()) {
+                        div {
+                            classes = "relative order-2 lg:order-3"
+                            button {
+                                type = ButtonType.button
+                                onClick = {
+                                    dropdownOpen = !dropdownOpen
+                                }
 
-                        i { classes = "fa-regular fa-arrow-right-to-arc mr-4" }
-                        +"Connect"
+                                img {
+                                    classes = "rounded-full inline align-middle w-10 h-10"
+                                    src = "./assets/img/user-1.svg"
+                                }
+                            }
+
+                            ul {
+                                classes =
+                                    ("relative block lg:right-full min-w-[240px] rounded-none mt-4 lg:bg-gray-900 lg:rounded-lg lg:absolute transition ease-in-out delay-150 duration-300 "
+                                            + if (dropdownOpen) "lg:visible lg:opacity-100" else "lg:invisible lg:opacity-0")
+
+                                li {
+                                    a {
+                                        classes = "px-6 py-3 block hover:lg:bg-dark-700"
+                                        href = "/profile/${connection.wallet?.address.orEmpty()}"
+
+                                        i { classes = "fa-regular fa-user mr-4" }
+                                        +"Profile"
+                                    }
+                                }
+
+                                li {
+                                    a {
+                                        classes = "px-6 py-3 block hover:lg:bg-dark-700"
+                                        onClick = {
+                                            props.onDisconnect?.invoke()
+                                        }
+
+                                        i { classes = "fa-regular fa-link-simple-slash mr-4" }
+                                        +"Disconnect"
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        Button {
+                            kind = ButtonKind.SOFT
+                            classes =
+                                "order-2 sticky bottom-4 left-0 w-full lg:w-auto"
+                            onClick = { props.onConnect?.invoke() }
+
+                            i { classes = "fa-regular fa-arrow-right-to-arc mr-4" }
+                            +"Connect"
+                        }
                     }
                 }
             }

@@ -1,8 +1,11 @@
 package money.tegro.market.web.dialogue
 
+import kotlinx.coroutines.launch
 import money.tegro.market.web.component.Button
 import money.tegro.market.web.html.classes
+import money.tegro.market.web.mainScope
 import money.tegro.market.web.model.ButtonKind
+import money.tegro.market.web.model.Connection
 import money.tegro.market.web.props.ConnectDialogueProps
 import react.FC
 import react.dom.html.ButtonType
@@ -48,22 +51,31 @@ val ConnectDialogue = FC<ConnectDialogueProps>("ConnectDialogue") { props ->
                 div {
                     classes = "flex flex-col"
 
-                    Button {
-                        classes = "flex items-center gap-4"
-                        kind = ButtonKind.SOFT
+                    if (Connection.tonWallet() != null) {
+                        Button {
+                            classes = "flex items-center gap-4"
+                            kind = ButtonKind.SOFT
+                            onClick = {
+                                mainScope.launch {
+                                    Connection.connectTonWallet()?.let {
+                                        props.onConnect?.invoke(it)
+                                    }
+                                }
+                            }
 
-                        img {
-                            classes = "w-10 h-10"
-                            alt = "Ton Wallet"
-                            src = "./assets/img/ton-wallet.png"
+                            img {
+                                classes = "w-10 h-10"
+                                alt = "Ton Wallet"
+                                src = "./assets/img/ton-wallet.png"
+                            }
+
+                            span {
+                                classes = "text-lg flex-grow"
+                                +"Ton Wallet"
+                            }
+
+                            i { classes = "fa-solid fa-angle-right" }
                         }
-
-                        span {
-                            classes = "text-lg flex-grow"
-                            +"Ton Wallet"
-                        }
-
-                        i { classes = "fa-solid fa-angle-right" }
                     }
                 }
             }

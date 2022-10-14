@@ -4,4 +4,5 @@ import react.Props
 
 external interface HeaderProps : Props {
     var onConnect: (() -> Unit)?
+    var onDisconnect: (() -> Unit)?
 }

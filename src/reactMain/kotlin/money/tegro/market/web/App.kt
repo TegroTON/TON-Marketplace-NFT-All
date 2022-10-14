@@ -6,6 +6,7 @@ import money.tegro.market.web.context.ConnectionContext
 import money.tegro.market.web.dialogue.ConnectDialogue
 import money.tegro.market.web.fragment.Footer
 import money.tegro.market.web.fragment.Header
+import money.tegro.market.web.model.Connection
 import money.tegro.market.web.model.Dialogue
 import money.tegro.market.web.page.Collection
 import money.tegro.market.web.page.Index
@@ -29,7 +30,9 @@ val App = FC<Props>("App") {
         Header {
             onConnect = {
                 appState = appState.copy(dialogue = Dialogue.CONNECT)
-                console.log("yeet")
+            }
+            onDisconnect = {
+                appState = appState.copy(connection = Connection())
             }
         }
 
@@ -58,6 +61,9 @@ val App = FC<Props>("App") {
             open = appState.dialogue == Dialogue.CONNECT
             onClose = {
                 appState = appState.copy(dialogue = Dialogue.NONE)
+            }
+            onConnect = { connection ->
+                appState = appState.copy(dialogue = Dialogue.NONE, connection = connection)
             }
         }
     }
