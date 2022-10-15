@@ -1,13 +1,15 @@
 package money.tegro.market.web.component
 
+import dev.fritz2.core.HtmlTag
 import dev.fritz2.core.RenderContext
 import dev.fritz2.core.type
 import money.tegro.market.web.model.ButtonKind
+import org.w3c.dom.HTMLButtonElement
 
 fun RenderContext.Button(
-    classes: String = "",
+    classes: String? = null,
     kind: ButtonKind = ButtonKind.PRIMARY,
-    content: RenderContext.() -> Unit
+    content: HtmlTag<HTMLButtonElement>.() -> Unit
 ) {
     button("px-6 py-3 flex flex-nowrap items-center justify-center border rounded-lg text-sm uppercase font-medium tracking-widest") {
         when (kind) {
@@ -20,10 +22,10 @@ fun RenderContext.Button(
             ButtonKind.SOFT ->
                 className("text-white bg-dark-700 hover:bg-gray-900 focus:bg-gray-900 border-dark-700 hover:border-gray-900 focus:border-gray-900")
         }
-        
-        className(classes)
+
+        classes?.let { className(it) }
         type("button")
 
-        content()
+        this.apply(content)
     }
 }
