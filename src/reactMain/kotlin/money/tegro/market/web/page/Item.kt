@@ -164,7 +164,7 @@ fun RenderContext.Item(address: String) {
                                             }
 
                                             span("flex-grow text-right") {
-                                                +(item.sale?.take(12)?.plus("...") ?: "n/a")
+                                                +item.sale.take(12).plus("...")
                                             }
 
                                             i("fa-solid fa-angle-right") { }

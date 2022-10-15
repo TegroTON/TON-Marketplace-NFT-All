@@ -4,6 +4,7 @@ import dev.fritz2.core.*
 import kotlinx.coroutines.flow.map
 import money.tegro.market.web.component.Button
 import money.tegro.market.web.model.ButtonKind
+import money.tegro.market.web.store.ConnectModalStore
 import money.tegro.market.web.store.ConnectionStore
 
 fun RenderContext.Header() {
@@ -101,7 +102,7 @@ fun RenderContext.Header() {
 
                                         li {
                                             a("px-6 py-3 block hover:lg:bg-dark-700") {
-                                                href("/profile/${connection.wallet?.address.orEmpty()}")
+                                                href("/profile/${connection.wallet.orEmpty()}")
 
                                                 i("fa-regular fa-user mr-4") { }
                                                 +"Profile"
@@ -120,7 +121,7 @@ fun RenderContext.Header() {
                                 }
                             } else {
                                 Button("order-2 sticky bottom-4 left-0 w-full lg:w-auto", ButtonKind.SOFT) {
-                                    clicks handledBy ConnectionStore.connect
+                                    clicks.map { true } handledBy ConnectModalStore.update
 
                                     i("fa-regular fa-arrow-right-to-arc mr-4") {}
                                     +"Connect"

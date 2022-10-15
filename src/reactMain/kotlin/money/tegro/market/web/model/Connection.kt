@@ -2,12 +2,16 @@ package money.tegro.market.web.model
 
 import kotlinx.browser.window
 import kotlinx.coroutines.await
+import kotlinx.serialization.Serializable
 import money.tegro.market.web.wallet.TonWalletProvider
 import org.w3c.dom.get
 
+@Serializable
 data class Connection(
+    val id: String = "connection",
     val provider: String? = null,
-    val wallet: Wallet? = null,
+    val wallet: String? = null,
+    val publicKey: String? = null,
 ) {
     fun isConnected() = provider != null && wallet != null
 
@@ -20,7 +24,8 @@ data class Connection(
             ?.let {
                 Connection(
                     provider = "tonwallet",
-                    wallet = it,
+                    wallet = it.address,
+                    publicKey = it.publicKey,
                 )
             }
     }

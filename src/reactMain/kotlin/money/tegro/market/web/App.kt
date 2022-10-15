@@ -2,9 +2,9 @@ package money.tegro.market.web
 
 import dev.fritz2.core.RenderContext
 import dev.fritz2.core.render
-import money.tegro.market.web.dialogue.ConnectDialogue
 import money.tegro.market.web.fragment.Footer
 import money.tegro.market.web.fragment.Header
+import money.tegro.market.web.modal.ConnectModal
 import money.tegro.market.web.page.Collection
 import money.tegro.market.web.page.Index
 import money.tegro.market.web.page.Item
@@ -24,7 +24,7 @@ fun RenderContext.app() {
 
     Footer()
 
-    ConnectDialogue()
+    ConnectModal()
 }
 
 fun main() {

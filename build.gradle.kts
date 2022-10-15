@@ -49,6 +49,7 @@ kotlin {
                 implementation("io.github.microutils:kotlin-logging:2.1.23")
 
                 implementation("dev.fritz2:core:1.0-RC1")
+                implementation("dev.fritz2:headless:1.0-RC1")
             }
         }
 
