@@ -1,6 +1,6 @@
 package money.tegro.market.web.model
 
-import browser.window
+import kotlinx.browser.window
 import kotlinx.coroutines.await
 import money.tegro.market.web.wallet.TonWalletProvider
 import org.w3c.dom.get

@@ -1,80 +1,62 @@
 package money.tegro.market.web.dialogue
 
-import kotlinx.coroutines.launch
+import dev.fritz2.core.RenderContext
+import dev.fritz2.core.alt
+import dev.fritz2.core.src
+import dev.fritz2.core.type
+import kotlinx.coroutines.flow.map
 import money.tegro.market.web.component.Button
-import money.tegro.market.web.html.classes
-import money.tegro.market.web.mainScope
 import money.tegro.market.web.model.ButtonKind
 import money.tegro.market.web.model.Connection
-import money.tegro.market.web.props.ConnectDialogueProps
-import react.FC
-import react.dom.html.ButtonType
-import react.dom.html.ReactHTML.button
-import react.dom.html.ReactHTML.div
-import react.dom.html.ReactHTML.h5
-import react.dom.html.ReactHTML.i
-import react.dom.html.ReactHTML.img
-import react.dom.html.ReactHTML.p
-import react.dom.html.ReactHTML.span
+import money.tegro.market.web.model.Dialogue
+import money.tegro.market.web.store.ConnectionStore
+import money.tegro.market.web.store.DialogueStore
 
-val ConnectDialogue = FC<ConnectDialogueProps>("ConnectDialogue") { props ->
-    div {
-        classes =
-            "top-0 left-0 z-40 w-full h-full bg-dark-900/[.6] " + if (props.open == true) "fixed" else "hidden"
+fun RenderContext.ConnectDialogue() {
+    div("top-0 left-0 z-40 w-full h-full bg-dark-900/[.6]") {
+        className(
+            DialogueStore.data
+                .map {
+                    if (it == Dialogue.CONNECT) "fixed" else "hidden"
+                }
+        )
 
-        div {
-            classes = "mx-auto flex items-center relative w-auto max-w-lg min-h-screen"
-
-            div {
-                classes = "bg-dark-700 rounded-3xl p-10 relative flex flex-col w-full h-full min-h-full gap-4"
-
+        div("mx-auto flex items-center relative w-auto max-w-lg min-h-screen") {
+            div("bg-dark-700 rounded-3xl p-10 relative flex flex-col w-full h-full min-h-full gap-4") {
                 div {
-                    h5 {
-                        classes = "text-2xl font-raleway font-bold mb-2"
+                    h5("text-2xl font-raleway font-bold mb-2") {
                         +"Connect Wallet"
                     }
 
-                    p {
-                        classes = "text-gray-500 text-lg"
+                    p("text-gray-500 text-lg") {
                         +"Choose how you want to connect. More options will be added in the future."
                     }
 
-                    button {
-                        classes = "absolute top-6 right-8 opacity-50"
-                        type = ButtonType.button
-                        onClick = { props.onClose?.invoke() }
+                    button("absolute top-6 right-8 opacity-50") {
+                        type("button")
+                        clicks handledBy DialogueStore.close
 
-                        i { classes = "fa-solid fa-xmark text-2xl" }
+                        i("fa-solid fa-xmark text-2xl") {}
                     }
                 }
 
-                div {
-                    classes = "flex flex-col"
+                div("flex flex-col") {
+                    ConnectionStore.data.render { _ ->
+                        if (Connection.tonWallet() != null) {
+                            Button("flex items-center gap-4", ButtonKind.SOFT) {
+                                clicks handledBy ConnectionStore.connectTonWallet
 
-                    if (Connection.tonWallet() != null) {
-                        Button {
-                            classes = "flex items-center gap-4"
-                            kind = ButtonKind.SOFT
-                            onClick = {
-                                mainScope.launch {
-                                    Connection.connectTonWallet()?.let {
-                                        props.onConnect?.invoke(it)
-                                    }
+                                img("w-10 h-10") {
+                                    alt("Ton Wallet")
+                                    src("./assets/img/ton-wallet.png")
                                 }
-                            }
 
-                            img {
-                                classes = "w-10 h-10"
-                                alt = "Ton Wallet"
-                                src = "./assets/img/ton-wallet.png"
-                            }
+                                span("text-lg flex-grow") {
+                                    +"Ton Wallet"
+                                }
 
-                            span {
-                                classes = "text-lg flex-grow"
-                                +"Ton Wallet"
+                                i("fa-solid fa-angle-right") { }
                             }
-
-                            i { classes = "fa-solid fa-angle-right" }
                         }
                     }
                 }

@@ -1,203 +1,122 @@
 package money.tegro.market.web.page
 
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.launch
-import kotlinx.js.get
-import money.tegro.market.dto.CollectionDTO
-import money.tegro.market.dto.ItemDTO
-import money.tegro.market.web.client.APIv1Client
+import dev.fritz2.core.RenderContext
+import dev.fritz2.core.alt
+import dev.fritz2.core.href
+import dev.fritz2.core.src
+import kotlinx.coroutines.flow.filterNotNull
 import money.tegro.market.web.component.Button
-import money.tegro.market.web.html.classes
-import money.tegro.market.web.mainScope
 import money.tegro.market.web.model.ButtonKind
-import react.FC
-import react.Props
-import react.dom.html.ImgLoading
-import react.dom.html.ReactHTML.div
-import react.dom.html.ReactHTML.h1
-import react.dom.html.ReactHTML.h4
-import react.dom.html.ReactHTML.h5
-import react.dom.html.ReactHTML.img
-import react.dom.html.ReactHTML.li
-import react.dom.html.ReactHTML.main
-import react.dom.html.ReactHTML.p
-import react.dom.html.ReactHTML.picture
-import react.dom.html.ReactHTML.section
-import react.dom.html.ReactHTML.span
-import react.dom.html.ReactHTML.ul
-import react.router.dom.Link
-import react.router.useParams
-import react.useEffectOnce
-import react.useState
+import money.tegro.market.web.store.CollectionItemsStore
+import money.tegro.market.web.store.CollectionStore
 
-val Collection = FC<Props>("Collection") {
-    val params = useParams()
-    val address = requireNotNull(params.get("address"))
-    var collection: CollectionDTO? by useState(null)
+fun RenderContext.Collection(address: String) {
+    CollectionStore.load(address)
 
-    useEffectOnce {
-        mainScope.launch {
-            collection = APIv1Client.getCollection(address)
-        }
-    }
-
-    section {
-        classes = "min-w-full m-0 -mb-6 bg-gray-900"
-
-        picture {
-            img {
-                src = collection?.coverImage?.original ?: "./assets/img/nft-hero.png"
-                loading = ImgLoading.lazy
-                alt = collection?.name ?: "Collection Cover"
-                classes = "w-full h-[340px] object-cover align-middle"
+    CollectionStore.data.filterNotNull().render { collection ->
+        section("min-w-full m-0 -mb-6 bg-gray-900") {
+            picture {
+                img("w-full h-[340px] object-cover align-middle") {
+                    src(collection.coverImage.original ?: "./assets/img/nft-hero.png")
+                    alt(collection.name)
+                }
             }
         }
-    }
 
-    main {
-        classes = "mx-3 lg:mx-6"
-
-        section {
-            classes = "container relative px-3 mx-auto gap-8 grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4"
-
-            div {// Left panel
-                div { // Card
-                    classes =
-                        "relative top-0 overflow-hidden rounded-xl bg-dark-700 bg-white/[.02] backdrop-blur-3xl -mt-24"
-
-                    div { // Card body
-                        classes = "flex flex-col gap-6 p-6"
-
-                        div {
-                            classes = "flex flex-col items-center"
-
-                            div { // Image
-                                img {
-                                    classes = "w-full h-32 rounded-full object-cover align-middle"
-                                    src = collection?.image?.original ?: "./assets/img/user-1.svg"
+        main("mx-3 lg:mx-6") {
+            section("container relative px-3 mx-auto gap-8 grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4") {
+                div {// Left panel
+                    div("relative top-0 overflow-hidden rounded-xl bg-dark-700 bg-white/[.02] backdrop-blur-3xl -mt-24") { // Card
+                        div("flex flex-col gap-6 p-6") { // Card body
+                            div("flex flex-col items-center") {
+                                div { // Image
+                                    img("w-full h-32 rounded-full object-cover align-middle") {
+                                        src(collection.image.original ?: "./assets/img/user-1.svg")
+                                    }
                                 }
+
+                                // Main actions here
                             }
 
-                            // Main actions here
-                        }
-
-                        h1 {
-                            classes = "text-3xl font-raleway"
-                            +(collection?.name ?: "...")
-                        }
-
-                        div { // Collection description
-                            classes = "text-gray-500"
-                            p {
-                                +collection?.description.orEmpty()
-                            }
-                        }
-                    }
-
-                    div { // Card footer
-                        classes = "text-center px-12 py-4"
-
-                        +"Created by "
-                        span {
-                            classes = "text-yellow"
-                            +(collection?.owner
-                                ?.let { it.take(6) + "..." + it.takeLast(6) } ?: "...")
-                        }
-                    }
-                }
-
-                // Filters here
-            }
-
-            div { // Right panel
-                classes = "lg:col-span-2 xl:col-span-3 flex flex-col gap-6"
-
-                div { // Stats card
-                    classes =
-                        "overflow-auto rounded-xl bg-dark-700 bg-white/[.02] backdrop-blur-3xl flex items-center justify-between"
-
-                    div {
-                        classes = "p-6 text-center flex flex-col gap-2 flex-1"
-
-                        h5 {
-                            classes = "uppercase text-gray-500"
-                            +"Items"
-                        }
-
-                        p {
-                            classes = "uppercase"
-                            +(collection?.numberOfItems ?: 0uL).toString()
-                        }
-                    }
-
-                    div {
-                        classes = "p-6 text-center flex flex-col gap-2 flex-1"
-
-                        h5 {
-                            classes = "uppercase text-gray-500"
-                            +"Address"
-                        }
-
-                        p {
-                            classes = ""
-                            +collection?.address?.take(12).orEmpty()
-                        }
-                    }
-                }
-
-                ul { // Collection tabs
-                    classes = "overflow-auto flex items-center"
-
-                    li {
-                        classes = ""
-
-                        Button {
-                            classes = "rounded-none rounded-t-lg border-0 border-b"
-                            kind = ButtonKind.SECONDARY
-                            +"Items"
-                        }
-                    }
-                }
-
-                div { // Collection Body
-                    classes = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-
-                    var items: List<ItemDTO> by useState(listOf())
-
-                    useEffectOnce {
-                        mainScope.launch {
-                            items = APIv1Client.listCollectionItems(address, drop = 0, take = 16).toList()
-                        }
-                    }
-
-                    for (item in items) {
-                        Link {
-                            key = item.address
-
-                            classes = "p-4 bg-dark-700 rounded-lg flex flex-col gap-4"
-                            to = "/item/${item.address}"
-
-                            picture {
-                                img {
-                                    classes = "w-full h-52 rounded-lg object-cover"
-                                    src = item.image.original ?: "./assets/img/user-1.svg"
-                                }
+                            h1("text-3xl font-raleway") {
+                                +(collection.name)
                             }
 
-                            h4 {
-                                classes = "font-raleway text-lg"
-                                +(item.name)
-                            }
-
-                            div {
-                                classes = "flex justify-between bg-soft rounded-xl p-4"
-
+                            div("text-gray-500") { // Collection description
                                 p {
-                                    classes = "w-full text-center"
-                                    +"Not For Sale"
+                                    +collection.description
                                 }
                             }
                         }
+
+                        div("text-center px-12 py-4") { // Card footer
+                            +"Created by "
+                            span("text-yellow") {
+                                +(collection.owner
+                                    ?.let { it.take(6) + "..." + it.takeLast(6) } ?: "...")
+                            }
+                        }
+                    }
+
+                    // Filters here
+                }
+
+                div("lg:col-span-2 xl:col-span-3 flex flex-col gap-6") { // Right panel
+                    div("overflow-auto rounded-xl bg-dark-700 bg-white/[.02] backdrop-blur-3xl flex items-center justify-between") { // Stats card
+                        div("p-6 text-center flex flex-col gap-2 flex-1") {
+                            h5("uppercase text-gray-500") {
+                                +"Items"
+                            }
+
+                            p("uppercase") {
+                                +collection.numberOfItems.toString()
+                            }
+                        }
+
+                        div("p-6 text-center flex flex-col gap-2 flex-1") {
+                            h5("uppercase text-gray-500") {
+                                +"Address"
+                            }
+
+                            p {
+                                +collection.address.take(12).orEmpty()
+                            }
+                        }
+                    }
+
+                    ul("overflow-auto flex items-center") { // Collection tabs
+                        li {
+                            Button("rounded-none rounded-t-lg border-0 border-b", ButtonKind.SECONDARY) {
+                                +"Items"
+                            }
+                        }
+                    }
+
+                    div("grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4") { // Collection Body
+                        CollectionItemsStore.query(address)
+                        CollectionItemsStore.data
+                            .renderEach { item ->
+                                a("p-4 bg-dark-700 rounded-lg flex flex-col gap-4") {
+                                    href("/item/${item.address}")
+
+                                    picture {
+                                        img("w-full h-52 rounded-lg object-cover") {
+                                            src(item.image.original ?: "./assets/img/user-1.svg")
+                                        }
+                                    }
+
+                                    h4("font-raleway text-lg") {
+                                        +item.name
+                                    }
+
+                                    div("flex justify-between bg-soft rounded-xl p-4") {
+                                        p("w-full text-center") {
+
+                                            +"Not For Sale"
+                                        }
+                                    }
+                                }
+                            }
                     }
                 }
             }

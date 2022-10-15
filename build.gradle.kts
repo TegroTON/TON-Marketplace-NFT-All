@@ -47,22 +47,20 @@ kotlin {
                 implementation("com.ionspin.kotlin:bignum:0.3.7")
                 implementation("com.ionspin.kotlin:bignum-serialization-kotlinx:0.3.7")
                 implementation("io.github.microutils:kotlin-logging:2.1.23")
+
+                implementation("dev.fritz2:core:1.0-RC1")
             }
         }
 
         val reactMain by getting {
             dependencies {
                 dependsOn(commonMain)
-
                 implementation("org.jetbrains.kotlin-wrappers:kotlin-extensions:1.0.1-pre.399")
-                implementation("org.jetbrains.kotlin-wrappers:kotlin-react:18.2.0-pre.399")
-                implementation("org.jetbrains.kotlin-wrappers:kotlin-react-dom:18.2.0-pre.399")
-                implementation("org.jetbrains.kotlin-wrappers:kotlin-react-router-dom:6.3.0-pre.399")
 
-                implementation(npm("postcss", "^8.4.17"))
-                implementation(npm("postcss-loader", "7.0.1"))
-                implementation(npm("autoprefixer", "10.4.12"))
                 implementation(npm("tailwindcss", "3.1.8"))
+                implementation(devNpm("postcss", "^8.4.17"))
+                implementation(devNpm("postcss-loader", "7.0.1"))
+                implementation(devNpm("autoprefixer", "10.4.12"))
             }
         }
         val springMain by getting {
@@ -94,9 +92,9 @@ kotlin {
         }
     }
 }
-
-tasks.getByName<Copy>("springProcessResources") {
-    from(tasks.getByName("reactBrowserDistribution")) {
-        into("static")
-    }
-}
+//
+//tasks.getByName<Copy>("springProcessResources") {
+//    from(tasks.getByName("reactBrowserDistribution")) {
+//        into("static")
+//    }
+//}
