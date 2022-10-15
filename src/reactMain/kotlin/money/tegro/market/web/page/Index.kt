@@ -1,14 +1,12 @@
 package money.tegro.market.web.page
 
 import dev.fritz2.core.*
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.map
 import money.tegro.market.web.component.Button
 import money.tegro.market.web.model.ButtonKind
 import money.tegro.market.web.route.AppRouter
 import money.tegro.market.web.store.TopCollectionsStore
 
-@OptIn(FlowPreview::class)
 fun RenderContext.Index() {
     main("mx-3 lg:mx-6") {
         section("px-0 py-12") {
@@ -177,14 +175,13 @@ fun RenderContext.Index() {
 
                 div("pt-4 flex flex-wrap gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3") {
                     TopCollectionsStore.data
-                        .renderEach { collection ->
+                        .map { it.withIndex().toList() }
+                        .renderEach { (index, collection) ->
                             a("flex flex-col lg:flex-row gap-4 rounded-xl p-4 items-center bg-dark-700 hover:bg-gray-900") {
                                 clicks.map { setOf("collection", collection.address) } handledBy AppRouter.navTo
                                 title(collection.name)
 
-                                span("font-bold") {
-                                    +"0"
-                                }
+                                span("font-bold") { +"${index + 1}" }
 
                                 picture {
                                     img("rounded-full w-16 h-16") {
