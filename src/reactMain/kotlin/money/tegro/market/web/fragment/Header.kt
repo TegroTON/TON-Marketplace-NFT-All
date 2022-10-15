@@ -5,8 +5,9 @@ import kotlinx.coroutines.flow.map
 import money.tegro.market.web.component.Button
 import money.tegro.market.web.component.Link
 import money.tegro.market.web.model.ButtonKind
-import money.tegro.market.web.store.ConnectModalStore
+import money.tegro.market.web.model.PopOver
 import money.tegro.market.web.store.ConnectionStore
+import money.tegro.market.web.store.PopOverStore
 
 fun RenderContext.Header() {
     header("sticky z-30 top-0 px-0 py-6 sm:py-8 bg-dark-900/[.9] backdrop-blur-2xl") {
@@ -23,17 +24,16 @@ fun RenderContext.Header() {
                     }
                 }
 
-                val navbarOpen = storeOf(false)
                 Button(ButtonKind.SOFT, "lg:hidden ml-4 order-2") {
-                    clicks.map { !navbarOpen.current } handledBy navbarOpen.update
+                    clicks handledBy PopOverStore.menu
 
                     i("fa-regular text-xl fa-bars") { }
                 }
 
                 div("fixed top-0 left-0 w-3/4 h-screen bg-dark-900 lg:bg-inherit basis-full items-center px-3 py-6 lg:flex lg:basis-auto lg:p-0 lg:w-auto lg:h-auto lg:static grow items-center") {
                     className(
-                        navbarOpen.data
-                            .map { if (it) "block" else "hidden" }
+                        PopOverStore.data
+                            .map { if (it == PopOver.MENU) "block" else "hidden" }
                     )
                     form("mx-0 lg:mx-12 mb-4 lg:mb-0 order-1 lg:order-2 block grow") {
                         div("border border-solid grow border-border-soft rounded-lg bg-soft relative flex flex-wrap items-stretch w-full") {
@@ -119,7 +119,7 @@ fun RenderContext.Header() {
                                 }
                             } else {
                                 Button(ButtonKind.SOFT, "order-2 sticky bottom-4 left-0 w-full lg:w-auto") {
-                                    clicks.map { true } handledBy ConnectModalStore.update
+                                    clicks handledBy PopOverStore.connect
 
                                     i("fa-regular fa-arrow-right-to-arc mr-4") {}
                                     +"Connect"

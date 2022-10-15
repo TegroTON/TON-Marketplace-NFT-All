@@ -20,7 +20,7 @@ object ConnectionStore : RootStore<Connection>(Connection()) {
     val connect = handle<Connection> { _, connection ->
         connection.also {
             localStorage.addOrUpdate(it)
-            ConnectModalStore.update(false)
+            PopOverStore.close()
         }
     }
 
