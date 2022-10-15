@@ -3,8 +3,8 @@ package money.tegro.market.web.page
 import dev.fritz2.core.*
 import kotlinx.coroutines.flow.map
 import money.tegro.market.web.component.Button
+import money.tegro.market.web.component.Link
 import money.tegro.market.web.model.ButtonKind
-import money.tegro.market.web.route.AppRouter
 import money.tegro.market.web.store.TopCollectionsStore
 
 fun RenderContext.Index() {
@@ -100,11 +100,13 @@ fun RenderContext.Index() {
                 }
 
                 div("flex flex-wrap items-center justify-center") {
-                    Button(
-                        "text-dark-900 bg-yellow px-8 py-4 m-0 border-0 rounded-lg uppercase font-medium text-sm flex flex-nowrap items-center tracking-widest hover:bg-yellow-hover hover:border-yellow-hover",
-                        ButtonKind.PRIMARY
-                    ) {
-                        +"Explore"
+                    Link(setOf("explore")) {
+                        Button(
+                            ButtonKind.PRIMARY,
+                            "text-dark-900 bg-yellow px-8 py-4 m-0 border-0 rounded-lg uppercase font-medium text-sm flex flex-nowrap items-center tracking-widest hover:bg-yellow-hover hover:border-yellow-hover",
+                        ) {
+                            +"Explore"
+                        }
                     }
                 }
             }
@@ -123,8 +125,7 @@ fun RenderContext.Index() {
                 }
 
                 div("mt-10 flex items-center") {
-                    a {
-                        href("/explore")
+                    Link(setOf("explore")) {
                         Button(kind = ButtonKind.PRIMARY) {
                             +"Explore"
                         }
@@ -144,8 +145,8 @@ fun RenderContext.Index() {
                                     href(link)
                                     target("_blank")
                                     Button(
-                                        "p-0 w-12 h-12 hover:bg-dark-900 focus:bg-dark-900 border-dark-900",
-                                        ButtonKind.SECONDARY
+                                        ButtonKind.SECONDARY,
+                                        "p-0 w-12 h-12 hover:bg-dark-900 focus:bg-dark-900 border-dark-900"
                                     ) {
                                         i("fa-brands $icon") { }
                                     }
@@ -177,8 +178,10 @@ fun RenderContext.Index() {
                     TopCollectionsStore.data
                         .map { it.withIndex().toList() }
                         .renderEach { (index, collection) ->
-                            a("flex flex-col lg:flex-row gap-4 rounded-xl p-4 items-center bg-dark-700 hover:bg-gray-900") {
-                                clicks.map { setOf("collection", collection.address) } handledBy AppRouter.navTo
+                            Link(
+                                setOf("collection", collection.address),
+                                "flex flex-col lg:flex-row gap-4 rounded-xl p-4 items-center bg-dark-700 hover:bg-gray-900"
+                            ) {
                                 title(collection.name)
 
                                 span("font-bold") { +"${index + 1}" }
@@ -198,8 +201,7 @@ fun RenderContext.Index() {
                 }
 
                 div("mt-12 flex flex-wrap items-center justify-center") {
-                    a {
-                        href("/explore")
+                    Link(setOf("explore")) {
                         Button(kind = ButtonKind.PRIMARY) {
                             +"Explore"
                         }

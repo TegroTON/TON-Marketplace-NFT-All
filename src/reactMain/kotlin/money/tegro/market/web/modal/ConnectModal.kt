@@ -38,7 +38,7 @@ fun RenderContext.ConnectModal() {
                     div("flex flex-col") {
                         ConnectionStore.data.render { _ ->
                             if (Connection.tonWallet() != null) {
-                                Button("flex items-center gap-4", ButtonKind.SOFT) {
+                                Button(ButtonKind.SOFT, "flex items-center gap-4") {
                                     clicks handledBy ConnectionStore.connectTonWallet
 
                                     img("w-10 h-10") {

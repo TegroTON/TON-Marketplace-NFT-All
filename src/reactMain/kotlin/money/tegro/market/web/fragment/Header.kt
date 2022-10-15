@@ -3,6 +3,7 @@ package money.tegro.market.web.fragment
 import dev.fritz2.core.*
 import kotlinx.coroutines.flow.map
 import money.tegro.market.web.component.Button
+import money.tegro.market.web.component.Link
 import money.tegro.market.web.model.ButtonKind
 import money.tegro.market.web.store.ConnectModalStore
 import money.tegro.market.web.store.ConnectionStore
@@ -11,9 +12,7 @@ fun RenderContext.Header() {
     header("sticky z-30 top-0 px-0 py-6 sm:py-8 bg-dark-900/[.9] backdrop-blur-2xl") {
         div("container relative px-3 mx-auto") {
             nav("relative flex flex-wrap p-0 items-center justify-between") {
-                a("flex mr-12 items-center") {
-                    href("/")
-
+                Link(setOf(""), "flex mr-12 items-center") {
                     img("w-12 h-12 object-contain") {
                         alt("Libermall - NFT Marketplace")
                         src("assets/img/logo/apple-icon-57x57.png")
@@ -25,7 +24,7 @@ fun RenderContext.Header() {
                 }
 
                 val navbarOpen = storeOf(false)
-                Button("lg:hidden ml-4 order-2", ButtonKind.SOFT) {
+                Button(ButtonKind.SOFT, "lg:hidden ml-4 order-2") {
                     clicks.map { !navbarOpen.current } handledBy navbarOpen.update
 
                     i("fa-regular text-xl fa-bars") { }
@@ -44,7 +43,7 @@ fun RenderContext.Header() {
                             }
 
                             div("p-0 border-0 border-gray-900 rounded-lg flex items-center text-center") {
-                                Button("px-6 py-3", ButtonKind.SOFT) {
+                                Button(ButtonKind.SOFT, "px-6 py-3") {
                                     i("fa-solid fa-magnifying-glass text-gray-500") {}
                                 }
                             }
@@ -54,7 +53,7 @@ fun RenderContext.Header() {
                     div("relative order-3 lg:order-1") {
                         val dropdownOpen = storeOf(false)
 
-                        Button("mt-4 lg:mt-0", ButtonKind.PRIMARY) {
+                        Button(ButtonKind.PRIMARY, "mt-4 lg:mt-0") {
                             clicks.map { !dropdownOpen.current } handledBy dropdownOpen.update
 
                             i("fa-regular fa-grid-2 mr-2") {}
@@ -68,9 +67,7 @@ fun RenderContext.Header() {
                             )
 
                             li {
-                                a("px-6 py-3 block hover:lg:bg-dark-700") {
-                                    href("/explore")
-
+                                Link(setOf("explore"), "px-6 py-3 block hover:lg:bg-dark-700") {
                                     i("fa-regular fa-hexagon-vertical-nft-slanted mr-4") { }
                                     +"All NFTs"
                                 }
@@ -101,9 +98,10 @@ fun RenderContext.Header() {
                                         )
 
                                         li {
-                                            a("px-6 py-3 block hover:lg:bg-dark-700") {
-                                                href("/profile/${connection.wallet.orEmpty()}")
-
+                                            Link(
+                                                setOf("profile", connection.wallet.orEmpty()),
+                                                "px-6 py-3 block hover:lg:bg-dark-700"
+                                            ) {
                                                 i("fa-regular fa-user mr-4") { }
                                                 +"Profile"
                                             }
@@ -120,7 +118,7 @@ fun RenderContext.Header() {
                                     }
                                 }
                             } else {
-                                Button("order-2 sticky bottom-4 left-0 w-full lg:w-auto", ButtonKind.SOFT) {
+                                Button(ButtonKind.SOFT, "order-2 sticky bottom-4 left-0 w-full lg:w-auto") {
                                     clicks.map { true } handledBy ConnectModalStore.update
 
                                     i("fa-regular fa-arrow-right-to-arc mr-4") {}

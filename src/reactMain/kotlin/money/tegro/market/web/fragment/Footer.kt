@@ -2,6 +2,7 @@ package money.tegro.market.web.fragment
 
 import dev.fritz2.core.*
 import money.tegro.market.web.component.Button
+import money.tegro.market.web.component.Link
 import money.tegro.market.web.model.ButtonKind
 
 fun RenderContext.Footer() {
@@ -45,7 +46,7 @@ fun RenderContext.Footer() {
                                 a {
                                     href(link)
                                     target("_blank")
-                                    Button("p-0 w-12 h-12", ButtonKind.SOFT) {
+                                    Button(ButtonKind.SOFT, "p-0 w-12 h-12") {
                                         i("fa-brands $icon") { }
                                     }
                                 }
@@ -59,9 +60,7 @@ fun RenderContext.Footer() {
 
                     ul("mt-6 text-gray-500") {
                         li("mb-2") {
-                            a("hover:text-yellow") {
-                                href("/explore")
-
+                            Link(setOf("explore"), "hover:text-yellow") {
                                 +"All NFTs"
                             }
                         }

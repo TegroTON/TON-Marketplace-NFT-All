@@ -2,10 +2,10 @@ package money.tegro.market.web.page
 
 import dev.fritz2.core.RenderContext
 import dev.fritz2.core.alt
-import dev.fritz2.core.href
 import dev.fritz2.core.src
 import kotlinx.coroutines.flow.filterNotNull
 import money.tegro.market.web.component.Button
+import money.tegro.market.web.component.Link
 import money.tegro.market.web.model.ButtonKind
 import money.tegro.market.web.store.CollectionItemsStore
 import money.tegro.market.web.store.CollectionStore
@@ -79,14 +79,14 @@ fun RenderContext.Collection(address: String) {
                             }
 
                             p {
-                                +collection.address.take(12).orEmpty()
+                                +collection.address.take(12).plus("...")
                             }
                         }
                     }
 
                     ul("overflow-auto flex items-center") { // Collection tabs
                         li {
-                            Button("rounded-none rounded-t-lg border-0 border-b", ButtonKind.SECONDARY) {
+                            Button(ButtonKind.SECONDARY, "rounded-none rounded-t-lg border-0 border-b") {
                                 +"Items"
                             }
                         }
@@ -96,9 +96,7 @@ fun RenderContext.Collection(address: String) {
                         CollectionItemsStore.query(address)
                         CollectionItemsStore.data
                             .renderEach { item ->
-                                a("p-4 bg-dark-700 rounded-lg flex flex-col gap-4") {
-                                    href("/item/${item.address}")
-
+                                Link(setOf("item", item.address), "p-4 bg-dark-700 rounded-lg flex flex-col gap-4") {
                                     picture {
                                         img("w-full h-52 rounded-lg object-cover") {
                                             src(item.image.original ?: "./assets/img/user-1.svg")

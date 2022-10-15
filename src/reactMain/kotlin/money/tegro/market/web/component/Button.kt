@@ -7,10 +7,10 @@ import money.tegro.market.web.model.ButtonKind
 import org.w3c.dom.HTMLButtonElement
 
 fun RenderContext.Button(
+    kind: ButtonKind,
     classes: String? = null,
-    kind: ButtonKind = ButtonKind.PRIMARY,
     content: HtmlTag<HTMLButtonElement>.() -> Unit
-) {
+) =
     button("px-6 py-3 flex flex-nowrap items-center justify-center border rounded-lg text-sm uppercase font-medium tracking-widest") {
         when (kind) {
             ButtonKind.PRIMARY ->
@@ -28,4 +28,3 @@ fun RenderContext.Button(
 
         this.apply(content)
     }
-}

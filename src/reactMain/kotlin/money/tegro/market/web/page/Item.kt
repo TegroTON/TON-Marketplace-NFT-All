@@ -5,6 +5,7 @@ import dev.fritz2.core.href
 import dev.fritz2.core.src
 import dev.fritz2.core.target
 import kotlinx.coroutines.flow.filterNotNull
+import money.tegro.market.web.component.Link
 import money.tegro.market.web.store.CollectionStore
 import money.tegro.market.web.store.ItemStore
 
@@ -18,8 +19,7 @@ fun RenderContext.Item(address: String) {
                 nav {
                     ol("flex flex-wrap text-gray-500 gap-2") {
                         li {
-                            a {
-                                href("#explore")
+                            Link(setOf("explore")) {
                                 +"Explore"
                             }
                         }
@@ -31,8 +31,7 @@ fun RenderContext.Item(address: String) {
                                     }
                                 }
                                 li {
-                                    a {
-                                        href("#collection/${collection.address}")
+                                    Link(setOf("collection", collection.address)) {
                                         +collection.name
                                     }
 
@@ -105,15 +104,16 @@ fun RenderContext.Item(address: String) {
                                 }
                             }
 
-                            a("rounded-lg bg-soft px-6 py-4 flex-grow flex flex-col gap-2") {
-                                href(item.collection?.let { "/collection/$it" } ?: "#explore")
+                            if (item.collection != null) {
+                                CollectionStore.data.filterNotNull().render { collection ->
+                                    Link(
+                                        setOf("collection", collection.address),
+                                        "rounded-lg bg-soft px-6 py-4 flex-grow flex flex-col gap-2"
+                                    ) {
+                                        h4("font-raleway text-sm text-gray-500") {
+                                            +"Collection"
+                                        }
 
-                                h4("font-raleway text-sm text-gray-500") {
-                                    +"Collection"
-                                }
-
-                                if (item.collection != null) {
-                                    CollectionStore.data.filterNotNull().render { collection ->
                                         div("flex items-center gap-2") {
                                             img("w-10 h-10 rounded-full") {
                                                 src(collection.image.original ?: "./assets/img/user-1.svg")
