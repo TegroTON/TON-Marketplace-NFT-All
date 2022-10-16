@@ -137,7 +137,7 @@ class APIv1Controller(
         @RequestParam responseDestination: String?,
     ) = TransactionRequestDTO(
         dest = MsgAddressInt(item).toRaw(),
-        value = (marketplaceProperties.itemTransferFee + marketplaceProperties.networkFee).amount.value.toBigInteger(),
+        value = (marketplaceProperties.itemTransferFee.amount.value + marketplaceProperties.networkFee.amount.value).toBigInteger(),
         stateInit = null,
         text = "NFT Item Transfer",
         payload = CellBuilder.createCell {

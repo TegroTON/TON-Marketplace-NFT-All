@@ -4,4 +4,5 @@ enum class PopOver {
     NONE,
     MENU,
     CONNECT,
+    TRANSFER,
 }

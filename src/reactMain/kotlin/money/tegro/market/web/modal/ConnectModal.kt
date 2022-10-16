@@ -7,8 +7,8 @@ import dev.fritz2.core.type
 import kotlinx.coroutines.flow.map
 import money.tegro.market.web.component.Button
 import money.tegro.market.web.model.ButtonKind
-import money.tegro.market.web.model.Connection
 import money.tegro.market.web.model.PopOver
+import money.tegro.market.web.model.TonWalletConnection
 import money.tegro.market.web.store.ConnectionStore
 import money.tegro.market.web.store.PopOverStore
 
@@ -36,22 +36,20 @@ fun RenderContext.ConnectModal() =
                 }
 
                 div("flex flex-col") {
-                    ConnectionStore.data.render { _ ->
-                        if (Connection.tonWallet() != null) {
-                            Button(ButtonKind.SOFT, "flex items-center gap-4") {
-                                clicks handledBy ConnectionStore.connectTonWallet
+                    if (TonWalletConnection.isAvailable()) {
+                        Button(ButtonKind.SOFT, "flex items-center gap-4") {
+                            clicks handledBy ConnectionStore.connectTonWallet
 
-                                img("w-10 h-10") {
-                                    alt("Ton Wallet")
-                                    src("./assets/img/ton-wallet.png")
-                                }
-
-                                span("text-lg flex-grow") {
-                                    +"Ton Wallet"
-                                }
-
-                                i("fa-solid fa-angle-right") { }
+                            img("w-10 h-10") {
+                                alt("Ton Wallet")
+                                src("./assets/img/ton-wallet.png")
                             }
+
+                            span("text-lg flex-grow") {
+                                +"Ton Wallet"
+                            }
+
+                            i("fa-solid fa-angle-right") { }
                         }
                     }
                 }

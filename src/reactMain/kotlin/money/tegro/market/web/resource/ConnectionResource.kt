@@ -8,7 +8,7 @@ import kotlinx.serialization.json.Json
 import money.tegro.market.web.model.Connection
 
 object ConnectionResource : Resource<Connection, String> {
-    override val idProvider: IdProvider<Connection, String> = Connection::id
+    override val idProvider: IdProvider<Connection, String> = { "connection" }
     override fun deserialize(source: String): Connection = Json.decodeFromString(source)
     override fun serialize(item: Connection): String = Json.encodeToString(item)
 }

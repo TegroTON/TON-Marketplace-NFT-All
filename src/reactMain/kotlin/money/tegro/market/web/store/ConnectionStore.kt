@@ -3,41 +3,60 @@ package money.tegro.market.web.store
 import dev.fritz2.core.RootStore
 import dev.fritz2.repository.ResourceNotFoundException
 import dev.fritz2.repository.localstorage.localStorageEntityOf
+import kotlinx.coroutines.flow.drop
+import money.tegro.market.dto.TransactionRequestDTO
 import money.tegro.market.web.model.Connection
+import money.tegro.market.web.model.TonWalletConnection
 import money.tegro.market.web.resource.ConnectionResource
 
-object ConnectionStore : RootStore<Connection>(Connection()) {
+object ConnectionStore : RootStore<Connection?>(null) {
+    object isConnected : RootStore<Boolean>(false) {
+        val load = handle { _ ->
+            ConnectionStore.current?.isConnected() ?: false
+        }
+    }
+
     private val localStorage = localStorageEntityOf(ConnectionResource, "connection")
 
     val load = handle { _ ->
         try {
             localStorage.load("connection")
         } catch (_: ResourceNotFoundException) {
-            Connection()
+            null
         }
-    }
 
+    }
     val connect = handle<Connection> { _, connection ->
         connection.also {
-            localStorage.addOrUpdate(it)
             PopOverStore.close()
         }
     }
 
     val connectTonWallet = handle { _ ->
-        (Connection.connectTonWallet() ?: Connection())
-            .also {
+        (TonWalletConnection.connect())
+            ?.also {
                 connect(it)
             }
     }
 
-    val disconnect = handle { old ->
-        Connection().also {
-            localStorage.delete(old)
-        }
+    val disconnect = handle { _ ->
+        current?.let { localStorage.delete(it) }
+        null
+    }
+
+    val requestTransaction = handle<TransactionRequestDTO> { _, request ->
+        current?.requestTransaction(request)
+        current
     }
 
     init {
+        data.drop(1) handledBy { connection ->
+            if (connection != null) {
+                localStorage.addOrUpdate(connection)
+            }
+
+            isConnected.load()
+        }
         load()
     }
 }

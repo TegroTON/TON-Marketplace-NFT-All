@@ -5,9 +5,15 @@ import dev.fritz2.core.href
 import dev.fritz2.core.src
 import dev.fritz2.core.target
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.mapNotNull
+import money.tegro.market.web.component.Button
 import money.tegro.market.web.component.Link
+import money.tegro.market.web.modal.TransferModal
+import money.tegro.market.web.model.ButtonKind
 import money.tegro.market.web.store.CollectionStore
+import money.tegro.market.web.store.ConnectionStore
 import money.tegro.market.web.store.ItemStore
+import money.tegro.market.web.store.PopOverStore
 
 
 fun RenderContext.Item(address: String) {
@@ -81,7 +87,16 @@ fun RenderContext.Item(address: String) {
                             }
                         }
 
-                        // Actions here
+                        div("grid grid-cols-1 gap-4") {
+                            ConnectionStore.data.mapNotNull { it?.walletAddress }.render { walletAddress ->
+                                if (walletAddress == item.address) { // Item is owned by the user
+                                    Button(ButtonKind.SECONDARY) {
+                                        clicks handledBy PopOverStore.transfer
+                                        +"Transfer Ownership"
+                                    }
+                                }
+                            }
+                        }
 
                         div("grid grid-cols-1 lg:grid-cols-2 gap-4") {
                             a("rounded-lg bg-soft px-6 py-4 flex-grow flex flex-col gap-2") {
@@ -201,5 +216,7 @@ fun RenderContext.Item(address: String) {
                 }
             }
         }
+
+        TransferModal(item)
     }
 }

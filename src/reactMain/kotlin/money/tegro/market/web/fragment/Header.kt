@@ -1,6 +1,7 @@
 package money.tegro.market.web.fragment
 
 import dev.fritz2.core.*
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import money.tegro.market.web.component.Button
 import money.tegro.market.web.component.Link
@@ -75,9 +76,9 @@ fun RenderContext.Header() {
                         }
                     }
 
-                    ConnectionStore.data
-                        .render { connection ->
-                            if (connection.isConnected()) {
+                    ConnectionStore.isConnected.data
+                        .render { isConnected ->
+                            if (isConnected) {
                                 div("relative order-2 lg:order-3") {
                                     val dropdownOpen = storeOf(false)
 
@@ -97,13 +98,15 @@ fun RenderContext.Header() {
                                                 .map { if (it) "lg:visible lg:opacity-100" else "lg:invisible lg:opacity-0" }
                                         )
 
-                                        li {
-                                            Link(
-                                                setOf("profile", connection.wallet.orEmpty()),
-                                                "px-6 py-3 block hover:lg:bg-dark-700"
-                                            ) {
-                                                i("fa-regular fa-user mr-4") { }
-                                                +"Profile"
+                                        ConnectionStore.data.filterNotNull().render { connection ->
+                                            li {
+                                                Link(
+                                                    setOf("profile", connection.walletAddress.orEmpty()),
+                                                    "px-6 py-3 block hover:lg:bg-dark-700"
+                                                ) {
+                                                    i("fa-regular fa-user mr-4") { }
+                                                    +"Profile"
+                                                }
                                             }
                                         }
 
