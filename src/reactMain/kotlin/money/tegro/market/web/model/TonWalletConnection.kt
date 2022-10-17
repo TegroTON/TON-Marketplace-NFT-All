@@ -37,7 +37,6 @@ data class TonWalletConnection(
                 .orEmpty()
 
         suspend fun sendTransaction(request: dynamic): Boolean {
-            console.log(request)
             return ton()?.send("ton_sendTransaction", arrayOf(request))?.await()?.unsafeCast<Boolean>() ?: false
         }
 

@@ -7,6 +7,7 @@ import dev.fritz2.core.target
 import kotlinx.coroutines.flow.filterNotNull
 import money.tegro.market.web.component.Button
 import money.tegro.market.web.component.Link
+import money.tegro.market.web.modal.CancelSaleModal
 import money.tegro.market.web.modal.TransferModal
 import money.tegro.market.web.model.ButtonKind
 import money.tegro.market.web.normalizeAddress
@@ -102,6 +103,7 @@ fun RenderContext.Item(address: String) {
                                 } else {
                                     if (connection?.walletAddress?.let(::normalizeAddress) == item.owner?.let(::normalizeAddress)) { // Item is owned by the user
                                         Button(ButtonKind.SECONDARY, "lg:col-span-2") {
+                                            clicks handledBy PopOverStore.cancelSale
                                             +"Cancel Sale"
                                         }
                                     } else {
@@ -234,5 +236,6 @@ fun RenderContext.Item(address: String) {
         }
 
         TransferModal(item)
+        CancelSaleModal(item)
     }
 }
