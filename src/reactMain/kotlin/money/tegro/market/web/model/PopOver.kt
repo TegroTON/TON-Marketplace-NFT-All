@@ -5,5 +5,6 @@ enum class PopOver {
     MENU,
     CONNECT,
     TRANSFER,
+    SELL,
     CANCEL_SALE,
 }

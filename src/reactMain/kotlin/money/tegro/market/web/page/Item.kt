@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import money.tegro.market.web.component.Button
 import money.tegro.market.web.component.Link
 import money.tegro.market.web.modal.CancelSaleModal
+import money.tegro.market.web.modal.SellModal
 import money.tegro.market.web.modal.TransferModal
 import money.tegro.market.web.model.ButtonKind
 import money.tegro.market.web.normalizeAddress
@@ -93,6 +94,7 @@ fun RenderContext.Item(address: String) {
                                 if (item.sale == null) { // Not on sale items
                                     if (connection?.walletAddress?.let(::normalizeAddress) == item.owner?.let(::normalizeAddress)) { // Item is owned by the user
                                         Button(ButtonKind.PRIMARY) {
+                                            clicks handledBy PopOverStore.sell
                                             +"Put On Sale"
                                         }
                                         Button(ButtonKind.SECONDARY) {
@@ -236,6 +238,7 @@ fun RenderContext.Item(address: String) {
         }
 
         TransferModal(item)
+        SellModal(item)
         CancelSaleModal(item)
     }
 }

@@ -1,7 +1,6 @@
 package money.tegro.market.controller
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
-import com.ionspin.kotlin.bignum.integer.BigInteger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
 import money.tegro.market.contract.op.item.ItemOp
@@ -159,11 +158,11 @@ class APIv1Controller(
     override suspend fun sellItem(
         @PathVariable item: String,
         @RequestParam(required = true) seller: String,
-        price: BigInteger,
+        price: String,
     ): TransactionRequestDTO {
         val itemAddress = MsgAddressInt(item)
         val sellerAddress = MsgAddressInt(seller)
-        val priceBigInt = BigInt(price.toString())
+        val priceBigInt = BigInt(price)
 
         val royalty = itemRepository.getRoyalty(itemAddress)
         val marketplaceFee =
@@ -186,9 +185,9 @@ class APIv1Controller(
 
         return TransactionRequestDTO(
             dest = item,
-            value = (marketplaceProperties.saleInitializationFee
-                    + marketplaceProperties.itemTransferFee
-                    + marketplaceProperties.networkFee).amount.value.toBigInteger(),
+            value = (marketplaceProperties.saleInitializationFee.amount.value
+                    + marketplaceProperties.itemTransferFee.amount.value
+                    + marketplaceProperties.networkFee.amount.value).toBigInteger(),
             stateInit = null,
             text = "NFT put up for sale",
             payload = CellBuilder.createCell {

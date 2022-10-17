@@ -1,6 +1,5 @@
 package money.tegro.market.operations
 
-import com.ionspin.kotlin.bignum.integer.BigInteger
 import kotlinx.coroutines.flow.Flow
 import money.tegro.market.dto.CollectionDTO
 import money.tegro.market.dto.ItemDTO
@@ -24,7 +23,7 @@ interface APIv1Operations {
     suspend fun sellItem(
         item: String,
         seller: String,
-        price: BigInteger,
+        price: String,
     ): TransactionRequestDTO
 
     fun listProfileOwnedItems(profile: String, drop: Int?, take: Int?): Flow<ItemDTO>
