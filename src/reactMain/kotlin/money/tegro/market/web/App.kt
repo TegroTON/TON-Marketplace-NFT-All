@@ -8,6 +8,7 @@ import money.tegro.market.web.modal.ConnectModal
 import money.tegro.market.web.page.Collection
 import money.tegro.market.web.page.Index
 import money.tegro.market.web.page.Item
+import money.tegro.market.web.page.Profile
 import money.tegro.market.web.route.AppRouter
 
 fun RenderContext.app() {
@@ -18,6 +19,7 @@ fun RenderContext.app() {
             "" -> Index()
             "collection" -> Collection(route.last())
             "item" -> Item(route.last())
+            "profile" -> Profile(route.last())
             else -> div { +"Not Found" }
         }
     }

@@ -100,9 +100,10 @@ fun RenderContext.Item(address: String) {
                         }
 
                         div("grid grid-cols-1 lg:grid-cols-2 gap-4") {
-                            a("rounded-lg bg-soft px-6 py-4 flex-grow flex flex-col gap-2") {
-                                href("/profile/${item.owner}")
-
+                            Link(
+                                setOf("profile", item.owner.orEmpty()),
+                                "rounded-lg bg-soft px-6 py-4 flex-grow flex flex-col gap-2"
+                            ) {
                                 h4("font-raleway text-sm text-gray-500") {
                                     +"Owner"
                                 }

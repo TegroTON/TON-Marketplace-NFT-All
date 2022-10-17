@@ -1,7 +1,9 @@
 package money.tegro.market.web.modal
 
-import dev.fritz2.core.*
-import kotlinx.coroutines.flow.combine
+import dev.fritz2.core.RenderContext
+import dev.fritz2.core.placeholder
+import dev.fritz2.core.type
+import dev.fritz2.core.values
 import kotlinx.coroutines.flow.map
 import money.tegro.market.dto.ItemDTO
 import money.tegro.market.web.component.Button
@@ -35,11 +37,12 @@ fun RenderContext.TransferModal(item: ItemDTO) =
                 }
 
                 form("flex flex-col gap-4") {
-                    val newOwner = storeOf("")
                     input("p-3 w-full rounded-xl bg-dark-900") {
                         type("text")
                         placeholder("Enter Address")
-                        changes.values() handledBy newOwner.update
+                        changes.values().map { newOwner ->
+                            Triple(item.address, newOwner, item.owner)
+                        } handledBy ItemTransferStore.load
                     }
 
                     ul("flex flex-col gap-2") {
@@ -72,9 +75,7 @@ fun RenderContext.TransferModal(item: ItemDTO) =
                     }
 
                     Button(ButtonKind.PRIMARY) {
-                        clicks.combine(newOwner.data) { _, nOwner ->
-                            Triple(item.address, nOwner, item.owner)
-                        } handledBy ItemTransferStore.request
+                        clicks handledBy ItemTransferStore.request
                         +"Transfer Ownership"
                     }
                 }

@@ -216,5 +216,21 @@ class APIv1Controller(
         )
     }
 
+    @RequestMapping("/api/v1/profile/{profile}/items/owned")
+    override fun listProfileOwnedItems(
+        @PathVariable profile: String,
+        @RequestParam drop: Int?,
+        @RequestParam take: Int?
+    ): Flow<ItemDTO> =
+        itemRepository.listItemsOwnedBy(MsgAddressInt(profile))
+            .mapNotNull { address ->
+                try {
+                    getItem(address.toRaw())
+                } catch (_: Exception) {
+                    null
+                }
+            }
+            .dropTake(drop, take)
+
     companion object : KLogging()
 }

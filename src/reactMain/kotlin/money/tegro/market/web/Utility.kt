@@ -11,6 +11,13 @@ fun BigInteger.formatTON() = this.toString()
                 it.takeLast(9).padStart(9, '0').dropLastWhile { it == '0' }
     }
 
+fun isValidAddress(address: String) = try {
+    parseAddress(address)
+    true
+} catch (_: Exception) {
+    false
+}
+
 fun parseAddress(address: String): Pair<Int, ByteArray> {
     if (address.contains(':')) {
         require(address.substringAfter(':').length == 32 * 2)

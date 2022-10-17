@@ -26,4 +26,6 @@ interface APIv1Operations {
         seller: String,
         price: BigInteger,
     ): TransactionRequestDTO
+
+    fun listProfileOwnedItems(profile: String, drop: Int?, take: Int?): Flow<ItemDTO>
 }
