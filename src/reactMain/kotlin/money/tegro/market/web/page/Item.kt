@@ -10,6 +10,7 @@ import money.tegro.market.web.component.Button
 import money.tegro.market.web.component.Link
 import money.tegro.market.web.modal.TransferModal
 import money.tegro.market.web.model.ButtonKind
+import money.tegro.market.web.normalizeAddress
 import money.tegro.market.web.store.CollectionStore
 import money.tegro.market.web.store.ConnectionStore
 import money.tegro.market.web.store.ItemStore
@@ -89,7 +90,7 @@ fun RenderContext.Item(address: String) {
 
                         div("grid grid-cols-1 gap-4") {
                             ConnectionStore.data.mapNotNull { it?.walletAddress }.render { walletAddress ->
-                                if (walletAddress == item.address) { // Item is owned by the user
+                                if (normalizeAddress(walletAddress) == item.owner?.let(::normalizeAddress)) { // Item is owned by the user
                                     Button(ButtonKind.SECONDARY) {
                                         clicks handledBy PopOverStore.transfer
                                         +"Transfer Ownership"
@@ -112,7 +113,7 @@ fun RenderContext.Item(address: String) {
                                     }
 
                                     h4("flex-grow text-lg") {
-                                        +(item.owner?.take(12)?.plus("...") ?: "Owner")
+                                        +(item.owner?.let(::normalizeAddress)?.take(12)?.plus("...") ?: "Owner")
                                     }
 
                                     i("fa-solid fa-angle-right") { }
@@ -161,7 +162,7 @@ fun RenderContext.Item(address: String) {
                                         }
 
                                         span("flex-grow text-right") {
-                                            +(item.address.take(12).plus("..."))
+                                            +(normalizeAddress(item.address).take(12).plus("..."))
                                         }
 
                                         i("fa-solid fa-angle-right") {}
@@ -179,7 +180,7 @@ fun RenderContext.Item(address: String) {
                                             }
 
                                             span("flex-grow text-right") {
-                                                +item.sale.take(12).plus("...")
+                                                +normalizeAddress(item.sale).take(12).plus("...")
                                             }
 
                                             i("fa-solid fa-angle-right") { }

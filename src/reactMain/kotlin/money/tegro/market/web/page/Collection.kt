@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import money.tegro.market.web.component.Button
 import money.tegro.market.web.component.Link
 import money.tegro.market.web.model.ButtonKind
+import money.tegro.market.web.normalizeAddress
 import money.tegro.market.web.store.CollectionItemsStore
 import money.tegro.market.web.store.CollectionStore
 
@@ -53,6 +54,7 @@ fun RenderContext.Collection(address: String) {
                             +"Created by "
                             span("text-yellow") {
                                 +(collection.owner
+                                    ?.let(::normalizeAddress)
                                     ?.let { it.take(6) + "..." + it.takeLast(6) } ?: "...")
                             }
                         }
@@ -79,7 +81,7 @@ fun RenderContext.Collection(address: String) {
                             }
 
                             p {
-                                +collection.address.take(12).plus("...")
+                                +normalizeAddress(collection.address).take(12).plus("...")
                             }
                         }
                     }
