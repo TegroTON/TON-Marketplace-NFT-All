@@ -56,9 +56,10 @@ class ItemRepository(
 
     fun listItemsOwnedBy(owner: MsgAddress) =
         listAll()
-            .mapNotNull { address -> getContract(address)?.let { address to it.owner } }
-            .filter { (_, itemOwner) -> itemOwner == owner }
-            .map { it.first }
+            .filter { address ->
+                getContract(address)?.owner == owner ||
+                        getItemSale(address)?.owner == owner
+            }
 
     private val contractCache =
         caffeineBuilder<MsgAddressInt, Optional<ItemContract>>().build()

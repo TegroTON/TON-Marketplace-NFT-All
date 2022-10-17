@@ -5,7 +5,6 @@ import dev.fritz2.core.href
 import dev.fritz2.core.src
 import dev.fritz2.core.target
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.mapNotNull
 import money.tegro.market.web.component.Button
 import money.tegro.market.web.component.Link
 import money.tegro.market.web.modal.TransferModal
@@ -88,12 +87,27 @@ fun RenderContext.Item(address: String) {
                             }
                         }
 
-                        div("grid grid-cols-1 gap-4") {
-                            ConnectionStore.data.mapNotNull { it?.walletAddress }.render { walletAddress ->
-                                if (normalizeAddress(walletAddress) == item.owner?.let(::normalizeAddress)) { // Item is owned by the user
-                                    Button(ButtonKind.SECONDARY) {
-                                        clicks handledBy PopOverStore.transfer
-                                        +"Transfer Ownership"
+                        div("grid grid-cols-1 lg:grid-cols-2 gap-4") {
+                            ConnectionStore.data.render { connection ->
+                                if (item.sale == null) { // Not on sale items
+                                    if (connection?.walletAddress?.let(::normalizeAddress) == item.owner?.let(::normalizeAddress)) { // Item is owned by the user
+                                        Button(ButtonKind.PRIMARY) {
+                                            +"Put On Sale"
+                                        }
+                                        Button(ButtonKind.SECONDARY) {
+                                            clicks handledBy PopOverStore.transfer
+                                            +"Transfer Ownership"
+                                        }
+                                    }
+                                } else {
+                                    if (connection?.walletAddress?.let(::normalizeAddress) == item.owner?.let(::normalizeAddress)) { // Item is owned by the user
+                                        Button(ButtonKind.SECONDARY, "lg:col-span-2") {
+                                            +"Cancel Sale"
+                                        }
+                                    } else {
+                                        Button(ButtonKind.PRIMARY, "lg:col-span-2") {
+                                            +"Buy Item"
+                                        }
                                     }
                                 }
                             }
