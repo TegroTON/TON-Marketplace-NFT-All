@@ -7,6 +7,8 @@ import dev.fritz2.core.target
 import kotlinx.coroutines.flow.filterNotNull
 import money.tegro.market.web.component.Button
 import money.tegro.market.web.component.Link
+import money.tegro.market.web.formatTON
+import money.tegro.market.web.modal.BuyModal
 import money.tegro.market.web.modal.CancelSaleModal
 import money.tegro.market.web.modal.SellModal
 import money.tegro.market.web.modal.TransferModal
@@ -89,6 +91,27 @@ fun RenderContext.Item(address: String) {
                             }
                         }
 
+                        if (item.sale != null) {
+                            div("flex flex-col gap-4 rounded-lg bg-soft px-6 py-4") {
+                                div("flex uppercase items-center") {
+                                    span("flex-grow font-raleway text-xl") {
+                                        +"Price"
+                                    }
+                                    span("text-3xl") {
+                                        +(item.fullPrice?.formatTON() ?: "N/A").plus(" TON")
+                                    }
+                                }
+                                div("flex text-gray-500") {
+                                    span("flex-grow") {
+                                        +"Plus a network fee of"
+                                    }
+                                    span {
+                                        +item.minimalGasFee.formatTON().plus(" TON")
+                                    }
+                                }
+                            }
+                        }
+
                         div("grid grid-cols-1 lg:grid-cols-2 gap-4") {
                             ConnectionStore.data.render { connection ->
                                 if (item.sale == null) { // Not on sale items
@@ -110,6 +133,7 @@ fun RenderContext.Item(address: String) {
                                         }
                                     } else {
                                         Button(ButtonKind.PRIMARY, "lg:col-span-2") {
+                                            clicks handledBy PopOverStore.buy
                                             +"Buy Item"
                                         }
                                     }
@@ -240,5 +264,6 @@ fun RenderContext.Item(address: String) {
         TransferModal(item)
         SellModal(item)
         CancelSaleModal(item)
+        BuyModal(item)
     }
 }

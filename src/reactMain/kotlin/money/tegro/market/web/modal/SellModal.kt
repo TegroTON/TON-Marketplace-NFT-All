@@ -158,7 +158,7 @@ fun RenderContext.SellModal(item: ItemDTO) =
                     Button(ButtonKind.PRIMARY) {
                         clicks.combine(ItemSaleRequestStore.data) { _, a -> a }
                             .filterNotNull() handledBy ConnectionStore.requestTransaction
-                        +"Transfer Ownership"
+                        +"Put Item For Sale"
                     }
                 }
             }

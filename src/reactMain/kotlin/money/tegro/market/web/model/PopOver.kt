@@ -7,4 +7,5 @@ enum class PopOver {
     TRANSFER,
     SELL,
     CANCEL_SALE,
+    BUY,
 }

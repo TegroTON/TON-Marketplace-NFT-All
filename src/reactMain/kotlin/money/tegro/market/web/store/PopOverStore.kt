@@ -9,5 +9,6 @@ object PopOverStore : RootStore<PopOver>(PopOver.NONE) {
     val transfer = handle { if (current != PopOver.TRANSFER) PopOver.TRANSFER else PopOver.NONE }
     val sell = handle { if (current != PopOver.SELL) PopOver.SELL else PopOver.NONE }
     val cancelSale = handle { if (current != PopOver.CANCEL_SALE) PopOver.CANCEL_SALE else PopOver.NONE }
+    val buy = handle { if (current != PopOver.BUY) PopOver.BUY else PopOver.NONE }
     val close = handle { PopOver.NONE }
 }
