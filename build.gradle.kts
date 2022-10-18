@@ -16,7 +16,7 @@ repositories {
 }
 
 kotlin {
-    jvm("spring") {
+    jvm("server") {
         withJava()
 
         compilations.all {
@@ -26,14 +26,12 @@ kotlin {
             }
         }
     }
-    js("react", IR) {
+    js("web", IR) {
         binaries.executable()
         browser {
             commonWebpackConfig {
                 devServer?.port = 8081
                 cssSupport.enabled = true
-                outputFileName = "index.js"
-                outputPath = File(buildDir, "processedResources/spring/main/static")
             }
         }
     }
@@ -50,19 +48,7 @@ kotlin {
             }
         }
 
-        val reactMain by getting {
-            dependencies {
-                dependsOn(commonMain)
-                implementation("dev.fritz2:core:1.0-RC1")
-                implementation("org.jetbrains.kotlin-wrappers:kotlin-extensions:1.0.1-pre.399")
-
-                implementation(npm("tailwindcss", "3.1.8"))
-                implementation(devNpm("postcss", "^8.4.17"))
-                implementation(devNpm("postcss-loader", "7.0.1"))
-                implementation(devNpm("autoprefixer", "10.4.12"))
-            }
-        }
-        val springMain by getting {
+        val serverMain by getting {
             dependencies {
                 dependsOn(commonMain)
 
@@ -89,11 +75,25 @@ kotlin {
                 compileOnly("org.springframework.boot:spring-boot-configuration-processor")
             }
         }
+
+        val webMain by getting {
+            dependencies {
+                dependsOn(commonMain)
+
+                implementation("dev.fritz2:core:1.0-RC1")
+                implementation("org.jetbrains.kotlin-wrappers:kotlin-extensions:1.0.1-pre.399")
+
+                implementation(npm("tailwindcss", "3.1.8"))
+                implementation(devNpm("postcss", "^8.4.17"))
+                implementation(devNpm("postcss-loader", "7.0.1"))
+                implementation(devNpm("autoprefixer", "10.4.12"))
+            }
+        }
     }
 }
 
-tasks.getByName<Copy>("springProcessResources") {
-    from(tasks.getByName("reactBrowserDistribution")) {
+tasks.getByName<Copy>("serverProcessResources") {
+    from(tasks.getByName("webBrowserDistribution")) {
         into("static")
     }
 }
