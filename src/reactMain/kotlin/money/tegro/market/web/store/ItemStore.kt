@@ -8,7 +8,7 @@ import money.tegro.market.web.resource.ItemResource
 
 object ItemStore : RootStore<ItemDTO?>(null) {
     private val rest =
-        restEntityOf(ItemResource, http("http://localhost:8080/api/v1/item"), initialId = "")
+        restEntityOf(ItemResource, http("/api/v1/item"), initialId = "")
 
     val load = handle<String> { _, address ->
         rest.load(address).also {

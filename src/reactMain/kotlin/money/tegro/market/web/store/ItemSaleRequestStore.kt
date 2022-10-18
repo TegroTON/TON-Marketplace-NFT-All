@@ -10,7 +10,7 @@ import money.tegro.market.web.resource.TransactionRequestResource
 
 object ItemSaleRequestStore : RootStore<TransactionRequestDTO?>(null) {
     private val rest =
-        restEntityOf(TransactionRequestResource, http("http://localhost:8080/api/v1/item"), initialId = "")
+        restEntityOf(TransactionRequestResource, http("/api/v1/item"), initialId = "")
 
     val load = handle<Triple<String, String, BigInteger>> { _, (item, seller, price) ->
         try {

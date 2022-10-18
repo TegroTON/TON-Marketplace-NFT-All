@@ -10,7 +10,7 @@ object TopCollectionsStore : RootStore<List<CollectionDTO>>(emptyList()) {
     private val rest =
         restQueryOf<CollectionDTO, String, Unit>(
             CollectionResource,
-            http("http://localhost:8080/api/v1/collections/top?take=9"),
+            http("/api/v1/collections/top?take=9"),
             initialId = ""
         )
 

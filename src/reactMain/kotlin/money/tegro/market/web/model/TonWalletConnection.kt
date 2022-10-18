@@ -42,6 +42,7 @@ data class TonWalletConnection(
 
         suspend fun connect() =
             requestWallets().firstOrNull()?.let {
+                console.log(it)
                 TonWalletConnection(it.address, it.publicKey)
             }
     }

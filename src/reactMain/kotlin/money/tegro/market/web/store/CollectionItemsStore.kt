@@ -10,7 +10,7 @@ object CollectionItemsStore : RootStore<List<ItemDTO>>(emptyList()) {
     private val rest =
         restQueryOf<ItemDTO, String, String>(
             ItemResource,
-            http("http://localhost:8080/api/v1/collection/"),
+            http("/api/v1/collection/"),
             initialId = ""
         ) {
             get("$it/items?take=25")
