@@ -1,29 +1,31 @@
 package money.tegro.market.metadata
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import com.fasterxml.jackson.databind.ser.std.ByteArraySerializer
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.ktor.client.*
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import mu.KLogging
-import org.springframework.web.reactive.function.client.WebClient
 import org.ton.cell.Cell
+import org.ton.crypto.Base64ByteArraySerializer
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+@Serializable
 data class ItemMetadata(
-    override val uri: String?,
-    override val name: String?,
-    override val description: String?,
-    override val image: String?,
-    @JsonSerialize(using = ByteArraySerializer::class)
-    override val image_data: ByteArray?,
+    override val uri: String? = null,
+    override val name: String? = null,
+    override val description: String? = null,
+    override val image: String? = null,
+    @Serializable(with = Base64ByteArraySerializer::class)
+    override val image_data: ByteArray? = null,
     val attributes: List<ItemMetadataAttribute>? = null,
 ) : Metadata {
     companion object : KLogging() {
-        private val mapper by lazy { jacksonObjectMapper() }
+        private val json = Json {
+            ignoreUnknownKeys = true
+        }
 
         @JvmStatic
-        suspend fun of(content: Cell, webClient: WebClient = WebClient.create()): ItemMetadata =
-            mapper.convertValue(Metadata.of(content, webClient), ItemMetadata::class.java)
+        suspend fun of(content: Cell, httpClient: HttpClient = HttpClient {}): ItemMetadata =
+            json.decodeFromString(Metadata.of(content, httpClient))
     }
 }
 

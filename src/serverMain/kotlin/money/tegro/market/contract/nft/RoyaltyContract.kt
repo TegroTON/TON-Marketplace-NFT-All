@@ -2,7 +2,6 @@ package money.tegro.market.contract.nft
 
 import money.tegro.market.toRaw
 import mu.KLogging
-import net.logstash.logback.argument.StructuredArguments.kv
 import org.ton.api.exception.TvmException
 import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.block.AddrStd
@@ -32,7 +31,7 @@ data class RoyaltyContract(
                     "royalty_params"
                 )
             } catch (e: TvmException) {
-                logger.warn("could not get royalty information for {}", kv("address", address.toRaw()), e)
+                logger.warn(e) { "could not get royalty information for address=${address.toRaw()}" }
                 null
             }
                 ?.toMutableVmStack()
@@ -44,7 +43,7 @@ data class RoyaltyContract(
                             destination = it.popSlice().loadTlb(MsgAddress),
                         )
                     } catch (e: ClassCastException) {
-                        logger.warn("could not get royalty information for {}", kv("address", address.toRaw()), e)
+                        logger.warn(e) { "could not get royalty information for address=${address.toRaw()}" }
                         null
                     }
                 }

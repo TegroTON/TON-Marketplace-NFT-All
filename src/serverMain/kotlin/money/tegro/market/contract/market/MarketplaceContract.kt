@@ -1,7 +1,7 @@
 package money.tegro.market.contract.market
 
 import money.tegro.market.contract.nft.SaleContract
-import money.tegro.market.properties.MarketplaceProperties
+import money.tegro.market.server.properties.MarketplaceProperties
 import mu.KLogging
 import org.ton.bigint.BigInt
 import org.ton.block.*
@@ -15,10 +15,10 @@ import org.ton.tlb.storeTlb
 
 data class MarketplaceContract(
     val owner: MsgAddress,
-    val authorizationPublicKey: ByteArray = Ed25519.publicKey(MarketplaceProperties().marketplaceAuthorizationPrivateKey),
+    val authorizationPublicKey: ByteArray = Ed25519.publicKey(MarketplaceProperties().authorizationPrivateKey),
     val saleCode: Cell = SaleContract.CODE,
-    val saleDeployAmount: BigInt = BigInt(MarketplaceProperties().saleInitializationFee.amount.value),
-    val transferAmount: BigInt = BigInt(MarketplaceProperties().itemTransferFee.amount.value),
+    val saleDeployAmount: BigInt = BigInt(MarketplaceProperties().saleFee.amount.value),
+    val transferAmount: BigInt = BigInt(MarketplaceProperties().transferFee.amount.value),
     val code: Cell = CODE,
     val workchain: Int = 0,
 ) {

@@ -1,18 +1,33 @@
 plugins {
-    kotlin("multiplatform") version "1.7.10"
-    kotlin("plugin.serialization") version "1.7.10"
-    kotlin("plugin.spring") version "1.7.10"
-
-    id("org.springframework.boot") version "2.7.0"
-    id("io.spring.dependency-management") version "1.0.14.RELEASE"
+    application
+    kotlin("multiplatform") version "1.7.20"
+    kotlin("plugin.serialization") version "1.7.20"
+    id("io.ktor.plugin") version "2.1.2"
 }
 
+val ktorVersion = "2.1.2"
+val kodeinVersion = "7.15.0"
+
 group = "money.tegro"
-version = "0.5.0"
+version = "0.6.0"
 
 repositories {
     mavenCentral()
     maven("https://jitpack.io")
+}
+dependencies {
+    implementation("io.ktor:ktor-server-call-logging-jvm:2.1.2")
+    implementation("io.ktor:ktor-server-call-id-jvm:2.1.2")
+}
+
+application {
+    mainClass.set("money.tegro.market.server.ApplicationKt")
+
+    val isDevelopment: Boolean = project.ext.has("development")
+    applicationDefaultJvmArgs = listOf(
+        "-Dio.ktor.development=$isDevelopment",
+        "-Dorg.slf4j.simpleLogger.defaultLogLevel=${if (isDevelopment) "debug" else "info"}"
+    )
 }
 
 kotlin {
@@ -22,10 +37,10 @@ kotlin {
         compilations.all {
             kotlinOptions {
                 jvmTarget = "17"
-                freeCompilerArgs = listOf("-Xjsr305=strict")
             }
         }
     }
+
     js("web", IR) {
         binaries.executable()
         browser {
@@ -35,44 +50,71 @@ kotlin {
             }
         }
     }
+
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation("org.jetbrains.kotlin:atomicfu:1.6.21")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
+                // Dependency Injection
+                implementation("org.kodein.di:kodein-di:$kodeinVersion")
 
-                implementation("com.ionspin.kotlin:bignum:0.3.7")
+                // Logging
+                implementation("io.github.microutils:kotlin-logging:3.0.2")
+
+                // Coroutines
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+
+                // Cache
+                implementation("io.github.reactivecircus.cache4k:cache4k:0.8.0")
+
+                // Serialization
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
+                implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
                 implementation("com.ionspin.kotlin:bignum-serialization-kotlinx:0.3.7")
-                implementation("io.github.microutils:kotlin-logging:2.1.23")
+
+                // Big integers
+                implementation("com.ionspin.kotlin:bignum:0.3.7")
+
+                // Ktor
+                implementation("io.ktor:ktor-client-core:$ktorVersion")
+                implementation("io.ktor:ktor-client-resources:$ktorVersion")
+
+//                implementation("org.jetbrains.kotlin:atomicfu:1.6.21")
             }
         }
 
         val serverMain by getting {
+            val exposedVersion = "0.40.1"
+            val ktorVersion = "2.1.2"
+
             dependencies {
                 dependsOn(commonMain)
 
-                implementation("net.logstash.logback:logstash-logback-encoder:7.2")
+                implementation("org.kodein.di:kodein-di-framework-ktor-server-jvm:$kodeinVersion")
+                implementation("org.kodein.di:kodein-di-framework-ktor-server-controller-jvm:$kodeinVersion")
+
+                runtimeOnly("org.slf4j:slf4j-simple:2.0.3")
+
+                // Ton
                 implementation("com.github.andreypfau.ton-kotlin:ton-kotlin:aef363d8c5")
 
-                implementation("org.springframework.boot:spring-boot-starter-actuator")
-                implementation("org.springframework.boot:spring-boot-starter-amqp")
-                implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
-                implementation("org.springframework.boot:spring-boot-starter-jdbc")
-                implementation("org.springframework.boot:spring-boot-starter-webflux")
-                implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-                implementation("com.github.ben-manes.caffeine:caffeine")
-                implementation("com.sksamuel.aedile:aedile-core:1.0.2")
-                implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
-                implementation("org.flywaydb:flyway-core")
-                implementation("org.jetbrains.kotlin:kotlin-reflect")
-                implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
-                implementation("org.springframework.boot:spring-boot-devtools")
-                runtimeOnly("io.micrometer:micrometer-registry-prometheus")
-                runtimeOnly("org.postgresql:postgresql")
-                implementation("org.postgresql:r2dbc-postgresql")
-                compileOnly("org.springframework.boot:spring-boot-configuration-processor")
+                // Database access
+                implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
+                implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
+                implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+                implementation("org.jetbrains.exposed:exposed-kotlin-datetime:$exposedVersion")
+                runtimeOnly("org.postgresql:postgresql:42.5.0")
+
+                // Ktor
+                implementation("io.ktor:ktor-client-cio:$ktorVersion")
+                implementation("io.ktor:ktor-server-core:$ktorVersion")
+                implementation("io.ktor:ktor-server-config-yaml:$ktorVersion")
+                implementation("io.ktor:ktor-server-host-common:$ktorVersion")
+                implementation("io.ktor:ktor-server-partial-content:$ktorVersion")
+                implementation("io.ktor:ktor-server-resources:$ktorVersion")
+                implementation("io.ktor:ktor-server-call-logging:$ktorVersion")
+                implementation("io.ktor:ktor-server-call-id:$ktorVersion")
+                implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
+                implementation("io.ktor:ktor-server-cio:$ktorVersion")
             }
         }
 
@@ -80,9 +122,12 @@ kotlin {
             dependencies {
                 dependsOn(commonMain)
 
+                // Framework
                 implementation("dev.fritz2:core:1.0-RC1")
+
                 implementation("org.jetbrains.kotlin-wrappers:kotlin-extensions:1.0.1-pre.399")
 
+                // Tailwindcss and loaders
                 implementation(npm("tailwindcss", "3.1.8"))
                 implementation(devNpm("postcss", "^8.4.17"))
                 implementation(devNpm("postcss-loader", "7.0.1"))
@@ -92,8 +137,8 @@ kotlin {
     }
 }
 
-tasks.getByName<Copy>("serverProcessResources") {
-    from(tasks.getByName("webBrowserDistribution")) {
-        into("static")
-    }
-}
+//tasks.getByName<Copy>("serverProcessResources") {
+//    from(tasks.getByName("webBrowserDistribution")) {
+//        into("static")
+//    }
+//}

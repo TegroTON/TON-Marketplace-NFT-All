@@ -2,7 +2,6 @@ package money.tegro.market.contract.nft
 
 import money.tegro.market.toRaw
 import mu.KLogging
-import net.logstash.logback.argument.StructuredArguments.kv
 import org.ton.api.exception.TvmException
 import org.ton.api.tonnode.TonNodeBlockIdExt
 import org.ton.bigint.BigInt
@@ -35,7 +34,7 @@ data class SaleContract(
                     "get_sale_data"
                 )
             } catch (e: TvmException) {
-                logger.warn("could not get sale information for {}", kv("address", address.toRaw()), e)
+                logger.warn(e) { "could not get sale information for address=${address.toRaw()}" }
                 null
             }
                 ?.toMutableVmStack()
@@ -51,7 +50,7 @@ data class SaleContract(
                             royalty = it.popNumber().toBigInt(),
                         )
                     } catch (e: ClassCastException) {
-                        logger.warn("could not get sale information for {}", kv("address", address.toRaw()), e)
+                        logger.warn(e) { "could not get sale information for address=${address.toRaw()}" }
                         null
                     }
                 }

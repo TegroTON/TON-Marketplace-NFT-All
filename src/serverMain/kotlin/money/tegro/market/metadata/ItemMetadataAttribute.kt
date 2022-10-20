@@ -1,11 +1,11 @@
 package money.tegro.market.metadata
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.annotation.JsonProperty
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+@Serializable
 data class ItemMetadataAttribute(
-    @JsonProperty("trait_type")
+    @SerialName("trait_type")
     val trait: String,
     val value: String
 )
