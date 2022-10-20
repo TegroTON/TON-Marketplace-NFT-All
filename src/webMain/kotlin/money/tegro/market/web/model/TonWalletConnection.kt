@@ -3,7 +3,7 @@ package money.tegro.market.web.model
 import kotlinx.browser.window
 import kotlinx.coroutines.await
 import kotlinx.serialization.Serializable
-import money.tegro.market.dto.TransactionRequestDTO
+import money.tegro.market.model.TransactionRequestModel
 import money.tegro.market.web.jsObject
 import money.tegro.market.web.wallet.TonWalletProvider
 import org.w3c.dom.get
@@ -16,7 +16,7 @@ data class TonWalletConnection(
     override suspend fun isConnected(): Boolean =
         requestWallets().any { it.address == walletAddress && it.publicKey == publicKey }
 
-    override suspend fun requestTransaction(request: TransactionRequestDTO): Boolean =
+    override suspend fun requestTransaction(request: TransactionRequestModel): Boolean =
         sendTransaction(jsObject {
             to = request.dest
             value = request.value.toString()

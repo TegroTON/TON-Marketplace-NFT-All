@@ -7,6 +7,8 @@ import kotlinx.serialization.Serializable
 @Resource("/items")
 data class ItemResource(
     val sort: Sort = Sort.ALL,
+    val drop: Int? = null,
+    val take: Int? = null,
 ) {
     @Serializable
     enum class Sort {
@@ -41,7 +43,24 @@ data class ItemResource(
     data class ByCollection(
         val parent: ItemResource = ItemResource(),
         val collection: String,
-        val sort: Sort = Sort.INDEX
+        val sortItems: Sort = Sort.INDEX,
+        val drop: Int? = null,
+        val take: Int? = null,
+    ) {
+        @Serializable
+        enum class Sort {
+            INDEX,
+        }
+    }
+
+    @Serializable
+    @Resource("/profile/{collection}")
+    data class ByOwner(
+        val parent: ItemResource = ItemResource(),
+        val owner: String,
+        val sortItems: Sort = Sort.INDEX,
+        val drop: Int? = null,
+        val take: Int? = null,
     ) {
         @Serializable
         enum class Sort {

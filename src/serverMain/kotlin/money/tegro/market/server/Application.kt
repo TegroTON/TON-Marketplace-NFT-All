@@ -9,6 +9,7 @@ import io.ktor.server.cio.*
 import io.ktor.server.plugins.callid.*
 import io.ktor.server.plugins.callloging.*
 import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.request.*
 import io.ktor.server.resources.*
 import io.ktor.server.routing.*
@@ -29,6 +30,7 @@ import money.tegro.market.server.repository.ApprovalRepository
 import money.tegro.market.server.repository.CollectionRepository
 import money.tegro.market.server.repository.ItemRepository
 import money.tegro.market.server.repository.RoyaltyRepository
+import money.tegro.market.server.service.ReferenceBlockService
 import money.tegro.market.server.table.ApprovalTable
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -66,6 +68,14 @@ fun Application.module() {
             callId.isNotEmpty()
         }
     }
+    install(CORS) {
+        allowMethod(HttpMethod.Options)
+        allowMethod(HttpMethod.Put)
+        allowMethod(HttpMethod.Delete)
+        allowMethod(HttpMethod.Patch)
+        allowHeader(HttpHeaders.Authorization)
+        anyHost() // @TODO: Don't do this in production if possible. Try to limit it.
+    }
 
     di {
         bindSingleton { MarketplaceProperties.fromEnvironment(environment) }
@@ -85,12 +95,14 @@ fun Application.module() {
                 instance()
             )
         }
+        bindSingleton { ReferenceBlockService(di) }
 
         bindSingleton {
             Database.connect(
                 url = environment.config.propertyOrNull("database.url")?.getString()
                     ?: "jdbc:postgresql://localhost:5432/market",
-                driver = environment.config.propertyOrNull("database.driver")?.getString() ?: "org.postgresql.Driver",
+                driver = environment.config.propertyOrNull("database.driver")?.getString()
+                    ?: "org.postgresql.Driver",
                 user = environment.config.propertyOrNull("database.user")?.getString() ?: "postgres",
                 password = environment.config.propertyOrNull("database.password")?.getString() ?: "postgrespw",
             ).also { db ->

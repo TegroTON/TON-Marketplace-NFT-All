@@ -53,6 +53,8 @@ fun toUserFriendly(address: Pair<Int, ByteArray>) =
 
 fun normalizeAddress(address: String): String = toUserFriendly(parseAddress(address))
 
+fun normalizeAndShorten(address: String): String = normalizeAddress(address).let { it.take(6) + "..." + it.takeLast(6) }
+
 inline fun jsObject(init: dynamic.() -> Unit): dynamic {
     val o = js("{}")
     init(o)

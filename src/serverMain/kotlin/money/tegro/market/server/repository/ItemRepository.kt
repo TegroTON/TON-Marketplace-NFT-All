@@ -14,6 +14,7 @@ import money.tegro.market.model.ItemModel
 import money.tegro.market.model.OrdinaryItemModel
 import money.tegro.market.model.SaleItemModel
 import money.tegro.market.server.properties.MarketplaceProperties
+import money.tegro.market.server.service.ReferenceBlockService
 import money.tegro.market.server.toBigInteger
 import money.tegro.market.toRaw
 import mu.KLogging
@@ -39,6 +40,8 @@ class ItemRepository(override val di: DI) : DIAware {
     private val contractCache: Cache<MsgAddressInt, Optional<ItemContract>> by instance()
     private val metadataCache: Cache<MsgAddressInt, Optional<ItemMetadata>> by instance()
     private val saleCache: Cache<MsgAddressInt, Optional<SaleContract>> by instance()
+
+    private val referenceBlockService: ReferenceBlockService by instance()
 
     @OptIn(FlowPreview::class)
     fun all() =
@@ -121,7 +124,7 @@ class ItemRepository(override val di: DI) : DIAware {
             } else {
                 try {
                     logger.debug { "fetching item address=${item.toRaw()}" }
-                    ItemContract.of(item as AddrStd, liteClient, liteClient.getLastBlockId())
+                    ItemContract.of(item as AddrStd, liteClient, referenceBlockService.last())
                         .let { Optional.of(it) }
                 } catch (e: TvmException) {
                     logger.warn(e) { "could not get item information for address=${item.toRaw()}" }
@@ -147,7 +150,7 @@ class ItemRepository(override val di: DI) : DIAware {
                                         contract.index,
                                         contract.individual_content,
                                         liteClient,
-                                        liteClient.getLastBlockId(),
+                                        referenceBlockService.last()
                                     )
                                 }
                                 ?: contract.individual_content) // Standalone items
@@ -164,7 +167,7 @@ class ItemRepository(override val di: DI) : DIAware {
                 Optional.empty()
             } else {
                 logger.debug { "fetching sale address=${sale.toRaw()}" }
-                SaleContract.of(sale as AddrStd, liteClient, liteClient.getLastBlockId())
+                SaleContract.of(sale as AddrStd, liteClient, referenceBlockService.last())
                     .let { Optional.ofNullable(it) }
             }
         }

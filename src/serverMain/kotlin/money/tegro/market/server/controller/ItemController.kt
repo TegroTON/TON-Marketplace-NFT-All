@@ -4,10 +4,12 @@ import io.ktor.server.application.*
 import io.ktor.server.resources.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.coroutines.flow.toList
 import money.tegro.market.contract.op.item.ItemOp
 import money.tegro.market.contract.op.item.TransferOp
 import money.tegro.market.model.TransactionRequestModel
 import money.tegro.market.resource.ItemResource
+import money.tegro.market.server.dropTake
 import money.tegro.market.server.properties.MarketplaceProperties
 import money.tegro.market.server.repository.ItemRepository
 import money.tegro.market.server.toBigInteger
@@ -35,6 +37,8 @@ class ItemController(application: Application) : AbstractDIController(applicatio
             call.respond(
                 when (request.sort) {
                     ItemResource.Sort.ALL -> itemRepository.all()
+                        .dropTake(request.drop, request.take)
+                        .toList()
                 }
             )
         }
@@ -47,10 +51,25 @@ class ItemController(application: Application) : AbstractDIController(applicatio
             call.respond(
                 itemRepository.belongingTo(MsgAddressInt(request.collection))
                     .let {
-                        when (request.sort) {
-                            ItemResource.ByCollection.Sort.INDEX -> {} // Already sorted by index
+                        when (request.sortItems) {
+                            ItemResource.ByCollection.Sort.INDEX -> it // Already sorted by index
                         }
                     }
+                    .dropTake(request.drop, request.take)
+                    .toList()
+            )
+        }
+
+        get<ItemResource.ByOwner> { request ->
+            call.respond(
+                itemRepository.ownedBy(MsgAddressInt(request.owner))
+                    .let {
+                        when (request.sortItems) {
+                            ItemResource.ByOwner.Sort.INDEX -> it // Already sorted by index
+                        }
+                    }
+                    .dropTake(request.drop, request.take)
+                    .toList()
             )
         }
 

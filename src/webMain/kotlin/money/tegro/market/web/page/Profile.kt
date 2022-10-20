@@ -1,13 +1,20 @@
 package money.tegro.market.web.page
 
 import dev.fritz2.core.RenderContext
+import dev.fritz2.core.RootStore
 import dev.fritz2.core.alt
 import dev.fritz2.core.src
+import io.ktor.client.call.*
+import io.ktor.client.plugins.resources.*
+import kotlinx.coroutines.flow.filterNotNull
+import money.tegro.market.model.ItemModel
+import money.tegro.market.resource.ItemResource
+import money.tegro.market.web.card.ItemCard
+import money.tegro.market.web.client
 import money.tegro.market.web.component.Button
-import money.tegro.market.web.component.ItemCard
 import money.tegro.market.web.model.ButtonKind
 import money.tegro.market.web.normalizeAddress
-import money.tegro.market.web.store.ProfileItemsStore
+import money.tegro.market.web.normalizeAndShorten
 
 fun RenderContext.Profile(address: String) {
     section("min-w-full m-0 -mb-6 bg-gray-900") {
@@ -35,7 +42,7 @@ fun RenderContext.Profile(address: String) {
                         }
 
                         h1("text-3xl font-raleway") {
-                            +normalizeAddress(address).take(12).plus("...")
+                            +normalizeAndShorten(address)
                         }
                     }
                 }
@@ -51,7 +58,7 @@ fun RenderContext.Profile(address: String) {
                         }
 
                         p {
-                            +normalizeAddress(address).take(12).plus("...")
+                            +normalizeAndShorten(address)
                         }
                     }
                 }
@@ -65,11 +72,20 @@ fun RenderContext.Profile(address: String) {
                 }
 
                 div("grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4") { // Collection Body
-                    ProfileItemsStore.query(address)
-                    ProfileItemsStore.data
-                        .renderEach { item ->
-                            ItemCard(item)
+                    val itemsStore = object : RootStore<List<ItemModel>?>(null) {
+                        val load = handle { _ ->
+                            client.get(ItemResource.ByOwner(owner = address))
+                                .body<List<ItemModel>>()
                         }
+
+                        init {
+                            load()
+                        }
+                    }
+
+                    itemsStore.data
+                        .filterNotNull()
+                        .renderEach { ItemCard(it) }
                 }
             }
         }

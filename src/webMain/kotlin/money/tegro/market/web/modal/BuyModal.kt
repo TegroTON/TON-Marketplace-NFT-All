@@ -1,11 +1,10 @@
 package money.tegro.market.web.modal
 
-import com.ionspin.kotlin.bignum.integer.BigInteger
 import dev.fritz2.core.RenderContext
 import dev.fritz2.core.type
 import kotlinx.coroutines.flow.map
-import money.tegro.market.dto.ItemDTO
-import money.tegro.market.dto.TransactionRequestDTO
+import money.tegro.market.model.SaleItemModel
+import money.tegro.market.model.TransactionRequestModel
 import money.tegro.market.web.component.Button
 import money.tegro.market.web.formatTON
 import money.tegro.market.web.model.ButtonKind
@@ -13,7 +12,7 @@ import money.tegro.market.web.model.PopOver
 import money.tegro.market.web.store.ConnectionStore
 import money.tegro.market.web.store.PopOverStore
 
-fun RenderContext.BuyModal(item: ItemDTO) =
+fun RenderContext.BuyModal(item: SaleItemModel) =
     div("top-0 left-0 z-40 w-full h-full bg-dark-900/[.6]") {
         className(PopOverStore.data.map { if (it == PopOver.BUY) "fixed" else "hidden" })
 
@@ -43,7 +42,7 @@ fun RenderContext.BuyModal(item: ItemDTO) =
                                 +"Item Price"
                             }
                             span {
-                                +(item.fullPrice?.formatTON()?.plus(" TON") ?: "N/A")
+                                +item.fullPrice.formatTON().plus(" TON")
                             }
                         }
 
@@ -52,7 +51,7 @@ fun RenderContext.BuyModal(item: ItemDTO) =
                                 +"Network Fee"
                             }
                             span {
-                                +(item.minimalGasFee.formatTON() + " TON")
+                                +item.networkFee.formatTON().plus(" TON")
                             }
                         }
                     }
@@ -62,15 +61,15 @@ fun RenderContext.BuyModal(item: ItemDTO) =
                             +"You'll pay"
                         }
                         span {
-                            +(item.fullPrice?.plus(item.minimalGasFee) ?: BigInteger.ZERO).formatTON().plus(" TON")
+                            +item.fullPrice.plus(item.networkFee).formatTON().plus(" TON")
                         }
                     }
 
                     Button(ButtonKind.PRIMARY) {
                         clicks.map {
-                            TransactionRequestDTO(
+                            TransactionRequestModel(
                                 dest = requireNotNull(item.sale),
-                                value = item.fullPrice?.plus(item.minimalGasFee) ?: BigInteger.ZERO,
+                                value = item.fullPrice.plus(item.networkFee),
                                 stateInit = null,
                                 text = "buy",
                                 payload = null,

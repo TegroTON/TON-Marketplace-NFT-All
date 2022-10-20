@@ -8,6 +8,7 @@ import money.tegro.market.contract.nft.CollectionContract
 import money.tegro.market.metadata.CollectionMetadata
 import money.tegro.market.model.CollectionModel
 import money.tegro.market.model.ImageModel
+import money.tegro.market.server.service.ReferenceBlockService
 import money.tegro.market.toRaw
 import mu.KLogging
 import org.kodein.di.DI
@@ -30,6 +31,8 @@ class CollectionRepository(
     private val contractCache: Cache<MsgAddressInt, Optional<CollectionContract>> by instance()
     private val metadataCache: Cache<MsgAddressInt, Optional<CollectionMetadata>> by instance()
     private val itemAddressCache: Cache<Pair<MsgAddressInt, ULong>, Optional<MsgAddress>> by instance()
+
+    private val referenceBlockService: ReferenceBlockService by instance()
 
     fun all() =
         approvalRepository.allApproved()
@@ -60,7 +63,7 @@ class CollectionRepository(
             if (approvalRepository.isApproved(collection)) { // Has been explicitly approved
                 try {
                     logger.debug { "fetching collection address=${collection.toRaw()}" }
-                    CollectionContract.of(collection as AddrStd, liteClient, liteClient.getLastBlockId())
+                    CollectionContract.of(collection as AddrStd, liteClient, referenceBlockService.last())
                         .let { Optional.of(it) }
                 } catch (e: TvmException) {
                     logger.warn(e) { "could not get collection information for address=${collection.toRaw()}" }
@@ -99,7 +102,7 @@ class CollectionRepository(
                         collection as AddrStd,
                         index,
                         liteClient,
-                        liteClient.getLastBlockId()
+                        referenceBlockService.last()
                     )
                         .let { Optional.of(it) }
                 } catch (e: TvmException) {

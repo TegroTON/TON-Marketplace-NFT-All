@@ -1,11 +1,16 @@
 package money.tegro.market.web.page
 
 import dev.fritz2.core.*
+import io.ktor.client.call.*
+import io.ktor.client.plugins.resources.*
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import money.tegro.market.model.CollectionModel
+import money.tegro.market.resource.CollectionResource
+import money.tegro.market.web.client
 import money.tegro.market.web.component.Button
 import money.tegro.market.web.component.Link
 import money.tegro.market.web.model.ButtonKind
-import money.tegro.market.web.store.TopCollectionsStore
 
 fun RenderContext.Index() {
     main("mx-3 lg:mx-6") {
@@ -175,7 +180,19 @@ fun RenderContext.Index() {
                 }
 
                 div("pt-4 flex flex-wrap gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3") {
-                    TopCollectionsStore.data
+                    val topCollectionsStore = object : RootStore<List<CollectionModel>?>(null) {
+                        val load = handle { _ ->
+                            client.get(CollectionResource(sort = CollectionResource.Sort.TOP))
+                                .body<List<CollectionModel>>()
+                        }
+
+                        init {
+                            load()
+                        }
+                    }
+
+                    topCollectionsStore.data
+                        .filterNotNull()
                         .map { it.withIndex().toList() }
                         .renderEach { (index, collection) ->
                             Link(

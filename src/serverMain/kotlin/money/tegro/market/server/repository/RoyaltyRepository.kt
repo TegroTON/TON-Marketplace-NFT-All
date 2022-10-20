@@ -2,6 +2,7 @@ package money.tegro.market.server.repository
 
 import io.github.reactivecircus.cache4k.Cache
 import money.tegro.market.contract.nft.RoyaltyContract
+import money.tegro.market.server.service.ReferenceBlockService
 import money.tegro.market.toRaw
 import mu.KLogging
 import org.kodein.di.DI
@@ -19,6 +20,8 @@ class RoyaltyRepository(override val di: DI) : DIAware {
 
     private val cache: Cache<MsgAddressInt, Optional<RoyaltyContract>> by instance()
 
+    private val referenceBlockService: ReferenceBlockService by instance()
+
     suspend fun get(royalty: MsgAddressInt): RoyaltyContract? =
         cache.get(royalty) {
             if (approvalRepository.isDisapproved(royalty)) { // Explicitly forbiddenden
@@ -26,7 +29,7 @@ class RoyaltyRepository(override val di: DI) : DIAware {
                 Optional.empty()
             } else {
                 logger.debug { "fetching royalty address=${royalty.toRaw()}" }
-                RoyaltyContract.of(royalty as AddrStd, liteClient, liteClient.getLastBlockId())
+                RoyaltyContract.of(royalty as AddrStd, liteClient, referenceBlockService.last())
                     .let { Optional.ofNullable(it) }
             }
         }

@@ -7,6 +7,8 @@ import kotlinx.serialization.Serializable
 @Resource("/collections")
 data class CollectionResource(
     val sort: Sort = Sort.ALL,
+    val drop: Int? = null,
+    val take: Int? = null,
 ) {
     @Serializable
     enum class Sort {

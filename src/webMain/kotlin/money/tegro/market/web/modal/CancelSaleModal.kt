@@ -3,8 +3,8 @@ package money.tegro.market.web.modal
 import dev.fritz2.core.RenderContext
 import dev.fritz2.core.type
 import kotlinx.coroutines.flow.map
-import money.tegro.market.dto.ItemDTO
-import money.tegro.market.dto.TransactionRequestDTO
+import money.tegro.market.model.SaleItemModel
+import money.tegro.market.model.TransactionRequestModel
 import money.tegro.market.web.component.Button
 import money.tegro.market.web.formatTON
 import money.tegro.market.web.model.ButtonKind
@@ -12,7 +12,7 @@ import money.tegro.market.web.model.PopOver
 import money.tegro.market.web.store.ConnectionStore
 import money.tegro.market.web.store.PopOverStore
 
-fun RenderContext.CancelSaleModal(item: ItemDTO) =
+fun RenderContext.CancelSaleModal(item: SaleItemModel) =
     div("top-0 left-0 z-40 w-full h-full bg-dark-900/[.6]") {
         className(PopOverStore.data.map { if (it == PopOver.CANCEL_SALE) "fixed" else "hidden" })
 
@@ -42,7 +42,7 @@ fun RenderContext.CancelSaleModal(item: ItemDTO) =
                                 +"Network Fee"
                             }
                             span {
-                                +(item.minimalGasFee.formatTON() + " TON")
+                                +item.networkFee.formatTON().plus(" TON")
                             }
                         }
                     }
@@ -52,15 +52,15 @@ fun RenderContext.CancelSaleModal(item: ItemDTO) =
                             +"You'll pay"
                         }
                         span {
-                            +(item.minimalGasFee).formatTON().plus(" TON")
+                            +item.networkFee.formatTON().plus(" TON")
                         }
                     }
 
                     Button(ButtonKind.PRIMARY) {
                         clicks.map {
-                            TransactionRequestDTO(
+                            TransactionRequestModel(
                                 dest = requireNotNull(item.sale),
-                                value = item.minimalGasFee,
+                                value = item.networkFee,
                                 stateInit = null,
                                 text = "cancel",
                                 payload = null,

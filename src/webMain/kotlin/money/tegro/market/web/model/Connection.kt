@@ -1,7 +1,7 @@
 package money.tegro.market.web.model
 
 import kotlinx.serialization.Serializable
-import money.tegro.market.dto.TransactionRequestDTO
+import money.tegro.market.model.TransactionRequestModel
 
 @Serializable
 sealed interface Connection {
@@ -10,5 +10,5 @@ sealed interface Connection {
 
     suspend fun isConnected(): Boolean
 
-    suspend fun requestTransaction(request: TransactionRequestDTO): Boolean
+    suspend fun requestTransaction(request: TransactionRequestModel): Boolean
 }

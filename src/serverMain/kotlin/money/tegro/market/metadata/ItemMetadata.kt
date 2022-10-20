@@ -2,6 +2,7 @@ package money.tegro.market.metadata
 
 import io.ktor.client.*
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import mu.KLogging
@@ -24,8 +25,13 @@ data class ItemMetadata(
         }
 
         @JvmStatic
-        suspend fun of(content: Cell, httpClient: HttpClient = HttpClient {}): ItemMetadata =
-            json.decodeFromString(Metadata.of(content, httpClient))
+        suspend fun of(content: Cell, httpClient: HttpClient = HttpClient {}): ItemMetadata? =
+            try {
+                json.decodeFromString(Metadata.of(content, httpClient))
+            } catch (e: SerializationException) {
+                logger.warn(e) { "could not load item metadata from $content" }
+                null
+            }
     }
 }
 

@@ -3,19 +3,23 @@ package money.tegro.market.web.modal
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.integer.BigInteger
 import dev.fritz2.core.*
+import io.ktor.client.call.*
+import io.ktor.client.plugins.resources.*
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
-import money.tegro.market.dto.ItemDTO
+import money.tegro.market.model.OrdinaryItemModel
+import money.tegro.market.model.TransactionRequestModel
+import money.tegro.market.resource.ItemResource
+import money.tegro.market.web.client
 import money.tegro.market.web.component.Button
 import money.tegro.market.web.formatTON
 import money.tegro.market.web.model.ButtonKind
 import money.tegro.market.web.model.PopOver
 import money.tegro.market.web.store.ConnectionStore
-import money.tegro.market.web.store.ItemSaleRequestStore
 import money.tegro.market.web.store.PopOverStore
 
-fun RenderContext.SellModal(item: ItemDTO) =
+fun RenderContext.SellModal(item: OrdinaryItemModel) =
     div("top-0 left-0 z-40 w-full h-full bg-dark-900/[.6]") {
         className(PopOverStore.data.map { if (it == PopOver.SELL) "fixed" else "hidden" })
 
@@ -39,36 +43,32 @@ fun RenderContext.SellModal(item: ItemDTO) =
                 }
 
                 form("flex flex-col gap-4") {
-                    val price = storeOf(BigInteger.ZERO)
+                    val priceStore = storeOf(BigInteger.ZERO)
                     val royaltyAmount = storeOf(BigInteger.ZERO)
                     val marketplaceFeeAmount = storeOf(BigInteger.ZERO)
                     val fullPrice = storeOf(BigInteger.ZERO)
 
-                    price.data.map {
+                    priceStore.data.map {
                         BigDecimal.fromBigInteger(it)
-                            .multiply(item.royaltyPercentage)
+                            .multiply(item.royaltyValue)
                             .toBigInteger()
                     } handledBy royaltyAmount.update
 
-                    price.data.map {
+                    priceStore.data.map {
                         BigDecimal.fromBigInteger(it)
-                            .multiply(item.marketplaceFeePercentage)
+                            .multiply(item.marketplaceFeeValue)
                             .toBigInteger()
                     } handledBy marketplaceFeeAmount.update
 
-                    price.data.combine(royaltyAmount.data) { a, b -> a + b }
+                    priceStore.data.combine(royaltyAmount.data) { a, b -> a + b }
                         .combine(marketplaceFeeAmount.data) { a, b -> a + b } handledBy fullPrice.update
-
-                    price.data.map {
-                        Triple(item.address, requireNotNull(item.owner), it)
-                    } handledBy ItemSaleRequestStore.load
 
                     input("p-3 w-full rounded-xl bg-dark-900") {
                         type("number")
                         placeholder("Enter Price")
                         changes.values().map { price ->
                             BigDecimal.parseString(price).multiply(BigDecimal.fromInt(1_000_000_000)).toBigInteger()
-                        } handledBy price.update
+                        } handledBy priceStore.update
                     }
 
                     ul("flex flex-col gap-2") {
@@ -110,7 +110,7 @@ fun RenderContext.SellModal(item: ItemDTO) =
                         span("flex-grow") {
                             +"You'll get"
                         }
-                        price.data.render {
+                        priceStore.data.render {
                             span {
                                 +it.formatTON().plus(" TON")
                             }
@@ -156,8 +156,19 @@ fun RenderContext.SellModal(item: ItemDTO) =
                     }
 
                     Button(ButtonKind.PRIMARY) {
-                        clicks.combine(ItemSaleRequestStore.data) { _, a -> a }
-                            .filterNotNull() handledBy ConnectionStore.requestTransaction
+                        clicks // On click
+                            .combine(ConnectionStore.data) { _, b -> b } // Get connection state
+                            .filterNotNull() // Make sure we're connected
+                            .combine(priceStore.data) { connection, price -> connection.walletAddress to price }
+                            .map { (seller, price) ->
+                                client.get(
+                                    ItemResource.ByAddress.Sell(
+                                        parent = ItemResource.ByAddress(address = item.address),
+                                        seller = seller,
+                                        price = price.toString(),
+                                    )
+                                ).body<TransactionRequestModel>()
+                            } handledBy ConnectionStore.requestTransaction
                         +"Put Item For Sale"
                     }
                 }

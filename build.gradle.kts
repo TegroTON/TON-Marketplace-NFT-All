@@ -18,6 +18,7 @@ repositories {
 dependencies {
     implementation("io.ktor:ktor-server-call-logging-jvm:2.1.2")
     implementation("io.ktor:ktor-server-call-id-jvm:2.1.2")
+    implementation("io.ktor:ktor-server-cors-jvm:2.1.2")
 }
 
 application {
@@ -113,8 +114,9 @@ kotlin {
                 implementation("io.ktor:ktor-server-resources:$ktorVersion")
                 implementation("io.ktor:ktor-server-call-logging:$ktorVersion")
                 implementation("io.ktor:ktor-server-call-id:$ktorVersion")
-                implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
                 implementation("io.ktor:ktor-server-cio:$ktorVersion")
+                implementation("io.ktor:ktor-server-cors:$ktorVersion")
+                implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
             }
         }
 
@@ -124,6 +126,10 @@ kotlin {
 
                 // Framework
                 implementation("dev.fritz2:core:1.0-RC1")
+
+                implementation("io.ktor:ktor-client-core:$ktorVersion")
+                implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+                implementation("io.ktor:ktor-client-js:$ktorVersion")
 
                 implementation("org.jetbrains.kotlin-wrappers:kotlin-extensions:1.0.1-pre.399")
 

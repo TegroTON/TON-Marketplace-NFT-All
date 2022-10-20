@@ -1,8 +1,5 @@
 package money.tegro.market
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.take
 import org.ton.block.*
 import org.ton.boc.BagOfCells
 import org.ton.cell.Cell
@@ -32,9 +29,3 @@ fun Block.accountBlockAddresses() =
     this.extra.account_blocks.toMap()
         .keys
         .map { AddrStd(this.info.shard.workchain_id, it.account_addr) }
-
-fun <T> Flow<T>.dropTake(drop: Int?, take: Int?): Flow<T> =
-    this.drop(maxOf(drop ?: 0, 0))
-        .take(minOf(maxOf(take ?: 1, 0), FLOW_DROPTAKE_TAKE_MAX))
-
-const val FLOW_DROPTAKE_TAKE_MAX = 128

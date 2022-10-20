@@ -1,19 +1,23 @@
 package money.tegro.market.web.modal
 
-import dev.fritz2.core.RenderContext
-import dev.fritz2.core.placeholder
-import dev.fritz2.core.type
-import dev.fritz2.core.values
+import dev.fritz2.core.*
+import io.ktor.client.call.*
+import io.ktor.client.plugins.resources.*
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import money.tegro.market.dto.ItemDTO
+import kotlinx.coroutines.flow.mapNotNull
+import money.tegro.market.model.OrdinaryItemModel
+import money.tegro.market.model.TransactionRequestModel
+import money.tegro.market.resource.ItemResource
+import money.tegro.market.web.client
 import money.tegro.market.web.component.Button
 import money.tegro.market.web.formatTON
 import money.tegro.market.web.model.ButtonKind
 import money.tegro.market.web.model.PopOver
-import money.tegro.market.web.store.ItemTransferStore
+import money.tegro.market.web.store.ConnectionStore
 import money.tegro.market.web.store.PopOverStore
 
-fun RenderContext.TransferModal(item: ItemDTO) =
+fun RenderContext.TransferModal(item: OrdinaryItemModel) =
     div("top-0 left-0 z-40 w-full h-full bg-dark-900/[.6]") {
         className(PopOverStore.data.map { if (it == PopOver.TRANSFER) "fixed" else "hidden" })
 
@@ -37,12 +41,12 @@ fun RenderContext.TransferModal(item: ItemDTO) =
                 }
 
                 form("flex flex-col gap-4") {
+                    val newOwnerStore = storeOf<String?>(null)
+
                     input("p-3 w-full rounded-xl bg-dark-900") {
                         type("text")
                         placeholder("Enter Address")
-                        changes.values().map { newOwner ->
-                            Triple(item.address, newOwner, item.owner)
-                        } handledBy ItemTransferStore.load
+                        changes.values() handledBy newOwnerStore.update
                     }
 
                     ul("flex flex-col gap-2") {
@@ -75,7 +79,20 @@ fun RenderContext.TransferModal(item: ItemDTO) =
                     }
 
                     Button(ButtonKind.PRIMARY) {
-                        clicks handledBy ItemTransferStore.request
+                        clicks // On click
+                            .combine(ConnectionStore.data) { _, b -> b } // Get connection state
+                            .combine(newOwnerStore.data) { connection, newOwner -> connection to newOwner }
+                            .mapNotNull { (a, b) -> a?.let { connection -> b?.let { newOwner -> connection to newOwner } } }
+                            .map { (connection, newOwner) ->
+                                client.get(
+                                    ItemResource.ByAddress.Transfer(
+                                        parent = ItemResource.ByAddress(address = item.address),
+                                        newOwner = newOwner,
+                                        response = connection.walletAddress,
+                                    )
+                                ).body<TransactionRequestModel>()
+                            } handledBy ConnectionStore.requestTransaction
+
                         +"Transfer Ownership"
                     }
                 }
