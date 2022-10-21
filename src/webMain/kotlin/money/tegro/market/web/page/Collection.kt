@@ -4,9 +4,11 @@ import dev.fritz2.core.*
 import dev.fritz2.tracking.tracker
 import io.ktor.client.call.*
 import io.ktor.client.plugins.resources.*
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import money.tegro.market.model.CollectionModel
 import money.tegro.market.model.ItemModel
 import money.tegro.market.resource.CollectionResource
@@ -113,8 +115,7 @@ fun RenderContext.Collection(address: String) {
                     }
                 }
 
-                val sortReverseStore = storeOf(false)
-                val sortStore = storeOf(ItemResource.ByRelation.Sort.INDEX)
+                val sortStore = storeOf(false to ItemResource.ByRelation.Sort.INDEX)
                 div("flex items-center relative") {
                     ul("overflow-auto flex items-center flex-grow") { // Collection tabs
                         li {
@@ -124,45 +125,17 @@ fun RenderContext.Collection(address: String) {
                         }
                     }
 
-                    val dropdownOpen = storeOf(false)
-                    Button(ButtonKind.SOFT, "gap-2") {
-                        clicks.map { !dropdownOpen.current } handledBy dropdownOpen.update
-
-                        i("fa-regular") {
-                            sortReverseStore.data.map { if (it) "fa-arrow-down-z-a" else "fa-arrow-up-a-z" }
-                                .let(::className)
-                        }
-
-                        span {
-                            sortStore.data.renderText(this)
-                        }
-                    }
-
-                    ul("absolute rounded-lg bg-gray-900 block top-12 right-0 transition ease-in-out delay-150 duration-300") {
-                        dropdownOpen.data
-                            .map { if (it) "visible opacity-100" else "invisible opacity-0" }.let(::className)
+                    select("px-6 py-3 border border-border-soft rounded-lg bg-dark-700 text-white") {
+                        changes.values()
+                            .map { Json.decodeFromString<Pair<Boolean, ItemResource.ByRelation.Sort>>(it) } handledBy sortStore.update
 
                         ItemResource.ByRelation.Sort.values()
                             .flatMap { listOf(false to it, true to it) }
-                            .forEach { (reversed, sort) ->
-                                li {
-                                    button("px-6 py-3 flex items-center gap-2 hover:bg-dark-700") {
-                                        type("button")
-
-                                        clicks.map { reversed } handledBy sortReverseStore.update
-                                        clicks.map { sort } handledBy sortStore.update
-
-                                        if (reversed) {
-                                            i("fa-regular fa-arrow-down-z-a") {}
-                                        } else {
-                                            i("fa-regular fa-arrow-up-a-z") {}
-                                        }
-
-                                        span {
-                                            +sort.toString().lowercase().replaceFirstChar { it.uppercase() }
-                                                .plus(if (reversed) " - descending" else " - ascending")
-                                        }
-                                    }
+                            .mapIndexed { index, (reversed, sort) ->
+                                option() {
+                                    value(Json.encodeToString(reversed to sort))
+                                    +sort.toString().lowercase().replaceFirstChar { it.uppercase() }
+                                        .plus(if (reversed) " - High to Low" else " - Low to High")
                                 }
                             }
                     }
@@ -179,8 +152,8 @@ fun RenderContext.Collection(address: String) {
                                     ItemResource.ByRelation(
                                         address = address,
                                         relation = ItemResource.ByRelation.Relation.COLLECTION,
-                                        sortItems = sortStore.current,
-                                        sortReverse = sortReverseStore.current,
+                                        sortItems = sortStore.current.second,
+                                        sortReverse = sortStore.current.first,
                                         drop = itemsLoaded.current,
                                         take = 16
                                     )
@@ -192,7 +165,7 @@ fun RenderContext.Collection(address: String) {
                     }
                 }
 
-                sortReverseStore.data.combine(sortStore.data) { _, _ -> } handledBy {
+                sortStore.data handledBy {
                     // Reload items when sort changes
                     itemsLoaded.update(0)
                     itemsStore.update(null)
