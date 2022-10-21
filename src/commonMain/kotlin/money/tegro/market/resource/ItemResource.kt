@@ -39,32 +39,32 @@ data class ItemResource(
     }
 
     @Serializable
-    @Resource("/collection/{collection}")
-    data class ByCollection(
+    @Resource("/of/{address}")
+    data class ByRelation(
         val parent: ItemResource = ItemResource(),
-        val collection: String,
-        val sortItems: Sort = Sort.INDEX,
+        val address: String,
+        val relation: Relation = ByRelation.Relation.COLLECTION,
+        val sortItems: Sort? = null,
+        val sortReverse: Boolean? = null,
         val drop: Int? = null,
         val take: Int? = null,
     ) {
         @Serializable
-        enum class Sort {
-            INDEX,
+        enum class Relation {
+            COLLECTION,
+            OWNED,
         }
-    }
 
-    @Serializable
-    @Resource("/profile/{collection}")
-    data class ByOwner(
-        val parent: ItemResource = ItemResource(),
-        val owner: String,
-        val sortItems: Sort = Sort.INDEX,
-        val drop: Int? = null,
-        val take: Int? = null,
-    ) {
         @Serializable
         enum class Sort {
             INDEX,
+            PRICE,
         }
+
+        @Serializable
+        @Resource("/attributes")
+        data class Attributes(
+            val parent: ByRelation,
+        )
     }
 }

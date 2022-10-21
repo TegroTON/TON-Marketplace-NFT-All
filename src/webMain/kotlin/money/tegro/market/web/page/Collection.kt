@@ -4,6 +4,7 @@ import dev.fritz2.core.*
 import dev.fritz2.tracking.tracker
 import io.ktor.client.call.*
 import io.ktor.client.plugins.resources.*
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import money.tegro.market.model.CollectionModel
@@ -112,24 +113,78 @@ fun RenderContext.Collection(address: String) {
                     }
                 }
 
-                ul("overflow-auto flex items-center") { // Collection tabs
-                    li {
-                        Button(ButtonKind.SECONDARY, "rounded-none rounded-t-lg border-0 border-b") {
-                            +"Items"
+                val sortReverseStore = storeOf(false)
+                val sortStore = storeOf(ItemResource.ByRelation.Sort.INDEX)
+                div("flex items-center relative") {
+                    ul("overflow-auto flex items-center flex-grow") { // Collection tabs
+                        li {
+                            Button(ButtonKind.SECONDARY, "rounded-none rounded-t-lg border-0 border-b") {
+                                +"Items"
+                            }
                         }
+                    }
+
+                    val dropdownOpen = storeOf(false)
+                    Button(ButtonKind.SOFT, "gap-2") {
+                        clicks.map { !dropdownOpen.current } handledBy dropdownOpen.update
+
+                        sortReverseStore.data.render {
+                            if (it) {
+                                i("fa-regular fa-arrow-down-z-a") {}
+                            } else {
+                                i("fa-regular fa-arrow-up-a-z") {}
+                            }
+                        }
+                        span {
+                            sortStore.data.renderText()
+                        }
+                    }
+
+                    ul("absolute rounded-lg bg-gray-900 block top-12 right-0 transition ease-in-out delay-150 duration-300") {
+                        className(
+                            dropdownOpen.data
+                                .map { if (it) "visible opacity-100" else "invisible opacity-0" }
+                        )
+
+                        ItemResource.ByRelation.Sort.values()
+                            .flatMap { listOf(false to it, true to it) }
+                            .forEach { (reversed, sort) ->
+                                li {
+                                    button("px-6 py-3 flex items-center gap-2 hover:bg-dark-700") {
+                                        type("button")
+
+                                        clicks.map { reversed } handledBy sortReverseStore.update
+                                        clicks.map { sort } handledBy sortStore.update
+
+                                        if (reversed) {
+                                            i("fa-regular fa-arrow-down-z-a") {}
+                                        } else {
+                                            i("fa-regular fa-arrow-up-a-z") {}
+                                        }
+
+                                        span {
+                                            +sort.toString().lowercase().replaceFirstChar { it.uppercase() }
+                                                .plus(if (reversed) " - descending" else " - ascending")
+                                        }
+                                    }
+                                }
+                            }
                     }
                 }
 
+                val itemsLoaded = storeOf(0)
                 val itemsStore = object : RootStore<List<ItemModel>?>(null) {
-                    val itemsLoaded = storeOf(0)
                     val tracking = tracker()
 
                     val load = handle { last ->
                         tracking.track {
                             last.orEmpty().plus(
                                 client.get(
-                                    ItemResource.ByCollection(
-                                        collection = address,
+                                    ItemResource.ByRelation(
+                                        address = address,
+                                        relation = ItemResource.ByRelation.Relation.COLLECTION,
+                                        sortItems = sortStore.current,
+                                        sortReverse = sortReverseStore.current,
                                         drop = itemsLoaded.current,
                                         take = 16
                                     )
@@ -139,11 +194,16 @@ fun RenderContext.Collection(address: String) {
                                 .also { itemsLoaded.update(it.size) }
                         }
                     }
-
-                    init {
-                        load()
-                    }
                 }
+
+                sortReverseStore.data.combine(sortStore.data) { _, _ -> } handledBy {
+                    // Reload items when sort changes
+                    itemsLoaded.update(0)
+                    itemsStore.update(null)
+                    itemsStore.load()
+                }
+
+
                 div("grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4") { // Collection Body
                     itemsStore.data
                         .filterNotNull()

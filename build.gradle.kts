@@ -47,7 +47,10 @@ kotlin {
         browser {
             commonWebpackConfig {
                 devServer?.port = 8081
-                cssSupport.enabled = true
+                cssSupport {
+                    enabled = true
+                    mode = "extract"
+                }
             }
         }
     }

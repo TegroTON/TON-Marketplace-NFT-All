@@ -107,12 +107,12 @@ class ItemRepository(override val di: DI) : DIAware {
             }
         }
 
-    fun ownedBy(owner: MsgAddress) =
+    fun byOwner(owner: MsgAddress) =
         all()
             .filter { it.owner == owner.toRaw() }
 
 
-    fun belongingTo(collection: MsgAddressInt) =
+    fun byCollection(collection: MsgAddressInt) =
         collectionRepository.itemsOf(collection).mapNotNull { it.second as? MsgAddressInt }
             .mapNotNull { get(it) }
 

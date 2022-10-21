@@ -74,7 +74,12 @@ fun RenderContext.Profile(address: String) {
                 div("grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4") { // Collection Body
                     val itemsStore = object : RootStore<List<ItemModel>?>(null) {
                         val load = handle { _ ->
-                            client.get(ItemResource.ByOwner(owner = address))
+                            client.get(
+                                ItemResource.ByRelation(
+                                    address = address,
+                                    relation = ItemResource.ByRelation.Relation.OWNED
+                                )
+                            )
                                 .body<List<ItemModel>>()
                         }
 

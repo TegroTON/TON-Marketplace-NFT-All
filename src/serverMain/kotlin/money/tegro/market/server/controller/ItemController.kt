@@ -4,9 +4,12 @@ import io.ktor.server.application.*
 import io.ktor.server.resources.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import money.tegro.market.contract.op.item.ItemOp
 import money.tegro.market.contract.op.item.TransferOp
+import money.tegro.market.model.SaleItemModel
 import money.tegro.market.model.TransactionRequestModel
 import money.tegro.market.resource.ItemResource
 import money.tegro.market.server.dropTake
@@ -47,29 +50,42 @@ class ItemController(application: Application) : AbstractDIController(applicatio
             call.respond(requireNotNull(itemRepository.get(MsgAddressInt(request.address))))
         }
 
-        get<ItemResource.ByCollection> { request ->
+        get<ItemResource.ByRelation> { request ->
             call.respond(
-                itemRepository.belongingTo(MsgAddressInt(request.collection))
+                when (request.relation) {
+                    ItemResource.ByRelation.Relation.COLLECTION -> itemRepository.byCollection(MsgAddressInt(request.address))
+                    ItemResource.ByRelation.Relation.OWNED -> itemRepository.byOwner(MsgAddressInt(request.address))
+                }
+                    .toList() // Damn
                     .let {
                         when (request.sortItems) {
-                            ItemResource.ByCollection.Sort.INDEX -> it // Already sorted by index
+                            ItemResource.ByRelation.Sort.INDEX -> it
+                                .sortedBy { it.index }
+
+                            ItemResource.ByRelation.Sort.PRICE -> it
+                                .sortedBy { (it as? SaleItemModel)?.fullPrice }
+
+                            else -> it
                         }
                     }
+                    .let { if (request.sortReverse == true) it.reversed() else it }
+                    .asFlow()
                     .dropTake(request.drop, request.take)
                     .toList()
             )
         }
 
-        get<ItemResource.ByOwner> { request ->
+        get<ItemResource.ByRelation.Attributes> { request ->
             call.respond(
-                itemRepository.ownedBy(MsgAddressInt(request.owner))
-                    .let {
-                        when (request.sortItems) {
-                            ItemResource.ByOwner.Sort.INDEX -> it // Already sorted by index
-                        }
-                    }
-                    .dropTake(request.drop, request.take)
+                when (request.parent.relation) {
+                    ItemResource.ByRelation.Relation.COLLECTION -> itemRepository.byCollection(MsgAddressInt(request.parent.address))
+                    ItemResource.ByRelation.Relation.OWNED -> itemRepository.byOwner(MsgAddressInt(request.parent.address))
+                }
+                    .map { it.attributes }
                     .toList()
+                    .flatMap { it.asSequence() }
+                    .groupBy({ it.key }, { it.value })
+                    .mapValues { (_, values) -> values.toSet() }
             )
         }
 
