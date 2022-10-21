@@ -1,7 +1,6 @@
 package money.tegro.market.web.fragment
 
 import dev.fritz2.core.*
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import money.tegro.market.web.component.Button
 import money.tegro.market.web.component.Link
@@ -76,59 +75,58 @@ fun RenderContext.Header() {
                         }
                     }
 
-                    ConnectionStore.isConnected.data
-                        .render { isConnected ->
-                            if (isConnected) {
-                                div("relative order-2 lg:order-3") {
-                                    val dropdownOpen = storeOf(false)
+                    div("relative order-2 lg:order-3") {
+                        ConnectionStore.isConnected.data.map { if (it) "block" else "hidden" }.let(::className)
 
-                                    button {
-                                        type("button")
+                        val dropdownOpen = storeOf(false)
 
-                                        clicks.map { !dropdownOpen.current } handledBy dropdownOpen.update
+                        button {
+                            type("button")
 
-                                        img("rounded-full inline align-middle w-10 h-10") {
-                                            src("./assets/img/user-1.svg")
-                                        }
-                                    }
+                            clicks.map { !dropdownOpen.current } handledBy dropdownOpen.update
 
-                                    ul("relative block lg:right-full min-w-[240px] rounded-none mt-4 lg:bg-gray-900 lg:rounded-lg lg:absolute transition ease-in-out delay-150 duration-300") {
-                                        className(
-                                            dropdownOpen.data
-                                                .map { if (it) "lg:visible lg:opacity-100" else "lg:invisible lg:opacity-0" }
-                                        )
+                            img("rounded-full inline align-middle w-10 h-10") {
+                                src("./assets/img/user-1.svg")
+                            }
+                        }
 
-                                        ConnectionStore.data.filterNotNull().render { connection ->
-                                            li {
-                                                Link(
-                                                    setOf("profile", connection.walletAddress.orEmpty()),
-                                                    "px-6 py-3 block hover:lg:bg-dark-700"
-                                                ) {
-                                                    i("fa-regular fa-user mr-4") { }
-                                                    +"Profile"
-                                                }
-                                            }
-                                        }
+                        ul("relative block lg:right-full min-w-[240px] rounded-none mt-4 lg:bg-gray-900 lg:rounded-lg lg:absolute transition ease-in-out delay-150 duration-300") {
+                            dropdownOpen.data
+                                .map { if (it) "lg:visible lg:opacity-100" else "lg:invisible lg:opacity-0" }
+                                .let(::className)
 
-                                        li {
-                                            a("px-6 py-3 block hover:lg:bg-dark-700") {
-                                                clicks handledBy ConnectionStore.disconnect
-
-                                                i("fa-regular fa-link-simple-slash mr-4") { }
-                                                +"Disconnect"
-                                            }
-                                        }
-                                    }
+                            li {
+                                Link(
+                                    ConnectionStore.data
+                                        .map {
+                                            it?.walletAddress?.let { addr -> setOf("profile", addr) }
+                                                ?: setOf("profile")
+                                        },
+                                    "px-6 py-3 block hover:lg:bg-dark-700"
+                                ) {
+                                    i("fa-regular fa-user mr-4") { }
+                                    +"Profile"
                                 }
-                            } else {
-                                Button(ButtonKind.SOFT, "order-2 sticky bottom-4 left-0 w-full lg:w-auto") {
-                                    clicks handledBy PopOverStore.connect
+                            }
 
-                                    i("fa-regular fa-arrow-right-to-arc mr-4") {}
-                                    +"Connect"
+                            li {
+                                a("px-6 py-3 block hover:lg:bg-dark-700") {
+                                    clicks handledBy ConnectionStore.disconnect
+
+                                    i("fa-regular fa-link-simple-slash mr-4") { }
+                                    +"Disconnect"
                                 }
                             }
                         }
+                    }
+
+                    Button(ButtonKind.SOFT, "order-2 sticky bottom-4 left-0 w-full lg:w-auto") {
+                        ConnectionStore.isConnected.data.map { if (it) "hidden" else "block" }.let(::className)
+                        clicks handledBy PopOverStore.connect
+
+                        i("fa-regular fa-arrow-right-to-arc mr-4") {}
+                        +"Connect"
+                    }
                 }
             }
         }

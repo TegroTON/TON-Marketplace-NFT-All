@@ -9,7 +9,7 @@ fun RenderContext.Footer() {
     footer("pt-24 pb-12 px-4") {
         div("container relative mx-auto") {
             div("flex flex-wrap px-3 grid grid-cols-1 lg:grid-cols-3 gap-12") {
-                div("mb-12 lg:mb-0 mr-auto") {
+                div("mb-12 lg:mb-0") {
                     div("flex items-center mb-6") {
                         img("align-middle") {
                             alt("Libermall - NFT Marketplace")
@@ -33,7 +33,7 @@ fun RenderContext.Footer() {
                             """.trimIndent()
                         }
                     }
-                    div("flex gap-3") {
+                    div("flex flex-wrap gap-3") {
                         mapOf(
                             "fa-telegram" to "https://t.me/LiberMall",
                             "fa-twitter" to "https://twitter.com/LiberMallNFT",

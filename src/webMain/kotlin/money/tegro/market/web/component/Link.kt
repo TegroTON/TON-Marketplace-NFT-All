@@ -22,7 +22,7 @@ fun RenderContext.Link(
     content: HtmlTag<HTMLAnchorElement>.() -> Unit
 ): HtmlTag<HTMLAnchorElement> =
     a {
-        to.map { "/#" + it.joinToString("/") } handledBy ::href
+        to.map { "/#" + it.joinToString("/") }.let(::href)
         clicks.combine(to) { _, target -> target } handledBy AppRouter.navigate
 
         classes?.let { className(it) }

@@ -14,7 +14,7 @@ import money.tegro.market.web.store.PopOverStore
 
 fun RenderContext.ConnectModal() =
     div("top-0 left-0 z-40 w-full h-full bg-dark-900/[.6]") {
-        className(PopOverStore.data.map { if (it == PopOver.CONNECT) "fixed" else "hidden" })
+        PopOverStore.data.map { if (it == PopOver.CONNECT) "fixed" else "hidden" }.let(::className)
 
         div("mx-auto flex items-center relative w-auto max-w-lg min-h-screen") {
             div("bg-dark-700 rounded-3xl p-10 relative flex flex-col w-full h-full min-h-full gap-4") {

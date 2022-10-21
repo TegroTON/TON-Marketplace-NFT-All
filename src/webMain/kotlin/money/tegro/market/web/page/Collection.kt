@@ -33,9 +33,9 @@ fun RenderContext.Collection(address: String) {
         picture {
             img("w-full h-[340px] object-cover align-middle") {
                 collectionStore.data
-                    .map { it?.coverImage?.original ?: "./assets/img/profile-hero.jpg" } handledBy ::src
+                    .map { it?.coverImage?.original ?: "./assets/img/profile-hero.jpg" }.let(::src)
                 collectionStore.data
-                    .map { it?.name ?: "Collection Cover Image" } handledBy ::alt
+                    .map { it?.name ?: "Collection Cover Image" }.let(::alt)
             }
         }
     }
@@ -49,9 +49,9 @@ fun RenderContext.Collection(address: String) {
                             div { // Image
                                 img("w-full h-32 rounded-full object-cover align-middle") {
                                     collectionStore.data
-                                        .map { it?.image?.original ?: "./assets/img/user-1.svg" } handledBy ::src
+                                        .map { it?.image?.original ?: "./assets/img/user-1.svg" }.let(::src)
                                     collectionStore.data
-                                        .map { it?.name ?: "Collection Image" } handledBy ::alt
+                                        .map { it?.name ?: "Collection Image" }.let(::alt)
                                 }
                             }
 
@@ -61,14 +61,14 @@ fun RenderContext.Collection(address: String) {
                         h1("text-3xl font-raleway") {
                             collectionStore.data
                                 .map { it?.name ?: "..." }
-                                .renderText()
+                                .renderText(this)
                         }
 
                         div("text-gray-500") { // Collection description
                             p {
                                 collectionStore.data
                                     .map { it?.description.orEmpty() }
-                                    .renderText()
+                                    .renderText(this)
                             }
                         }
                     }
@@ -78,7 +78,7 @@ fun RenderContext.Collection(address: String) {
                         span("text-yellow") {
                             collectionStore.data
                                 .map { it?.owner?.let(::normalizeAndShorten) ?: "..." }
-                                .renderText()
+                                .renderText(this)
                         }
                     }
                 }
@@ -96,7 +96,7 @@ fun RenderContext.Collection(address: String) {
                         p("uppercase") {
                             collectionStore.data
                                 .map { it?.numberOfItems ?: "..." }
-                                .renderText()
+                                .renderText(this)
                         }
                     }
 
@@ -108,7 +108,7 @@ fun RenderContext.Collection(address: String) {
                         p {
                             collectionStore.data
                                 .map { it?.address?.let(::normalizeAndShorten) ?: "..." }
-                                .renderText()
+                                .renderText(this)
                         }
                     }
                 }
@@ -128,23 +128,19 @@ fun RenderContext.Collection(address: String) {
                     Button(ButtonKind.SOFT, "gap-2") {
                         clicks.map { !dropdownOpen.current } handledBy dropdownOpen.update
 
-                        sortReverseStore.data.render {
-                            if (it) {
-                                i("fa-regular fa-arrow-down-z-a") {}
-                            } else {
-                                i("fa-regular fa-arrow-up-a-z") {}
-                            }
+                        i("fa-regular") {
+                            sortReverseStore.data.map { if (it) "fa-arrow-down-z-a" else "fa-arrow-up-a-z" }
+                                .let(::className)
                         }
+
                         span {
-                            sortStore.data.renderText()
+                            sortStore.data.renderText(this)
                         }
                     }
 
                     ul("absolute rounded-lg bg-gray-900 block top-12 right-0 transition ease-in-out delay-150 duration-300") {
-                        className(
-                            dropdownOpen.data
-                                .map { if (it) "visible opacity-100" else "invisible opacity-0" }
-                        )
+                        dropdownOpen.data
+                            .map { if (it) "visible opacity-100" else "invisible opacity-0" }.let(::className)
 
                         ItemResource.ByRelation.Sort.values()
                             .flatMap { listOf(false to it, true to it) }
@@ -207,18 +203,18 @@ fun RenderContext.Collection(address: String) {
                 div("grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4") { // Collection Body
                     itemsStore.data
                         .filterNotNull()
-                        .renderEach { ItemCard(it) }
+                        .renderEach(into = this) { ItemCard(it) }
                 }
 
                 itemsStore.tracking.data.render {
                     if (it)
                         i("fa-regular fa-spinner animate-spin text-3xl text-yellow text-center") {}
-                }
+                    else
+                        Button(ButtonKind.SECONDARY) {
+                            clicks handledBy itemsStore.load
 
-                Button(ButtonKind.SECONDARY) {
-                    clicks handledBy itemsStore.load
-
-                    +"Load More"
+                            +"Load More"
+                        }
                 }
             }
         }

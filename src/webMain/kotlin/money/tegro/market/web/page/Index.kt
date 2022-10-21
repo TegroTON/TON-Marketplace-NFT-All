@@ -20,19 +20,15 @@ fun RenderContext.Index() {
 
                 div("absolute bottom-0 left-0 right-0 p-0 mb-4 flex justify-center") {
                     button("z-10 w-3 h-3 m-1 rounded-full flex-initial") {
-                        className(
-                            slide.data
-                                .map { if (it == 0) "bg-yellow" else "bg-gray-500" }
-                        )
+                        slide.data
+                            .map { if (it == 0) "bg-yellow" else "bg-gray-500" }.let(::className)
 
                         clicks.map { 0 } handledBy slide.update
                     }
 
                     button("z-10 w-3 h-3 m-1 rounded-full flex-initial") {
-                        className(
-                            slide.data
-                                .map { if (it == 1) "bg-yellow" else "bg-gray-500" }
-                        )
+                        slide.data
+                            .map { if (it == 1) "bg-yellow" else "bg-gray-500" }.let(::className)
 
                         clicks.map { 1 } handledBy slide.update
                     }
@@ -40,10 +36,8 @@ fun RenderContext.Index() {
 
                 div("relative overflow-hidden") {
                     div("relative px-6 pt-48 pb-12") {
-                        className(
-                            slide.data
-                                .map { if (it == 0) "block" else "hidden" }
-                        )
+                        slide.data
+                            .map { if (it == 0) "block" else "hidden" }.let(::className)
 
                         div("flex flex-wrap items-center lg:px-20 lg:py-16") {
                             div("w-full text-center lg:text-start") {
@@ -65,10 +59,8 @@ fun RenderContext.Index() {
                     }
 
                     div("relative px-6 pt-48 pb-12") {
-                        className(
-                            slide.data
-                                .map { if (it == 1) "block" else "hidden" }
-                        )
+                        slide.data
+                            .map { if (it == 1) "block" else "hidden" }.let(::className)
 
                         div("flex flex-wrap items-center lg:px-20 lg:py-16") {
                             div("w-full text-center lg:text-start") {
@@ -194,7 +186,7 @@ fun RenderContext.Index() {
                     topCollectionsStore.data
                         .filterNotNull()
                         .map { it.withIndex().toList() }
-                        .renderEach { (index, collection) ->
+                        .renderEach(into = this) { (index, collection) ->
                             Link(
                                 setOf("collection", collection.address),
                                 "flex flex-col lg:flex-row gap-4 rounded-xl p-4 items-center bg-dark-700 hover:bg-gray-900"
