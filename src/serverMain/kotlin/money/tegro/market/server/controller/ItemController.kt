@@ -97,7 +97,7 @@ class ItemController(application: Application) : AbstractDIController(applicatio
                             new_owner = marketplaceProperties.address,
                             response_destination = sellerAddress,
                             custom_payload = Maybe.of(null),
-                            forward_amount = marketplaceProperties.saleFee.amount,
+                            forward_amount = VarUInteger(marketplaceProperties.saleFee.amount.value + marketplaceProperties.transferFee.amount.value),
                             forward_payload = Either.of(CellBuilder.createCell {
                                 storeRef(payloadCell)
                                 storeRef {
