@@ -117,7 +117,7 @@ fun RenderContext.Item(address: String) {
 
                     itemStore.data
                         .mapNotNull { it as? SaleItemModel }
-                        .render(this) { item ->
+                        .render { item ->
                             div("flex flex-col gap-4 rounded-lg bg-soft px-6 py-4") {
                                 div("flex uppercase items-center") {
                                     span("flex-grow font-raleway text-xl") {
