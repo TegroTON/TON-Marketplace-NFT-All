@@ -80,6 +80,7 @@ kotlin {
 
                 // Ktor
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
+                implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
                 implementation("io.ktor:ktor-client-resources:$ktorVersion")
 
 //                implementation("org.jetbrains.kotlin:atomicfu:1.6.21")

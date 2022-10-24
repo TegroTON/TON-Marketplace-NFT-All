@@ -4,9 +4,7 @@ import io.ktor.server.application.*
 import io.ktor.server.resources.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.coroutines.flow.toList
 import money.tegro.market.resource.CollectionResource
-import money.tegro.market.server.dropTake
 import money.tegro.market.server.repository.CollectionRepository
 import org.kodein.di.instance
 import org.kodein.di.ktor.controller.AbstractDIController
@@ -17,21 +15,8 @@ class CollectionController(application: Application) : AbstractDIController(appl
 
     override fun Route.getRoutes() {
         get<CollectionResource> { request ->
-            call.respond(
-                when (request.sort) {
-                    CollectionResource.Sort.ALL -> collectionRepository.all()
-                        .dropTake(request.drop, request.take)
-                        .toList()
-
-                    CollectionResource.Sort.TOP -> collectionRepository.all()
-                        .dropTake(request.drop, request.take)
-                        .toList() // TODO: Actual collection top
-                }
-            )
-        };
-
-        get<CollectionResource.ByAddress> { request ->
-            call.respond(requireNotNull(collectionRepository.get(MsgAddressInt(request.address))))
+            requireNotNull(collectionRepository.get(MsgAddressInt(request.address)))
+                .let { call.respond(it) }
         }
     }
 }

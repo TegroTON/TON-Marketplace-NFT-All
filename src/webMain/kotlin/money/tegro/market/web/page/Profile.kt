@@ -8,7 +8,7 @@ import io.ktor.client.call.*
 import io.ktor.client.plugins.resources.*
 import kotlinx.coroutines.flow.filterNotNull
 import money.tegro.market.model.ItemModel
-import money.tegro.market.resource.ItemResource
+import money.tegro.market.resource.AllItemsResource
 import money.tegro.market.web.card.ItemCard
 import money.tegro.market.web.client
 import money.tegro.market.web.component.Button
@@ -75,9 +75,9 @@ fun RenderContext.Profile(address: String) {
                     val itemsStore = object : RootStore<List<ItemModel>?>(null) {
                         val load = handle { _ ->
                             client.get(
-                                ItemResource.ByRelation(
-                                    address = address,
-                                    relation = ItemResource.ByRelation.Relation.OWNED
+                                AllItemsResource(
+                                    relatedTo = address,
+                                    relation = AllItemsResource.Relation.OWNERSHIP,
                                 )
                             )
                                 .body<List<ItemModel>>()

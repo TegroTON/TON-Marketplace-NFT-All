@@ -85,8 +85,8 @@ fun RenderContext.TransferModal(item: OrdinaryItemModel) =
                             .mapNotNull { (a, b) -> a?.let { connection -> b?.let { newOwner -> connection to newOwner } } }
                             .map { (connection, newOwner) ->
                                 client.get(
-                                    ItemResource.ByAddress.Transfer(
-                                        parent = ItemResource.ByAddress(address = item.address),
+                                    ItemResource.Transfer(
+                                        parent = ItemResource(address = item.address),
                                         newOwner = newOwner,
                                         response = connection.walletAddress,
                                     )

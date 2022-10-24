@@ -22,6 +22,8 @@ import money.tegro.market.contract.nft.RoyaltyContract
 import money.tegro.market.contract.nft.SaleContract
 import money.tegro.market.metadata.CollectionMetadata
 import money.tegro.market.metadata.ItemMetadata
+import money.tegro.market.server.controller.AllCollectionsController
+import money.tegro.market.server.controller.AllItemsController
 import money.tegro.market.server.controller.CollectionController
 import money.tegro.market.server.controller.ItemController
 import money.tegro.market.server.logging.TonLogger
@@ -35,6 +37,7 @@ import money.tegro.market.server.table.ApprovalTable
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.kodein.di.bindEagerSingleton
 import org.kodein.di.bindSingleton
 import org.kodein.di.instance
 import org.kodein.di.ktor.controller.controller
@@ -69,11 +72,8 @@ fun Application.module() {
         }
     }
     install(CORS) {
-        allowMethod(HttpMethod.Options)
-        allowMethod(HttpMethod.Put)
-        allowMethod(HttpMethod.Delete)
-        allowMethod(HttpMethod.Patch)
         allowHeader(HttpHeaders.Authorization)
+        allowHeader(HttpHeaders.ContentType)
         anyHost() // @TODO: Don't do this in production if possible. Try to limit it.
     }
 
@@ -95,7 +95,7 @@ fun Application.module() {
                 instance()
             )
         }
-        bindSingleton { ReferenceBlockService(di) }
+        bindEagerSingleton { ReferenceBlockService(di) }
 
         bindSingleton {
             Database.connect(
@@ -127,6 +127,8 @@ fun Application.module() {
     }
 
     routing {
+        controller("/api/v1") { AllCollectionsController(instance()) }
+        controller("/api/v1") { AllItemsController(instance()) }
         controller("/api/v1") { CollectionController(instance()) }
         controller("/api/v1") { ItemController(instance()) }
     }

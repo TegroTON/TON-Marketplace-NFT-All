@@ -28,7 +28,7 @@ val client = HttpClient {
     install(Resources)
 
     defaultRequest {
-        url("http://localhost:8080/api/v1/h")
+        url("http://localhost:8080/api/v1/")
     }
 }
 

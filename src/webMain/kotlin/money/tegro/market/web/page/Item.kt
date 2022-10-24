@@ -29,7 +29,7 @@ import money.tegro.market.web.store.PopOverStore
 fun RenderContext.Item(address: String) {
     val itemStore = object : RootStore<ItemModel?>(null) {
         val load = handle { _ ->
-            client.get(ItemResource.ByAddress(address = address))
+            client.get(ItemResource(address = address))
                 .body<ItemModel>()
         }
 
@@ -73,7 +73,7 @@ fun RenderContext.Item(address: String) {
 
             div("relative grid gap-12 grid-cols-1 md:grid-cols-3") {
                 div {
-                    img("sticky top-36 w-full h-auto object-cover rounded-2xl") {
+                    img("sticky top-36 w-full h-auto object-cover rounded-lg") {
                         itemStore.data
                             .map { it?.image?.original ?: "./assets/img/user-1.svg" }.let(::src)
                         itemStore.data
