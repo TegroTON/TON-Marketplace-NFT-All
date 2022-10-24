@@ -1,7 +1,7 @@
 package money.tegro.market.server.controller
 
 import io.ktor.server.application.*
-import io.ktor.server.resources.get
+import io.ktor.server.resources.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import money.tegro.market.contract.op.item.ItemOp
@@ -59,10 +59,10 @@ class ItemController(application: Application) : AbstractDIController(applicatio
                 .let { call.respond(it) }
         }
 
-        post<ItemResource.Sell> { request ->
+        get<ItemResource.Sell> { request ->
             val itemAddress = MsgAddressInt(request.parent.address)
             val sellerAddress = MsgAddressInt(request.seller)
-            val priceBigInt = BigInt(request.price.toString()) // TODO
+            val priceBigInt = BigInt(request.price) // TODO
 
             val royalty = itemRepository.getRoyalty(itemAddress)
             val marketplaceFee =

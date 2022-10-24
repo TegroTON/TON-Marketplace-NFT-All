@@ -11,7 +11,6 @@ import org.ton.lite.client.LiteClient
 
 class ReferenceBlockService(override val di: DI) : DIAware {
     private val liteClient: LiteClient by instance()
-    private lateinit var temp: TonNodeBlockIdExt
     private lateinit var last: TonNodeBlockIdExt
 
     val data = flow {
@@ -22,13 +21,7 @@ class ReferenceBlockService(override val di: DI) : DIAware {
     }
         .distinctUntilChanged()
         .onEach {
-            if (!::temp.isInitialized) {
-                last = it
-            } else {
-                last = temp
-            }
-            temp = it
-
+            last = it
         }
         .onEach { logger.debug { "latest masterchain block seqno=${it.seqno}" } }
         .shareIn(CoroutineScope(Dispatchers.IO + CoroutineName("referenceBlockService")), SharingStarted.Eagerly)

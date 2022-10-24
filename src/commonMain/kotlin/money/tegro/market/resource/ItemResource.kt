@@ -1,8 +1,6 @@
 package money.tegro.market.resource
 
-import com.ionspin.kotlin.bignum.integer.BigInteger
 import io.ktor.resources.*
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -21,7 +19,6 @@ data class ItemResource(val address: String) {
     data class Sell(
         val parent: ItemResource,
         val seller: String,
-        @Contextual
-        val price: BigInteger,
+        val price: String,
     )
 }

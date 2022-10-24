@@ -29,6 +29,8 @@ import money.tegro.market.server.repository.ApprovalRepository
 import money.tegro.market.server.repository.CollectionRepository
 import money.tegro.market.server.repository.ItemRepository
 import money.tegro.market.server.repository.RoyaltyRepository
+import money.tegro.market.server.service.EvictionService
+import money.tegro.market.server.service.LiveBlockService
 import money.tegro.market.server.service.ReferenceBlockService
 import money.tegro.market.server.table.ApprovalTable
 import org.jetbrains.exposed.sql.Database
@@ -45,6 +47,7 @@ import org.ton.block.MsgAddress
 import org.ton.block.MsgAddressInt
 import org.ton.lite.client.LiteClient
 import java.util.*
+import kotlin.time.Duration.Companion.hours
 
 fun main(args: Array<String>): Unit = EngineMain.main(args)
 
@@ -92,7 +95,10 @@ fun Application.module() {
                 instance()
             )
         }
+
         bindEagerSingleton { ReferenceBlockService(di) }
+        bindEagerSingleton { LiveBlockService(di) }
+        bindEagerSingleton { EvictionService(di) }
 
         bindSingleton {
             Database.connect(
@@ -111,7 +117,11 @@ fun Application.module() {
 
         bindSingleton { Cache.Builder().build<MsgAddressInt, Optional<CollectionContract>>() }
         bindSingleton { Cache.Builder().build<MsgAddressInt, Optional<CollectionMetadata>>() }
-        bindSingleton { Cache.Builder().build<Pair<MsgAddressInt, ULong>, Optional<MsgAddress>>() }
+        bindSingleton {
+            Cache.Builder().apply {
+                expireAfterWrite(72.hours) // TODO: Evict cache smarter?
+            }.build<Pair<MsgAddressInt, ULong>, Optional<MsgAddress>>()
+        }
         bindSingleton { Cache.Builder().build<MsgAddressInt, Optional<ItemContract>>() }
         bindSingleton { Cache.Builder().build<MsgAddressInt, Optional<ItemMetadata>>() }
         bindSingleton { Cache.Builder().build<MsgAddressInt, Optional<SaleContract>>() }

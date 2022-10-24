@@ -165,7 +165,7 @@ fun RenderContext.SellModal(item: OrdinaryItemModel) =
                                     ItemResource.Sell(
                                         parent = ItemResource(address = item.address),
                                         seller = seller,
-                                        price = price,
+                                        price = price.toString(),
                                     )
                                 ).body<TransactionRequestModel>()
                             } handledBy ConnectionStore.requestTransaction
