@@ -22,10 +22,7 @@ import money.tegro.market.contract.nft.RoyaltyContract
 import money.tegro.market.contract.nft.SaleContract
 import money.tegro.market.metadata.CollectionMetadata
 import money.tegro.market.metadata.ItemMetadata
-import money.tegro.market.server.controller.AllCollectionsController
-import money.tegro.market.server.controller.AllItemsController
-import money.tegro.market.server.controller.CollectionController
-import money.tegro.market.server.controller.ItemController
+import money.tegro.market.server.controller.*
 import money.tegro.market.server.logging.TonLogger
 import money.tegro.market.server.properties.MarketplaceProperties
 import money.tegro.market.server.repository.ApprovalRepository
@@ -127,6 +124,7 @@ fun Application.module() {
     }
 
     routing {
+        controller("/") { StaticController(instance()) }
         controller("/api/v1") { AllCollectionsController(instance()) }
         controller("/api/v1") { AllItemsController(instance()) }
         controller("/api/v1") { CollectionController(instance()) }

@@ -2,7 +2,6 @@ plugins {
     application
     kotlin("multiplatform") version "1.7.20"
     kotlin("plugin.serialization") version "1.7.20"
-    id("io.ktor.plugin") version "2.1.2"
 }
 
 val ktorVersion = "2.1.2"
@@ -15,6 +14,7 @@ repositories {
     mavenCentral()
     maven("https://jitpack.io")
 }
+
 dependencies {
     implementation("io.ktor:ktor-server-call-logging-jvm:2.1.2")
     implementation("io.ktor:ktor-server-call-id-jvm:2.1.2")
@@ -100,7 +100,7 @@ kotlin {
                 runtimeOnly("org.slf4j:slf4j-simple:2.0.3")
 
                 // Ton
-                implementation("com.github.andreypfau.ton-kotlin:ton-kotlin:aef363d8c5")
+                implementation("org.ton:ton-kotlin:0.1.0")
 
                 // Database access
                 implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
@@ -147,8 +147,16 @@ kotlin {
     }
 }
 
-//tasks.getByName<Copy>("serverProcessResources") {
-//    from(tasks.getByName("webBrowserDistribution")) {
-//        into("static")
-//    }
-//}
+tasks.getByName<Jar>("serverJar") {
+    val taskName = if (!project.ext.has("development")
+        || project.gradle.startParameter.taskNames.contains("installDist")
+    ) {
+        "webBrowserProductionWebpack"
+    } else {
+        "webBrowserDevelopmentWebpack"
+    }
+    val webpackTask = tasks.getByName<org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpack>(taskName)
+    dependsOn(webpackTask)
+    println(webpackTask.destinationDirectory)
+    from(files(webpackTask.destinationDirectory))
+}
