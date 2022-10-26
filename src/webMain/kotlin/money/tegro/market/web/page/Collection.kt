@@ -2,6 +2,7 @@ package money.tegro.market.web.page
 
 import dev.fritz2.core.*
 import dev.fritz2.tracking.tracker
+import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.resources.*
 import kotlinx.coroutines.flow.combine
@@ -15,15 +16,18 @@ import money.tegro.market.model.ItemModel
 import money.tegro.market.resource.AllItemsResource
 import money.tegro.market.resource.CollectionResource
 import money.tegro.market.web.card.ItemCard
-import money.tegro.market.web.client
 import money.tegro.market.web.component.Button
 import money.tegro.market.web.model.ButtonKind
 import money.tegro.market.web.normalizeAndShorten
+import org.kodein.di.DI
+import org.kodein.di.conf.global
+import org.kodein.di.instance
 
 fun RenderContext.Collection(address: String) {
     val collectionStore = object : RootStore<CollectionModel?>(null) {
+        private val httpClient: HttpClient by DI.global.instance()
         val load = handle { _ ->
-            client.get(CollectionResource(address = address))
+            httpClient.get(CollectionResource(address = address))
                 .body<CollectionModel>()
         }
 
@@ -192,12 +196,13 @@ fun RenderContext.Collection(address: String) {
 
                 val itemsLoaded = storeOf(0)
                 val itemsStore = object : RootStore<List<ItemModel>?>(null) {
+                    private val httpClient: HttpClient by DI.global.instance()
                     val tracking = tracker()
 
                     val load = handle { last ->
                         tracking.track {
                             last.orEmpty().plus(
-                                client.get(
+                                httpClient.get(
                                     AllItemsResource(
                                         relatedTo = address,
                                         relation = AllItemsResource.Relation.COLLECTION,

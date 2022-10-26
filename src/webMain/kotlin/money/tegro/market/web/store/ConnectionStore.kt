@@ -4,19 +4,19 @@ import dev.fritz2.core.RootStore
 import dev.fritz2.repository.ResourceNotFoundException
 import dev.fritz2.repository.localstorage.localStorageEntityOf
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.map
 import money.tegro.market.model.TransactionRequestModel
 import money.tegro.market.web.model.Connection
 import money.tegro.market.web.model.TonWalletConnection
 import money.tegro.market.web.resource.ConnectionResource
+import org.kodein.di.conf.DIGlobalAware
+import org.kodein.di.instance
 
-object ConnectionStore : RootStore<Connection?>(null) {
-    object isConnected : RootStore<Boolean>(false) {
-        val load = handle { _ ->
-            ConnectionStore.current?.isConnected() ?: false
-        }
-    }
-
+class ConnectionStore : RootStore<Connection?>(null), DIGlobalAware {
+    private val popOverStore: PopOverStore by instance()
     private val localStorage = localStorageEntityOf(ConnectionResource, "connection")
+
+    val isConnected = data.map { it?.isConnected() == true }
 
     val load = handle { _ ->
         try {
@@ -24,11 +24,10 @@ object ConnectionStore : RootStore<Connection?>(null) {
         } catch (_: ResourceNotFoundException) {
             null
         }
-
     }
     val connect = handle<Connection> { _, connection ->
         connection.also {
-            PopOverStore.close()
+            popOverStore.close()
         }
     }
 
@@ -54,8 +53,6 @@ object ConnectionStore : RootStore<Connection?>(null) {
             if (connection != null) {
                 localStorage.addOrUpdate(connection)
             }
-
-            isConnected.load()
         }
         load()
     }

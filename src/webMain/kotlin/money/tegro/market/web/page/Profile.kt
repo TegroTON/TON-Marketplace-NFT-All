@@ -4,17 +4,20 @@ import dev.fritz2.core.RenderContext
 import dev.fritz2.core.RootStore
 import dev.fritz2.core.alt
 import dev.fritz2.core.src
+import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.resources.*
 import kotlinx.coroutines.flow.filterNotNull
 import money.tegro.market.model.ItemModel
 import money.tegro.market.resource.AllItemsResource
 import money.tegro.market.web.card.ItemCard
-import money.tegro.market.web.client
 import money.tegro.market.web.component.Button
 import money.tegro.market.web.model.ButtonKind
 import money.tegro.market.web.normalizeAddress
 import money.tegro.market.web.normalizeAndShorten
+import org.kodein.di.DI
+import org.kodein.di.conf.global
+import org.kodein.di.instance
 
 fun RenderContext.Profile(address: String) {
     section("min-w-full m-0 -mb-6 bg-gray-900") {
@@ -73,8 +76,9 @@ fun RenderContext.Profile(address: String) {
 
                 div("grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4") { // Collection Body
                     val itemsStore = object : RootStore<List<ItemModel>?>(null) {
+                        private val httpClient: HttpClient by DI.global.instance()
                         val load = handle { _ ->
-                            client.get(
+                            httpClient.get(
                                 AllItemsResource(
                                     relatedTo = address,
                                     relation = AllItemsResource.Relation.OWNERSHIP,

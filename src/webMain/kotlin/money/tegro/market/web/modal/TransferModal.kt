@@ -1,6 +1,7 @@
 package money.tegro.market.web.modal
 
 import dev.fritz2.core.*
+import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.resources.*
 import kotlinx.coroutines.flow.combine
@@ -9,17 +10,20 @@ import kotlinx.coroutines.flow.mapNotNull
 import money.tegro.market.model.OrdinaryItemModel
 import money.tegro.market.model.TransactionRequestModel
 import money.tegro.market.resource.ItemResource
-import money.tegro.market.web.client
 import money.tegro.market.web.component.Button
 import money.tegro.market.web.formatTON
 import money.tegro.market.web.model.ButtonKind
 import money.tegro.market.web.model.PopOver
 import money.tegro.market.web.store.ConnectionStore
 import money.tegro.market.web.store.PopOverStore
+import org.kodein.di.DI
+import org.kodein.di.conf.global
+import org.kodein.di.instance
 
 fun RenderContext.TransferModal(item: OrdinaryItemModel) =
     div("top-0 left-0 z-40 w-full h-full bg-dark-900/[.6]") {
-        PopOverStore.data.map { if (it == PopOver.TRANSFER) "fixed" else "hidden" }.let(::className)
+        val popOverStore: PopOverStore by DI.global.instance()
+        popOverStore.data.map { if (it == PopOver.TRANSFER) "fixed" else "hidden" }.let(::className)
 
         div("mx-auto flex items-center relative w-auto max-w-lg min-h-screen") {
             div("bg-dark-700 rounded-3xl p-10 relative flex flex-col w-full h-full min-h-full gap-4") {
@@ -34,7 +38,7 @@ fun RenderContext.TransferModal(item: OrdinaryItemModel) =
 
                     button("absolute top-6 right-8 opacity-50") {
                         type("button")
-                        clicks handledBy PopOverStore.close
+                        clicks handledBy popOverStore.close
 
                         i("fa-solid fa-xmark text-2xl") {}
                     }
@@ -79,19 +83,21 @@ fun RenderContext.TransferModal(item: OrdinaryItemModel) =
                     }
 
                     Button(ButtonKind.PRIMARY) {
+                        val connectionStore: ConnectionStore by DI.global.instance()
+                        val httpClient: HttpClient by DI.global.instance()
                         clicks // On click
-                            .combine(ConnectionStore.data) { _, b -> b } // Get connection state
+                            .combine(connectionStore.data) { _, b -> b } // Get connection state
                             .combine(newOwnerStore.data) { connection, newOwner -> connection to newOwner }
                             .mapNotNull { (a, b) -> a?.let { connection -> b?.let { newOwner -> connection to newOwner } } }
                             .map { (connection, newOwner) ->
-                                client.get(
+                                httpClient.get(
                                     ItemResource.Transfer(
                                         parent = ItemResource(address = item.address),
                                         newOwner = newOwner,
                                         response = connection.walletAddress,
                                     )
                                 ).body<TransactionRequestModel>()
-                            } handledBy ConnectionStore.requestTransaction
+                            } handledBy connectionStore.requestTransaction
 
                         +"Transfer Ownership"
                     }

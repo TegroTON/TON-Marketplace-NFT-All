@@ -8,8 +8,11 @@ import money.tegro.market.web.model.ButtonKind
 import money.tegro.market.web.model.PopOver
 import money.tegro.market.web.store.ConnectionStore
 import money.tegro.market.web.store.PopOverStore
+import org.kodein.di.DI
+import org.kodein.di.conf.global
+import org.kodein.di.instance
 
-fun RenderContext.Header() {
+fun RenderContext.Header() =
     header("sticky z-30 top-0 px-0 py-6 sm:py-8 bg-dark-900/[.9] backdrop-blur-2xl") {
         div("container relative px-3 mx-auto") {
             nav("relative flex flex-wrap p-0 items-center justify-between") {
@@ -24,17 +27,15 @@ fun RenderContext.Header() {
                     }
                 }
 
+                val popOverStore: PopOverStore by DI.global.instance()
                 Button(ButtonKind.SOFT, "lg:hidden ml-4 order-2") {
-                    clicks handledBy PopOverStore.menu
+                    clicks handledBy popOverStore.menu
 
                     i("fa-regular text-xl fa-bars") { }
                 }
 
                 div("fixed top-0 left-0 w-3/4 h-screen bg-dark-900 lg:bg-inherit basis-full items-center px-3 py-6 lg:flex lg:basis-auto lg:p-0 lg:w-auto lg:h-auto lg:static grow items-center") {
-                    className(
-                        PopOverStore.data
-                            .map { if (it == PopOver.MENU) "block" else "hidden" }
-                    )
+                    popOverStore.data.map { if (it == PopOver.MENU) "block" else "hidden" }.let(::className)
                     form("mx-0 lg:mx-12 mb-4 lg:mb-0 order-1 lg:order-2 block grow") {
                         div("border border-solid grow border-border-soft rounded-lg bg-soft relative flex flex-wrap items-stretch w-full") {
                             input("block px-3 py-1.5 w-1/100 min-w-0 min-h-[52] relative flex-auto rounded-tr-none rounded-br-none  bg-transparent border-0") {
@@ -75,8 +76,9 @@ fun RenderContext.Header() {
                         }
                     }
 
+                    val connectionStore: ConnectionStore by DI.global.instance()
                     div("relative order-2 lg:order-3") {
-                        ConnectionStore.isConnected.data.map { if (it) "block" else "hidden" }.let(::className)
+                        connectionStore.isConnected.map { if (it) "block" else "hidden" }.let(::className)
 
                         val dropdownOpen = storeOf(false)
 
@@ -97,7 +99,7 @@ fun RenderContext.Header() {
 
                             li {
                                 Link(
-                                    ConnectionStore.data
+                                    connectionStore.data
                                         .map {
                                             it?.walletAddress?.let { addr -> setOf("profile", addr) }
                                                 ?: setOf("profile")
@@ -111,7 +113,7 @@ fun RenderContext.Header() {
 
                             li {
                                 a("px-6 py-3 block hover:lg:bg-dark-700") {
-                                    clicks handledBy ConnectionStore.disconnect
+                                    clicks handledBy connectionStore.disconnect
 
                                     i("fa-regular fa-link-simple-slash mr-4") { }
                                     +"Disconnect"
@@ -121,8 +123,8 @@ fun RenderContext.Header() {
                     }
 
                     Button(ButtonKind.SOFT, "order-2 sticky bottom-4 left-0 w-full lg:w-auto") {
-                        ConnectionStore.isConnected.data.map { if (it) "hidden" else "block" }.let(::className)
-                        clicks handledBy PopOverStore.connect
+                        connectionStore.isConnected.map { if (it) "hidden" else "block" }.let(::className)
+                        clicks handledBy popOverStore.connect
 
                         i("fa-regular fa-arrow-right-to-arc mr-4") {}
                         +"Connect"
@@ -131,4 +133,3 @@ fun RenderContext.Header() {
             }
         }
     }
-}

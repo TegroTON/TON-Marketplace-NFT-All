@@ -1,6 +1,7 @@
 package money.tegro.market.web.page
 
 import dev.fritz2.core.*
+import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.resources.*
 import kotlinx.coroutines.flow.combine
@@ -11,7 +12,6 @@ import money.tegro.market.model.ItemModel
 import money.tegro.market.model.OrdinaryItemModel
 import money.tegro.market.model.SaleItemModel
 import money.tegro.market.resource.ItemResource
-import money.tegro.market.web.client
 import money.tegro.market.web.component.Button
 import money.tegro.market.web.component.Link
 import money.tegro.market.web.formatTON
@@ -24,12 +24,16 @@ import money.tegro.market.web.normalizeAddress
 import money.tegro.market.web.normalizeAndShorten
 import money.tegro.market.web.store.ConnectionStore
 import money.tegro.market.web.store.PopOverStore
+import org.kodein.di.DI
+import org.kodein.di.conf.global
+import org.kodein.di.instance
 
 
 fun RenderContext.Item(address: String) {
     val itemStore = object : RootStore<ItemModel?>(null) {
+        private val httpClient: HttpClient by DI.global.instance()
         val load = handle { _ ->
-            client.get(ItemResource(address = address))
+            httpClient.get(ItemResource(address = address))
                 .body<ItemModel>()
         }
 
@@ -139,20 +143,22 @@ fun RenderContext.Item(address: String) {
                         }
 
                     div("grid grid-cols-1 lg:grid-cols-2 gap-4") {
+                        val connectionStore: ConnectionStore by DI.global.instance()
+                        val popOverStore: PopOverStore by DI.global.instance()
                         itemStore.data
                             .filterNotNull()
-                            .combine(ConnectionStore.data) { a, b -> a to b }
+                            .combine(connectionStore.data) { a, b -> a to b }
                             .render(this) { (item, connection) ->
                                 when (item) {
                                     is SaleItemModel -> {
                                         if (connection?.walletAddress?.let(::normalizeAddress) == item.owner?.let(::normalizeAddress)) { // Item is owned by the user
                                             Button(ButtonKind.SECONDARY, "lg:col-span-2") {
-                                                clicks handledBy PopOverStore.cancelSale
+                                                clicks handledBy popOverStore.cancelSale
                                                 +"Cancel Sale"
                                             }
                                         } else {
                                             Button(ButtonKind.PRIMARY, "lg:col-span-2") {
-                                                clicks handledBy PopOverStore.buy
+                                                clicks handledBy popOverStore.buy
                                                 +"Buy Item"
                                             }
                                         }
@@ -161,11 +167,11 @@ fun RenderContext.Item(address: String) {
                                     is OrdinaryItemModel -> {
                                         if (connection?.walletAddress?.let(::normalizeAddress) == item.owner?.let(::normalizeAddress)) { // Item is owned by the user
                                             Button(ButtonKind.PRIMARY) {
-                                                clicks handledBy PopOverStore.sell
+                                                clicks handledBy popOverStore.sell
                                                 +"Put On Sale"
                                             }
                                             Button(ButtonKind.SECONDARY) {
-                                                clicks handledBy PopOverStore.transfer
+                                                clicks handledBy popOverStore.transfer
                                                 +"Transfer Ownership"
                                             }
                                         }

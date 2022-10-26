@@ -8,6 +8,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import money.tegro.market.web.route.AppRouter
+import org.kodein.di.DI
+import org.kodein.di.conf.global
+import org.kodein.di.instance
 import org.w3c.dom.HTMLAnchorElement
 
 fun RenderContext.Link(
@@ -22,8 +25,10 @@ fun RenderContext.Link(
     content: HtmlTag<HTMLAnchorElement>.() -> Unit
 ): HtmlTag<HTMLAnchorElement> =
     a {
+        val appRouter: AppRouter by DI.global.instance()
+
         to.map { "/#" + it.joinToString("/") }.let(::href)
-        clicks.combine(to) { _, target -> target } handledBy AppRouter.navigate
+        clicks.combine(to) { _, target -> target } handledBy appRouter.navigate
 
         classes?.let { className(it) }
 

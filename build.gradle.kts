@@ -60,6 +60,7 @@ kotlin {
             dependencies {
                 // Dependency Injection
                 implementation("org.kodein.di:kodein-di:$kodeinVersion")
+                implementation("org.kodein.di:kodein-di-conf:$kodeinVersion")
 
                 // Logging
                 implementation("io.github.microutils:kotlin-logging:3.0.2")
@@ -82,8 +83,6 @@ kotlin {
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
                 implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
                 implementation("io.ktor:ktor-client-resources:$ktorVersion")
-
-//                implementation("org.jetbrains.kotlin:atomicfu:1.6.21")
             }
         }
 
@@ -157,6 +156,5 @@ tasks.getByName<Jar>("serverJar") {
     }
     val webpackTask = tasks.getByName<org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpack>(taskName)
     dependsOn(webpackTask)
-    println(webpackTask.destinationDirectory)
     from(files(webpackTask.destinationDirectory))
 }
