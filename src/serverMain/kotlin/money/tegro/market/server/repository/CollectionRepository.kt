@@ -1,6 +1,7 @@
 package money.tegro.market.server.repository
 
 import io.github.reactivecircus.cache4k.Cache
+import io.ktor.client.*
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.mapNotNull
@@ -25,6 +26,7 @@ class CollectionRepository(
     override val di: DI,
 ) : DIAware {
     private val liteClient: LiteClient by instance()
+    private val httpClient: HttpClient by instance()
 
     private val approvalRepository: ApprovalRepository by instance()
 
@@ -81,7 +83,7 @@ class CollectionRepository(
             if (approvalRepository.isApproved(collection)) { // Has been explicitly approved
                 getContract(collection)
                     ?.let {
-                        CollectionMetadata.of(it.content)
+                        CollectionMetadata.of(it.content, httpClient)
                     }
                     .let { Optional.ofNullable(it) }
             } else {

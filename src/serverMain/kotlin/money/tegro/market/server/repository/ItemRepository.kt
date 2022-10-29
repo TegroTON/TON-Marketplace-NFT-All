@@ -2,6 +2,7 @@ package money.tegro.market.server.repository
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import io.github.reactivecircus.cache4k.Cache
+import io.ktor.client.*
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import money.tegro.market.contract.nft.CollectionContract
@@ -30,6 +31,7 @@ import java.util.*
 
 class ItemRepository(override val di: DI) : DIAware {
     private val liteClient: LiteClient by instance()
+    private val httpClient: HttpClient by instance()
 
     private val approvalRepository: ApprovalRepository by instance()
     private val collectionRepository: CollectionRepository by instance()
@@ -153,7 +155,9 @@ class ItemRepository(override val di: DI) : DIAware {
                                         referenceBlockService.last()
                                     )
                                 }
-                                ?: contract.individual_content) // Standalone items
+                                ?: contract.individual_content, // Standalone items
+                            httpClient
+                        )
                     }
                     .let { Optional.ofNullable(it) }
             }

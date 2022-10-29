@@ -2,6 +2,8 @@ package money.tegro.market.server
 
 import com.ionspin.kotlin.bignum.serialization.kotlinx.humanReadableSerializerModule
 import io.github.reactivecircus.cache4k.Cache
+import io.ktor.client.*
+import io.ktor.client.plugins.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
@@ -88,6 +90,20 @@ fun Application.module() {
                     .decodeFromStream(requireNotNull(ClassLoader.getSystemResourceAsStream(config)) { "Could not load Lite Api config." }),
                 instance()
             )
+        }
+        bindSingleton {
+            HttpClient {
+                install(HttpTimeout) {
+                    requestTimeoutMillis
+                }
+                install(HttpRequestRetry) {
+                    maxRetries = 16
+                    exponentialDelay()
+                    retryIf { request, response ->
+                        !response.status.isSuccess() || response.contentType() != ContentType.Application.Json
+                    }
+                }
+            }
         }
 
         bindEagerSingleton { ReferenceBlockService(di) }
