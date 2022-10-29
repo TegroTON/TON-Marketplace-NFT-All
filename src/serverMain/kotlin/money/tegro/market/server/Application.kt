@@ -9,7 +9,6 @@ import io.ktor.server.cio.*
 import io.ktor.server.plugins.callid.*
 import io.ktor.server.plugins.callloging.*
 import io.ktor.server.plugins.contentnegotiation.*
-import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.request.*
 import io.ktor.server.resources.*
 import io.ktor.server.routing.*
@@ -70,11 +69,6 @@ fun Application.module() {
         verify { callId: String ->
             callId.isNotEmpty()
         }
-    }
-    install(CORS) {
-        allowHeader(HttpHeaders.Authorization)
-        allowHeader(HttpHeaders.ContentType)
-        anyHost() // @TODO: Don't do this in production if possible. Try to limit it.
     }
 
     di {
