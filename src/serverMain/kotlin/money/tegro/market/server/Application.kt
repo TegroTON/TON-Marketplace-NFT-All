@@ -98,9 +98,9 @@ fun Application.module() {
                 }
                 install(HttpRequestRetry) {
                     maxRetries = 5
-                    retryIf { request, response ->
-                        !response.status.isSuccess() || response.contentType() != ContentType.Application.Json
-                    }
+                    retryOnServerErrors()
+                    retryOnException()
+                    exponentialDelay()
                 }
             }
         }

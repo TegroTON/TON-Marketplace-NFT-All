@@ -3,6 +3,7 @@ package money.tegro.market.metadata
 import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import io.ktor.http.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -53,6 +54,7 @@ sealed interface Metadata {
 
                 is FullContent.OffChain ->
                     httpClient.get(String(full.uri.data.flatten())) {
+                        accept(ContentType.Application.Json)
                     }
                         .bodyAsText()
             }
