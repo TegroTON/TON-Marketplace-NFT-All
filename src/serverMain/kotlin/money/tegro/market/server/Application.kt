@@ -94,11 +94,10 @@ fun Application.module() {
         bindSingleton {
             HttpClient {
                 install(HttpTimeout) {
-                    requestTimeoutMillis
+                    requestTimeoutMillis = 10_000L
                 }
                 install(HttpRequestRetry) {
-                    maxRetries = 16
-                    exponentialDelay()
+                    maxRetries = 5
                     retryIf { request, response ->
                         !response.status.isSuccess() || response.contentType() != ContentType.Application.Json
                     }
