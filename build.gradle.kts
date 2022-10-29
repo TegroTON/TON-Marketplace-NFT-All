@@ -111,7 +111,6 @@ kotlin {
                 // Ktor
                 implementation("io.ktor:ktor-client-cio:$ktorVersion")
                 implementation("io.ktor:ktor-server-core:$ktorVersion")
-                implementation("io.ktor:ktor-server-config-yaml:$ktorVersion")
                 implementation("io.ktor:ktor-server-host-common:$ktorVersion")
                 implementation("io.ktor:ktor-server-partial-content:$ktorVersion")
                 implementation("io.ktor:ktor-server-resources:$ktorVersion")
