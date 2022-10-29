@@ -83,6 +83,7 @@ class CollectionRepository(
             if (approvalRepository.isApproved(collection)) { // Has been explicitly approved
                 getContract(collection)
                     ?.let {
+                        logger.debug { "loading metadata for ${collection.toRaw()}" }
                         CollectionMetadata.of(it.content, httpClient)
                     }
                     .let { Optional.ofNullable(it) }

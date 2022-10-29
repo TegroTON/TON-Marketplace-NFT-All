@@ -144,6 +144,7 @@ class ItemRepository(override val di: DI) : DIAware {
             } else {
                 getContract(item)
                     ?.let { contract ->
+                        logger.debug { "loading metadata for ${item.toRaw()}" }
                         ItemMetadata.of(
                             (contract.collection as? AddrStd) // Collection items
                                 ?.let {
