@@ -11,10 +11,7 @@ import kotlinx.serialization.json.Json
 import money.tegro.market.web.fragment.Footer
 import money.tegro.market.web.fragment.Header
 import money.tegro.market.web.modal.ConnectModal
-import money.tegro.market.web.page.Collection
-import money.tegro.market.web.page.Index
-import money.tegro.market.web.page.Item
-import money.tegro.market.web.page.Profile
+import money.tegro.market.web.page.*
 import money.tegro.market.web.route.AppRouter
 import money.tegro.market.web.store.ConnectionStore
 import money.tegro.market.web.store.PopOverStore
@@ -41,7 +38,7 @@ fun main() {
                 install(Resources)
 
                 defaultRequest {
-                    url("http://localhost:8080/api/v1/")
+                    url("/api/v1/")
                 }
             }
         }
@@ -61,6 +58,7 @@ fun main() {
                 "collection" -> Collection(route.last())
                 "item" -> Item(route.last())
                 "profile" -> Profile(route.last())
+                "explore" -> Explore()
                 else -> div { +"Not Found" }
             }
         }

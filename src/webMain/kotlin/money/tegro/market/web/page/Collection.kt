@@ -1,22 +1,17 @@
 package money.tegro.market.web.page
 
 import dev.fritz2.core.*
-import dev.fritz2.tracking.tracker
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.resources.*
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import money.tegro.market.model.CollectionModel
-import money.tegro.market.model.ItemModel
 import money.tegro.market.resource.AllItemsResource
 import money.tegro.market.resource.CollectionResource
-import money.tegro.market.web.card.ItemCard
 import money.tegro.market.web.component.Button
+import money.tegro.market.web.fragment.FilterPanel
+import money.tegro.market.web.fragment.ItemList
+import money.tegro.market.web.fragment.SortPicker
 import money.tegro.market.web.model.ButtonKind
 import money.tegro.market.web.normalizeAndShorten
 import org.kodein.di.DI
@@ -52,7 +47,7 @@ fun RenderContext.Collection(address: String) {
             val filterStore = storeOf<AllItemsResource.Filter?>(null)
 
             div("flex flex-col gap-8") {// Left panel
-                div("relative top-0 overflow-hidden rounded-lg bg-dark-700 bg-white/[.02] backdrop-blur-3xl -mt-24") { // Card
+                div("relative top-0 overflow-hidden rounded-lg bg-dark-700 bg-white/[.02] backdrop-blur-3xl -mt-24 pb-24") { // Card
                     div("flex flex-col gap-6 p-6") { // Card body
                         div("flex flex-col items-center") {
                             div { // Image
@@ -92,53 +87,7 @@ fun RenderContext.Collection(address: String) {
                     }
                 }
 
-                div("relative h-full") {
-                    div("sticky top-36 flex flex-col gap-4 p-6") {
-                        h2("font-raleway font-medium text-lg") {
-                            +"Sale Type"
-                        }
-
-                        form("flex flex-col gap-2") {
-                            div("flex gap-2") {
-                                input(id = "sale-type-all") {
-                                    type("radio")
-                                    name("sale-type")
-                                    checked(true)
-                                    changes.values()
-                                        .map { null } handledBy filterStore.update
-                                }
-                                label("text-gray-500") {
-                                    `for`("sale-type-all")
-                                    +"All Types"
-                                }
-                            }
-                            div("flex gap-2") {
-                                input(id = "sale-type-sale") {
-                                    type("radio")
-                                    name("sale-type")
-                                    changes.values()
-                                        .map { AllItemsResource.Filter.ON_SALE } handledBy filterStore.update
-                                }
-                                label("text-gray-500") {
-                                    `for`("sale-type-sale")
-                                    +"On Sale"
-                                }
-                            }
-                            div("flex gap-2") {
-                                input(id = "sale-type-not") {
-                                    type("radio")
-                                    name("sale-type")
-                                    changes.values()
-                                        .map { AllItemsResource.Filter.NOT_FOR_SALE } handledBy filterStore.update
-                                }
-                                label("text-gray-500") {
-                                    `for`("sale-type-not")
-                                    +"Not For Sale"
-                                }
-                            }
-                        }
-                    }
-                }
+                FilterPanel(filterStore)
             }
 
             div("lg:col-span-2 xl:col-span-3 flex flex-col gap-6") { // Right panel
@@ -178,70 +127,15 @@ fun RenderContext.Collection(address: String) {
                         }
                     }
 
-                    select("px-6 py-3 border border-border-soft rounded-lg bg-dark-700 text-white") {
-                        changes.values()
-                            .map { Json.decodeFromString<AllItemsResource.Sort>(it) } handledBy sortStore.update
-
-                        AllItemsResource.Sort.values()
-                            .mapIndexed { index, sort ->
-                                option() {
-                                    value(Json.encodeToString(sort))
-                                    +sort.toString().lowercase().replaceFirstChar { it.uppercase() }
-                                        .replace("_up", " - Low to High")
-                                        .replace("_down", " - High to Low")
-                                }
-                            }
-                    }
+                    SortPicker(sortStore)
                 }
 
-                val itemsLoaded = storeOf(0)
-                val itemsStore = object : RootStore<List<ItemModel>?>(null) {
-                    private val httpClient: HttpClient by DI.global.instance()
-                    val tracking = tracker()
-
-                    val load = handle { last ->
-                        tracking.track {
-                            last.orEmpty().plus(
-                                httpClient.get(
-                                    AllItemsResource(
-                                        relatedTo = address,
-                                        relation = AllItemsResource.Relation.COLLECTION,
-                                        sort = sortStore.current,
-                                        filter = filterStore.current,
-                                        drop = itemsLoaded.current,
-                                        take = 16
-                                    )
-                                )
-                                    .body<List<ItemModel>>()
-                            )
-                                .also { itemsLoaded.update(it.size) }
-                        }
-                    }
-                }
-
-                sortStore.data.combine(filterStore.data) { _, _ -> } handledBy {
-                    // Reload items when sort or filters change
-                    itemsLoaded.update(0)
-                    itemsStore.update(null)
-                    itemsStore.load()
-                }
-
-                div("grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4") { // Collection Body
-                    itemsStore.data
-                        .filterNotNull()
-                        .renderEach(into = this) { ItemCard(it) }
-                }
-
-                itemsStore.tracking.data.render {
-                    if (it)
-                        i("fa-regular fa-spinner animate-spin text-3xl text-yellow text-center") {}
-                    else
-                        Button(ButtonKind.SECONDARY) {
-                            clicks handledBy itemsStore.load
-
-                            +"Load More"
-                        }
-                }
+                ItemList(
+                    relatedTo = address,
+                    relation = AllItemsResource.Relation.COLLECTION,
+                    sortStore = sortStore,
+                    filterStore = filterStore,
+                )
             }
         }
     }
