@@ -8,7 +8,7 @@ val ktorVersion = "2.1.2"
 val kodeinVersion = "7.15.0"
 
 group = "money.tegro"
-version = "0.6.0"
+version = "0.6.5"
 
 repositories {
     mavenCentral()
@@ -19,6 +19,9 @@ dependencies {
     implementation("io.ktor:ktor-server-call-logging-jvm:2.1.2")
     implementation("io.ktor:ktor-server-call-id-jvm:2.1.2")
     implementation("io.ktor:ktor-server-cors-jvm:2.1.2")
+    implementation("io.ktor:ktor-server-core-jvm:2.1.2")
+    implementation("io.ktor:ktor-server-host-common-jvm:2.1.2")
+    implementation("io.ktor:ktor-server-status-pages-jvm:2.1.2")
 }
 
 application {
@@ -119,6 +122,7 @@ kotlin {
                 implementation("io.ktor:ktor-server-cio:$ktorVersion")
                 implementation("io.ktor:ktor-server-cors:$ktorVersion")
                 implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
+                implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
             }
         }
 

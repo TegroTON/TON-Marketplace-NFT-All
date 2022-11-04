@@ -11,8 +11,10 @@ import io.ktor.server.cio.*
 import io.ktor.server.plugins.callid.*
 import io.ktor.server.plugins.callloging.*
 import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
 import io.ktor.server.resources.*
+import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -70,6 +72,12 @@ fun Application.module() {
         header(HttpHeaders.XRequestId)
         verify { callId: String ->
             callId.isNotEmpty()
+        }
+    }
+
+    install(StatusPages) {
+        status(HttpStatusCode.NotFound) { call, _ ->
+            call.respondRedirect("/#404")
         }
     }
 
