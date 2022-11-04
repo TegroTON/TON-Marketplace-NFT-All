@@ -145,8 +145,8 @@ fun RenderContext.Index() {
                                     href(link)
                                     target("_blank")
                                     Button(
-                                        ButtonKind.SECONDARY,
-                                        "p-0 w-12 h-12 hover:bg-dark-900 focus:bg-dark-900 border-dark-900"
+                                        ButtonKind.PRIMARY,
+                                        "p-0 w-12 h-12"
                                     ) {
                                         i("fa-brands $icon") { }
                                     }
