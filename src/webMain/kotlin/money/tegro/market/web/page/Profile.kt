@@ -27,27 +27,29 @@ fun RenderContext.Profile(address: String) {
         section("container relative px-3 mx-auto gap-8 grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4") {
             val filterStore = storeOf<AllItemsResource.Filter?>(null)
 
-            div("flex flex-col gap-8") {// Left panel
-                div("relative top-0 overflow-hidden rounded-lg bg-dark-700 bg-white/[.02] backdrop-blur-3xl -mt-24 pb-24") { // Card
-                    div("flex flex-col gap-6 p-6") { // Card body
-                        div("flex flex-col items-center") {
-                            div { // Image
-                                img("w-full h-32 rounded-full object-cover align-middle") {
-                                    src("./assets/img/user-1.svg")
-                                    alt(normalizeAddress(address))
+            div {// Left panel
+                div("flex flex-col gap-8 h-full relative top-0 -mt-24") {
+                    div("rounded-lg bg-dark-700 bg-white/[.02] backdrop-blur-3xl") {// Card
+                        div("flex flex-col gap-6 p-6") { // Card body
+                            div("flex flex-col items-center") {
+                                div { // Image
+                                    img("w-full h-32 rounded-full object-cover align-middle") {
+                                        src("./assets/img/user-1.svg")
+                                        alt(normalizeAddress(address))
+                                    }
                                 }
+
+                                // Main actions here
                             }
 
-                            // Main actions here
-                        }
-
-                        h1("text-3xl font-raleway") {
-                            +normalizeAndShorten(address)
+                            h1("text-3xl font-raleway") {
+                                +normalizeAndShorten(address)
+                            }
                         }
                     }
-                }
 
-                FilterPanel(filterStore)
+                    FilterPanel(filterStore)
+                }
             }
 
             div("lg:col-span-2 xl:col-span-3 flex flex-col gap-6") { // Right panel
