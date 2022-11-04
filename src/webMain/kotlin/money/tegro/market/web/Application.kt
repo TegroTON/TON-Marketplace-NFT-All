@@ -55,9 +55,9 @@ fun main() {
         appRouter.data.render { route ->
             when (route.first()) {
                 "" -> Index()
-                "collection" -> Collection(route.last())
-                "item" -> Item(route.last())
-                "profile" -> Profile(route.last())
+                "collection" -> Collection(route.elementAt(1))
+                "item" -> Item(route.elementAt(1))
+                "profile" -> Profile(route.elementAt(1))
                 "explore" -> Explore()
                 else -> div { +"Not Found" }
             }
