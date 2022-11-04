@@ -23,6 +23,7 @@ fun RenderContext.ItemList(
     sortStore: RootStore<AllItemsResource.Sort>,
     filterStore: RootStore<AllItemsResource.Filter?>,
 ) {
+    val moreItemsAvailable = storeOf(true)
     val itemsLoaded = storeOf(0)
     val itemsStore = object : RootStore<List<ItemModel>?>(null) {
         private val httpClient: HttpClient by DI.global.instance()
@@ -43,7 +44,10 @@ fun RenderContext.ItemList(
                     )
                         .body<List<ItemModel>>()
                 )
-                    .also { itemsLoaded.update(it.size) }
+                    .also {
+                        moreItemsAvailable.update(it.size >= itemsLoaded.current + 16)
+                        itemsLoaded.update(it.size)
+                    }
             }
         }
     }
@@ -61,14 +65,24 @@ fun RenderContext.ItemList(
             .renderEach(into = this) { ItemCard(it) }
     }
 
-    itemsStore.tracking.data.render {
-        if (it)
-            i("fa-regular fa-spinner animate-spin text-3xl text-yellow text-center") {}
-        else
-            Button(ButtonKind.SECONDARY) {
-                clicks handledBy itemsStore.load
+    itemsStore.tracking.data // Loading status
+        .combine(itemsLoaded.data) { a, b -> a to b } // Number of items loaded
+        .combine(moreItemsAvailable.data) { (a, b), c -> Triple(a, b, c) }
+        .render { (loading, loadedSoFar, moreAvailable) ->
+            if (loading) {
+                i("fa-regular fa-spinner animate-spin text-3xl text-yellow text-center") {}
+            } else {
+                if (moreAvailable) {
+                    Button(ButtonKind.SECONDARY) {
+                        clicks handledBy itemsStore.load
 
-                +"Load More"
+                        +"Load More"
+                    }
+                } else if (loadedSoFar == 0 && !moreAvailable) {
+                    span("text-center text-gray-500") {
+                        +"No Items Found"
+                    }
+                }
             }
-    }
+        }
 }
