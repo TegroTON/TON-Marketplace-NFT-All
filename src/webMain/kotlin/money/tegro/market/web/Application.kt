@@ -59,7 +59,7 @@ fun main() {
                 "item" -> Item(route.elementAt(1))
                 "profile" -> Profile(route.elementAt(1))
                 "explore" -> Explore()
-                else -> div { +"Not Found" }
+                else -> NotFound()
             }
         }
 
