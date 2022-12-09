@@ -16,6 +16,10 @@ import io.ktor.server.request.*
 import io.ktor.server.resources.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
@@ -144,10 +148,22 @@ fun Application.module() {
         bindSingleton { Cache.Builder().build<MsgAddressInt, Optional<SaleContract>>() }
         bindSingleton { Cache.Builder().build<MsgAddressInt, Optional<RoyaltyContract>>() }
 
-        bindSingleton { ApprovalRepository(di) }
-        bindSingleton { CollectionRepository(di) }
-        bindSingleton { ItemRepository(di) }
-        bindSingleton { RoyaltyRepository(di) }
+        bindEagerSingleton { ApprovalRepository(di) }
+        bindEagerSingleton {
+            CollectionRepository(di).apply {
+                CoroutineScope(Dispatchers.IO + CoroutineName("collectionRepositoryStartup")).launch {
+                    this@apply.all().collect {}
+                }
+            }
+        }
+        bindEagerSingleton {
+            ItemRepository(di).apply {
+                CoroutineScope(Dispatchers.IO + CoroutineName("itemRepositoryStartup")).launch {
+                    this@apply.all().collect {}
+                }
+            }
+        }
+        bindEagerSingleton { RoyaltyRepository(di) }
     }
 
     routing {
