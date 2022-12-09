@@ -64,7 +64,7 @@ class ItemRepository(override val di: DI) : DIAware {
         getContract(item)?.let { contract ->
             getMetadata(item)?.let { metadata ->
                 val sale = itemSale(item)
-                if (sale != null) {
+                if (sale != null && sale.marketplace == marketplaceProperties.address) { // Only allow items for sale on this marketplace
                     SaleItemModel(
                         address = item.toRaw(),
                         index = contract.index,
