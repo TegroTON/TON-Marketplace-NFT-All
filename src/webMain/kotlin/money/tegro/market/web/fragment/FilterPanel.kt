@@ -2,9 +2,9 @@ package money.tegro.market.web.fragment
 
 import dev.fritz2.core.*
 import kotlinx.coroutines.flow.map
-import money.tegro.market.resource.AllItemsResource
+import money.tegro.market.resource.ItemResource
 
-fun RenderContext.FilterPanel(filterStore: RootStore<AllItemsResource.Filter?>) =
+fun RenderContext.FilterPanel(filterStore: RootStore<ItemResource.All.Filter?>) =
     div("relative h-full") {
         div("sticky top-36 flex flex-col gap-4 p-6") {
             h2("font-raleway font-medium text-lg") {
@@ -30,7 +30,7 @@ fun RenderContext.FilterPanel(filterStore: RootStore<AllItemsResource.Filter?>) 
                         type("radio")
                         name("sale-type")
                         changes.values()
-                            .map { AllItemsResource.Filter.ON_SALE } handledBy filterStore.update
+                            .map { ItemResource.All.Filter.ON_SALE } handledBy filterStore.update
                     }
                     label("text-gray-500") {
                         `for`("sale-type-sale")
@@ -42,7 +42,7 @@ fun RenderContext.FilterPanel(filterStore: RootStore<AllItemsResource.Filter?>) 
                         type("radio")
                         name("sale-type")
                         changes.values()
-                            .map { AllItemsResource.Filter.NOT_FOR_SALE } handledBy filterStore.update
+                            .map { ItemResource.All.Filter.NOT_FOR_SALE } handledBy filterStore.update
                     }
                     label("text-gray-500") {
                         `for`("sale-type-not")

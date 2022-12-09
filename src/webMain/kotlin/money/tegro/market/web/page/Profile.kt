@@ -4,7 +4,7 @@ import dev.fritz2.core.RenderContext
 import dev.fritz2.core.alt
 import dev.fritz2.core.src
 import dev.fritz2.core.storeOf
-import money.tegro.market.resource.AllItemsResource
+import money.tegro.market.resource.ItemResource
 import money.tegro.market.web.component.Button
 import money.tegro.market.web.fragment.FilterPanel
 import money.tegro.market.web.fragment.ItemList
@@ -25,7 +25,7 @@ fun RenderContext.Profile(address: String) {
 
     main("mx-3 lg:mx-6") {
         section("container relative px-3 mx-auto gap-8 grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4") {
-            val filterStore = storeOf<AllItemsResource.Filter?>(null)
+            val filterStore = storeOf<ItemResource.All.Filter?>(null)
 
             div {// Left panel
                 div("flex flex-col gap-8 h-full relative top-0 -mt-24") {
@@ -65,7 +65,7 @@ fun RenderContext.Profile(address: String) {
                     }
                 }
 
-                val sortStore = storeOf(AllItemsResource.Sort.INDEX_UP)
+                val sortStore = storeOf(ItemResource.All.Sort.INDEX_UP)
                 div("flex items-center relative") {
                     ul("overflow-auto flex items-center flex-grow") { // Collection tabs
                         li {
@@ -80,7 +80,7 @@ fun RenderContext.Profile(address: String) {
 
                 ItemList(
                     relatedTo = address,
-                    relation = AllItemsResource.Relation.OWNERSHIP,
+                    relation = ItemResource.All.Relation.OWNERSHIP,
                     sortStore = sortStore,
                     filterStore = filterStore,
                 )

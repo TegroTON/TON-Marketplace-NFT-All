@@ -10,7 +10,7 @@ import io.ktor.client.plugins.resources.*
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import money.tegro.market.model.ItemModel
-import money.tegro.market.resource.AllItemsResource
+import money.tegro.market.resource.ItemResource
 import money.tegro.market.web.card.ItemCard
 import money.tegro.market.web.component.Button
 import money.tegro.market.web.model.ButtonKind
@@ -19,9 +19,9 @@ import org.kodein.di.conf.global
 import org.kodein.di.instance
 
 fun RenderContext.ItemList(
-    relatedTo: String?, relation: AllItemsResource.Relation?,
-    sortStore: RootStore<AllItemsResource.Sort>,
-    filterStore: RootStore<AllItemsResource.Filter?>,
+    relatedTo: String?, relation: ItemResource.All.Relation?,
+    sortStore: RootStore<ItemResource.All.Sort>,
+    filterStore: RootStore<ItemResource.All.Filter?>,
 ) {
     val moreItemsAvailable = storeOf(true)
     val itemsLoaded = storeOf(0)
@@ -33,7 +33,7 @@ fun RenderContext.ItemList(
             tracking.track {
                 last.orEmpty().plus(
                     httpClient.get(
-                        AllItemsResource(
+                        ItemResource.All(
                             relatedTo = relatedTo,
                             relation = relation,
                             sort = sortStore.current,

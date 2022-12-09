@@ -6,8 +6,8 @@ import io.ktor.client.call.*
 import io.ktor.client.plugins.resources.*
 import kotlinx.coroutines.flow.map
 import money.tegro.market.model.CollectionModel
-import money.tegro.market.resource.AllItemsResource
 import money.tegro.market.resource.CollectionResource
+import money.tegro.market.resource.ItemResource
 import money.tegro.market.web.component.Button
 import money.tegro.market.web.fragment.FilterPanel
 import money.tegro.market.web.fragment.ItemList
@@ -22,7 +22,7 @@ fun RenderContext.Collection(address: String) {
     val collectionStore = object : RootStore<CollectionModel?>(null) {
         private val httpClient: HttpClient by DI.global.instance()
         val load = handle { _ ->
-            httpClient.get(CollectionResource(address = address))
+            httpClient.get(CollectionResource.ByAddress(address = address))
                 .body<CollectionModel>()
         }
 
@@ -44,7 +44,7 @@ fun RenderContext.Collection(address: String) {
 
     main("mx-3 lg:mx-6") {
         section("container relative px-3 mx-auto gap-8 grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4") {
-            val filterStore = storeOf<AllItemsResource.Filter?>(null)
+            val filterStore = storeOf<ItemResource.All.Filter?>(null)
 
             div {// Left panel
                 div("flex flex-col gap-8 h-full relative top-0 -mt-24") {
@@ -119,7 +119,7 @@ fun RenderContext.Collection(address: String) {
                     }
                 }
 
-                val sortStore = storeOf(AllItemsResource.Sort.INDEX_UP)
+                val sortStore = storeOf(ItemResource.All.Sort.INDEX_UP)
                 div("flex items-center relative") {
                     ul("overflow-auto flex items-center flex-grow") { // Collection tabs
                         li {
@@ -134,7 +134,7 @@ fun RenderContext.Collection(address: String) {
 
                 ItemList(
                     relatedTo = address,
-                    relation = AllItemsResource.Relation.COLLECTION,
+                    relation = ItemResource.All.Relation.COLLECTION,
                     sortStore = sortStore,
                     filterStore = filterStore,
                 )

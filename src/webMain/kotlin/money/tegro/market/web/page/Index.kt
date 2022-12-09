@@ -7,7 +7,7 @@ import io.ktor.client.plugins.resources.*
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import money.tegro.market.model.CollectionModel
-import money.tegro.market.resource.AllCollectionsResource
+import money.tegro.market.resource.CollectionResource
 import money.tegro.market.web.component.Button
 import money.tegro.market.web.component.Link
 import money.tegro.market.web.model.ButtonKind
@@ -178,7 +178,7 @@ fun RenderContext.Index() {
                     val topCollectionsStore = object : RootStore<List<CollectionModel>?>(null) {
                         private val httpClient: HttpClient by DI.global.instance()
                         val load = handle { _ ->
-                            httpClient.get(AllCollectionsResource(sort = AllCollectionsResource.Sort.TOP))
+                            httpClient.get(CollectionResource.All(sort = CollectionResource.All.Sort.TOP))
                                 .body<List<CollectionModel>>()
                         }
 

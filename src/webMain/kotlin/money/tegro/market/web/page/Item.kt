@@ -33,7 +33,7 @@ fun RenderContext.Item(address: String) {
     val itemStore = object : RootStore<ItemModel?>(null) {
         private val httpClient: HttpClient by DI.global.instance()
         val load = handle { _ ->
-            httpClient.get(ItemResource(address = address))
+            httpClient.get(ItemResource.ByAddress(address = address))
                 .body<ItemModel>()
         }
 

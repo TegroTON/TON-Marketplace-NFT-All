@@ -168,8 +168,8 @@ fun RenderContext.SellModal(item: OrdinaryItemModel) =
                             .combine(priceStore.data) { connection, price -> connection.walletAddress to price }
                             .map { (seller, price) ->
                                 httpClient.get(
-                                    ItemResource.Sell(
-                                        parent = ItemResource(address = item.address),
+                                    ItemResource.ByAddress.Sell(
+                                        parent = ItemResource.ByAddress(address = item.address),
                                         seller = seller,
                                         price = price.toString(),
                                     )

@@ -8,14 +8,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import money.tegro.market.resource.AllItemsResource
+import money.tegro.market.resource.ItemResource
 
-fun RenderContext.SortPicker(sortStore: RootStore<AllItemsResource.Sort>) =
+fun RenderContext.SortPicker(sortStore: RootStore<ItemResource.All.Sort>) =
     select("px-6 py-3 border border-border-soft rounded-lg bg-dark-700 text-white") {
         changes.values()
-            .map { Json.decodeFromString<AllItemsResource.Sort>(it) } handledBy sortStore.update
+            .map { Json.decodeFromString<ItemResource.All.Sort>(it) } handledBy sortStore.update
 
-        AllItemsResource.Sort.values()
+        ItemResource.All.Sort.values()
             .mapIndexed { index, sort ->
                 option() {
                     value(Json.encodeToString(sort))

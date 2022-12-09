@@ -7,7 +7,7 @@ import io.ktor.client.call.*
 import io.ktor.client.plugins.resources.*
 import kotlinx.coroutines.flow.filterNotNull
 import money.tegro.market.model.CollectionModel
-import money.tegro.market.resource.AllCollectionsResource
+import money.tegro.market.resource.CollectionResource
 import money.tegro.market.web.card.CollectionCard
 import org.kodein.di.DI
 import org.kodein.di.conf.global
@@ -26,7 +26,7 @@ fun RenderContext.Explore() {
                 val collectionsStore = object : RootStore<List<CollectionModel>?>(null) {
                     private val httpClient: HttpClient by DI.global.instance()
                     val load = handle { _ ->
-                        httpClient.get(AllCollectionsResource(sort = AllCollectionsResource.Sort.ALL))
+                        httpClient.get(CollectionResource.All(sort = CollectionResource.All.Sort.ALL))
                             .body<List<CollectionModel>>()
                     }
 
