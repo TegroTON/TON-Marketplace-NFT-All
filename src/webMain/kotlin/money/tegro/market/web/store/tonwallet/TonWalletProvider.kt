@@ -1,4 +1,4 @@
-package money.tegro.market.web.wallet
+package money.tegro.market.web.store.tonwallet
 
 import kotlin.js.Promise
 

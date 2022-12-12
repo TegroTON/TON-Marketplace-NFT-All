@@ -6,7 +6,7 @@ import money.tegro.market.web.component.Button
 import money.tegro.market.web.component.Link
 import money.tegro.market.web.model.ButtonKind
 import money.tegro.market.web.model.PopOver
-import money.tegro.market.web.store.ConnectionStore
+import money.tegro.market.web.store.GlobalConnectionStore
 import money.tegro.market.web.store.PopOverStore
 import org.kodein.di.DI
 import org.kodein.di.conf.global
@@ -76,7 +76,7 @@ fun RenderContext.Header() =
                         }
                     }
 
-                    val connectionStore: ConnectionStore by DI.global.instance()
+                    val connectionStore: GlobalConnectionStore by DI.global.instance()
                     div("relative order-2 lg:order-3") {
                         connectionStore.isConnected.map { if (it) "block" else "hidden" }.let(::className)
 
@@ -99,9 +99,9 @@ fun RenderContext.Header() =
 
                             li {
                                 Link(
-                                    connectionStore.data
+                                    connectionStore.address
                                         .map {
-                                            it?.walletAddress?.let { addr -> setOf("profile", addr) }
+                                            it?.let { setOf("profile", it) }
                                                 ?: setOf("profile")
                                         },
                                     "px-6 py-3 block hover:lg:bg-dark-700"

@@ -9,7 +9,7 @@ import money.tegro.market.web.component.Button
 import money.tegro.market.web.formatTON
 import money.tegro.market.web.model.ButtonKind
 import money.tegro.market.web.model.PopOver
-import money.tegro.market.web.store.ConnectionStore
+import money.tegro.market.web.store.GlobalConnectionStore
 import money.tegro.market.web.store.PopOverStore
 import org.kodein.di.DI
 import org.kodein.di.conf.global
@@ -70,7 +70,7 @@ fun RenderContext.BuyModal(item: SaleItemModel) =
                     }
 
                     Button(ButtonKind.PRIMARY) {
-                        val connectionStore: ConnectionStore by DI.global.instance()
+                        val connectionStore: GlobalConnectionStore by DI.global.instance()
                         clicks.map {
                             TransactionRequestModel(
                                 dest = requireNotNull(item.sale),

@@ -1,4 +1,4 @@
-package money.tegro.market.web.model
+package money.tegro.market.web.store.tonwallet
 
 @OptIn(ExperimentalJsExport::class)
 @JsExport

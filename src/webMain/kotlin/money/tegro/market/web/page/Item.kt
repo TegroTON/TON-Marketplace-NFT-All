@@ -22,7 +22,7 @@ import money.tegro.market.web.modal.TransferModal
 import money.tegro.market.web.model.ButtonKind
 import money.tegro.market.web.normalizeAddress
 import money.tegro.market.web.normalizeAndShorten
-import money.tegro.market.web.store.ConnectionStore
+import money.tegro.market.web.store.GlobalConnectionStore
 import money.tegro.market.web.store.PopOverStore
 import org.kodein.di.DI
 import org.kodein.di.conf.global
@@ -143,15 +143,15 @@ fun RenderContext.Item(address: String) {
                         }
 
                     div("grid grid-cols-1 lg:grid-cols-2 gap-4") {
-                        val connectionStore: ConnectionStore by DI.global.instance()
+                        val connectionStore: GlobalConnectionStore by DI.global.instance()
                         val popOverStore: PopOverStore by DI.global.instance()
                         itemStore.data
                             .filterNotNull()
-                            .combine(connectionStore.data) { a, b -> a to b }
-                            .render(this) { (item, connection) ->
+                            .combine(connectionStore.address) { a, b -> a to b }
+                            .render(this) { (item, address) ->
                                 when (item) {
                                     is SaleItemModel -> {
-                                        if (connection?.walletAddress?.let(::normalizeAddress) == item.owner?.let(::normalizeAddress)) { // Item is owned by the user
+                                        if (address?.let(::normalizeAddress) == item.owner?.let(::normalizeAddress)) { // Item is owned by the user
                                             Button(ButtonKind.SECONDARY, "lg:col-span-2") {
                                                 clicks handledBy popOverStore.cancelSale
                                                 +"Cancel Sale"
@@ -165,7 +165,7 @@ fun RenderContext.Item(address: String) {
                                     }
 
                                     is OrdinaryItemModel -> {
-                                        if (connection?.walletAddress?.let(::normalizeAddress) == item.owner?.let(::normalizeAddress)) { // Item is owned by the user
+                                        if (address?.let(::normalizeAddress) == item.owner?.let(::normalizeAddress)) { // Item is owned by the user
                                             Button(ButtonKind.PRIMARY) {
                                                 clicks handledBy popOverStore.sell
                                                 +"Put On Sale"

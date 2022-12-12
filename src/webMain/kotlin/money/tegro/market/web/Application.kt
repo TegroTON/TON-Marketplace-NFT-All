@@ -13,8 +13,10 @@ import money.tegro.market.web.fragment.Header
 import money.tegro.market.web.modal.ConnectModal
 import money.tegro.market.web.page.*
 import money.tegro.market.web.route.AppRouter
-import money.tegro.market.web.store.ConnectionStore
+import money.tegro.market.web.store.GlobalConnectionStore
 import money.tegro.market.web.store.PopOverStore
+import money.tegro.market.web.store.TonWalletConnectionStore
+import money.tegro.market.web.store.TonkeeperConnectionStore
 import org.kodein.di.DI
 import org.kodein.di.bindSingleton
 import org.kodein.di.conf.global
@@ -44,7 +46,9 @@ fun main() {
         }
 
         bindSingleton { AppRouter() }
-        bindSingleton { ConnectionStore() }
+        bindSingleton { GlobalConnectionStore() }
+        bindSingleton { TonWalletConnectionStore() }
+        bindSingleton { TonkeeperConnectionStore() }
         bindSingleton { PopOverStore() }
     }
 

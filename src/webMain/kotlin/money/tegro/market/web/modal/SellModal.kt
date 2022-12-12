@@ -7,6 +7,7 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.resources.*
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import money.tegro.market.model.OrdinaryItemModel
@@ -16,7 +17,7 @@ import money.tegro.market.web.component.Button
 import money.tegro.market.web.formatTON
 import money.tegro.market.web.model.ButtonKind
 import money.tegro.market.web.model.PopOver
-import money.tegro.market.web.store.ConnectionStore
+import money.tegro.market.web.store.GlobalConnectionStore
 import money.tegro.market.web.store.PopOverStore
 import org.kodein.di.DI
 import org.kodein.di.conf.global
@@ -160,12 +161,14 @@ fun RenderContext.SellModal(item: OrdinaryItemModel) =
                     }
 
                     Button(ButtonKind.PRIMARY) {
-                        val connectionStore: ConnectionStore by DI.global.instance()
+                        val connectionStore: GlobalConnectionStore by DI.global.instance()
                         val httpClient: HttpClient by DI.global.instance()
                         clicks // On click
-                            .combine(connectionStore.data) { _, b -> b } // Get connection state
-                            .filterNotNull() // Make sure we're connected
-                            .combine(priceStore.data) { connection, price -> connection.walletAddress to price }
+                            .combine(connectionStore.isConnected) { _, b -> b } // Get connection state
+                            .filter { it } // Make sure we're connected
+                            .combine(connectionStore.address) { _, a -> a } // Get address
+                            .filterNotNull() // Make sure we have an address
+                            .combine(priceStore.data) { address, price -> address to price }
                             .map { (seller, price) ->
                                 httpClient.get(
                                     ItemResource.ByAddress.Sell(

@@ -82,6 +82,9 @@ kotlin {
                 // Big integers
                 implementation("com.ionspin.kotlin:bignum:0.3.7")
 
+                // Time
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
+
                 // Ktor
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
                 implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
@@ -144,6 +147,8 @@ kotlin {
                 implementation(devNpm("postcss", "^8.4.17"))
                 implementation(devNpm("postcss-loader", "7.0.1"))
                 implementation(devNpm("autoprefixer", "10.4.12"))
+
+                implementation(npm("@tonconnect/sdk", "0.0.42"))
             }
         }
     }
