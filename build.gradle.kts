@@ -148,6 +148,7 @@ kotlin {
                 implementation(devNpm("postcss-loader", "7.0.1"))
                 implementation(devNpm("autoprefixer", "10.4.12"))
 
+                // Ton connect
                 implementation(npm("@tonconnect/sdk", "0.0.42"))
             }
         }

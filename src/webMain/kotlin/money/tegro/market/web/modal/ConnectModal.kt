@@ -58,6 +58,7 @@ fun RenderContext.ConnectModal() =
                     val tonkeeperConnectionStore: TonkeeperConnectionStore by DI.global.instance()
                     Button(ButtonKind.SOFT, "flex items-center gap-4") {
                         disabled(tonkeeperConnectionStore.isAvailable.map { !it })
+                        clicks handledBy tonkeeperConnectionStore.connect
 
                         img("w-10 h-10") {
                             alt("Tonkeeper")

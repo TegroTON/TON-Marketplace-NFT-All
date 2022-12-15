@@ -2,10 +2,7 @@ package money.tegro.market.web.store
 
 import dev.fritz2.core.SimpleHandler
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flatMapConcat
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.*
 import money.tegro.market.model.TransactionRequestModel
 import org.kodein.di.instance
 
@@ -33,5 +30,17 @@ class GlobalConnectionStore : ConnectionStore<ConnectionStore<Any>>() {
     override val requestTransaction: SimpleHandler<TransactionRequestModel> = handle { connection, request ->
         connection?.requestTransaction(request)
         connection
+    }
+
+    init {
+        tonWalletConnectionStore.isConnected.combine(tonkeeperConnectionStore.isConnected) { tonWallet, tonkeeper ->
+            when {
+                tonWallet -> tonWalletConnectionStore
+                tonkeeper -> tonkeeperConnectionStore
+                else -> null
+            }
+        }.handledBy {
+            update(it as ConnectionStore<Any>?)
+        }
     }
 }

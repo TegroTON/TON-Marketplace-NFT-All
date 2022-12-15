@@ -11,6 +11,7 @@ import kotlinx.serialization.json.Json
 import money.tegro.market.web.fragment.Footer
 import money.tegro.market.web.fragment.Header
 import money.tegro.market.web.modal.ConnectModal
+import money.tegro.market.web.modal.ConnectTonkeeperModal
 import money.tegro.market.web.page.*
 import money.tegro.market.web.route.AppRouter
 import money.tegro.market.web.store.GlobalConnectionStore
@@ -70,5 +71,6 @@ fun main() {
         Footer()
 
         ConnectModal()
+        ConnectTonkeeperModal()
     }
 }

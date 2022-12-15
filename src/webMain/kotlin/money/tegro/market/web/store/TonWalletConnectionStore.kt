@@ -1,17 +1,24 @@
 package money.tegro.market.web.store
 
 import dev.fritz2.core.SimpleHandler
+import kotlinx.browser.localStorage
 import kotlinx.browser.window
 import kotlinx.coroutines.await
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import money.tegro.market.model.TransactionRequestModel
 import money.tegro.market.web.jsObject
 import money.tegro.market.web.store.tonwallet.TonWalletProvider
 import money.tegro.market.web.store.tonwallet.Wallet
+import org.kodein.di.instance
 import org.w3c.dom.get
 
 class TonWalletConnectionStore : ConnectionStore<Wallet>() {
+    private val popOverStore: PopOverStore by di.instance()
+
     override val address: Flow<String?> = data.map { it?.address }
 
     override val isAvailable: Flow<Boolean> = data.map { isAvailable() }
@@ -22,6 +29,7 @@ class TonWalletConnectionStore : ConnectionStore<Wallet>() {
     override val connect: SimpleHandler<Unit> = handle { _ ->
         requestWallets().firstOrNull()?.also {
             console.log(it)
+            popOverStore.close()
         }
     }
 
@@ -36,6 +44,12 @@ class TonWalletConnectionStore : ConnectionStore<Wallet>() {
             stateInit = request.stateInit
         })
         wallet
+    }
+
+    init {
+        localStorage.getItem("ton_wallet")?.let {
+            this.update(Json.decodeFromString<SerializableWallet>(it))
+        }
     }
 
     companion object {
@@ -54,3 +68,10 @@ class TonWalletConnectionStore : ConnectionStore<Wallet>() {
         }
     }
 }
+
+@Serializable
+private class SerializableWallet(
+    override val address: String,
+    override val publicKey: String,
+    override val walletVersion: String
+) : Wallet
