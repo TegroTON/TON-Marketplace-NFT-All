@@ -8,7 +8,7 @@ val ktorVersion = "2.1.2"
 val kodeinVersion = "7.15.0"
 
 group = "money.tegro"
-version = "0.7.1"
+version = "0.7.2"
 
 repositories {
     mavenCentral()
