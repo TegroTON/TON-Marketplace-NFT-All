@@ -4,10 +4,9 @@ import io.ktor.resources.*
 import kotlinx.serialization.Serializable
 
 @Serializable
-@Resource("/collection/")
-class CollectionResource {
+sealed interface CollectionResource {
     @Serializable
-    @Resource("/all")
+    @Resource("/collection/all")
     data class All(
         val sort: Sort? = null,
         val drop: Int? = null,
@@ -21,7 +20,7 @@ class CollectionResource {
     }
 
     @Serializable
-    @Resource("/address/{address}")
+    @Resource("/collection/address/{address}")
     data class ByAddress(
         val address: String,
     )

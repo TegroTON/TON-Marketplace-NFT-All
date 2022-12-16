@@ -4,10 +4,9 @@ import io.ktor.resources.*
 import kotlinx.serialization.Serializable
 
 @Serializable
-@Resource("/item/")
-class ItemResource {
+sealed interface ItemResource {
     @Serializable
-    @Resource("/all")
+    @Resource("/item/all")
     class All(
         val sort: Sort? = null,
         val relatedTo: String? = null,
@@ -38,7 +37,7 @@ class ItemResource {
     }
 
     @Serializable
-    @Resource("/address/{address}")
+    @Resource("/item/address/{address}")
     data class ByAddress(
         val address: String,
     ) {
