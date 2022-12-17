@@ -3,7 +3,7 @@ package money.tegro.market
 import org.ton.block.*
 import org.ton.boc.BagOfCells
 import org.ton.cell.Cell
-import org.ton.crypto.base64
+import org.ton.crypto.base64.base64
 
 fun MsgAddressInt.toRaw() = when (this) {
     is AddrStd -> "$workchain_id:$address"

@@ -5,7 +5,7 @@ import mu.KLogging
 import org.ton.bigint.BigInt
 import org.ton.block.Coins
 import org.ton.block.MsgAddressInt
-import org.ton.crypto.base64
+import org.ton.crypto.base64.base64
 
 data class MarketplaceProperties(
     val address: MsgAddressInt = MsgAddressInt("EQDvuJSj-Ay8zz_fgHOoLUm0AaAJul7pihPgtCkTeU07djgA"),

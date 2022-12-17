@@ -107,14 +107,14 @@ fun Application.module() {
         }
         bindSingleton {
             HttpClient {
-                install(HttpTimeout) {
-                    requestTimeoutMillis = 10_000L
-                }
                 install(HttpRequestRetry) {
-                    maxRetries = 5
+                    maxRetries = 10
                     retryOnServerErrors()
-                    retryOnException()
+                    retryOnException(retryOnTimeout = true)
                     exponentialDelay()
+                }
+                install(HttpTimeout) {
+                    requestTimeoutMillis = 30_000L
                 }
             }
         }

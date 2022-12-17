@@ -7,7 +7,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import mu.KLogging
 import org.ton.cell.Cell
-import org.ton.crypto.Base64ByteArraySerializer
+import org.ton.crypto.base64.Base64ByteArraySerializer
 
 @Serializable
 data class CollectionMetadata(

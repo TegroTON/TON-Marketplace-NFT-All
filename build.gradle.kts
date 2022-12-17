@@ -4,11 +4,11 @@ plugins {
     kotlin("plugin.serialization") version "1.7.20"
 }
 
-val ktorVersion = "2.1.2"
+val ktorVersion = "2.2.1"
 val kodeinVersion = "7.15.0"
 
 group = "money.tegro"
-version = "0.7.4"
+version = "0.7.5"
 
 repositories {
     mavenCentral()
@@ -105,7 +105,7 @@ kotlin {
                 runtimeOnly("org.slf4j:slf4j-simple:2.0.3")
 
                 // Ton
-                implementation("org.ton:ton-kotlin:0.1.0")
+                implementation("org.ton:ton-kotlin:0.1.1")
 
                 // Database access
                 implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
