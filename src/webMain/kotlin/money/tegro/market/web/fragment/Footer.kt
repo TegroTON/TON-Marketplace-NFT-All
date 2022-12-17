@@ -11,9 +11,9 @@ fun RenderContext.Footer() {
             div("flex flex-wrap px-3 grid grid-cols-1 lg:grid-cols-3 gap-12") {
                 div("mb-12 lg:mb-0") {
                     div("flex items-center mb-6") {
-                        img("align-middle") {
+                        img("align-middle w-12 h-12") {
                             alt("Libermall - NFT Marketplace")
-                            src("./assets/img/logo/apple-icon-57x57.png")
+                            src("./assets/img/logo/large.png")
                         }
 
                         span("hidden md:block text-2xl") {

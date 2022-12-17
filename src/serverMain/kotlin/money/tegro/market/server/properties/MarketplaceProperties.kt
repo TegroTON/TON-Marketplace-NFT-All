@@ -16,11 +16,11 @@ data class MarketplaceProperties(
 
     val serviceFeeDenominator: Int = 100,
 
-    val saleFee: Coins = Coins.ofNano(100_000_000),
+    val saleFee: Coins = Coins.ofNano(200_000_000),
 
-    val transferFee: Coins = Coins.ofNano(50_000_000),
+    val transferFee: Coins = Coins.ofNano(100_000_000),
 
-    val networkFee: Coins = Coins.ofNano(50_000_000),
+    val networkFee: Coins = Coins.ofNano(100_000_000),
 
     val gasFee: Coins = Coins.ofNano(1_000_000_000),
 ) {

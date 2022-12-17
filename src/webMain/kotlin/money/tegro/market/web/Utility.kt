@@ -1,7 +1,8 @@
 package money.tegro.market.web
 
 import com.ionspin.kotlin.bignum.integer.BigInteger
-import com.ionspin.kotlin.bignum.integer.toBigInteger
+import io.ktor.util.*
+import io.ktor.utils.io.core.*
 import kotlin.experimental.and
 import kotlin.experimental.or
 
@@ -18,38 +19,77 @@ fun isValidAddress(address: String) = try {
     false
 }
 
+@OptIn(ExperimentalUnsignedTypes::class)
 fun parseAddress(address: String): Pair<Int, ByteArray> {
     if (address.contains(':')) {
+        // 32 bytes, each represented as 2 characters
         require(address.substringAfter(':').length == 32 * 2)
-        return address.substringBefore(':').toByte().toInt() to address.substringAfter(':').decodeHex()
+        return address.substringBefore(':').toByte().toInt() to hex(address.substringAfter(':'))
     } else {
-        val raw = address.replace('-', '+').replace('_', '/').decodeBase64()
+        val packet = ByteReadPacket(
+            try {
+                base64url(address)
+            } catch (e: Exception) {
+                try {
+                    base64(address)
+                } catch (e: Exception) {
+                    throw IllegalArgumentException("Can't parse address: $address", e)
+                }
+            }
+        )
 
-        require(raw.size == 36) { "invalid byte-array size expected: 36, actual: ${raw.size}" }
+        require(packet.remaining == 36L) { "invalid byte-array size expected: 36, actual: ${packet.remaining}" }
         // not 0x80 = 0x7F; here we clean the test only flag to only check proper bounce flags
-        val cleanTestOnly = raw[0] and 0x7F.toByte()
+        val tag = packet.readByte()
+        val workchain = packet.readByte().toInt()
+        val rawAddress = packet.readBytes(32)
+        val cleanTestOnly = tag and 0x7F.toByte()
         check((cleanTestOnly == 0x11.toByte()) or (cleanTestOnly == 0x51.toByte())) {
             "unknown address tag"
         }
 
-        val addr = raw[1].toInt() to raw.sliceArray(2..33)
-
-        val testOnly = raw[0] and 0x80.toByte() != 0.toByte()
-        val bounceable = cleanTestOnly == 0x11.toByte()
-        val expectedChecksum = raw[34].toUByte().toInt() * 256 + raw[35].toUByte().toInt()
-        val actualChecksum = crc(addr, testOnly, bounceable)
+        val expectedChecksum = packet.readUShort().toInt()
+        val actualChecksum = checksum(tag, workchain, rawAddress)
         check(expectedChecksum == actualChecksum) {
             "CRC check failed"
         }
 
-        return addr
+        return workchain to rawAddress
     }
 }
 
-fun toUserFriendly(address: Pair<Int, ByteArray>) =
-    (byteArrayOf(tag(testOnly = false, bounceable = true), address.first.toByte()) +
-            address.second + crc(address, testOnly = false, bounceable = true).toShort().toBigInteger().toByteArray())
-        .encodeBase64(BASE64_URL)
+private fun checksum(tag: Byte, workchainId: Int, address: ByteArray): Int =
+    crc16(byteArrayOf(tag, workchainId.toByte()), address)
+
+// Get the tag byte based on set flags
+private fun tag(testOnly: Boolean, bounceable: Boolean): Byte =
+    (if (testOnly) 0x80.toByte() else 0.toByte()) or
+            (if (bounceable) 0x11.toByte() else 0x51.toByte())
+
+fun toUserFriendly(
+    address: Pair<Int, ByteArray>,
+    testOnly: Boolean = false,
+    bounceable: Boolean = true,
+    urlSafe: Boolean = true
+): String {
+    val tag = tag(testOnly, bounceable)
+    val workchain = address.first
+    val rawAddress = address.second
+    val checksum = checksum(tag, workchain, rawAddress)
+
+    val data = buildPacket {
+        writeByte(tag)
+        writeByte(workchain.toByte())
+        writeFully(rawAddress)
+        writeShort(checksum.toShort())
+    }.readBytes()
+
+    return if (urlSafe) {
+        base64url(data)
+    } else {
+        base64(data)
+    }
+}
 
 fun normalizeAddress(address: String): String = toUserFriendly(parseAddress(address))
 
@@ -70,7 +110,6 @@ fun String.decodeHex(): ByteArray {
 
     return ByteArray(length / 2) { byteIterator.next() }
 }
-
 
 @OptIn(ExperimentalUnsignedTypes::class)
 private val CRC16_TABLE = ushortArrayOf(
@@ -339,30 +378,29 @@ fun crc16(vararg byteArrays: ByteArray): Int {
     var crc: UShort = 0u
     byteArrays.forEach { byteArray ->
         byteArray.forEach { byte ->
-            val t = (byte.toInt() xor (crc.toInt() shr 8)) and 0xff
+            val t = (byte.toInt() xor (crc.toInt() ushr 8)) and 0xff
             crc = CRC16_TABLE[t] xor (crc.toInt() shl 8).toUShort()
         }
     }
     return crc.toInt()
 }
 
-private fun crc(address: Pair<Int, ByteArray>, testOnly: Boolean, bounceable: Boolean): Int =
-    crc16(
-        byteArrayOf(tag(testOnly, bounceable), address.first.toByte()),
-        address.second
-    )
-
-private fun tag(testOnly: Boolean, bounceable: Boolean): Byte =
-    (if (testOnly) 0x80.toByte() else 0.toByte()) or
-            (if (bounceable) 0x11.toByte() else 0x51.toByte())
-
-
-internal val BASE64 =
+private val BASE64 =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".encodeToByteArray()
-internal val BASE64_URL =
+private val BASE64_URL =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".encodeToByteArray()
 
-fun String.decodeBase64(): ByteArray {
+fun base64(string: String): ByteArray = string.commonDecodeBase64ToArray()
+    ?: throw IllegalArgumentException("Can't decode string: '${string.replace("\n", "")}'")
+
+fun base64(byteArray: ByteArray): String = byteArray.commonEncodeBse64(BASE64)
+
+fun base64url(string: String): ByteArray = string.commonDecodeBase64ToArray()
+    ?: throw IllegalArgumentException("Can't decode string: '${string.replace("\n", "")}'")
+
+fun base64url(byteArray: ByteArray): String = byteArray.commonEncodeBse64(BASE64_URL)
+
+private fun String.commonDecodeBase64ToArray(): ByteArray? {
     // Ignore trailing '=' padding and whitespace from the input.
     var limit = length
     while (limit > 0) {
@@ -405,7 +443,7 @@ fun String.decodeBase64(): ByteArray {
         } else if (c == '\n' || c == '\r' || c == ' ' || c == '\t') {
             continue
         } else {
-            throw IllegalArgumentException()
+            return null
         }
 
         // Append this char's 6 bits to the word.
@@ -424,7 +462,7 @@ fun String.decodeBase64(): ByteArray {
     when (lastWordChars) {
         1 -> {
             // We read 1 char followed by "===". But 6 bits is a truncated byte! Fail.
-            throw IllegalStateException()
+            return null
         }
 
         2 -> {
@@ -448,7 +486,7 @@ fun String.decodeBase64(): ByteArray {
     return out.copyOf(outCount)
 }
 
-fun ByteArray.encodeBase64(map: ByteArray): String {
+private fun ByteArray.commonEncodeBse64(map: ByteArray): String {
     val length = (size + 2) / 3 * 4
     val out = ByteArray(length)
     var index = 0

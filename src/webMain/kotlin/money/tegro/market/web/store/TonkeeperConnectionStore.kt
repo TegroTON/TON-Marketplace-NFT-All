@@ -27,6 +27,7 @@ class TonkeeperConnectionStore : ConnectionStore<Account>() {
     override val connect: SimpleHandler<Unit> = handle { account ->
         account.also {
             popOverStore.connectTonkeeper()
+            console.log(it)
         }
     }
 
@@ -56,12 +57,12 @@ class TonkeeperConnectionStore : ConnectionStore<Account>() {
     }).unsafeCast<String?>()
 
     init {
-        tonConnect.restoreConnection().then {
-            this.update(tonConnect.account)
-        }
+        tonConnect.restoreConnection()
 
         tonConnect.onStatusChange({
+            console.log(it)
             this.update(tonConnect.account)
+            popOverStore.close()
         })
     }
 }

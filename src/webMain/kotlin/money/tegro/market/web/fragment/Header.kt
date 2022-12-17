@@ -19,7 +19,7 @@ fun RenderContext.Header() =
                 Link(setOf(""), "flex mr-12 items-center") {
                     img("w-12 h-12 object-contain") {
                         alt("Libermall - NFT Marketplace")
-                        src("assets/img/logo/apple-icon-57x57.png")
+                        src("assets/img/logo/large.png")
                     }
 
                     span("font-raleway font-bold text-3xl hidden 2xl:block ml-6") {

@@ -30,12 +30,15 @@ class TonWalletConnectionStore : ConnectionStore<Wallet>() {
     override val connect: SimpleHandler<Unit> = handle { _ ->
         requestWallets().firstOrNull()?.also {
             console.log(it)
-            localStorage.setItem("ton_wallet", Json.encodeToString(it as SerializableWallet))
+            localStorage.setItem("ton_wallet", Json.encodeToString(SerializableWallet(it)))
             popOverStore.close()
         }
     }
 
-    override val disconnect: SimpleHandler<Unit> = handle { _ -> null }
+    override val disconnect: SimpleHandler<Unit> = handle { _ ->
+        localStorage.removeItem("ton_wallet")
+        null
+    }
 
     override val requestTransaction: SimpleHandler<TransactionRequestModel> = handle { wallet, request ->
         sendTransaction(jsObject {
@@ -55,8 +58,8 @@ class TonWalletConnectionStore : ConnectionStore<Wallet>() {
     }
 
     companion object {
-        fun ton() = window.get("ton").unsafeCast<TonWalletProvider?>()
-        suspend fun isAvailable(): Boolean = ton() != null
+        private fun ton() = window.get("ton").unsafeCast<TonWalletProvider?>()
+        fun isAvailable(): Boolean = ton() != null
 
         suspend fun requestWallets() =
             ton()?.send("ton_requestWallets", arrayOf())
@@ -76,4 +79,6 @@ private class SerializableWallet(
     override val address: String,
     override val publicKey: String,
     override val walletVersion: String
-) : Wallet
+) : Wallet {
+    constructor(wallet: Wallet) : this(wallet.address, wallet.publicKey, wallet.walletVersion)
+}
