@@ -36,7 +36,7 @@ fun RenderContext.ConnectModal() =
                     }
                 }
 
-                div("flex flex-col") {
+                div("flex flex-col gap-4") {
                     val tonwalletConnectionStore: TonWalletConnectionStore by DI.global.instance()
 
                     Button(ButtonKind.SOFT, "flex items-center gap-4") {

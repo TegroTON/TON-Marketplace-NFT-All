@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import money.tegro.market.model.TransactionRequestModel
 import money.tegro.market.web.jsObject
@@ -29,6 +30,7 @@ class TonWalletConnectionStore : ConnectionStore<Wallet>() {
     override val connect: SimpleHandler<Unit> = handle { _ ->
         requestWallets().firstOrNull()?.also {
             console.log(it)
+            localStorage.setItem("ton_wallet", Json.encodeToString(it as SerializableWallet))
             popOverStore.close()
         }
     }

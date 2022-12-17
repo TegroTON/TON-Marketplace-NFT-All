@@ -2,10 +2,16 @@ package money.tegro.market.web.modal
 
 import QrCodeToString
 import dev.fritz2.core.RenderContext
+import dev.fritz2.core.href
 import dev.fritz2.core.type
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.js.jso
+import money.tegro.market.web.component.Button
+import money.tegro.market.web.model.ButtonKind
 import money.tegro.market.web.model.PopOver
 import money.tegro.market.web.store.PopOverStore
 import money.tegro.market.web.store.TonkeeperConnectionStore
@@ -26,7 +32,7 @@ fun RenderContext.ConnectTonkeeperModal() =
                     }
 
                     p("text-gray-500 text-lg") {
-                        +"Scan the Qr code below to connect."
+                        +"Scan the QR code below or tap the button to connect."
                     }
 
                     button("absolute top-6 right-8 opacity-50") {
@@ -37,20 +43,27 @@ fun RenderContext.ConnectTonkeeperModal() =
                     }
                 }
 
-                div("flex flex-col") {
+                div("flex flex-col gap-4") {
                     val tonkeeperConnectionStore: TonkeeperConnectionStore by DI.global.instance()
 
+                    val connectLink = flow {
+                        emit(tonkeeperConnectionStore.connectLink())
+                    }.shareIn(MainScope(), started = SharingStarted.Lazily, replay = 1)
+
                     div {
-                        flow {
-                            emit(
-                                QrCodeToString(
-                                    tonkeeperConnectionStore.connectLink().orEmpty(),
-                                    jso { type = "svg" })
-                            )
-                        }
+                        connectLink.map { QrCodeToString(it.orEmpty(), jso { this.type = "svg" }) }
                             .render(this) {
                                 domNode.innerHTML = it
                             }
+                    }
+
+                    div("flex justify-center") {
+                        a {
+                            href(connectLink.map { it.orEmpty() })
+                            Button(ButtonKind.PRIMARY) {
+                                +"Connect"
+                            }
+                        }
                     }
                 }
             }
