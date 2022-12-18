@@ -21,8 +21,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromStream
 import money.tegro.market.contract.nft.CollectionContract
 import money.tegro.market.contract.nft.ItemContract
 import money.tegro.market.contract.nft.RoyaltyContract
@@ -55,6 +55,7 @@ import org.ton.adnl.client.engine.cio.CIOAdnlClientEngine
 import org.ton.block.MsgAddress
 import org.ton.block.MsgAddressInt
 import org.ton.lite.client.LiteClient
+import java.io.File
 import java.util.*
 import kotlin.time.Duration.Companion.hours
 
@@ -94,14 +95,16 @@ fun Application.module() {
         bindSingleton { CIOAdnlClientEngine.create() }
         bindSingleton {
             val config =
-                environment.config.propertyOrNull("liteapi.config")?.getString() ?: "testnet-global.config.json"
+                environment.config.propertyOrNull("liteapi.config")?.getString()
 
             LiteClient(
                 instance(),
                 Json {
                     ignoreUnknownKeys = true
                 }
-                    .decodeFromStream(requireNotNull(ClassLoader.getSystemResourceAsStream(config)) { "Could not load Lite Api config." }),
+                    .decodeFromString(requireNotNull(config?.let { File(it).readText() }
+                        ?: ClassLoader.getSystemResourceAsStream("testnet-global.config.json")?.readAllBytes()
+                            ?.decodeToString()) { "Could not load Lite Api config." }),
                 instance()
             )
         }
