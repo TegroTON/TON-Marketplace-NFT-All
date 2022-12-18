@@ -94,7 +94,7 @@ fun Application.module() {
         bindSingleton { CIOAdnlClientEngine.create() }
         bindSingleton {
             val config =
-                environment.config.propertyOrNull("lite-api.config")?.getString() ?: "testnet-global.config.json"
+                environment.config.propertyOrNull("liteapi.config")?.getString() ?: "testnet-global.config.json"
 
             LiteClient(
                 instance(),
