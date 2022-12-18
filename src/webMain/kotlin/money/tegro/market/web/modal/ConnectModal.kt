@@ -52,7 +52,9 @@ fun RenderContext.ConnectModal() =
                             +"Ton Wallet"
                         }
 
-                        i("fa-solid fa-angle-right") { }
+                        i {
+                            className(tonwalletConnectionStore.isAvailable.map { if (it) "fa-solid fa-angle-right" else "fa-solid fa-xmark" })
+                        }
                     }
 
                     val tonkeeperConnectionStore: TonkeeperConnectionStore by DI.global.instance()
@@ -69,7 +71,9 @@ fun RenderContext.ConnectModal() =
                             +"Tonkeeper"
                         }
 
-                        i("fa-solid fa-angle-right") { }
+                        i {
+                            className(tonkeeperConnectionStore.isAvailable.map { if (it) "fa-solid fa-angle-right" else "fa-solid fa-xmark" })
+                        }
                     }
                 }
             }
