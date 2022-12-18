@@ -251,7 +251,7 @@ fun RenderContext.Item(address: String) {
                                     target("_blank")
                                     itemStore.data
                                         .filterNotNull()
-                                        .map { "https://testnet.tonscan.org/address/${it.address}" }.let(::href)
+                                        .map { "https://tonscan.org/address/${it.address}" }.let(::href)
 
                                     span("text-gray-500") {
                                         +"Contract Address"
@@ -285,7 +285,7 @@ fun RenderContext.Item(address: String) {
                                 a("p-4 flex gap-2 items-center rounded-lg border border-gray-900") {
                                     target("_blank")
                                     itemStore.data
-                                        .mapNotNull { it?.owner?.let { owner -> "https://testnet.tonscan.org/address/$owner}" } }
+                                        .mapNotNull { it?.owner?.let { owner -> "https://tonscan.org/address/$owner}" } }
                                         .let(::href)
 
                                     span("text-gray-500") {
