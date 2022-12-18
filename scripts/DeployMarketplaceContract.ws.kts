@@ -6,7 +6,7 @@ import org.ton.block.MsgAddressInt
 import org.ton.crypto.base64
 import org.ton.lite.client.LiteClient
 
-val owner = MsgAddressInt("EQCtrqGMkj5GvQjFWjVOasejjkOWST7n5GuRGH9V3JJ07uap")
+val owner = MsgAddressInt("EQAnTon5VVNKup8v0EUT0SvCKsRmEpotr_3eSpqYJTneIVht ")
 
 val marketplace = MarketplaceContract(
     owner = owner,
@@ -18,9 +18,9 @@ println("Send coins there, then run this script again")
 runBlocking {
     val liteClient = LiteClient(
         LiteServerDesc(
-            id = PublicKeyEd25519(base64("Htx+2sriPIAZ46oF1j5KGRZFhh+XmZNA+Y0mDPbHTDc=")),
-            ip = 96247402,
-            port = 34366,
+            id = PublicKeyEd25519(base64("vOe1Xqt/1AQ2Z56Pr+1Rnw+f0NmAA7rNCZFIHeChB7o=")),
+            ip = 1091931590,
+            port = 47160,
         )
     )
 
