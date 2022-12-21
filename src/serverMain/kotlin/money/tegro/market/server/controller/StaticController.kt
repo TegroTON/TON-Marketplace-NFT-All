@@ -5,9 +5,13 @@ import io.ktor.server.application.*
 import io.ktor.server.http.content.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import money.tegro.market.server.properties.MarketplaceProperties
+import org.kodein.di.instance
 import org.kodein.di.ktor.controller.AbstractDIController
 
 class StaticController(application: Application) : AbstractDIController(application) {
+    private val marketplaceProperties: MarketplaceProperties by instance()
+
     override fun Route.getRoutes() {
         get("/") {
             call.respondText(
@@ -15,7 +19,18 @@ class StaticController(application: Application) : AbstractDIController(applicat
                 ContentType.Text.Html
             )
         }
-        
+
+        get("tonconnect-manifest.json") {
+            call.respondText(
+                "{\n" +
+                        "  \"url\": \"https://${if (marketplaceProperties.testnet) "test." else ""}libermall.com\",\n" +
+                        "  \"name\": \"Libermall${if (marketplaceProperties.testnet) " Testnet" else ""}\",\n" +
+                        "  \"iconUrl\": \"https://libermall.com/assets/img/logo/large.png\"\n" +
+                        "}\n",
+                ContentType.Application.Json
+            )
+        }
+
         static("/") {
             resources("")
         }

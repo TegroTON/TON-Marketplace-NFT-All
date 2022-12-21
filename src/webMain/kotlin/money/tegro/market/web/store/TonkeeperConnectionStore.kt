@@ -19,7 +19,7 @@ class TonkeeperConnectionStore : ConnectionStore<Account>() {
 
     override val address: Flow<String?> = data.map { it?.address }
 
-    override val isAvailable: Flow<Boolean> = data.map { false } // TODO
+    override val isAvailable: Flow<Boolean> = data.map { true }
 
     override val isConnected: Flow<Boolean> =
         data.map { tonConnect.connected }

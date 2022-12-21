@@ -8,7 +8,9 @@ import org.ton.block.MsgAddressInt
 import org.ton.crypto.base64.base64
 
 data class MarketplaceProperties(
-    val address: MsgAddressInt = MsgAddressInt("EQDvuJSj-Ay8zz_fgHOoLUm0AaAJul7pihPgtCkTeU07djgA"),
+    val testnet: Boolean,
+
+    val address: MsgAddressInt,
 
     val authorizationPrivateKey: ByteArray = base64("+Oag5l7EVtrqAPlV3CMGUxWNr4uMn5p6h5eWGwK9xcc="),
 
@@ -26,35 +28,43 @@ data class MarketplaceProperties(
 ) {
     companion object : KLogging() {
         @JvmStatic
-        fun fromEnvironment(environment: ApplicationEnvironment) =
-            MarketplaceProperties(
-                address = environment.config.propertyOrNull("marketplace.address")?.getString()
-                    ?.let { MsgAddressInt(it) }
-                    ?: MarketplaceProperties().address,
+        fun fromEnvironment(environment: ApplicationEnvironment): MarketplaceProperties {
+            val testnet =
+                requireNotNull(environment.config.propertyOrNull("marketplace.testnet")?.getString()?.toBoolean())
+            val marketplaceAddress =
+                requireNotNull(environment.config.propertyOrNull("marketplace.address")?.getString())
+                    .let { MsgAddressInt(it) }
+
+            return MarketplaceProperties(
+                testnet = testnet,
+                address = marketplaceAddress,
                 authorizationPrivateKey = environment.config.propertyOrNull("marketplace.authorization")
                     ?.getString()
                     ?.let { base64(it) }
-                    ?: MarketplaceProperties().authorizationPrivateKey,
+                    ?: MarketplaceProperties(testnet, marketplaceAddress).authorizationPrivateKey,
                 serviceFeeNumerator = environment.config.propertyOrNull("marketplace.fee.service.numerator")
                     ?.getString()
                     ?.toInt()
-                    ?: MarketplaceProperties().serviceFeeNumerator,
+                    ?: MarketplaceProperties(testnet, marketplaceAddress).serviceFeeNumerator,
                 serviceFeeDenominator = environment.config.propertyOrNull("marketplace.fee.service.denominator")
                     ?.getString()
                     ?.toInt()
-                    ?: MarketplaceProperties().serviceFeeDenominator,
+                    ?: MarketplaceProperties(testnet, marketplaceAddress).serviceFeeDenominator,
                 saleFee = environment.config.propertyOrNull("marketplace.fee.sale")?.getString()
                     ?.let { Coins.ofNano(BigInt(it)) }
-                    ?: MarketplaceProperties().saleFee,
+                    ?: MarketplaceProperties(testnet, marketplaceAddress).saleFee,
                 transferFee = environment.config.propertyOrNull("marketplace.fee.transfer")?.getString()
                     ?.let { Coins.ofNano(BigInt(it)) }
-                    ?: MarketplaceProperties().transferFee,
+                    ?: MarketplaceProperties(testnet, marketplaceAddress).transferFee,
                 networkFee = environment.config.propertyOrNull("marketplace.fee.network")?.getString()
                     ?.let { Coins.ofNano(BigInt(it)) }
-                    ?: MarketplaceProperties().networkFee,
+                    ?: MarketplaceProperties(testnet, marketplaceAddress).networkFee,
                 gasFee = environment.config.propertyOrNull("marketplace.fee.gas")?.getString()
                     ?.let { Coins.ofNano(BigInt(it)) }
-                    ?: MarketplaceProperties().gasFee,
-            )
+                    ?: MarketplaceProperties(testnet, marketplaceAddress).gasFee,
+            ).also {
+                logger.info { "Marketplace Properties: $it" }
+            }
+        }
     }
 }
