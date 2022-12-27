@@ -4,13 +4,13 @@ import Account
 import SendTransactionRequest
 import `T$4`
 import TonConnect
-import WalletConnectionSourceHTTP
 import dev.fritz2.core.SimpleHandler
 import kotlinx.coroutines.await
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Clock
 import money.tegro.market.model.TransactionRequestModel
+import money.tegro.market.web.jsObject
 import org.kodein.di.instance
 
 class TonkeeperConnectionStore : ConnectionStore<Account>() {
@@ -51,16 +51,14 @@ class TonkeeperConnectionStore : ConnectionStore<Account>() {
         wallet
     }
 
-    fun connectLink() = tonConnect.connect(object : WalletConnectionSourceHTTP {
-        override var universalLink: String = "https://app.tonkeeper.com/ton-connect"
-        override var bridgeUrl: String = "https://bridge.tonapi.io/bridge"
+    fun connectLink() = tonConnect.connect(jsObject {
+        universalLink = "https://app.tonkeeper.com/ton-connect"
+        bridgeUrl = "https://bridge.tonapi.io/bridge"
     }).unsafeCast<String?>()
 
-    fun restore() {
-        tonConnect.restoreConnection()
-    }
-
     init {
+        tonConnect.restoreConnection()
+
         tonConnect.onStatusChange({
             console.log(it)
             this.update(tonConnect.account)

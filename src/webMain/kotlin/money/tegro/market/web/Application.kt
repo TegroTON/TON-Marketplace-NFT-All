@@ -72,7 +72,5 @@ fun main() {
 
         ConnectModal()
         ConnectTonkeeperModal()
-        val tonKeeperConnectionStore: TonkeeperConnectionStore by DI.global.instance()
-        tonKeeperConnectionStore.restore()
     }
 }
