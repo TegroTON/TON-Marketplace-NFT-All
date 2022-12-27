@@ -56,9 +56,11 @@ class TonkeeperConnectionStore : ConnectionStore<Account>() {
         override var bridgeUrl: String = "https://bridge.tonapi.io/bridge"
     }).unsafeCast<String?>()
 
-    init {
+    fun restore() {
         tonConnect.restoreConnection()
+    }
 
+    init {
         tonConnect.onStatusChange({
             console.log(it)
             this.update(tonConnect.account)
