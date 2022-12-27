@@ -4,6 +4,8 @@ import Account
 import SendTransactionRequest
 import `T$4`
 import TonConnect
+import WalletInfoBase
+import WalletInfoInjected
 import dev.fritz2.core.SimpleHandler
 import kotlinx.coroutines.await
 import kotlinx.coroutines.flow.Flow
@@ -26,7 +28,13 @@ class TonkeeperConnectionStore : ConnectionStore<Account>() {
 
     override val connect: SimpleHandler<Unit> = handle { account ->
         account.also {
-            popOverStore.connectTonkeeper()
+            if (isEmbedded()) {
+                tonConnect.connect(jsObject {
+                    jsBridgeKey = "tonkeeper"
+                })
+            } else {
+                popOverStore.connectTonkeeper()
+            }
             console.log(it)
         }
     }
@@ -55,6 +63,10 @@ class TonkeeperConnectionStore : ConnectionStore<Account>() {
         universalLink = "https://app.tonkeeper.com/ton-connect"
         bridgeUrl = "https://bridge.tonapi.io/bridge"
     }).unsafeCast<String?>()
+
+    suspend fun isEmbedded() =
+        (tonConnect.getWallets().await().find { it.unsafeCast<WalletInfoBase>().name == "tonkeeper" }
+            ?.unsafeCast<WalletInfoInjected>())?.embedded ?: false
 
     init {
         tonConnect.restoreConnection()
