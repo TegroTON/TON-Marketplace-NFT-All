@@ -27,14 +27,12 @@ class TonkeeperConnectionStore : ConnectionStore<Account>() {
 
     override val connect: SimpleHandler<Unit> = handle { account ->
         account.also {
-            if (isEmbedded()) {
-                console.log("embedded connection")
+            if (isEmbedded() == false) {
+                popOverStore.connectTonkeeper()
+            } else {
                 tonConnect.connect(jsObject {
                     jsBridgeKey = "tonkeeper"
                 })
-            } else {
-                console.log("remote connection")
-                popOverStore.connectTonkeeper()
             }
             console.log(it)
         }
@@ -66,8 +64,8 @@ class TonkeeperConnectionStore : ConnectionStore<Account>() {
     }).unsafeCast<String?>()
 
     suspend fun isEmbedded() =
-        (tonConnect.getWallets().await().find { it.unsafeCast<WalletInfoInjected>().name == "tonkeeper" }
-            ?.unsafeCast<WalletInfoInjected>())?.embedded ?: false
+        (tonConnect.getWallets().await().unsafeCast<Array<WalletInfoInjected>>()
+            .find { it.name == "tonkeeper" })?.embedded
 
     init {
         tonConnect.restoreConnection()
