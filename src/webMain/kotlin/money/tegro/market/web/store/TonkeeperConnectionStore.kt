@@ -66,7 +66,7 @@ class TonkeeperConnectionStore : ConnectionStore<Account>() {
         val wallets = tonConnect.getWallets().await()
         console.log("wallets: ", wallets)
 
-        val keeper = wallets.find { it.name == "TonKeeper" }
+        val keeper = wallets.find { it.name.unsafeCast<String>().lowercase() == "tonkeeper" }
         console.log("keeper: ", keeper)
         return keeper?.embedded ?: false
     }
